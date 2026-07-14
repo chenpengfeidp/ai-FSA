@@ -61,6 +61,7 @@ erDiagram
     TEAM ||--o{ MATCH_PARTICIPANT : participates
     MATCH ||--|{ MATCH_PARTICIPANT : has
     MATCH ||--o| MATCH_RESULT : finishes_with
+    MATCH_RESULT ||--|{ MATCH_RESULT_VERSION : versions
 
     DATA_SOURCE ||--o{ SOURCE_RECORD : produces
     MATCH ||--o{ SOURCE_RECORD : concerns
@@ -176,14 +177,30 @@ Composite PK `(match_id, role)`, unique `(match_id, team_id)`.
 
 | Column | Type | Constraints / meaning |
 |---|---|---|
-| `match_id` | uuid | PK/FK matches |
+| `id` | uuid | PK |
+| `match_id` | uuid | Unique FK matches |
+| `current_version_id` | uuid | Nullable FK match_result_versions |
+| `status` | text | `provisional`, `verified`, `corrected` |
+| common mutable columns | — | Timestamps and row version |
+
+`match_results` is the stable aggregate root and current-version pointer. Scores and verification evidence live only in immutable versions.
+
+### `match_result_versions`
+
+| Column | Type | Constraints / meaning |
+|---|---|---|
+| `id` | uuid | PK |
+| `match_result_id` | uuid | FK match_results |
+| `version` | integer | Positive, immutable |
 | `home_score` | integer | Non-negative |
 | `away_score` | integer | Non-negative |
-| `result_status` | text | `provisional`, `verified`, `corrected` |
 | `verified_evidence_id` | uuid | FK evidence_items |
+| `supersedes_version_id` | uuid | Nullable FK match_result_versions |
+| `correction_reason` | text | Nullable for the first version; required for corrections |
+| `content_sha256` | char(64) | Required |
 | `recorded_at` | timestamptz | Required |
 
-A correction updates the result row with an audit event; reviews retain the result checksum/version they assessed.
+Unique `(match_result_id, version)` and unique `(match_result_id, content_sha256)`. A correction appends a new version, advances the root pointer, and records an audit event in one transaction. Historical versions and review references never change.
 
 ## 7. Evidence Tables
 
@@ -270,7 +287,7 @@ V1 retrieval uses tags, scope, effective dates, and PostgreSQL full-text search.
 
 ### `rules`
 
-Stable root with `id`, unique `slug`, lifecycle status (`draft`, `active`, `suspended`, `retired`), current active version, timestamps, and row version.
+Stable root with `id`, unique `slug`, lifecycle status (`inactive`, `active`, `suspended`, `retired`), current active version, timestamps, and row version. Draft/approved/rejected review status belongs to immutable rule versions, not the root.
 
 ### `rule_versions`
 
@@ -434,14 +451,14 @@ Stores validation kind, validator version, status, severity, location, message, 
 |---|---|---|
 | `id` | uuid | PK |
 | `analysis_revision_id` | uuid | FK published revision |
-| `match_result_version` | integer | Result version/checksum assessed |
+| `match_result_version_id` | uuid | FK immutable match_result_versions row assessed |
 | `status` | text | `draft`, `completed` |
 | `overall_assessment` | text | Nullable structured category |
 | `summary` | text | Nullable until completion |
 | `completed_at` | timestamptz | Nullable |
 | common mutable columns | — | Timestamps and row version |
 
-Only one completed review per published analysis revision; corrections create a new review version or superseding review.
+Only one completed review per `(analysis_revision_id, match_result_version_id)`; a corrected result can therefore be reviewed without mutating or obscuring the earlier assessment.
 
 ### `claim_assessments`
 

@@ -346,7 +346,7 @@ Create an ADR for decisions that:
 
 ADR statuses are proposed, accepted, superseded, or rejected. Superseding an ADR links both decisions.
 
-The canonical M0 documentation is the numbered series [00_PROJECT_BIBLE](./00_PROJECT_BIBLE.md) through [15_DEVELOPMENT_GUIDE](./15_DEVELOPMENT_GUIDE.md), plus accepted records in [`docs/decisions`](./decisions/). The Project Bible remains supreme; detailed engine authority lives in documents 05 through 11, and architecture changes require an ADR.
+The canonical architecture documentation is the numbered series [00_PROJECT_BIBLE](./00_PROJECT_BIBLE.md) through [19_DATABASE_ERD](./19_DATABASE_ERD.md), plus the accepted [Architecture Decision Records](../README.md#architecture-decision-records). The Project Bible remains supreme; detailed engine authority lives in documents 05 through 11, and architecture changes require an ADR.
 
 ## 19. Dependency Management
 

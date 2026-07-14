@@ -107,20 +107,27 @@ stateDiagram-v2
     [*] --> draft
     draft --> approved: human approval
     draft --> rejected: human rejection
-    approved --> active: eligibility checks pass
-    approved --> retired: governance decision
-    active --> retired: governance decision
+    approved --> [*]
     rejected --> [*]
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> inactive
+    inactive --> active: select approved version
+    active --> inactive: withdraw from retrieval
+    inactive --> retired: governance decision
+    active --> retired: governance decision
     retired --> [*]
 ```
 
 Rules:
 
 1. A draft may be created only from a completed match and completed review reference.
-2. Approval and activation are distinct decisions, even when performed by the same trusted operator.
+2. Approval freezes a version; activation is a distinct root decision selecting that approved version, even when performed by the same trusted operator.
 3. Approval requires complete traceability, explicit limitations, and a review showing why the case is reusable.
-4. Production eligibility requires an approved, active exact version whose scope and effective period include the analysis cutoff.
-5. Approved and active versions are immutable. Corrections or revised interpretation create a new draft version.
+4. Production eligibility requires an approved exact version selected by an active root whose scope and effective period include the analysis cutoff.
+5. Approved versions are immutable. Corrections or revised interpretation create a new draft version.
 6. Retirement affects future retrieval only; historical snapshot selections remain valid and inspectable.
 7. A learning candidate accepted by governance asks the Case Engine to create a draft. It grants no approval or activation.
 8. Rejection and retirement record a rationale and append-only audit event.
@@ -132,7 +139,7 @@ A case version is production-eligible only when all of the following hold:
 - its originating match is completed;
 - its referenced review is completed and targets a published analysis revision where a revision is referenced;
 - the referenced result version is verified and backed by outcome evidence;
-- the version is approved and active at the requested cutoff;
+- the exact version is approved and selected by an active root at the requested cutoff;
 - its effective window and competition/context scope apply;
 - required title, summary, context, decisive factors, lessons, limitations, and source roles are complete;
 - every referenced artifact exists and passes integrity checks;
@@ -232,7 +239,7 @@ This document intentionally does not duplicate physical catalogs:
 
 - [12_DATABASE §10 and §12](./12_DATABASE.md#10-case-library-tables) define authoritative case storage, case evidence, and snapshot selection records.
 - [13_API §12](./13_API.md#12-case-library-api) defines authoritative HTTP resources and commands.
-- [`@fas/case-engine` in 14_MONOREPO](./14_MONOREPO.md#fas-case-engine) owns domain/application behavior and public contracts.
+- [`@fas/case-engine` in 14_MONOREPO](./14_MONOREPO.md#4-package-responsibilities) owns domain/application behavior and public contracts.
 - `@fas/database` owns Prisma mappings, repositories, migrations, and query adapters.
 - `@fas/api-contracts` and `apps/api` own transport schemas, mapping, OpenAPI, idempotency, and HTTP concerns.
 - `@fas/analysis` owns snapshot, analysis, validation, and publication behavior.
@@ -287,7 +294,7 @@ Logs contain identifiers, versions, checksums, counts, timings, and redacted dia
 ### 14.1 Unit and Property Tests
 
 - lifecycle transitions reject every undefined edge;
-- approved/active versions cannot be edited;
+- approved versions cannot be edited and root activation cannot mutate them;
 - eligibility requires completed review, completed match, verified result, scope/effectivity, and intact traceability;
 - retrieval filtering and stable tie-breaking are deterministic;
 - every selected case has at least one supported similarity and explicit material differences;

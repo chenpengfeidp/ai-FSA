@@ -111,10 +111,17 @@ stateDiagram-v2
     [*] --> draft
     draft --> approved: human approval
     draft --> rejected: human rejection
-    approved --> active: eligibility checks pass
-    approved --> retired
-    active --> retired
+    approved --> [*]
     rejected --> [*]
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> inactive
+    inactive --> active: select approved version
+    active --> inactive: withdraw from retrieval
+    inactive --> retired
+    active --> retired
     retired --> [*]
 ```
 
@@ -124,9 +131,9 @@ stateDiagram-v2
 - Draft content may change under optimistic concurrency.
 - Submission validates structure, sources, scope, tags, effective period, and checksum.
 - Approval freezes the version.
-- Editing approved or active content creates a new draft version with the next monotonic version number.
-- Activation changes future eligibility; it does not replace references in sealed snapshots.
-- Retirement removes the version/item from future retrieval and preserves all historical references.
+- Editing approved content creates a new draft version with the next monotonic version number.
+- Activation is a root decision that selects one exact approved version and changes future eligibility; it does not replace references in sealed snapshots.
+- Retirement removes the root from future retrieval and preserves all historical references.
 
 ### 5.2 Approval Requirements
 
@@ -195,7 +202,7 @@ The Knowledge Engine does not send retrieved text to the Prompt Engine. The Anal
 
 A version is production-eligible only if:
 
-- it is approved and active under the governed lifecycle;
+- its exact version is approved and its root is active with that version selected;
 - it was approved and effective as of the analysis cutoff;
 - it is not retired as of the applicable eligibility time;
 - its sources and content integrity pass required checks;
@@ -234,7 +241,7 @@ An excerpt does not become a new knowledge version. It retains exact source-vers
 1. Knowledge item identity and version identity are distinct.
 2. Version numbers are positive and monotonic within an item.
 3. Approved versions are immutable.
-4. Production retrieval returns only approved, active, effective, scope-compatible versions.
+4. Production retrieval returns only approved versions selected by active roots and compatible with effectivity and scope.
 5. Every returned selection identifies one exact version and content checksum.
 6. Every approved factual knowledge statement has source backing.
 7. Sources preserve provenance, excerpt, locator, source date, and citation role.
@@ -306,7 +313,7 @@ The Analysis Orchestrator invokes Knowledge retrieval after evidence snapshot se
 
 The Knowledge Engine returns selections or a typed failure. It does not invoke Prompt, Rule, Case, AI Provider, Review, or Statistics engines.
 
-Review may propose knowledge changes. Statistics may report retrieval or review quality. Neither can mutate lifecycle state; only explicit Knowledge commands can create, approve, activate, or retire versions.
+Review may propose knowledge changes. Statistics may report retrieval or review quality. Neither can mutate lifecycle state; only explicit Knowledge commands can create or approve versions and activate, withdraw, or retire roots.
 
 ## 12. Persistence, API, and Package Ownership Links
 
@@ -418,7 +425,7 @@ Knowledge approval does not neutralize prompt injection. Selected text must rema
 
 The Knowledge Engine is acceptable for v1 when:
 
-1. all production selections are approved, active, effective, source-backed exact versions;
+1. all production selections are approved exact versions selected by active roots and are effective and source-backed;
 2. historical selections remain reviewable after new versions or retirement;
 3. fixed retrieval inputs produce an identical ordered result and excerpt checksums;
 4. every selection records a human-readable retrieval reason;

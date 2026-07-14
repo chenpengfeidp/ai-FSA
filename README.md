@@ -22,13 +22,19 @@ Read the numbered documents in order:
 14. [13_API](docs/13_API.md)
 15. [14_MONOREPO](docs/14_MONOREPO.md)
 16. [15_DEVELOPMENT_GUIDE](docs/15_DEVELOPMENT_GUIDE.md)
+17. [16_IMPLEMENTATION_ROADMAP](docs/16_IMPLEMENTATION_ROADMAP.md)
+18. [17_ANALYSIS_PIPELINE](docs/17_ANALYSIS_PIPELINE.md)
+19. [18_BACKEND_ARCHITECTURE](docs/18_BACKEND_ARCHITECTURE.md)
+20. [19_DATABASE_ERD](docs/19_DATABASE_ERD.md)
 
 ## Mandatory Paths by Change
 
 - **Product or architecture:** read 00 through 04, then the relevant downstream contracts.
 - **Engine work:** read 00, 04, 15, and the relevant engine document from 05 through 11.
-- **Data or API:** read 00, 02, 04, 12, 13, and the owning engine document.
-- **Delivery or repository structure:** read 00, 04, 14, and 15.
+- **Analysis workflow:** read 00, 02 through 11, 13, and 17.
+- **Data or API:** read 00, 02, 04, 12, 13, 19, and the owning engine document.
+- **Backend implementation:** read 00, 02, 04, 12 through 19, and the relevant engine documents.
+- **Delivery or repository structure:** read 00, 04, 14 through 16, and 18.
 - **Architecture decision changes:** read 00, 04, 14, 15, and all applicable ADRs; add or supersede an ADR when the decision changes.
 
 ## Architecture Decision Records
@@ -36,3 +42,4 @@ Read the numbered documents in order:
 - [ADR-001: Modular Monolith and TypeScript Monorepo](docs/decisions/ADR-001-modular-monolith-and-typescript-monorepo.md)
 - [ADR-002: PostgreSQL Durable Jobs for V1](docs/decisions/ADR-002-postgresql-durable-jobs-for-v1.md)
 - [ADR-003: Provider-Neutral AI and Staged Retrieval](docs/decisions/ADR-003-provider-neutral-ai-and-staged-retrieval.md)
+- [ADR-004: Append-only Match Result Versions](docs/decisions/ADR-004-append-only-match-result-versions.md)

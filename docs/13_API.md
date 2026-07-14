@@ -165,6 +165,8 @@ Stable machines consume `code`; human-facing `message` may improve without a maj
 - `POST /matches`
 - `GET /matches/{matchId}`
 - `PATCH /matches/{matchId}`
+- `GET /matches/{matchId}/result`
+- `GET /matches/{matchId}/result/versions`
 - `PUT /matches/{matchId}/result`
 
 Create match request:
@@ -199,7 +201,7 @@ Verified result request:
 }
 ```
 
-A verified result requires outcome evidence. Correcting it requires `If-Match` and a reason field.
+A verified result requires outcome evidence. The command appends an immutable result version and returns its `resultVersionId`, `version`, checksum, and supersession reference. Correcting a result requires `If-Match`, `supersedesResultVersionId`, and a non-empty `correctionReason`; it never overwrites the prior version. Concurrent correction against a stale root ETag returns `412`.
 
 ## 9. Evidence Endpoints
 

@@ -195,7 +195,7 @@ Researchers, editorial teams, paying subscribers, and public consumers may be su
 ## 10. Product States and Governance
 
 - Analyses: `draft -> running -> generated -> validated -> published`, with `failed` and `superseded` terminal alternatives.
-- Knowledge, rules, and cases: `draft -> approved -> active -> retired`.
+- Knowledge, rule, and case versions: `draft -> approved | rejected`; stable roots separately follow `inactive -> active -> retired`, with Rule roots also permitting suspension.
 - Reviews: `draft -> completed`.
 - Learning candidates: `proposed -> accepted | rejected`; acceptance creates a new draft/version, never edits an approved artifact in place.
 

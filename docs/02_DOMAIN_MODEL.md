@@ -163,24 +163,35 @@ A result correction creates a new auditable result version; the self-transition 
 
 ### 7.2 Governed Artifacts
 
-Knowledge and cases follow `draft -> approved -> active -> retired`. Rule governance additionally permits suspension.
+Governed artifacts separate immutable version review from stable-root activation:
+
+- versions follow `draft -> approved | rejected`; approved versions never change;
+- roots follow `inactive -> active -> retired`;
+- Rule roots additionally permit `active <-> suspended`;
+- activation selects an exact approved version as the root's current active version.
 
 ```mermaid
 stateDiagram-v2
     [*] --> draft
     draft --> approved: human approval
     draft --> rejected: human rejection
-    approved --> active: eligibility checks pass
+    approved --> [*]
+    rejected --> [*]
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> inactive
+    inactive --> active: activate approved version
     active --> suspended: rule only
     suspended --> active: rule only
     active --> retired
     suspended --> retired
-    approved --> retired
-    rejected --> [*]
+    inactive --> retired
     retired --> [*]
 ```
 
-Revisions to approved content create a new draft version. No transition edits an approved version in place.
+Revisions to approved content create a new draft version. Activating a replacement advances the root pointer and does not mutate either version. Retirement affects future eligibility only; historical snapshots retain exact version references.
 
 ### 7.3 Analysis
 

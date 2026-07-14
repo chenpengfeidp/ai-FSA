@@ -197,13 +197,19 @@ stateDiagram-v2
     [*] --> draft
     draft --> approved: human approval
     draft --> rejected: human rejection
-    approved --> active: qualification checks pass
+    approved --> [*]
+    rejected --> [*]
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> inactive
+    inactive --> active: select qualified approved version
     active --> suspended
     suspended --> active: qualification rechecked
-    approved --> retired
+    inactive --> retired
     active --> retired
     suspended --> retired
-    rejected --> [*]
     retired --> [*]
 ```
 
@@ -223,7 +229,7 @@ Validation does not approve the rule.
 
 ### 7.2 Approval and Activation
 
-Approval is a human decision that freezes the exact version. Activation additionally requires:
+Approval is a human decision that freezes the exact version. Activation is a root transition that selects that version and additionally requires:
 
 - approved status;
 - `sampleCount >= minimumSampleRequired`;
@@ -275,7 +281,7 @@ The orchestrator may evaluate independent versions concurrently, but persistence
 ## 9. Invariants
 
 1. Production evaluation references one exact rule version and one exact sealed snapshot.
-2. Only approved, active, effective, qualified versions are selected for production.
+2. Only approved, effective, qualified versions selected by active roots are used in production.
 3. Rule versions are immutable after approval.
 4. Activation requires sample count, minimum sample, confidence, validation method, scope, and limitations.
 5. Input values are exact, normalized, temporally eligible, and persisted with provenance/checksum.

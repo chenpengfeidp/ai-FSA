@@ -291,7 +291,7 @@ This document intentionally does not duplicate physical catalogs:
 
 - [12_DATABASE §13](./12_DATABASE.md#13-review-and-learning-tables) defines authoritative review, assessment, and learning-candidate persistence.
 - [13_API §15–16](./13_API.md#15-review-api) defines authoritative HTTP commands and representations.
-- [`@fas/review-engine` in 14_MONOREPO](./14_MONOREPO.md#fas-review-engine) owns review domain/application behavior and public contracts.
+- [`@fas/review-engine` in 14_MONOREPO](./14_MONOREPO.md#4-package-responsibilities) owns review domain/application behavior and public contracts.
 - `@fas/database` owns Prisma mappings, migrations, repositories, transaction adapters, and constraints.
 - `@fas/api-contracts` and `apps/api` own runtime transport schemas, DTO mapping, OpenAPI, ETags, and idempotency handling.
 - `@fas/statistics-engine` owns metric definitions and projections; `@fas/jobs` owns durable refresh dispatch.

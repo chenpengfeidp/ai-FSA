@@ -225,7 +225,7 @@ Dependencies point inward. The engine may depend on `@fas/domain` and published 
 
 ### Package
 
-The package is [`@fas/evaluation-engine`](./14_MONOREPO.md#fas-evaluation-engine), with pure domain/application contracts and no framework imports. `apps/api` invokes definition/report commands and queries; `apps/worker` executes evaluation jobs. Repository adapters remain in `@fas/database`; job and telemetry adapters remain in `@fas/jobs` and `@fas/observability`. `@fas/rule-engine` retains deterministic per-snapshot rule application; Evaluation consumes those immutable results when its assessment policy requires them.
+The package is [`@fas/evaluation-engine`](./14_MONOREPO.md#4-package-responsibilities), with pure domain/application contracts and no framework imports. `apps/api` invokes definition/report commands and queries; `apps/worker` executes evaluation jobs. Repository adapters remain in `@fas/database`; job and telemetry adapters remain in `@fas/jobs` and `@fas/observability`. `@fas/rule-engine` retains deterministic per-snapshot rule application; Evaluation consumes those immutable results when its assessment policy requires them.
 
 ## 10. Failure and Observability
 

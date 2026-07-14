@@ -193,17 +193,18 @@ Rules:
 ### 7.1 Stages
 
 1. **Readiness:** verify match state, kickoff, evidence freshness, and required fields.
-2. **Freeze:** create an immutable input snapshot with a cutoff time and checksums.
-3. **Retrieve:** obtain approved knowledge versions and reviewed cases using snapshot data.
+2. **Fix evidence selection:** select cutoff-eligible evidence and persist its exact checksums; the complete analysis snapshot is not sealed yet.
+3. **Retrieve knowledge:** obtain approved versions through an exact retrieval-specification version.
 4. **Apply rules:** execute applicable rule versions deterministically through the Rule Engine.
-5. **Compose:** build prompt sections from versioned templates and selected artifacts.
-6. **Generate:** call the configured provider with a structured response schema.
-7. **Validate:** validate JSON schema, citations, claim types, contradictions, and prohibited assertions.
-8. **Persist:** store provider run, output, citations, and validation findings.
-9. **Publish:** require valid output and an explicit command; publication makes the revision immutable.
-10. **Review later:** compare published claims with final outcome evidence.
+5. **Retrieve cases:** obtain approved reviewed analogies and record material differences.
+6. **Seal:** create the immutable complete analysis snapshot over evidence, knowledge, rule findings, cases, policies, and manifests.
+7. **Compose:** build prompt sections from versioned templates and sealed artifacts.
+8. **Generate:** call the configured provider with a structured response schema.
+9. **Validate and persist:** validate JSON schema, citations, claim types, contradictions, and prohibited assertions; persist the run, output, citations, and findings.
+10. **Publish:** require valid output and an explicit command; publication makes the revision immutable.
+11. **Review later:** compare published claims with final outcome evidence.
 
-Each stage is independently observable. A retry resumes from a safe checkpoint and never silently changes the frozen snapshot.
+Each stage is independently observable. A retry resumes from a safe checkpoint and never silently changes fixed evidence or a sealed snapshot. [17_ANALYSIS_PIPELINE](./17_ANALYSIS_PIPELINE.md) is authoritative for detailed stage contracts and checkpoint semantics.
 
 ### 7.2 Prompt Composition
 
@@ -250,13 +251,14 @@ sequenceDiagram
     API-->>Web: 202Accepted
 
     Worker->>DB: ClaimJob
-    Worker->>DB: FreezeEvidenceSnapshot
+    Worker->>DB: FixEligibleEvidenceSelection
     Worker->>Knowledge: RetrieveApprovedVersions
     Knowledge-->>Worker: KnowledgeSelections
     Worker->>Rules: EvaluateActiveRuleVersions
     Rules-->>Worker: ExplainedRuleFindings
     Worker->>Cases: RetrieveReviewedCases
     Cases-->>Worker: CaseSelections
+    Worker->>DB: SealCompleteAnalysisSnapshot
     Worker->>Prompt: ComposeVersionedRequest
     Prompt-->>Worker: PromptManifest
     Worker->>AI: CreateStructuredResponse

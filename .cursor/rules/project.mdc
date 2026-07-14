@@ -1,0 +1,17 @@
+Always read `docs/00_PROJECT_BIBLE.md` first; it is the supreme project authority.
+
+Before changing code, read `docs/04_ARCHITECTURE.md` and `docs/15_DEVELOPMENT_GUIDE.md`.
+
+For engine changes, also read the relevant canonical engine contract:
+
+- `docs/05_PROMPT_ENGINE.md`
+- `docs/06_KNOWLEDGE_ENGINE.md`
+- `docs/07_RULE_ENGINE.md`
+- `docs/08_CASE_ENGINE.md`
+- `docs/09_REVIEW_ENGINE.md`
+- `docs/10_EVALUATION_ENGINE.md`
+- `docs/11_STATISTICS_ENGINE.md`
+
+For architecture decisions, read the applicable records in `docs/decisions/` and update or supersede an ADR when the decision changes.
+
+Use `docs/12_DATABASE.md`, `docs/13_API.md`, and `docs/14_MONOREPO.md` as the canonical persistence, transport, and package-layout authorities. Do not invent parallel authority or use stale unnumbered document paths.

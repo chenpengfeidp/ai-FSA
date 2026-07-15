@@ -22,9 +22,11 @@
     "prepare": "node scripts/install-git-hooks.mjs",
     "quality": "pnpm check && pnpm boundaries && pnpm boundaries:test",
     "test": "turbo run test",
+    "toolchain:check": "node scripts/validate-toolchain.mjs",
+    "toolchain:test": "node --test scripts/toolchain-enforcement.test.mjs",
     "typecheck": "turbo run typecheck",
     "workspace:check": "node scripts/validate-workspace.mjs && pnpm --recursive list --depth -1",
-    "validate": "pnpm workspace:check && pnpm quality && pnpm typecheck && pnpm test && pnpm build"
+    "validate": "pnpm toolchain:check && pnpm toolchain:test && pnpm workspace:check && pnpm quality && pnpm typecheck && pnpm test && pnpm build"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,jsonc,css}": "biome check --write --no-errors-on-unmatched"

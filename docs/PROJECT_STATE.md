@@ -5,10 +5,10 @@
 - Last updated: 2026-07-15
 - Current delivery milestone: Milestone 3A — Repository Bootstrap
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
-- Current task status: Final Milestone 3A gate review complete; no implementation sprint active
+- Current task status: Sprint 6 implementation complete; no implementation sprint active
 - Current sprint: No implementation sprint active
-- Last completed sprint: Sprint 5 — Configuration Foundation
-- Next sprint: Sprint 6, specified and architecture-ready but not authorized
+- Last completed sprint: Sprint 6 — Toolchain Enforcement
+- Next sprint: Not specified and not authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -28,7 +28,9 @@ The repository contains:
 - dependency-cruiser boundary enforcement with a controlled negative test;
 - guarded Husky and lint-staged pre-commit checks;
 - focused Vitest configuration-contract tests;
-- unified workspace, quality, typecheck, test, and build validation commands;
+- pnpm-native exact Node.js and package-manager rejection;
+- repository-owned toolchain diagnostics and 15 controlled enforcement tests;
+- unified toolchain, workspace, quality, typecheck, test, and build validation commands;
 - architecture documents, ADRs, sprint reports, and AI-agent governance.
 
 The API currently exposes only:
@@ -74,6 +76,7 @@ TypeScript 6 is the approved compatibility fallback. TypeScript 7.0.2 failed bec
 - Milestone 3A Sprint 3 — Platform Foundation: complete.
 - Milestone 3A Sprint 4 — Engineering Quality Foundation: complete.
 - Milestone 3A Sprint 5 — Configuration Foundation: complete.
+- Milestone 3A Sprint 6 — Toolchain Enforcement: complete.
 
 Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation work remains.
 
@@ -122,13 +125,22 @@ Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation
 - Added no endpoint, response, web, domain, AI, persistence, queue, or observability behavior.
 - Evidence: `docs/sprints/SPRINT5_REPORT.md`.
 
+### Sprint 6 — Toolchain Enforcement
+
+- Added pnpm-native exact Node.js and package-manager rejection.
+- Added a repository-owned metadata and active-toolchain diagnostic.
+- Added 15 controlled positive, policy-negative, metadata, and native-install enforcement tests.
+- Integrated toolchain checks before existing root validation evidence.
+- Added no dependency, lockfile, application, shared-package, architecture, ADR, or Sprint 7 change.
+- Evidence: `docs/sprints/SPRINT6_REPORT.md`.
+
 ## Architecture Status
 
 Architecture direction is **approved with conditions**.
 
 The governing implementation gate is `docs/21_ARCHITECTURE_SIGNOFF.md`. The requested path `docs/21_IMPLEMENTATION_GATE.md` does not exist; the architecture sign-off is the accepted gate authority for this governance milestone.
 
-`docs/22_MILESTONE_3A_GATE.md` records the post-Sprint 5 recommendation `READY FOR SPRINT 6`. This is an architecture-readiness decision, not implementation authorization.
+`docs/22_MILESTONE_3A_GATE.md` records the post-Sprint 5 recommendation `READY FOR SPRINT 6`. Sprint 6 subsequently received separate authorization, completed MF-05, and did not close Milestone 3A.
 
 The following principles remain binding:
 
@@ -142,7 +154,7 @@ The following principles remain binding:
 - append-only match-result versions;
 - executable acceptance evidence.
 
-Open Milestone 3A conditions include explicit unsupported-runtime and package-manager installation rejection evidence, automated application tests beyond the configuration contract, Prisma no-model bootstrap, container strategy and acceptance, deterministic runtime smoke testing, security gates, and CI.
+Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager rejection evidence. Open Milestone 3A conditions include automated application tests beyond the configuration contract, Prisma no-model bootstrap, container strategy and acceptance, deterministic runtime smoke testing, Turbo environment/cache policy, security gates, and CI.
 
 ## Approved Documents
 
@@ -177,6 +189,7 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT3_ALIGNMENT_REPORT.md`
 - `docs/sprints/SPRINT4_REPORT.md`
 - `docs/sprints/SPRINT5_REPORT.md`
+- `docs/sprints/SPRINT6_REPORT.md`
 - `docs/22_MILESTONE_3A_GATE.md`
 - `docs/23_RELEASE_BASELINE.md`
 - `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`
@@ -199,7 +212,8 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - `@fas/config` validates only `NODE_ENV`, API `HOST`, and API `PORT`.
 - No browser-safe, secret, database, provider, queue, storage, feature-flag, or observability configuration is implemented.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
-- Runtime and package-manager metadata are exact-pinned, but sign-off condition MF-05 still requires evidence that installation rejects unsupported Node.js and pnpm versions.
+- Runtime and package-manager metadata are exact-pinned and enforced through pnpm-native installation rejection plus repository-owned checks.
+- The API's undeclared local `tsc` resolution currently reaches the NestJS CLI transitive TypeScript `5.9.3`; compiler-baseline alignment requires a separately authorized manifest and lockfile change.
 - Generated Next.js type files are reproducible and uncommitted.
 - The worker must not use a fake persistence loop before durable work exists.
 - The API and web shell copy “Repository Bootstrap Completed” refers only to shell creation; Milestone 3A and canonical v0.1 remain incomplete.
@@ -207,19 +221,19 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Known Documentation Drift
 
-No known broken Markdown links, obsolete sprint locations, or active package/tool-version drift remains after the post-Sprint 5 repository audit. The implementation-plan progress overlay and Sprint 5 specification status are aligned with completed Sprint 5 evidence.
+No known broken Markdown links, obsolete sprint locations, or active documentation-index omissions remain. Historical audit and gate documents retain point-in-time status statements, including pre-Sprint 6 tracking state; this project-state document and the latest Sprint report own current delivery status.
 
 ## Next Sprint
 
-Sprint 6 is scoped by `docs/sprints/SPRINT6_SPECIFICATION.md` and is architecture-ready. It has not received explicit implementation authorization.
+Sprint 6 is complete. Sprint 7 has not been specified or authorized.
 
-Before Sprint 6:
+Before any later implementation sprint:
 
-1. review and track the Sprint 6 specification and final gate report;
-2. obtain separate explicit implementation authorization;
-3. read `AGENTS.md`, this state file, the Project Bible, implementation plan, architecture sign-off, and final gate report;
-4. use only the Sprint 6 allowlist, validation commands, acceptance criteria, and stop boundary;
-5. stop if the work would introduce any excluded capability or continue into Sprint 7.
+1. review and track `docs/sprints/SPRINT6_REPORT.md`;
+2. select the next unresolved Milestone 3A condition through a separate specification;
+3. obtain explicit implementation authorization;
+4. start from a reviewable worktree and follow the new Sprint allowlist and stop boundary;
+5. do not infer authorization from roadmap order or remaining technical debt.
 
 ## Future Roadmap
 

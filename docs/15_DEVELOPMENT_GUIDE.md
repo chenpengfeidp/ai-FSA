@@ -20,12 +20,26 @@ When speed conflicts with evidence traceability, reproducibility, or architectur
 
 ## 3. Required Toolchain
 
-- Supported LTS Node.js version pinned by the repository.
-- pnpm version pinned by the repository/package manager field.
+- Node.js `24.18.0`.
+- pnpm `11.13.0`.
 - Docker and Docker Compose.
 - Git.
 
-Use pnpm only. Do not generate or commit npm/yarn lockfiles. Install and run workspace commands from the repository root unless a package guide says otherwise.
+The root `package.json` is the machine-readable toolchain authority. `.nvmrc` must match its exact Node.js engine. `pnpm-workspace.yaml` enables pnpm-native rejection with `engineStrict: true` and `pmOnFail: error`; unsupported Node.js or pnpm versions fail even when lifecycle scripts are disabled.
+
+Use pnpm only. Do not generate or commit npm/yarn lockfiles. Install and run workspace commands from the repository root unless a package guide says otherwise. The repository validates installed tools but does not install, download, or replace them.
+
+Activate the supported Node.js version with an already installed version manager, then verify the active toolchain:
+
+```bash
+nvm use 24.18.0
+node --version
+pnpm --version
+pnpm toolchain:check
+pnpm toolchain:test
+```
+
+If validation reports a mismatch, activate Node.js `24.18.0` and use an existing pnpm `11.13.0` installation. Do not relax the exact version declarations, bypass the checks, or substitute npm or Yarn.
 
 ### 3.1 Repository Quality Commands
 
@@ -42,7 +56,9 @@ pnpm boundaries     # validate the current dependency graph
 pnpm boundaries:test # prove a controlled forbidden import is rejected
 pnpm quality        # run Biome and both boundary checks
 pnpm test           # run the currently configured Vitest projects
-pnpm validate       # workspace, quality, typecheck, test, and build validation
+pnpm toolchain:check # validate active Node.js/pnpm identity and metadata
+pnpm toolchain:test # run controlled positive and negative enforcement tests
+pnpm validate       # toolchain, workspace, quality, typecheck, test, and build
 ```
 
 Husky invokes lint-staged before local commits. The hook runs Biome only against supported staged files; it does not run repository-wide typecheck, build, or boundary validation. Set `HUSKY=0` in CI and production-only/container dependency stages.
@@ -57,7 +73,7 @@ Supply current values through the process environment. Browser-safe, secret, dat
 
 ## 4. Local Environment
 
-The following is the target M1 workflow, not the current Sprint 5 repository state:
+The following is the target M1 workflow, not the current post-Sprint 6 repository state:
 
 1. Copy the committed environment example to a local ignored environment file.
 2. Provide local-only secrets.

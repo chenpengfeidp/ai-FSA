@@ -13,6 +13,11 @@ Read [AGENTS](AGENTS.md) first for repository-wide collaboration rules, then [PR
 Run commands from the repository root with Node.js `24.18.0` and pnpm `11.13.0`.
 
 ```bash
+nvm use 24.18.0
+node --version
+pnpm --version
+pnpm toolchain:check
+pnpm toolchain:test
 pnpm install --frozen-lockfile
 pnpm format:check
 pnpm lint
@@ -23,6 +28,10 @@ pnpm test
 pnpm build
 pnpm validate
 ```
+
+The root `package.json` is the version authority. `.nvmrc` must agree with its exact Node.js engine. `pnpm-workspace.yaml` enables native exact-version rejection through `engineStrict: true` and `pmOnFail: error`, including when install scripts are disabled.
+
+If a command reports an unsupported toolchain, activate Node.js `24.18.0` with an already installed version manager and invoke an existing pnpm `11.13.0` installation. Do not bypass the check, relax the version declarations, or use npm or Yarn. Re-run `pnpm toolchain:check` before installation.
 
 `pnpm format` is the explicit writing formatter command. Local pre-commit checks use Husky and lint-staged to run Biome only on supported staged files.
 

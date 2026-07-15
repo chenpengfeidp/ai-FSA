@@ -10,12 +10,15 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "typecheck": "tsc --showConfig --project tsconfig.base.json",
+    "dev:api": "pnpm --filter @fas/api dev",
+    "dev:web": "pnpm --filter @fas/web dev",
+    "dev:worker": "pnpm --filter @fas/worker dev",
+    "typecheck": "turbo run typecheck",
     "workspace:check": "node scripts/validate-workspace.mjs && pnpm --recursive list --depth -1",
     "validate": "pnpm workspace:check && pnpm typecheck && pnpm build"
   },
   "devDependencies": {
     "turbo": "2.10.5",
-    "typescript": "7.0.2"
+    "typescript": "6.0.3"
   }
 }

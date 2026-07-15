@@ -6,7 +6,7 @@
 - Scope: Repository Bootstrap
 - Delivery label: Milestone 3A
 - Canonical roadmap mapping: v0.1 / M1 Foundation
-- Implementation state: In progress — Sprints 1 through 4 complete; Milestone 3A incomplete
+- Implementation state: In progress — Sprints 1 through 5 complete; Milestone 3A incomplete
 
 This document is the official implementation blueprint for the repository bootstrap. It translates the architecture contracts into an executable delivery plan without defining football-analysis business behavior.
 
@@ -35,7 +35,8 @@ If this plan conflicts with those authorities, the higher authority wins and thi
 - Sprint 2 created the minimal API, web, and worker shells.
 - Sprint 3 created and connected `@fas/tsconfig`.
 - Sprint 4 added Biome, dependency-cruiser, guarded Husky/lint-staged checks, and unified validation.
-- Tests, Prisma no-model bootstrap, containers, deterministic runtime smoke validation, security gates, and CI remain planned and unimplemented.
+- Sprint 5 created and connected `@fas/config`, added focused configuration tests, and integrated test execution into root validation.
+- Application tests beyond the configuration contract, Prisma no-model bootstrap, containers, deterministic runtime smoke validation, security gates, and CI remain planned and unimplemented.
 
 Current repository truth and sprint evidence are maintained in [PROJECT_STATE](./PROJECT_STATE.md) and `docs/sprints/`. Planned files and commands below are not evidence of implementation until their owning sprint report records successful validation.
 
@@ -63,7 +64,7 @@ The bootstrap must prove:
 - Biome formatting and linting;
 - dependency-cruiser architecture checks;
 - Husky pre-commit checks;
-- Vitest test workspace;
+- Vitest test projects;
 - Next.js App Router shell;
 - NestJS API shell;
 - NestJS standalone worker shell;
@@ -92,7 +93,7 @@ The bootstrap must prove:
 
 ## 4. Repository Structure
 
-The following is the target Milestone 3A end state. Sprints 1 through 4 implemented only the subset recorded in `docs/PROJECT_STATE.md`; unimplemented entries remain planned and must not be treated as current repository contents.
+The following is the target Milestone 3A end state. Sprints 1 through 5 implemented only the subset recorded in `docs/PROJECT_STATE.md`; unimplemented entries remain planned and must not be treated as current repository contents.
 
 ```text
 football-analysis-system/
@@ -237,7 +238,7 @@ Owns framework-neutral runtime-validatable transport contracts. Bootstrap scope 
 
 ### `packages/config`
 
-Is the only shared package that reads and validates runtime configuration. It exposes a separate browser-safe contract and must prevent secrets from entering web bundles.
+Is the only shared package that reads and validates runtime configuration. Its implemented server-side contract covers API and worker startup. A separate browser-safe contract remains a conditional target and must prevent secrets from entering web bundles when authorized.
 
 ### `packages/database`
 
@@ -271,7 +272,7 @@ Owns cross-package deterministic test utilities with at least two real consumers
 - Husky: `9.1.7`
 - lint-staged: `17.0.8`
 - dependency-cruiser: `18.1.0`
-- Vitest: `4.1.10`, planned and not installed
+- Vitest: `4.1.10`, installed for the focused configuration test project
 
 Node 24 satisfies the minimum runtime requirements of Next.js 16, NestJS 11, Prisma 7, pnpm 11, Vitest 4, and dependency-cruiser 18.
 
@@ -306,7 +307,7 @@ shadcn/ui is not installed during bootstrap because it produces source component
 - `reflect-metadata`: `0.2.2`
 - `rxjs`: `7.8.2`
 - NestJS Swagger: deferred to v0.2 under sign-off decision DF-01
-- Zod: `4.4.3`, planned and not installed
+- Zod: `4.4.3`, installed as the runtime validation dependency of `@fas/config`
 
 Express is the v0.1 HTTP adapter because it is NestJS's default and introduces the least bootstrap risk. A Fastify migration requires measured need and transport compatibility tests.
 
@@ -317,8 +318,8 @@ The worker uses a standalone NestJS application context and does not depend on a
 - Prisma CLI: `7.8.0`
 - Prisma Client: `7.8.0`
 - Prisma PostgreSQL adapter: `7.8.0`
-- `pg`: current Prisma-compatible stable version, exact-pinned
-- `dotenv`: current stable version, exact-pinned
+- `pg`: exact Prisma-compatible version to be selected and recorded by the authorized Prisma bootstrap Sprint
+- `dotenv`: exact version to be selected and recorded by the authorized Prisma bootstrap Sprint if it remains necessary
 - PostgreSQL image: `postgres:17-alpine`, pinned by digest in release environments
 
 Prisma 7 configuration uses `prisma.config.ts` and an explicit generated-client output. The bootstrap schema contains datasource and generator configuration only. Domain models and migrations are added by their owning persistence milestones.
@@ -388,7 +389,7 @@ Exit gate: Turbo's dry-run graph shows only intended dependencies and outputs.
 
 1. Add Biome as the single formatter/linter.
 2. Add dependency-cruiser for package and framework boundaries.
-3. Add Vitest workspace configuration.
+3. Add root Vitest configuration with explicit projects.
 4. Add Husky after workspace installation.
 5. Run only staged Biome checks in pre-commit.
 6. Keep complete typecheck, test, boundary, and build checks in CI.
@@ -535,7 +536,7 @@ apps/web/src/app/globals.css
 
 ### 8.3 Packages
 
-Create only with an immediate consumer. `packages/tsconfig` is implemented; every other entry remains conditional under the sign-off deferrals and must not be scaffolded from this list alone:
+Create only with an immediate consumer. `packages/tsconfig` and the server-side subset of `packages/config` are implemented; every other entry remains conditional under the sign-off deferrals and must not be scaffolded from this list alone:
 
 ```text
 packages/tsconfig/package.json
@@ -557,6 +558,7 @@ packages/config/package.json
 packages/config/tsconfig.json
 packages/config/src/index.ts
 packages/config/src/environment.ts
+packages/config/test/environment.spec.ts
 
 packages/database/package.json
 packages/database/tsconfig.json
@@ -678,7 +680,7 @@ Mitigation: review generated output file by file. Remove examples, duplicate too
 
 ### 10.1 Clean Clone
 
-Status after Sprint 4: demonstrated.
+Status after Sprint 5: supported-toolchain clean installation demonstrated; explicit unsupported-runtime and package-manager rejection evidence remains open under sign-off condition MF-05.
 
 From a clean clone with the pinned Node runtime:
 
@@ -692,7 +694,7 @@ The reported versions match repository pins and installation produces no second 
 
 ### 10.2 Static Quality
 
-Status after Sprint 4: demonstrated.
+Status after Sprint 5: demonstrated.
 
 ```bash
 pnpm quality
@@ -703,25 +705,20 @@ All commands succeed. The controlled dependency-cruiser fixture proves that a fo
 
 ### 10.3 Tests and Build
 
-Status after Sprint 4: build demonstrated; automated tests remain planned and are not yet available.
+Status after Sprint 5: build and focused configuration tests demonstrated; application tests remain planned.
 
 Demonstrated:
 
 ```bash
+pnpm test
 pnpm build
 ```
 
-When test infrastructure is implemented, remaining acceptance requires:
-
-```bash
-pnpm test
-```
-
-API health tests, worker bootstrap tests, and justified foundation-package tests must then succeed from a clean cache.
+The implemented Vitest project discovers and passes the `@fas/config` contract tests. Remaining acceptance requires API health tests, worker bootstrap tests, and other justified application or foundation-package tests to succeed from a clean cache when their owning Sprints authorize them.
 
 ### 10.4 Prisma
 
-Status after Sprint 4: planned and not implemented.
+Status after Sprint 5: planned and not implemented.
 
 ```bash
 pnpm prisma:validate
@@ -732,7 +729,7 @@ When implemented, acceptance requires both commands to succeed, generated output
 
 ### 10.5 Containers
 
-Status after Sprint 4: planned and not implemented.
+Status after Sprint 5: planned and not implemented.
 
 ```bash
 docker compose config
@@ -744,13 +741,14 @@ When implemented, acceptance requires valid Compose configuration, a healthy Pos
 
 ### 10.6 Runtime Shells
 
-Status after Sprint 4: API, worker, and web shell startup/build behavior is demonstrated. Database-aware readiness, correlation, and redaction acceptance remain planned.
+Status after Sprint 5: API, worker, and web shell startup/build behavior is demonstrated. API and worker configuration validation is demonstrated. Database-aware readiness, correlation, and full redaction acceptance remain planned.
 
 Demonstrated:
 
 - API starts and liveness succeeds;
 - worker initializes and shuts down gracefully;
 - web shell renders;
+- API and worker reject invalid supported configuration before NestJS initialization without exposing raw invalid values;
 
 Remaining runtime acceptance requires:
 
@@ -760,7 +758,7 @@ Remaining runtime acceptance requires:
 
 ### 10.7 CI
 
-Status after Sprint 4: planned and not implemented.
+Status after Sprint 5: planned and not implemented.
 
 When implemented, acceptance requires:
 

@@ -13,17 +13,18 @@
     "boundaries:test": "node scripts/validate-boundary-fixture.mjs",
     "build": "turbo run build",
     "check": "biome check .",
-    "dev:api": "pnpm --filter @fas/api dev",
+    "dev:api": "pnpm --filter @fas/config build && pnpm --filter @fas/api dev",
     "dev:web": "pnpm --filter @fas/web dev",
-    "dev:worker": "pnpm --filter @fas/worker dev",
+    "dev:worker": "pnpm --filter @fas/config build && pnpm --filter @fas/worker dev",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome lint .",
     "prepare": "node scripts/install-git-hooks.mjs",
     "quality": "pnpm check && pnpm boundaries && pnpm boundaries:test",
+    "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "workspace:check": "node scripts/validate-workspace.mjs && pnpm --recursive list --depth -1",
-    "validate": "pnpm workspace:check && pnpm quality && pnpm typecheck && pnpm build"
+    "validate": "pnpm workspace:check && pnpm quality && pnpm typecheck && pnpm test && pnpm build"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json,jsonc,css}": "biome check --write --no-errors-on-unmatched"
@@ -35,6 +36,7 @@
     "husky": "9.1.7",
     "lint-staged": "17.0.8",
     "turbo": "2.10.5",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
   }
 }

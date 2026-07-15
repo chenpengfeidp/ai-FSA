@@ -1,6 +1,6 @@
 # Football Analysis System (FAS)
 
-FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, the shared `@fas/tsconfig` package, and the Biome/dependency-cruiser engineering-quality foundation.
+FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, the shared `@fas/tsconfig` and `@fas/config` packages, the Biome/dependency-cruiser engineering-quality foundation, and focused configuration-contract tests.
 
 No football-domain, AI-engine, database, authentication, or production behavior is implemented. V1 has no user or authentication system, so public deployment is prohibited.
 
@@ -19,11 +19,22 @@ pnpm lint
 pnpm boundaries
 pnpm quality
 pnpm typecheck
+pnpm test
 pnpm build
 pnpm validate
 ```
 
 `pnpm format` is the explicit writing formatter command. Local pre-commit checks use Husky and lint-staged to run Biome only on supported staged files.
+
+## Runtime Configuration
+
+API and worker environment configuration is loaded through `@fas/config`.
+
+- `NODE_ENV`: `development`, `test`, or `production`; defaults to `development`.
+- `HOST`: API listener host; defaults to `127.0.0.1`.
+- `PORT`: API listener port from `1` through `65535`; defaults to `3001`.
+
+The repository does not load `.env` files automatically. Supply variables through the process environment. Invalid supported values stop startup before NestJS initialization.
 
 ## Reading Order
 

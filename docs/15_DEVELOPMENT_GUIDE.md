@@ -41,16 +41,23 @@ pnpm check          # run the combined non-writing Biome check
 pnpm boundaries     # validate the current dependency graph
 pnpm boundaries:test # prove a controlled forbidden import is rejected
 pnpm quality        # run Biome and both boundary checks
-pnpm validate       # workspace, quality, typecheck, and build validation
+pnpm test           # run the currently configured Vitest projects
+pnpm validate       # workspace, quality, typecheck, test, and build validation
 ```
 
 Husky invokes lint-staged before local commits. The hook runs Biome only against supported staged files; it does not run repository-wide typecheck, build, or boundary validation. Set `HUSKY=0` in CI and production-only/container dependency stages.
 
 Local hooks provide fast feedback. They are not a substitute for the non-writing root validation pipeline.
 
+### 3.2 Runtime Configuration
+
+API and worker startup configuration is loaded through `@fas/config`. The current contract supports `NODE_ENV`, API `HOST`, and API `PORT`. The package applies defaults, validates supported values before NestJS initialization, and does not load `.env` files automatically.
+
+Supply current values through the process environment. Browser-safe, secret, database, provider, queue, storage, feature-flag, and observability configuration remain deferred until an approved capability has an immediate consumer.
+
 ## 4. Local Environment
 
-The target M1 workflow is:
+The following is the target M1 workflow, not the current Sprint 5 repository state:
 
 1. Copy the committed environment example to a local ignored environment file.
 2. Provide local-only secrets.

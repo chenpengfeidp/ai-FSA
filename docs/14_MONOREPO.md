@@ -138,7 +138,9 @@ Contracts may use a framework-neutral schema library. They do not import NestJS 
 
 - validates environment variables at process startup;
 - exposes typed server configuration;
-- provides a separate allowlist of browser-safe configuration.
+- will provide a separate allowlist of browser-safe configuration only when a browser consumer is authorized.
+
+Sprint 5 implements only the server-side API and worker loaders for `NODE_ENV`, API `HOST`, and API `PORT`. Browser-safe configuration remains deferred.
 
 No package reads `process.env` directly except this package and framework bootstraps.
 
@@ -337,7 +339,7 @@ Secrets and `.env` files must not be cache inputs that can enter remote cache ar
 - A controlled fixture proves that a forbidden dependency is rejected.
 - Husky invokes lint-staged at pre-commit for supported staged files only.
 - Local hooks are a fast convenience; the root `validate` command remains authoritative.
-- Full validation runs workspace checks, quality checks, typechecking, and builds without writing files.
+- Full validation runs workspace checks, quality checks, typechecking, tests, and builds without writing files.
 
 ## 9. Boundary Enforcement
 

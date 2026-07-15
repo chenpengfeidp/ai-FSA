@@ -7,8 +7,8 @@
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
 - Current task status: Last authorized sprint complete; no implementation sprint active
 - Current sprint: No implementation sprint active
-- Last completed sprint: Sprint 4 — Engineering Quality Foundation
-- Next sprint: Sprint 5, not started and not authorized
+- Last completed sprint: Sprint 5 — Configuration Foundation
+- Next sprint: Sprint 6, not started and not authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -19,6 +19,7 @@ The repository contains:
 
 - a pnpm and Turborepo workspace;
 - the reusable `@fas/tsconfig` TypeScript configuration package;
+- the reusable `@fas/config` typed runtime configuration package;
 - exact runtime and package-manager pins;
 - a minimal NestJS API application;
 - a minimal Next.js web application;
@@ -26,7 +27,8 @@ The repository contains:
 - Biome formatting and source linting;
 - dependency-cruiser boundary enforcement with a controlled negative test;
 - guarded Husky and lint-staged pre-commit checks;
-- unified workspace, quality, typecheck, and build validation commands;
+- focused Vitest configuration-contract tests;
+- unified workspace, quality, typecheck, test, and build validation commands;
 - architecture documents, ADRs, sprint reports, and AI-agent governance.
 
 The API currently exposes only:
@@ -52,6 +54,8 @@ No football-domain, AI-engine, database, authentication, durable-job, or busines
 - dependency-cruiser: `18.1.0`
 - Husky: `9.1.7`
 - lint-staged: `17.0.8`
+- Vitest: `4.1.10`
+- Zod: `4.4.3`
 - Next.js: `16.2.10`
 - React / React DOM: `19.2.7`
 - NestJS: `11.1.28`
@@ -69,6 +73,7 @@ TypeScript 6 is the approved compatibility fallback. TypeScript 7.0.2 failed bec
 - Milestone 3A.5 — AI Collaboration Governance: complete.
 - Milestone 3A Sprint 3 — Platform Foundation: complete.
 - Milestone 3A Sprint 4 — Engineering Quality Foundation: complete.
+- Milestone 3A Sprint 5 — Configuration Foundation: complete.
 
 Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation work remains.
 
@@ -107,6 +112,16 @@ Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation
 - Added no application-source or runtime behavior changes.
 - Evidence: `docs/sprints/SPRINT4_REPORT.md`.
 
+### Sprint 5 — Configuration Foundation
+
+- Created private workspace package `@fas/config`.
+- Added immutable API and worker configuration contracts.
+- Added strict validation for `NODE_ENV`, `HOST`, and `PORT`.
+- Replaced direct API environment parsing and added worker startup validation.
+- Added one explicit Vitest project with 17 configuration contract tests.
+- Added no endpoint, response, web, domain, AI, persistence, queue, or observability behavior.
+- Evidence: `docs/sprints/SPRINT5_REPORT.md`.
+
 ## Architecture Status
 
 Architecture direction is **approved with conditions**.
@@ -125,7 +140,7 @@ The following principles remain binding:
 - append-only match-result versions;
 - executable acceptance evidence.
 
-Open Milestone 3A conditions include tests, Prisma no-model bootstrap, container strategy and acceptance, deterministic smoke testing, security gates, and CI.
+Open Milestone 3A conditions include explicit unsupported-runtime and package-manager installation rejection evidence, automated application tests beyond the configuration contract, Prisma no-model bootstrap, container strategy and acceptance, deterministic runtime smoke testing, security gates, and CI.
 
 ## Approved Documents
 
@@ -144,6 +159,7 @@ Open Milestone 3A conditions include tests, Prisma no-model bootstrap, container
 - `docs/21_ARCHITECTURE_SIGNOFF.md`
 - `docs/sprints/SPRINT3_SPECIFICATION.md`
 - `docs/sprints/SPRINT4_SPECIFICATION.md`
+- `docs/sprints/SPRINT5_SPECIFICATION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
 
@@ -157,6 +173,7 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT3_REPORT.md`
 - `docs/sprints/SPRINT3_ALIGNMENT_REPORT.md`
 - `docs/sprints/SPRINT4_REPORT.md`
+- `docs/sprints/SPRINT5_REPORT.md`
 - `docs/sprints/GOVERNANCE_FOUNDATION_REPORT.md`
 - `docs/sprints/REPOSITORY_AUDIT_REPORT.md`
 
@@ -171,8 +188,11 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - No AI provider or engine implementation is currently authorized.
 - No Prisma schema, PostgreSQL runtime, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
 - No speculative engine or shared business packages may be created.
-- `@fas/tsconfig` is the only shared platform package currently implemented.
+- `@fas/tsconfig` and `@fas/config` are the only shared platform packages currently implemented.
+- `@fas/config` validates only `NODE_ENV`, API `HOST`, and API `PORT`.
+- No browser-safe, secret, database, provider, queue, storage, feature-flag, or observability configuration is implemented.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
+- Runtime and package-manager metadata are exact-pinned, but sign-off condition MF-05 still requires evidence that installation rejects unsupported Node.js and pnpm versions.
 - Generated Next.js type files are reproducible and uncommitted.
 - The worker must not use a fake persistence loop before durable work exists.
 - The API and web shell copy “Repository Bootstrap Completed” refers only to shell creation; Milestone 3A and canonical v0.1 remain incomplete.
@@ -180,13 +200,13 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Known Documentation Drift
 
-No known broken Markdown links, obsolete sprint locations, or active package/tool-version drift remains after the repository audit. The implementation plan distinguishes demonstrated Sprint 1–4 work from remaining Milestone 3A targets.
+No known broken Markdown links, obsolete sprint locations, or active package/tool-version drift remains after the post-Sprint 5 repository audit. The implementation-plan progress overlay and Sprint 5 specification status are aligned with completed Sprint 5 evidence.
 
 ## Next Sprint
 
-Sprint 5 has not been approved or scoped.
+Sprint 6 has not been approved or scoped.
 
-Before Sprint 5:
+Before Sprint 6:
 
 1. define its exact goal, allowed files, exclusions, and acceptance criteria;
 2. read `AGENTS.md`, this state file, the Project Bible, implementation plan, and architecture sign-off;

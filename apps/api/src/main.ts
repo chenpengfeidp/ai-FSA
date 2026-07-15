@@ -1,15 +1,18 @@
 import "reflect-metadata";
+import { loadApiConfig } from "@fas/config";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module.js";
 
 async function bootstrap(): Promise<void> {
+  const config = loadApiConfig();
   const app = await NestFactory.create(AppModule);
-  const host = process.env.HOST ?? "127.0.0.1";
-  const port = Number.parseInt(process.env.PORT ?? "3001", 10);
 
-  await app.listen(port, host);
-  Logger.log(`API listening on http://${host}:${port}`, "Bootstrap");
+  await app.listen(config.http.port, config.http.host);
+  Logger.log(
+    `API listening on http://${config.http.host}:${config.http.port}`,
+    "Bootstrap",
+  );
 }
 
 void bootstrap().catch((error: unknown) => {

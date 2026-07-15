@@ -49,6 +49,8 @@ Runtime composition roots are:
 - `apps/api`: NestJS REST transport;
 - `apps/worker`: standalone NestJS background-runtime composition.
 
+Implemented shared platform packages are `@fas/tsconfig` for compiler policy and `@fas/config` for server-side API and worker startup configuration.
+
 The target architecture uses ports and adapters:
 
 - presentation and transport depend on application contracts;
@@ -204,7 +206,9 @@ Current baseline commands are:
 
 - `pnpm install --frozen-lockfile`
 - `pnpm workspace:check`
+- `pnpm quality`
 - `pnpm typecheck`
+- `pnpm test`
 - `pnpm build`
 - `pnpm validate`
 

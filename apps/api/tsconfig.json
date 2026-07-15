@@ -1,14 +1,11 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@fas/tsconfig/nest.json",
   "compilerOptions": {
     "noEmit": false,
     "outDir": "dist",
     "rootDir": "src",
     "declaration": false,
-    "declarationMap": false,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "types": ["node"]
+    "declarationMap": false
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]

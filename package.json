@@ -18,6 +18,7 @@
     "validate": "pnpm workspace:check && pnpm typecheck && pnpm build"
   },
   "devDependencies": {
+    "@fas/tsconfig": "workspace:*",
     "turbo": "2.10.5",
     "typescript": "6.0.3"
   }

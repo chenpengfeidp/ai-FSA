@@ -3,12 +3,12 @@
 ## Snapshot
 
 - Last updated: 2026-07-15
-- Current delivery milestone: Milestone 3A.5 — AI Collaboration Governance
+- Current delivery milestone: Milestone 3A — Repository Bootstrap
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
 - Current task status: Complete
 - Current sprint: No implementation sprint active
-- Last completed sprint: Sprint 2 — Application Skeleton
-- Next sprint: Sprint 3, not started and not authorized
+- Last completed sprint: Sprint 3 — Platform Foundation
+- Next sprint: Sprint 4, not started and not authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -18,7 +18,7 @@ Update this document after every sprint, implementation gate, or material govern
 The repository contains:
 
 - a pnpm and Turborepo workspace;
-- strict shared TypeScript configuration;
+- the reusable `@fas/tsconfig` TypeScript configuration package;
 - exact runtime and package-manager pins;
 - a minimal NestJS API application;
 - a minimal Next.js web application;
@@ -60,6 +60,7 @@ TypeScript 6 is the approved compatibility fallback. TypeScript 7.0.2 failed bec
 - Milestone 3A Sprint 1 — Repository Foundation: complete.
 - Milestone 3A Sprint 2 — Application Skeleton: complete.
 - Milestone 3A.5 — AI Collaboration Governance: complete.
+- Milestone 3A Sprint 3 — Platform Foundation: complete.
 
 Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation work remains.
 
@@ -79,6 +80,14 @@ Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation
 - Added root development commands and production builds.
 - Introduced no domain, AI, database, authentication, or queue behavior.
 - Evidence: `docs/sprints/SPRINT2_REPORT.md`.
+
+### Sprint 3 — Platform Foundation
+
+- Created the private `@fas/tsconfig` workspace package.
+- Centralized strict base, Node.js, NestJS, and Next.js compiler policy.
+- Connected the root, API, web, and worker as immediate consumers through explicit export paths and `workspace:*` dependencies.
+- Added no executable package code or application-source changes.
+- Evidence: `docs/sprints/SPRINT3_REPORT.md`.
 
 ## Architecture Status
 
@@ -115,6 +124,7 @@ Open Milestone 3A conditions include quality tooling, boundary enforcement, test
 
 - `docs/20_IMPLEMENTATION_PLAN.md`
 - `docs/21_ARCHITECTURE_SIGNOFF.md`
+- `docs/SPRINT3_SPECIFICATION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
 
@@ -125,6 +135,7 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/PROJECT_STATE.md`
 - `docs/22_SPRINT1_REPORT.md`
 - `docs/sprints/SPRINT2_REPORT.md`
+- `docs/sprints/SPRINT3_REPORT.md`
 - `docs/sprints/GOVERNANCE_FOUNDATION_REPORT.md`
 
 Sprint reports are evidence records, not replacements for canonical architecture.
@@ -138,6 +149,7 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - No AI provider or engine implementation is currently authorized.
 - No Prisma schema, PostgreSQL runtime, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
 - No speculative engine or shared business packages may be created.
+- `@fas/tsconfig` is the only shared platform package currently implemented.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
 - Generated Next.js type files are reproducible and uncommitted.
 - The worker must not use a fake persistence loop before durable work exists.
@@ -149,15 +161,15 @@ The following pre-existing documents are not changed by Milestone 3A.5:
 
 - `README.md` still describes the repository as architecture-only and does not list documents 20 and 21.
 - `docs/14_MONOREPO.md` still references an ESLint configuration package, while the approved bootstrap selects Biome plus dependency-cruiser.
-- `docs/20_IMPLEMENTATION_PLAN.md` still lists TypeScript 7.0.2, while Sprint 2 recorded and applied the approved TypeScript 6.0.3 fallback.
+- `docs/20_IMPLEMENTATION_PLAN.md` still lists TypeScript 7.0.2 and `packages/typescript-config`; implementation uses the approved TypeScript 6.0.3 fallback and the Sprint 3-approved `packages/tsconfig` refinement.
 
 These are explicit alignment items for a separately authorized documentation or implementation change. They must not be treated as current runtime truth.
 
 ## Next Sprint
 
-Sprint 3 has not been approved or scoped.
+Sprint 4 has not been approved or scoped.
 
-Before Sprint 3:
+Before Sprint 4:
 
 1. define its exact goal, allowed files, exclusions, and acceptance criteria;
 2. read `AGENTS.md`, this state file, the Project Bible, implementation plan, and architecture sign-off;

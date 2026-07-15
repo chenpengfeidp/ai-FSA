@@ -20,15 +20,6 @@ importers:
 
   apps/api:
     dependencies:
-      '@fas/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@fas/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
-      '@fas/shared-types':
-        specifier: workspace:*
-        version: link:../../packages/shared-types
       '@nestjs/common':
         specifier: 11.1.28
         version: 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -85,12 +76,6 @@ importers:
 
   apps/worker:
     dependencies:
-      '@fas/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@fas/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
       '@nestjs/common':
         specifier: 11.1.28
         version: 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -113,34 +98,6 @@ importers:
       '@types/node':
         specifier: 24.13.3
         version: 24.13.3
-
-  packages/config:
-    dependencies:
-      '@fas/shared-types':
-        specifier: workspace:*
-        version: link:../shared-types
-    devDependencies:
-      '@fas/tsconfig':
-        specifier: workspace:*
-        version: link:../tsconfig
-      '@types/node':
-        specifier: 24.13.3
-        version: 24.13.3
-
-  packages/logger:
-    devDependencies:
-      '@fas/tsconfig':
-        specifier: workspace:*
-        version: link:../tsconfig
-      '@types/node':
-        specifier: 24.13.3
-        version: 24.13.3
-
-  packages/shared-types:
-    devDependencies:
-      '@fas/tsconfig':
-        specifier: workspace:*
-        version: link:../tsconfig
 
   packages/tsconfig: {}
 

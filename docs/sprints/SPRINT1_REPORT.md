@@ -166,7 +166,7 @@ Sprint 1 does not authorize or begin the following:
 - adding Dockerfiles or Docker Compose;
 - adding domain, engine, AI provider, persistence, or business code.
 
-The next sprint must be separately approved and must follow the binding decisions in [21_ARCHITECTURE_SIGNOFF](./21_ARCHITECTURE_SIGNOFF.md). In particular, it must resolve the exact dependency matrix and run the approved compatibility gate before package expansion.
+The next sprint must be separately approved and must follow the binding decisions in [21_ARCHITECTURE_SIGNOFF](../21_ARCHITECTURE_SIGNOFF.md). In particular, it must resolve the exact dependency matrix and run the approved compatibility gate before package expansion.
 
 ## 8. Sprint Boundary
 

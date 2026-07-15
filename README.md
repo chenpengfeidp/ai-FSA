@@ -1,6 +1,6 @@
 # Football Analysis System (FAS)
 
-FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, and the shared `@fas/tsconfig` package.
+FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, the shared `@fas/tsconfig` package, and the Biome/dependency-cruiser engineering-quality foundation.
 
 No football-domain, AI-engine, database, authentication, or production behavior is implemented. V1 has no user or authentication system, so public deployment is prohibited.
 

@@ -2,15 +2,17 @@
 
 ## 1. Status and Authority
 
-- Status: Proposed for final approval
+- Status: Approved with conditions
 - Scope: Repository Bootstrap
 - Delivery label: Milestone 3A
 - Canonical roadmap mapping: v0.1 / M1 Foundation
-- Implementation state: Not started
+- Implementation state: In progress — Sprints 1 through 4 complete; Milestone 3A incomplete
 
 This document is the official implementation blueprint for the repository bootstrap. It translates the architecture contracts into an executable delivery plan without defining football-analysis business behavior.
 
 The delivery label “Milestone 3A” does not replace canonical milestone naming. In [16_IMPLEMENTATION_ROADMAP](./16_IMPLEMENTATION_ROADMAP.md), repository bootstrap belongs to v0.1 / M1 Foundation; M3 remains the Knowledge Engine milestone.
+
+[21_ARCHITECTURE_SIGNOFF](./21_ARCHITECTURE_SIGNOFF.md) is the governing approval addendum. Its must-fix, deferral, documentation-alignment, and rejected-item decisions narrow this plan wherever the documents differ.
 
 The following remain authoritative:
 
@@ -26,6 +28,16 @@ The following remain authoritative:
 - [ADR-001](./decisions/ADR-001-modular-monolith-and-typescript-monorepo.md), [ADR-002](./decisions/ADR-002-postgresql-durable-jobs-for-v1.md), [ADR-003](./decisions/ADR-003-provider-neutral-ai-and-staged-retrieval.md), and [ADR-004](./decisions/ADR-004-append-only-match-result-versions.md) for accepted decisions.
 
 If this plan conflicts with those authorities, the higher authority wins and this document must be corrected before implementation proceeds.
+
+### 1.1 Demonstrated Implementation Progress
+
+- Sprint 1 established the pnpm/Turborepo repository foundation and runtime pins.
+- Sprint 2 created the minimal API, web, and worker shells.
+- Sprint 3 created and connected `@fas/tsconfig`.
+- Sprint 4 added Biome, dependency-cruiser, guarded Husky/lint-staged checks, and unified validation.
+- Tests, Prisma no-model bootstrap, containers, deterministic runtime smoke validation, security gates, and CI remain planned and unimplemented.
+
+Current repository truth and sprint evidence are maintained in [PROJECT_STATE](./PROJECT_STATE.md) and `docs/sprints/`. Planned files and commands below are not evidence of implementation until their owning sprint report records successful validation.
 
 ## 2. Objective
 
@@ -79,6 +91,8 @@ The bootstrap must prove:
 - empty packages created only to mirror the future architecture.
 
 ## 4. Repository Structure
+
+The following is the target Milestone 3A end state. Sprints 1 through 4 implemented only the subset recorded in `docs/PROJECT_STATE.md`; unimplemented entries remain planned and must not be treated as current repository contents.
 
 ```text
 football-analysis-system/
@@ -187,16 +201,16 @@ football-analysis-system/
 ├── .editorconfig
 ├── .env.example
 ├── .gitignore
-├── .node-version
+├── .nvmrc
 ├── biome.json
 ├── compose.yaml
 ├── dependency-cruiser.config.cjs
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
-├── tsconfig.json
+├── tsconfig.base.json
 ├── turbo.json
-└── vitest.workspace.ts
+└── vitest.config.ts
 ```
 
 ## 5. Directory Responsibilities
@@ -255,8 +269,9 @@ Owns cross-package deterministic test utilities with at least two real consumers
 - TypeScript: `6.0.3`, the approved compatibility baseline
 - Biome: `2.5.3`
 - Husky: `9.1.7`
+- lint-staged: `17.0.8`
 - dependency-cruiser: `18.1.0`
-- Vitest: `4.1.10`
+- Vitest: `4.1.10`, planned and not installed
 
 Node 24 satisfies the minimum runtime requirements of Next.js 16, NestJS 11, Prisma 7, pnpm 11, Vitest 4, and dependency-cruiser 18.
 
@@ -277,7 +292,7 @@ Any future TypeScript version change requires recorded compatibility evidence an
 - Next.js: `16.2.10`
 - React: `19.2.7`
 - React DOM: `19.2.7`
-- TailwindCSS: current stable v4 resolved and exact-pinned during implementation
+- TailwindCSS: deferred until an approved user-facing workflow has an immediate styling requirement
 - matching React and Node type packages
 
 shadcn/ui is not installed during bootstrap because it produces source components. It is introduced with the first approved UI component requirement.
@@ -287,11 +302,11 @@ shadcn/ui is not installed during bootstrap because it produces source component
 - `@nestjs/common`: `11.1.28`
 - `@nestjs/core`: `11.1.28`
 - `@nestjs/platform-express`: `11.1.28`, API only
-- NestJS CLI: compatible stable 11.x
-- NestJS Swagger: compatible stable 11.x
-- `reflect-metadata`: compatible stable 0.2.x
-- `rxjs`: compatible stable 7.x
-- Zod: `4.4.3`
+- NestJS CLI: `11.0.24`
+- `reflect-metadata`: `0.2.2`
+- `rxjs`: `7.8.2`
+- NestJS Swagger: deferred to v0.2 under sign-off decision DF-01
+- Zod: `4.4.3`, planned and not installed
 
 Express is the v0.1 HTTP adapter because it is NestJS's default and introduces the least bootstrap risk. A Fastify migration requires measured need and transport compatibility tests.
 
@@ -463,10 +478,10 @@ GitHub Actions are pinned to immutable commit SHAs. Dependabot updates npm and A
 
 ### 8.1 Root and Automation
 
-Create:
+Create incrementally. Existing files are retained; remaining entries are planned:
 
 ```text
-.node-version
+.nvmrc
 .editorconfig
 .env.example
 biome.json
@@ -475,9 +490,9 @@ dependency-cruiser.config.cjs
 package.json
 pnpm-lock.yaml
 pnpm-workspace.yaml
-tsconfig.json
+tsconfig.base.json
 turbo.json
-vitest.workspace.ts
+vitest.config.ts
 .github/dependabot.yml
 .github/workflows/ci.yml
 .husky/pre-commit
@@ -485,7 +500,7 @@ vitest.workspace.ts
 
 ### 8.2 Applications
 
-Create:
+Create incrementally. The current Sprint 2 shells consolidate operational endpoints in `apps/api/src/app.controller.ts`; health modules, tests, Dockerfiles, and other listed files remain planned until their owning sprint:
 
 ```text
 apps/api/Dockerfile
@@ -493,6 +508,7 @@ apps/api/package.json
 apps/api/tsconfig.json
 apps/api/tsconfig.build.json
 apps/api/src/main.ts
+apps/api/src/app.controller.ts
 apps/api/src/app.module.ts
 apps/api/src/health/health.module.ts
 apps/api/src/health/health.controller.ts
@@ -504,14 +520,12 @@ apps/worker/package.json
 apps/worker/tsconfig.json
 apps/worker/tsconfig.build.json
 apps/worker/src/main.ts
-apps/worker/src/app.module.ts
-apps/worker/src/worker/worker.module.ts
+apps/worker/src/worker.module.ts
 apps/worker/test/bootstrap.spec.ts
 
 apps/web/Dockerfile
 apps/web/package.json
 apps/web/tsconfig.json
-apps/web/next-env.d.ts
 apps/web/next.config.ts
 apps/web/postcss.config.mjs
 apps/web/src/app/layout.tsx
@@ -521,7 +535,7 @@ apps/web/src/app/globals.css
 
 ### 8.3 Packages
 
-Create:
+Create only with an immediate consumer. `packages/tsconfig` is implemented; every other entry remains conditional under the sign-off deferrals and must not be scaffolded from this list alone:
 
 ```text
 packages/tsconfig/package.json
@@ -585,7 +599,6 @@ Generated and committed:
 
 ```text
 pnpm-lock.yaml
-apps/web/next-env.d.ts
 ```
 
 Generated and ignored:
@@ -594,6 +607,7 @@ Generated and ignored:
 node_modules/
 .turbo/
 apps/web/.next/
+apps/web/next-env.d.ts
 coverage/
 packages/database/generated/
 ```
@@ -664,6 +678,8 @@ Mitigation: review generated output file by file. Remove examples, duplicate too
 
 ### 10.1 Clean Clone
 
+Status after Sprint 4: demonstrated.
+
 From a clean clone with the pinned Node runtime:
 
 ```bash
@@ -676,33 +692,47 @@ The reported versions match repository pins and installation produces no second 
 
 ### 10.2 Static Quality
 
+Status after Sprint 4: demonstrated.
+
 ```bash
-pnpm biome:check
-pnpm boundaries
+pnpm quality
 pnpm typecheck
 ```
 
-All commands succeed. A test fixture or documented validation proves that a forbidden Prisma or cross-package deep import is rejected.
+All commands succeed. The controlled dependency-cruiser fixture proves that a forbidden dependency is rejected.
 
 ### 10.3 Tests and Build
 
+Status after Sprint 4: build demonstrated; automated tests remain planned and are not yet available.
+
+Demonstrated:
+
 ```bash
-pnpm test
 pnpm build
 ```
 
-API health tests, worker bootstrap tests, foundation package tests, and all production builds succeed from a clean cache.
+When test infrastructure is implemented, remaining acceptance requires:
+
+```bash
+pnpm test
+```
+
+API health tests, worker bootstrap tests, and justified foundation-package tests must then succeed from a clean cache.
 
 ### 10.4 Prisma
+
+Status after Sprint 4: planned and not implemented.
 
 ```bash
 pnpm prisma:validate
 pnpm prisma:generate
 ```
 
-Both commands succeed. Generated output remains inside the database package and no other package imports Prisma directly.
+When implemented, acceptance requires both commands to succeed, generated output to remain inside the database package, and no other package to import Prisma directly.
 
 ### 10.5 Containers
+
+Status after Sprint 4: planned and not implemented.
 
 ```bash
 docker compose config
@@ -710,27 +740,36 @@ docker compose up -d postgres
 docker compose ps
 ```
 
-Compose configuration is valid and PostgreSQL becomes healthy. No Redis or pgvector container exists.
+When implemented, acceptance requires valid Compose configuration, a healthy PostgreSQL service, and no Redis or pgvector container.
 
 ### 10.6 Runtime Shells
 
-The documented development/start commands prove:
+Status after Sprint 4: API, worker, and web shell startup/build behavior is demonstrated. Database-aware readiness, correlation, and redaction acceptance remain planned.
+
+Demonstrated:
 
 - API starts and liveness succeeds;
-- API readiness reflects database availability;
 - worker initializes and shuts down gracefully;
 - web shell renders;
+
+Remaining runtime acceptance requires:
+
+- API readiness reflects database availability;
 - request correlation appears in structured logs;
 - no secret value appears in logs or browser output.
 
 ### 10.7 CI
 
-- CI passes from a clean GitHub runner.
-- Frozen installation is enforced.
-- Turbo cache does not contain secrets.
-- Dependabot configuration validates.
-- Actions are immutable-version pinned.
-- No step silently skips tests or type checks.
+Status after Sprint 4: planned and not implemented.
+
+When implemented, acceptance requires:
+
+- CI to pass from a clean GitHub runner;
+- frozen installation enforcement;
+- Turbo cache to contain no secrets;
+- valid Dependabot configuration;
+- immutable-version-pinned Actions;
+- no step to silently skip tests or type checks.
 
 ### 10.8 Architecture
 
@@ -739,7 +778,7 @@ The documented development/start commands prove:
 - Only composition roots import framework modules.
 - Package consumers use export maps, not deep source paths.
 - No AI, engine, user, subscription, notification, or live-analysis behavior exists.
-- README and canonical engineering documents match actual commands and tools.
+- README and the Development Guide match actual commands and tools.
 
 ## 11. Rollback Strategy
 
@@ -870,7 +909,7 @@ Redis/BullMQ, pgvector, semantic retrieval, authentication, multi-user workflows
 
 ## 13. Final Approval Gate
 
-Implementation may start only after reviewers approve:
+Initial repository-bootstrap implementation was authorized by [21_ARCHITECTURE_SIGNOFF](./21_ARCHITECTURE_SIGNOFF.md). Each remaining implementation slice may proceed only through an approved sprint specification that confirms:
 
 - scope and exclusions;
 - runtime and dependency baseline;
@@ -881,4 +920,4 @@ Implementation may start only after reviewers approve:
 - acceptance commands;
 - rollback strategy.
 
-Approval of this document authorizes repository bootstrap only. It does not authorize football-analysis business code or later milestone implementation.
+This plan and its sign-off authorize repository bootstrap only. They do not authorize football-analysis business code or later milestone implementation.

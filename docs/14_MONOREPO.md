@@ -43,10 +43,9 @@ football-analysis-system/
 │   ├── ui/                          # Shared presentational React components
 │   ├── tsconfig/                    # Shared TypeScript compiler policy
 │   └── test-utils/                  # Test builders and infrastructure harnesses
+├── scripts/                         # Current repository maintenance scripts
 ├── tooling/
-│   ├── dependency-cruiser/          # Controlled architecture-rule fixtures
-│   ├── scripts/                     # Repository maintenance scripts
-│   └── docker/                      # Container entrypoints/configuration
+│   └── dependency-cruiser/          # Controlled architecture-rule fixtures
 ├── docs/                            # Product and architecture source of truth
 ├── biome.json                       # Formatting and source-lint policy
 ├── dependency-cruiser.config.cjs    # Dependency-direction policy
@@ -57,7 +56,7 @@ football-analysis-system/
 └── README.md
 ```
 
-This is the target M1 structure, not application code for the architecture milestone.
+This is the target M1 structure, not a claim that every listed package or deployment artifact is implemented. Shared scripts move under `tooling/` only when multiple applications consume them; application Dockerfiles remain app-local when introduced.
 
 ## 3. Application Responsibilities
 

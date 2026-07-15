@@ -7,11 +7,11 @@
 - Sprint: 4
 - Theme: Engineering Quality Foundation
 - Specification status: Complete
-- Implementation status: Not started
+- Implementation status: Completed
 
 This document is the official implementation specification for Sprint 4. It narrows Step 4 of `docs/20_IMPLEMENTATION_PLAN.md` according to the binding conditions in `docs/21_ARCHITECTURE_SIGNOFF.md`.
 
-Creation of this specification does not authorize implementation. Sprint 4 implementation requires separate explicit approval.
+Sprint 4 was separately authorized and completed. Implementation evidence is recorded in `docs/sprints/SPRINT4_REPORT.md`.
 
 # Sprint Goal
 

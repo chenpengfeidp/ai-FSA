@@ -5,7 +5,7 @@
 - Last updated: 2026-07-15
 - Current delivery milestone: Milestone 3A — Repository Bootstrap
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
-- Current task status: Complete
+- Current task status: Last authorized sprint complete; no implementation sprint active
 - Current sprint: No implementation sprint active
 - Last completed sprint: Sprint 4 — Engineering Quality Foundation
 - Next sprint: Sprint 5, not started and not authorized
@@ -155,8 +155,10 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT1_REPORT.md`
 - `docs/sprints/SPRINT2_REPORT.md`
 - `docs/sprints/SPRINT3_REPORT.md`
+- `docs/sprints/SPRINT3_ALIGNMENT_REPORT.md`
 - `docs/sprints/SPRINT4_REPORT.md`
 - `docs/sprints/GOVERNANCE_FOUNDATION_REPORT.md`
+- `docs/sprints/REPOSITORY_AUDIT_REPORT.md`
 
 Sprint reports are evidence records, not replacements for canonical architecture.
 
@@ -173,11 +175,12 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
 - Generated Next.js type files are reproducible and uncommitted.
 - The worker must not use a fake persistence loop before durable work exists.
+- The API and web shell copy “Repository Bootstrap Completed” refers only to shell creation; Milestone 3A and canonical v0.1 remain incomplete.
 - Sprint boundaries require separate approval.
 
 ## Known Documentation Drift
 
-No known engineering-quality documentation drift remains after Sprint 4. Future implementation must continue to distinguish the target architecture from demonstrated repository behavior.
+No known broken Markdown links, obsolete sprint locations, or active package/tool-version drift remains after the repository audit. The implementation plan distinguishes demonstrated Sprint 1–4 work from remaining Milestone 3A targets.
 
 ## Next Sprint
 

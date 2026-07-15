@@ -11,7 +11,7 @@
 
 This document is the official implementation specification for Sprint 3. It narrows the broader foundation-package plan in `docs/20_IMPLEMENTATION_PLAN.md` according to the immediate-consumer and deferral decisions in `docs/21_ARCHITECTURE_SIGNOFF.md`.
 
-Creation of this specification does not authorize implementation. Sprint 3 implementation requires a separate explicit instruction.
+Sprint 3 was separately authorized and completed. Implementation evidence is recorded in `docs/sprints/SPRINT3_REPORT.md`.
 
 # Sprint Goal
 

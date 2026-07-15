@@ -27,12 +27,12 @@ The canonical Sprint 3 specification is located at `docs/sprints/SPRINT3_SPECIFI
 
 ## Remaining Documentation Drift
 
-- `docs/14_MONOREPO.md` still references an ESLint configuration package, while the approved bootstrap selects Biome plus dependency-cruiser.
+- At completion of this alignment task, `docs/14_MONOREPO.md` still referenced an ESLint configuration package while the approved bootstrap selected Biome plus dependency-cruiser.
 
-This pre-existing architecture-document drift was not changed because it was outside the explicitly authorized alignment.
+That historical drift was resolved during Sprint 4. See `docs/sprints/SPRINT4_REPORT.md` and the current `docs/14_MONOREPO.md`.
 
 ## Code Change Confirmation
 
 No source code, application configuration, package manifest, lockfile, build configuration, or runtime behavior was modified. All changes in this task are Markdown documentation only.
 
-Sprint 4 was not started.
+Sprint 4 had not started at the time of this report.

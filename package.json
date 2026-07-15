@@ -1,0 +1,21 @@
+{
+  "name": "ai-fsa",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Evidence-first AI football analysis platform",
+  "packageManager": "pnpm@11.13.0",
+  "engines": {
+    "node": "24.18.0",
+    "pnpm": "11.13.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "tsc --showConfig --project tsconfig.base.json",
+    "workspace:check": "node scripts/validate-workspace.mjs && pnpm --recursive list --depth -1",
+    "validate": "pnpm workspace:check && pnpm typecheck && pnpm build"
+  },
+  "devDependencies": {
+    "turbo": "2.10.5",
+    "typescript": "7.0.2"
+  }
+}

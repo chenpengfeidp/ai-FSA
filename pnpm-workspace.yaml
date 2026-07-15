@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+minimumReleaseAge: 1440
+
+minimumReleaseAgeExclude:
+  - "turbo@2.10.5"
+  - "typescript@7.0.2"

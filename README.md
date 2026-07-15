@@ -1,6 +1,29 @@
 # Football Analysis System (FAS)
 
-FAS is an evidence-based, reviewable football analysis platform. This repository currently contains architecture documentation only; there is no application code yet. V1 has no user or authentication system, so public deployment is prohibited.
+FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, and the shared `@fas/tsconfig` package.
+
+No football-domain, AI-engine, database, authentication, or production behavior is implemented. V1 has no user or authentication system, so public deployment is prohibited.
+
+## Current Delivery State
+
+Read [AGENTS](AGENTS.md) first for repository-wide collaboration rules, then [PROJECT_STATE](docs/PROJECT_STATE.md) for the current milestone, completed sprints, constraints, and next approved step.
+
+## Repository Commands
+
+Run commands from the repository root with Node.js `24.18.0` and pnpm `11.13.0`.
+
+```bash
+pnpm install --frozen-lockfile
+pnpm format:check
+pnpm lint
+pnpm boundaries
+pnpm quality
+pnpm typecheck
+pnpm build
+pnpm validate
+```
+
+`pnpm format` is the explicit writing formatter command. Local pre-commit checks use Husky and lint-staged to run Biome only on supported staged files.
 
 ## Reading Order
 
@@ -26,6 +49,8 @@ Read the numbered documents in order:
 18. [17_ANALYSIS_PIPELINE](docs/17_ANALYSIS_PIPELINE.md)
 19. [18_BACKEND_ARCHITECTURE](docs/18_BACKEND_ARCHITECTURE.md)
 20. [19_DATABASE_ERD](docs/19_DATABASE_ERD.md)
+21. [20_IMPLEMENTATION_PLAN](docs/20_IMPLEMENTATION_PLAN.md)
+22. [21_ARCHITECTURE_SIGNOFF](docs/21_ARCHITECTURE_SIGNOFF.md)
 
 ## Mandatory Paths by Change
 
@@ -34,7 +59,7 @@ Read the numbered documents in order:
 - **Analysis workflow:** read 00, 02 through 11, 13, and 17.
 - **Data or API:** read 00, 02, 04, 12, 13, 19, and the owning engine document.
 - **Backend implementation:** read 00, 02, 04, 12 through 19, and the relevant engine documents.
-- **Delivery or repository structure:** read 00, 04, 14 through 16, and 18.
+- **Delivery or repository structure:** read 00, 04, 14 through 16, 18, 20, and 21.
 - **Architecture decision changes:** read 00, 04, 14, 15, and all applicable ADRs; add or supersede an ADR when the decision changes.
 
 ## Architecture Decision Records

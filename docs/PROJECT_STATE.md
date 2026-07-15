@@ -7,8 +7,8 @@
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
 - Current task status: Complete
 - Current sprint: No implementation sprint active
-- Last completed sprint: Sprint 3 — Platform Foundation
-- Next sprint: Sprint 4, not started and not authorized
+- Last completed sprint: Sprint 4 — Engineering Quality Foundation
+- Next sprint: Sprint 5, not started and not authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -23,7 +23,10 @@ The repository contains:
 - a minimal NestJS API application;
 - a minimal Next.js web application;
 - a minimal standalone NestJS worker;
-- workspace validation, typechecking, build, and development commands;
+- Biome formatting and source linting;
+- dependency-cruiser boundary enforcement with a controlled negative test;
+- guarded Husky and lint-staged pre-commit checks;
+- unified workspace, quality, typecheck, and build validation commands;
 - architecture documents, ADRs, sprint reports, and AI-agent governance.
 
 The API currently exposes only:
@@ -45,6 +48,10 @@ No football-domain, AI-engine, database, authentication, durable-job, or busines
 - pnpm: `11.13.0`
 - Turborepo: `2.10.5`
 - TypeScript: `6.0.3`
+- Biome: `2.5.3`
+- dependency-cruiser: `18.1.0`
+- Husky: `9.1.7`
+- lint-staged: `17.0.8`
 - Next.js: `16.2.10`
 - React / React DOM: `19.2.7`
 - NestJS: `11.1.28`
@@ -61,6 +68,7 @@ TypeScript 6 is the approved compatibility fallback. TypeScript 7.0.2 failed bec
 - Milestone 3A Sprint 2 — Application Skeleton: complete.
 - Milestone 3A.5 — AI Collaboration Governance: complete.
 - Milestone 3A Sprint 3 — Platform Foundation: complete.
+- Milestone 3A Sprint 4 — Engineering Quality Foundation: complete.
 
 Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation work remains.
 
@@ -89,6 +97,16 @@ Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation
 - Added no executable package code or application-source changes.
 - Evidence: `docs/sprints/SPRINT3_REPORT.md`.
 
+### Sprint 4 — Engineering Quality Foundation
+
+- Added Biome as the single formatter and source linter.
+- Added dependency-cruiser rules for cycles, package-to-app, and cross-application imports.
+- Added an executable controlled boundary-failure proof.
+- Added guarded Husky and staged-only lint-staged checks.
+- Unified workspace, quality, typecheck, and build validation.
+- Added no application-source or runtime behavior changes.
+- Evidence: `docs/sprints/SPRINT4_REPORT.md`.
+
 ## Architecture Status
 
 Architecture direction is **approved with conditions**.
@@ -107,7 +125,7 @@ The following principles remain binding:
 - append-only match-result versions;
 - executable acceptance evidence.
 
-Open Milestone 3A conditions include quality tooling, boundary enforcement, tests, Prisma no-model bootstrap, container strategy and acceptance, deterministic smoke testing, security gates, CI, and documentation alignment.
+Open Milestone 3A conditions include tests, Prisma no-model bootstrap, container strategy and acceptance, deterministic smoke testing, security gates, and CI.
 
 ## Approved Documents
 
@@ -125,6 +143,7 @@ Open Milestone 3A conditions include quality tooling, boundary enforcement, test
 - `docs/20_IMPLEMENTATION_PLAN.md`
 - `docs/21_ARCHITECTURE_SIGNOFF.md`
 - `docs/SPRINT3_SPECIFICATION.md`
+- `docs/sprints/SPRINT4_SPECIFICATION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
 
@@ -136,6 +155,7 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/22_SPRINT1_REPORT.md`
 - `docs/sprints/SPRINT2_REPORT.md`
 - `docs/sprints/SPRINT3_REPORT.md`
+- `docs/sprints/SPRINT4_REPORT.md`
 - `docs/sprints/GOVERNANCE_FOUNDATION_REPORT.md`
 
 Sprint reports are evidence records, not replacements for canonical architecture.
@@ -155,21 +175,15 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - The worker must not use a fake persistence loop before durable work exists.
 - Sprint boundaries require separate approval.
 
-## Known Documentation Alignment Work
+## Known Documentation Drift
 
-The following pre-existing documents are not changed by Milestone 3A.5:
-
-- `README.md` still describes the repository as architecture-only and does not list documents 20 and 21.
-- `docs/14_MONOREPO.md` still references an ESLint configuration package, while the approved bootstrap selects Biome plus dependency-cruiser.
-- `docs/20_IMPLEMENTATION_PLAN.md` still lists TypeScript 7.0.2 and `packages/typescript-config`; implementation uses the approved TypeScript 6.0.3 fallback and the Sprint 3-approved `packages/tsconfig` refinement.
-
-These are explicit alignment items for a separately authorized documentation or implementation change. They must not be treated as current runtime truth.
+No known engineering-quality documentation drift remains after Sprint 4. Future implementation must continue to distinguish the target architecture from demonstrated repository behavior.
 
 ## Next Sprint
 
-Sprint 4 has not been approved or scoped.
+Sprint 5 has not been approved or scoped.
 
-Before Sprint 4:
+Before Sprint 5:
 
 1. define its exact goal, allowed files, exclusions, and acceptance criteria;
 2. read `AGENTS.md`, this state file, the Project Bible, implementation plan, and architecture sign-off;

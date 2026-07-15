@@ -177,7 +177,7 @@ football-analysis-system/
 │   │   │   └── index.ts
 │   │   ├── package.json
 │   │   └── tsconfig.json
-│   └── typescript-config/
+│   └── tsconfig/
 │       ├── base.json
 │       ├── nest.json
 │       ├── next.json
@@ -237,9 +237,9 @@ Owns provider-neutral durable-job contracts. The bootstrap defines only stable j
 
 Owns structured logging, correlation identifiers, redaction defaults, and future metrics/tracing adapters. Domain packages must not import telemetry SDKs.
 
-### `packages/typescript-config`
+### `packages/tsconfig`
 
-Owns reusable strict compiler configurations for pure Node packages, NestJS applications, and Next.js.
+`@fas/tsconfig` owns reusable strict compiler configurations for pure Node packages, NestJS applications, and Next.js.
 
 ### `packages/test-utils`
 
@@ -252,7 +252,7 @@ Owns cross-package deterministic test utilities with at least two real consumers
 - Node.js: `24.18.0` LTS
 - pnpm: `11.13.0`
 - Turborepo: `2.10.5`
-- TypeScript: `7.0.2`, subject to the compatibility gate below
+- TypeScript: `6.0.3`, the approved compatibility baseline
 - Biome: `2.5.3`
 - Husky: `9.1.7`
 - dependency-cruiser: `18.1.0`
@@ -260,7 +260,9 @@ Owns cross-package deterministic test utilities with at least two real consumers
 
 Node 24 satisfies the minimum runtime requirements of Next.js 16, NestJS 11, Prisma 7, pnpm 11, Vitest 4, and dependency-cruiser 18.
 
-TypeScript 7 is accepted only if the clean bootstrap passes:
+TypeScript `6.0.3` is the approved baseline after the previously proposed compiler failed the NestJS CLI compatibility gate because it did not expose the required programmatic compiler API.
+
+The clean bootstrap compatibility gate still verifies:
 
 - NestJS decorator compilation;
 - Next.js production build;
@@ -268,7 +270,7 @@ TypeScript 7 is accepted only if the clean bootstrap passes:
 - Vitest execution;
 - declaration generation for shared packages.
 
-If compatibility fails, the implementation must select the latest mutually supported TypeScript 6 release, record the reason in the pull request, and update this document before merge.
+Any future TypeScript version change requires recorded compatibility evidence and an update to this document before merge.
 
 ### 6.2 Web Dependencies
 
@@ -353,7 +355,7 @@ Exit gate: pnpm lists every intended workspace and rejects unsupported runtime v
 2. Add Node, NestJS, and Next.js variants.
 3. Configure project boundaries and declaration output for shared packages.
 4. Avoid path aliases that bypass package export maps.
-5. Validate TypeScript 7 compatibility before proceeding.
+5. Validate the approved TypeScript `6.0.3` baseline before proceeding.
 
 Exit gate: a minimal pure package, API shell, worker shell, and web shell typecheck with the same compiler.
 
@@ -382,7 +384,7 @@ Exit gate: an intentionally forbidden import fails boundary validation.
 
 Create packages in dependency order:
 
-1. `typescript-config`;
+1. `@fas/tsconfig`;
 2. `domain`;
 3. `api-contracts`;
 4. `config`;
@@ -522,11 +524,11 @@ apps/web/src/app/globals.css
 Create:
 
 ```text
-packages/typescript-config/package.json
-packages/typescript-config/base.json
-packages/typescript-config/node.json
-packages/typescript-config/nest.json
-packages/typescript-config/next.json
+packages/tsconfig/package.json
+packages/tsconfig/base.json
+packages/tsconfig/node.json
+packages/tsconfig/nest.json
+packages/tsconfig/next.json
 
 packages/domain/package.json
 packages/domain/tsconfig.json
@@ -604,11 +606,11 @@ Risk: implementation may be mistaken for canonical M3 Knowledge Engine work.
 
 Mitigation: branch, PR, and release notes use “Repository Bootstrap / v0.1 Foundation,” with “3A” only as the external delivery label.
 
-### 9.2 TypeScript 7 Compatibility
+### 9.2 TypeScript Compatibility
 
-Risk: NestJS decorators, Prisma generation, Next.js, or test tooling may not yet support the selected compiler fully.
+Risk: Prisma generation, Next.js, or test tooling may expose incompatibilities with the approved TypeScript `6.0.3` baseline as the bootstrap expands.
 
-Mitigation: run the compatibility gate before package expansion. Fall back only to the latest compatible TypeScript 6 release and document the constraint.
+Mitigation: retain TypeScript `6.0.3` and run the compatibility gate before each affected package expansion. Any compiler change requires recorded evidence and document alignment.
 
 ### 9.3 Prisma 7 Configuration
 
@@ -760,7 +762,7 @@ Each commit should keep the repository installable or clearly identify a short-l
 
 - Revert the dependency-specific commit and lockfile together.
 - Do not hand-edit the lockfile.
-- If TypeScript 7 fails compatibility, update the exact TypeScript pin, regenerate the lockfile, and rerun the full matrix.
+- If TypeScript `6.0.3` fails compatibility with a newly introduced bootstrap tool, stop, record the evidence, update the approved exact pin and this document, regenerate the lockfile, and rerun the full matrix.
 - If Prisma 7 blocks the bootstrap, stop and document the incompatibility before considering Prisma 6; do not mix Prisma major versions.
 
 ### 11.3 Configuration Rollback

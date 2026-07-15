@@ -7,7 +7,7 @@
 - Sprint: 3
 - Theme: Platform Foundation
 - Specification status: Complete
-- Implementation status: Not started
+- Implementation status: Completed
 
 This document is the official implementation specification for Sprint 3. It narrows the broader foundation-package plan in `docs/20_IMPLEMENTATION_PLAN.md` according to the immediate-consumer and deferral decisions in `docs/21_ARCHITECTURE_SIGNOFF.md`.
 

@@ -41,13 +41,15 @@ football-analysis-system/
 │   ├── observability/               # Logging, metrics, tracing, correlation
 │   ├── config/                      # Typed runtime configuration
 │   ├── ui/                          # Shared presentational React components
-│   ├── eslint-config/               # Shared lint and dependency-boundary rules
-│   ├── typescript-config/           # Shared tsconfig bases
+│   ├── tsconfig/                    # Shared TypeScript compiler policy
 │   └── test-utils/                  # Test builders and infrastructure harnesses
 ├── tooling/
+│   ├── dependency-cruiser/          # Controlled architecture-rule fixtures
 │   ├── scripts/                     # Repository maintenance scripts
 │   └── docker/                      # Container entrypoints/configuration
 ├── docs/                            # Product and architecture source of truth
+├── biome.json                       # Formatting and source-lint policy
+├── dependency-cruiser.config.cjs    # Dependency-direction policy
 ├── compose.yaml                     # Local and v1 deployment topology
 ├── pnpm-workspace.yaml
 ├── turbo.json
@@ -235,7 +237,9 @@ Test builders, clocks, deterministic IDs, fake repositories/providers, database 
 
 #### Configuration packages
 
-`eslint-config` and `typescript-config` centralize strict compiler settings, import boundaries, formatting, and framework variants. Applications extend these configurations rather than copying them.
+`@fas/tsconfig` centralizes strict compiler settings and framework variants. Applications extend its explicit exports rather than copying shared compiler policy.
+
+Formatting and source linting are repository-level concerns owned by root `biome.json`. Dependency direction is a separate graph-level concern owned by root `dependency-cruiser.config.cjs`. No ESLint configuration package or parallel formatter/linter authority is approved.
 
 ## 5. Internal Package Shape
 
@@ -327,9 +331,18 @@ Tasks:
 
 Secrets and `.env` files must not be cache inputs that can enter remote cache artifacts.
 
+### Engineering Quality
+
+- Biome is the single formatter and source linter.
+- dependency-cruiser enforces dependency direction and circular-dependency rules.
+- A controlled fixture proves that a forbidden dependency is rejected.
+- Husky invokes lint-staged at pre-commit for supported staged files only.
+- Local hooks are a fast convenience; the root `validate` command remains authoritative.
+- Full validation runs workspace checks, quality checks, typechecking, and builds without writing files.
+
 ## 9. Boundary Enforcement
 
-CI and lint rules should enforce:
+dependency-cruiser and later architecture tests should enforce:
 
 - package dependency allowlists/tags;
 - no `@prisma/client` imports outside `@fas/database`;

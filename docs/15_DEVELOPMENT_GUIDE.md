@@ -27,6 +27,27 @@ When speed conflicts with evidence traceability, reproducibility, or architectur
 
 Use pnpm only. Do not generate or commit npm/yarn lockfiles. Install and run workspace commands from the repository root unless a package guide says otherwise.
 
+### 3.1 Repository Quality Commands
+
+The current repository uses Biome as its only formatter and source linter. dependency-cruiser owns dependency-direction checks; it does not duplicate Biome.
+
+Run:
+
+```bash
+pnpm format         # write formatting changes explicitly
+pnpm format:check   # check formatting without writing
+pnpm lint           # run source linting without writing
+pnpm check          # run the combined non-writing Biome check
+pnpm boundaries     # validate the current dependency graph
+pnpm boundaries:test # prove a controlled forbidden import is rejected
+pnpm quality        # run Biome and both boundary checks
+pnpm validate       # workspace, quality, typecheck, and build validation
+```
+
+Husky invokes lint-staged before local commits. The hook runs Biome only against supported staged files; it does not run repository-wide typecheck, build, or boundary validation. Set `HUSKY=0` in CI and production-only/container dependency stages.
+
+Local hooks provide fast feedback. They are not a substitute for the non-writing root validation pipeline.
+
 ## 4. Local Environment
 
 The target M1 workflow is:
@@ -211,8 +232,8 @@ AI output cannot approve rules, knowledge, cases, analyses, reviews, or learning
 
 Before merge, affected work must pass:
 
-- formatting check;
-- lint and architecture-boundary checks;
+- `pnpm format:check`;
+- `pnpm lint` and `pnpm boundaries`;
 - TypeScript typecheck;
 - unit tests;
 - relevant integration and contract tests;

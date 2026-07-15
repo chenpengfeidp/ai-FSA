@@ -35,7 +35,7 @@ Sprint 1 established the repository foundation without creating application code
 
 ### Sprint Documentation
 
-- `docs/22_SPRINT1_REPORT.md`
+- `docs/sprints/SPRINT1_REPORT.md`
 
 ## 3. Files Modified
 

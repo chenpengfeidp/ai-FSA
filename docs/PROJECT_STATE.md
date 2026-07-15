@@ -79,7 +79,7 @@ Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation
 - Created root workspace configuration and tracked foundation directories.
 - Added workspace validation.
 - Introduced no application code.
-- Evidence: `docs/22_SPRINT1_REPORT.md`.
+- Evidence: `docs/sprints/SPRINT1_REPORT.md`.
 
 ### Sprint 2 — Application Skeleton
 
@@ -142,7 +142,7 @@ Open Milestone 3A conditions include tests, Prisma no-model bootstrap, container
 
 - `docs/20_IMPLEMENTATION_PLAN.md`
 - `docs/21_ARCHITECTURE_SIGNOFF.md`
-- `docs/SPRINT3_SPECIFICATION.md`
+- `docs/sprints/SPRINT3_SPECIFICATION.md`
 - `docs/sprints/SPRINT4_SPECIFICATION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
@@ -152,7 +152,7 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `AGENTS.md`
 - `docs/DEVELOPMENT_WORKFLOW.md`
 - `docs/PROJECT_STATE.md`
-- `docs/22_SPRINT1_REPORT.md`
+- `docs/sprints/SPRINT1_REPORT.md`
 - `docs/sprints/SPRINT2_REPORT.md`
 - `docs/sprints/SPRINT3_REPORT.md`
 - `docs/sprints/SPRINT4_REPORT.md`

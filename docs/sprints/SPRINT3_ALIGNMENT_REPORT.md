@@ -7,12 +7,12 @@ Completed. This task aligned documentation with the reviewed Sprint 3 repository
 ## Documents Updated
 
 - `docs/20_IMPLEMENTATION_PLAN.md`
-- `docs/SPRINT3_SPECIFICATION.md`
+- `docs/sprints/SPRINT3_SPECIFICATION.md`
 - `README.md`
 - `docs/PROJECT_STATE.md`
 - `docs/sprints/SPRINT3_ALIGNMENT_REPORT.md` (created)
 
-The canonical Sprint 3 specification is located at `docs/SPRINT3_SPECIFICATION.md`; no duplicate was created under `docs/sprints/`.
+The canonical Sprint 3 specification is located at `docs/sprints/SPRINT3_SPECIFICATION.md`.
 
 ## Alignment Performed
 

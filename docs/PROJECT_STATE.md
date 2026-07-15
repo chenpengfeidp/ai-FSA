@@ -5,10 +5,10 @@
 - Last updated: 2026-07-15
 - Current delivery milestone: Milestone 3A — Repository Bootstrap
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
-- Current task status: Last authorized sprint complete; no implementation sprint active
+- Current task status: Final Milestone 3A gate review complete; no implementation sprint active
 - Current sprint: No implementation sprint active
 - Last completed sprint: Sprint 5 — Configuration Foundation
-- Next sprint: Sprint 6, not started and not authorized
+- Next sprint: Sprint 6, specified and architecture-ready but not authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -128,6 +128,8 @@ Architecture direction is **approved with conditions**.
 
 The governing implementation gate is `docs/21_ARCHITECTURE_SIGNOFF.md`. The requested path `docs/21_IMPLEMENTATION_GATE.md` does not exist; the architecture sign-off is the accepted gate authority for this governance milestone.
 
+`docs/22_MILESTONE_3A_GATE.md` records the post-Sprint 5 recommendation `READY FOR SPRINT 6`. This is an architecture-readiness decision, not implementation authorization.
+
 The following principles remain binding:
 
 - evidence before assumption;
@@ -174,6 +176,8 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT3_ALIGNMENT_REPORT.md`
 - `docs/sprints/SPRINT4_REPORT.md`
 - `docs/sprints/SPRINT5_REPORT.md`
+- `docs/22_MILESTONE_3A_GATE.md`
+- `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`
 - `docs/sprints/GOVERNANCE_FOUNDATION_REPORT.md`
 - `docs/sprints/REPOSITORY_AUDIT_REPORT.md`
 
@@ -204,15 +208,15 @@ No known broken Markdown links, obsolete sprint locations, or active package/too
 
 ## Next Sprint
 
-Sprint 6 has not been approved or scoped.
+Sprint 6 is scoped by `docs/sprints/SPRINT6_SPECIFICATION.md` and is architecture-ready. It has not received explicit implementation authorization.
 
 Before Sprint 6:
 
-1. define its exact goal, allowed files, exclusions, and acceptance criteria;
-2. read `AGENTS.md`, this state file, the Project Bible, implementation plan, and architecture sign-off;
-3. select only the next cohesive Milestone 3A capability;
-4. resolve any applicable must-fix condition before affected implementation;
-5. stop if the work would introduce business or AI-engine behavior.
+1. review and track the Sprint 6 specification and final gate report;
+2. obtain separate explicit implementation authorization;
+3. read `AGENTS.md`, this state file, the Project Bible, implementation plan, architecture sign-off, and final gate report;
+4. use only the Sprint 6 allowlist, validation commands, acceptance criteria, and stop boundary;
+5. stop if the work would introduce any excluded capability or continue into Sprint 7.
 
 ## Future Roadmap
 

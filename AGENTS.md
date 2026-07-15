@@ -236,7 +236,7 @@ Then read by change type:
 - data or API: `02`, `04`, `12`, `13`, `19`, and the owning engine document;
 - backend work: `02`, `04`, `12` through `19`, and affected engine documents;
 - analysis workflow: `02` through `11`, `13`, and `17`;
-- repository or delivery work: `04`, `14` through `16`, `18`, `20`, and the implementation gate/sign-off;
+- repository or delivery work: `04`, `14` through `16`, `18`, and `20` through `22`;
 - architecture decisions: all affected canonical documents and records in `docs/decisions/`.
 
 Read sprint reports for historical evidence, not as replacements for canonical contracts.

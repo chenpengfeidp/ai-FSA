@@ -62,6 +62,7 @@ Read the numbered documents in order:
 20. [19_DATABASE_ERD](docs/19_DATABASE_ERD.md)
 21. [20_IMPLEMENTATION_PLAN](docs/20_IMPLEMENTATION_PLAN.md)
 22. [21_ARCHITECTURE_SIGNOFF](docs/21_ARCHITECTURE_SIGNOFF.md)
+23. [22_MILESTONE_3A_GATE](docs/22_MILESTONE_3A_GATE.md)
 
 ## Mandatory Paths by Change
 
@@ -70,7 +71,7 @@ Read the numbered documents in order:
 - **Analysis workflow:** read 00, 02 through 11, 13, and 17.
 - **Data or API:** read 00, 02, 04, 12, 13, 19, and the owning engine document.
 - **Backend implementation:** read 00, 02, 04, 12 through 19, and the relevant engine documents.
-- **Delivery or repository structure:** read 00, 04, 14 through 16, 18, 20, and 21.
+- **Delivery or repository structure:** read 00, 04, 14 through 16, 18, and 20 through 22.
 - **Architecture decision changes:** read 00, 04, 14, 15, and all applicable ADRs; add or supersede an ADR when the decision changes.
 
 ## Architecture Decision Records

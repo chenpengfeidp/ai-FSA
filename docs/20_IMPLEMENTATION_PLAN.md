@@ -780,9 +780,9 @@ When implemented, acceptance requires:
 
 ## 11. Rollback Strategy
 
-### 11.1 Commit Structure
+### 11.1 Review Structure
 
-Implementation should be split into reviewable commits:
+Implementation should be split into reviewable branch-local commits or independently merged pull-request slices:
 
 1. root workspace and runtime pins;
 2. TypeScript, Turbo, Biome, and boundary tooling;
@@ -793,11 +793,13 @@ Implementation should be split into reviewable commits:
 7. containers;
 8. CI, hooks, and documentation.
 
-Each commit should keep the repository installable or clearly identify a short-lived setup boundary within the same pull request.
+Each review slice should keep the repository installable or clearly identify a short-lived setup boundary within the same pull request.
+
+Post-merge rollback uses a whole-pull-request revert or reverts an independently merged slice. Branch-local commits are review aids and must not be treated as guaranteed post-merge rollback units under the default squash-merge workflow.
 
 ### 11.2 Dependency Rollback
 
-- Revert the dependency-specific commit and lockfile together.
+- Revert the whole merged pull request or independently merged dependency slice with its lockfile change.
 - Do not hand-edit the lockfile.
 - If TypeScript `6.0.3` fails compatibility with a newly introduced bootstrap tool, stop, record the evidence, update the approved exact pin and this document, regenerate the lockfile, and rerun the full matrix.
 - If Prisma 7 blocks the bootstrap, stop and document the incompatibility before considering Prisma 6; do not mix Prisma major versions.
@@ -824,7 +826,7 @@ If acceptance gates cannot be met without violating architecture:
 
 1. stop implementation;
 2. preserve diagnostics;
-3. revert the smallest affected commit;
+3. revert the whole pull request or the smallest independently merged slice;
 4. update the owning architecture document or create an ADR;
 5. obtain approval before retrying.
 

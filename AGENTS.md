@@ -236,8 +236,14 @@ Then read by change type:
 - data or API: `02`, `04`, `12`, `13`, `19`, and the owning engine document;
 - backend work: `02`, `04`, `12` through `19`, and affected engine documents;
 - analysis workflow: `02` through `11`, `13`, and `17`;
-- repository or delivery work: `04`, `14` through `16`, `18`, and `20` through `22`;
+- repository or delivery work: `04`, `14` through `16`, `18`, `20` through `23`, and the applicable current milestone governance listed below;
 - architecture decisions: all affected canonical documents and records in `docs/decisions/`.
+
+For current Milestone 3A and Sprint 6 delivery work, also read:
+
+- `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`;
+- `docs/sprints/SPRINT6_SPECIFICATION.md`;
+- `docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md`.
 
 Read sprint reports for historical evidence, not as replacements for canonical contracts.
 

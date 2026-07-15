@@ -162,6 +162,7 @@ Open Milestone 3A conditions include explicit unsupported-runtime and package-ma
 - `docs/sprints/SPRINT3_SPECIFICATION.md`
 - `docs/sprints/SPRINT4_SPECIFICATION.md`
 - `docs/sprints/SPRINT5_SPECIFICATION.md`
+- `docs/sprints/SPRINT6_SPECIFICATION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
 
@@ -177,7 +178,9 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT4_REPORT.md`
 - `docs/sprints/SPRINT5_REPORT.md`
 - `docs/22_MILESTONE_3A_GATE.md`
+- `docs/23_RELEASE_BASELINE.md`
 - `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`
+- `docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md`
 - `docs/sprints/GOVERNANCE_FOUNDATION_REPORT.md`
 - `docs/sprints/REPOSITORY_AUDIT_REPORT.md`
 

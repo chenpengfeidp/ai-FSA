@@ -63,6 +63,13 @@ Read the numbered documents in order:
 21. [20_IMPLEMENTATION_PLAN](docs/20_IMPLEMENTATION_PLAN.md)
 22. [21_ARCHITECTURE_SIGNOFF](docs/21_ARCHITECTURE_SIGNOFF.md)
 23. [22_MILESTONE_3A_GATE](docs/22_MILESTONE_3A_GATE.md)
+24. [23_RELEASE_BASELINE](docs/23_RELEASE_BASELINE.md)
+
+Current Milestone 3A delivery governance:
+
+- [Final Milestone 3A Gate Review](docs/sprints/MILESTONE_3A_GATE_REVIEW.md)
+- [Sprint 6 Specification](docs/sprints/SPRINT6_SPECIFICATION.md)
+- [Final Repository Health Report](docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md)
 
 ## Mandatory Paths by Change
 
@@ -71,7 +78,7 @@ Read the numbered documents in order:
 - **Analysis workflow:** read 00, 02 through 11, 13, and 17.
 - **Data or API:** read 00, 02, 04, 12, 13, 19, and the owning engine document.
 - **Backend implementation:** read 00, 02, 04, 12 through 19, and the relevant engine documents.
-- **Delivery or repository structure:** read 00, 04, 14 through 16, 18, and 20 through 22.
+- **Delivery or repository structure:** read 00, 04, 14 through 16, 18, 20 through 23, and the current milestone delivery-governance documents above.
 - **Architecture decision changes:** read 00, 04, 14, 15, and all applicable ADRs; add or supersede an ADR when the decision changes.
 
 ## Architecture Decision Records

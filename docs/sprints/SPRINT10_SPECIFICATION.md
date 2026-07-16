@@ -535,10 +535,15 @@ compose() {
   docker compose --file compose.yaml --env-file /dev/null "$@"
 }
 
-CONFIG_JSON="$(mktemp "${TMPDIR:-/tmp}/fas-sprint10-compose.XXXXXX.json")"
+DEFAULT_CONFIG_JSON="$(
+  mktemp "${TMPDIR:-/tmp}/fas-sprint10-compose-default.XXXXXX.json"
+)"
+PROFILED_CONFIG_JSON="$(
+  mktemp "${TMPDIR:-/tmp}/fas-sprint10-compose-profiled.XXXXXX.json"
+)"
 
 cleanup_config() {
-  rm -f "$CONFIG_JSON"
+  rm -f "$DEFAULT_CONFIG_JSON" "$PROFILED_CONFIG_JSON"
 }
 trap cleanup_config EXIT INT TERM
 
@@ -586,14 +591,17 @@ for (const [key, value] of entries) {
 NODE
 
 compose config --quiet
-compose config --format json >"$CONFIG_JSON"
+compose config --format json >"$DEFAULT_CONFIG_JSON"
+compose --profile worker config --quiet
+compose --profile worker config --format json >"$PROFILED_CONFIG_JSON"
 
-node --input-type=module - "$CONFIG_JSON" <<'NODE'
+node --input-type=module \
+  - "$DEFAULT_CONFIG_JSON" "$PROFILED_CONFIG_JSON" <<'NODE'
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const configPath = process.argv[2];
-const config = JSON.parse(readFileSync(configPath, "utf8"));
+const defaultConfig = JSON.parse(readFileSync(process.argv[2], "utf8"));
+const config = JSON.parse(readFileSync(process.argv[3], "utf8"));
 
 function assert(condition, message) {
   if (!condition) {
@@ -601,11 +609,19 @@ function assert(condition, message) {
   }
 }
 
+const expectedDefaultServices = ["api", "postgres", "web"];
+const actualDefaultServices = Object.keys(defaultConfig.services ?? {}).sort();
+assert(
+  JSON.stringify(actualDefaultServices) ===
+    JSON.stringify(expectedDefaultServices),
+  `Unexpected default services: ${actualDefaultServices.join(", ")}`,
+);
+
 const expectedServices = ["api", "postgres", "web", "worker"];
 const actualServices = Object.keys(config.services ?? {}).sort();
 assert(
   JSON.stringify(actualServices) === JSON.stringify(expectedServices),
-  `Unexpected services: ${actualServices.join(", ")}`,
+  `Unexpected worker-profile services: ${actualServices.join(", ")}`,
 );
 
 const { api, postgres, web, worker } = config.services;
@@ -784,15 +800,22 @@ NODE
 
 cleanup_config
 trap - EXIT INT TERM
-test ! -e "$CONFIG_JSON"
+test ! -e "$DEFAULT_CONFIG_JSON"
+test ! -e "$PROFILED_CONFIG_JSON"
 ```
 
-Required result: the normalized configuration proves the exact topology,
-private network, profile, volume, build ownership, loopback bindings,
-PostgreSQL non-publication, exact `pg_isready` health contract,
-migration/database-consumer boundaries, and the exact `.env.example` contract.
-Explicit `--file` and `--env-file` arguments make this evidence independent of
-an ignored local `.env` or alternate Compose-file selection.
+Required result:
+
+- default normalized configuration contains exactly `api`, `postgres`, and
+  `web`;
+- worker-profile normalized configuration contains exactly `api`, `postgres`,
+  `web`, and `worker`;
+- the two configurations prove the exact topology, private network, profile,
+  volume, build ownership, loopback bindings, PostgreSQL non-publication, exact
+  `pg_isready` health contract, migration/database-consumer boundaries, and the
+  exact `.env.example` contract;
+- explicit `--file` and `--env-file` arguments make this evidence independent
+  of an ignored local `.env` or alternate Compose-file selection.
 
 ### 4. Compose Build and Runtime Evidence
 

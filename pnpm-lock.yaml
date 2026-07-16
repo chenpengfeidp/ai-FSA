@@ -63,6 +63,9 @@ importers:
       '@types/node':
         specifier: 24.13.3
         version: 24.13.3
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
 
   apps/web:
     dependencies:
@@ -119,6 +122,9 @@ importers:
       '@types/node':
         specifier: 24.13.3
         version: 24.13.3
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
 
   packages/config:
     dependencies:
@@ -129,6 +135,9 @@ importers:
       '@fas/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
 
   packages/tsconfig: {}
 

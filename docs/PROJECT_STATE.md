@@ -2,12 +2,12 @@
 
 ## Snapshot
 
-- Last updated: 2026-07-15
+- Last updated: 2026-07-16
 - Current delivery milestone: Milestone 3A — Repository Bootstrap
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
-- Current task status: Sprint 6 implementation complete; no implementation sprint active
+- Current task status: Sprint 7 implementation complete; no implementation sprint active
 - Current sprint: No implementation sprint active
-- Last completed sprint: Sprint 6 — Toolchain Enforcement
+- Last completed sprint: Sprint 7 — TypeScript Compiler Baseline Alignment
 - Next sprint: Not specified and not authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
@@ -30,6 +30,7 @@ The repository contains:
 - focused Vitest configuration-contract tests;
 - pnpm-native exact Node.js and package-manager rejection;
 - repository-owned toolchain diagnostics and 15 controlled enforcement tests;
+- explicit TypeScript `6.0.3` ownership for every implemented workspace that invokes `tsc`;
 - unified toolchain, workspace, quality, typecheck, test, and build validation commands;
 - architecture documents, ADRs, sprint reports, and AI-agent governance.
 
@@ -62,7 +63,7 @@ No football-domain, AI-engine, database, authentication, durable-job, or busines
 - React / React DOM: `19.2.7`
 - NestJS: `11.1.28`
 
-TypeScript 6 is the approved compatibility fallback. TypeScript 7.0.2 failed because Nest CLI 11 requires a programmatic compiler API that TypeScript 7.0 does not expose.
+TypeScript 6.0.3 is the approved compiler baseline. TypeScript 7.0.2 failed because Nest CLI 11 requires a programmatic compiler API that TypeScript 7.0 does not expose.
 
 ## Completed Milestones and Gates
 
@@ -77,6 +78,7 @@ TypeScript 6 is the approved compatibility fallback. TypeScript 7.0.2 failed bec
 - Milestone 3A Sprint 4 — Engineering Quality Foundation: complete.
 - Milestone 3A Sprint 5 — Configuration Foundation: complete.
 - Milestone 3A Sprint 6 — Toolchain Enforcement: complete.
+- Milestone 3A Sprint 7 — TypeScript Compiler Baseline Alignment: complete.
 
 Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation work remains.
 
@@ -134,6 +136,14 @@ Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation
 - Added no dependency, lockfile, application, shared-package, architecture, ADR, or Sprint 7 change.
 - Evidence: `docs/sprints/SPRINT6_REPORT.md`.
 
+### Sprint 7 — TypeScript Compiler Baseline Alignment
+
+- Added explicit TypeScript `6.0.3` development ownership to API, worker, and configuration manifests.
+- Aligned all root and workspace-owned compiler entry points on TypeScript `6.0.3`.
+- Preserved the NestJS CLI's internal transitive TypeScript `5.9.3` without an override.
+- Added no source, script, compiler-policy, application-behavior, architecture, ADR, or Sprint 8 change.
+- Evidence: `docs/sprints/SPRINT7_REPORT.md`.
+
 ## Architecture Status
 
 Architecture direction is **approved with conditions**.
@@ -154,7 +164,7 @@ The following principles remain binding:
 - append-only match-result versions;
 - executable acceptance evidence.
 
-Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager rejection evidence. Open Milestone 3A conditions include automated application tests beyond the configuration contract, Prisma no-model bootstrap, container strategy and acceptance, deterministic runtime smoke testing, Turbo environment/cache policy, security gates, and CI.
+Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager rejection evidence. Sprint 7 aligned workspace-owned compiler resolution with the approved TypeScript `6.0.3` baseline. Open Milestone 3A conditions include automated application tests beyond the configuration contract, Prisma no-model bootstrap, remaining Prisma/container compatibility evidence, container strategy and acceptance, deterministic runtime smoke testing, Turbo environment/cache policy, security gates, and CI.
 
 ## Approved Documents
 
@@ -175,6 +185,7 @@ Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager re
 - `docs/sprints/SPRINT4_SPECIFICATION.md`
 - `docs/sprints/SPRINT5_SPECIFICATION.md`
 - `docs/sprints/SPRINT6_SPECIFICATION.md`
+- `docs/sprints/SPRINT7_SPECIFICATION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
 
@@ -190,6 +201,7 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT4_REPORT.md`
 - `docs/sprints/SPRINT5_REPORT.md`
 - `docs/sprints/SPRINT6_REPORT.md`
+- `docs/sprints/SPRINT7_REPORT.md`
 - `docs/22_MILESTONE_3A_GATE.md`
 - `docs/23_RELEASE_BASELINE.md`
 - `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`
@@ -213,7 +225,7 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - No browser-safe, secret, database, provider, queue, storage, feature-flag, or observability configuration is implemented.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
 - Runtime and package-manager metadata are exact-pinned and enforced through pnpm-native installation rejection plus repository-owned checks.
-- The API's undeclared local `tsc` resolution currently reaches the NestJS CLI transitive TypeScript `5.9.3`; compiler-baseline alignment requires a separately authorized manifest and lockfile change.
+- Workspace-owned compiler entry points resolve explicit TypeScript `6.0.3`; the NestJS CLI retains an internal transitive TypeScript `5.9.3` that is not an approved workspace compiler entry point.
 - Generated Next.js type files are reproducible and uncommitted.
 - The worker must not use a fake persistence loop before durable work exists.
 - The API and web shell copy “Repository Bootstrap Completed” refers only to shell creation; Milestone 3A and canonical v0.1 remain incomplete.
@@ -225,7 +237,7 @@ No known broken Markdown links, obsolete sprint locations, or active documentati
 
 ## Next Sprint
 
-Sprint 6 is complete. Sprint 7 has not been specified or authorized.
+Sprint 7 is complete. Sprint 8 has not been specified or authorized.
 
 Before any later implementation sprint:
 

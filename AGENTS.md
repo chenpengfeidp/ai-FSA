@@ -239,11 +239,15 @@ Then read by change type:
 - repository or delivery work: `04`, `14` through `16`, `18`, `20` through `23`, and the applicable current milestone governance listed below;
 - architecture decisions: all affected canonical documents and records in `docs/decisions/`.
 
-For current Milestone 3A and Sprint 6 delivery work, also read:
+For current Milestone 3A and Sprint 8 delivery work, also read:
 
 - `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`;
-- `docs/sprints/SPRINT6_SPECIFICATION.md`;
-- `docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md`.
+- `docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md`;
+- `docs/sprints/SPRINT7_REPORT.md`;
+- `docs/sprints/SPRINT8_SPECIFICATION.md`;
+- `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md`;
+- `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md`;
+- `docs/sprints/SPRINT8_PRE_IMPLEMENTATION_AUDIT.md`.
 
 Read sprint reports for historical evidence, not as replacements for canonical contracts.
 

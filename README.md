@@ -77,8 +77,12 @@ Read the numbered documents in order:
 Current Milestone 3A delivery governance:
 
 - [Final Milestone 3A Gate Review](docs/sprints/MILESTONE_3A_GATE_REVIEW.md)
-- [Sprint 6 Specification](docs/sprints/SPRINT6_SPECIFICATION.md)
 - [Final Repository Health Report](docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md)
+- [Sprint 7 Report](docs/sprints/SPRINT7_REPORT.md)
+- [Sprint 8 Specification](docs/sprints/SPRINT8_SPECIFICATION.md)
+- [Sprint 8 Architecture Alignment](docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md)
+- [Sprint 8 Architecture Alignment Approval](docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md)
+- [Sprint 8 Pre-implementation Audit](docs/sprints/SPRINT8_PRE_IMPLEMENTATION_AUDIT.md)
 
 ## Mandatory Paths by Change
 

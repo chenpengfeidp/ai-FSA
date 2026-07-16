@@ -5,10 +5,10 @@
 - Last updated: 2026-07-16
 - Current delivery milestone: Milestone 3A — Repository Bootstrap
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
-- Current task status: Sprint 7 implementation complete; no implementation sprint active
+- Current task status: Sprint 8 architecture alignment approved; no implementation sprint active
 - Current sprint: No implementation sprint active
 - Last completed sprint: Sprint 7 — TypeScript Compiler Baseline Alignment
-- Next sprint: Not specified and not authorized
+- Next sprint: Sprint 8, specified and architecture-aligned but not authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -150,7 +150,7 @@ Architecture direction is **approved with conditions**.
 
 The governing implementation gate is `docs/21_ARCHITECTURE_SIGNOFF.md`. The requested path `docs/21_IMPLEMENTATION_GATE.md` does not exist; the architecture sign-off is the accepted gate authority for this governance milestone.
 
-`docs/22_MILESTONE_3A_GATE.md` records the post-Sprint 5 recommendation `READY FOR SPRINT 6`. Sprint 6 subsequently received separate authorization, completed MF-05, and did not close Milestone 3A.
+`docs/22_MILESTONE_3A_GATE.md` records the post-Sprint 5 recommendation `READY FOR SPRINT 6`. Sprint 6 subsequently received separate authorization, completed MF-05, and did not close Milestone 3A. The Architecture Board has also aligned MF-02 with verified Prisma `7.8.0` default no-model generation and controlled `--require-models` evidence.
 
 The following principles remain binding:
 
@@ -186,6 +186,7 @@ Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager re
 - `docs/sprints/SPRINT5_SPECIFICATION.md`
 - `docs/sprints/SPRINT6_SPECIFICATION.md`
 - `docs/sprints/SPRINT7_SPECIFICATION.md`
+- `docs/sprints/SPRINT8_SPECIFICATION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
 
@@ -202,6 +203,9 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT5_REPORT.md`
 - `docs/sprints/SPRINT6_REPORT.md`
 - `docs/sprints/SPRINT7_REPORT.md`
+- `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md`
+- `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md`
+- `docs/sprints/SPRINT8_PRE_IMPLEMENTATION_AUDIT.md`
 - `docs/22_MILESTONE_3A_GATE.md`
 - `docs/23_RELEASE_BASELINE.md`
 - `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`
@@ -233,19 +237,19 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Known Documentation Drift
 
-No known broken Markdown links, obsolete sprint locations, or active documentation-index omissions remain. Historical audit and gate documents retain point-in-time status statements, including pre-Sprint 6 tracking state; this project-state document and the latest Sprint report own current delivery status.
+No known broken Markdown links, obsolete sprint locations, active documentation-index omissions, or active obsolete Prisma commands remain. Historical proposal and approval evidence retains the superseded MF-02 command text so the decision change remains auditable.
 
 ## Next Sprint
 
-Sprint 7 is complete. Sprint 8 has not been specified or authorized.
+Sprint 7 is complete. Sprint 8 is specified and architecture-aligned but has not received explicit implementation authorization.
 
 Before any later implementation sprint:
 
-1. review and track `docs/sprints/SPRINT6_REPORT.md`;
-2. select the next unresolved Milestone 3A condition through a separate specification;
-3. obtain explicit implementation authorization;
-4. start from a reviewable worktree and follow the new Sprint allowlist and stop boundary;
-5. do not infer authorization from roadmap order or remaining technical debt.
+1. review and track the Sprint 8 specification, architecture-alignment proposal, approval record, and pre-implementation audit;
+2. obtain explicit Sprint 8 implementation authorization;
+3. start from a reviewable worktree;
+4. follow the Sprint 8 allowlist, validation commands, acceptance criteria, and stop boundary;
+5. stop before Sprint 9 or any excluded persistence capability.
 
 ## Future Roadmap
 

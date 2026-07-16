@@ -1,0 +1,1028 @@
+# Sprint 8 Specification — Prisma No-model Bootstrap
+
+## Status and Authority
+
+- Delivery milestone: Milestone 3A — Repository Bootstrap
+- Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
+- Sprint: 8
+- Theme: Prisma No-model Bootstrap
+- Specification status: Complete and architecture-aligned
+- Implementation status: Not started and not authorized
+
+This document defines the proposed Sprint 8 implementation boundary.
+
+It follows:
+
+- `AGENTS.md`;
+- `docs/PROJECT_STATE.md`;
+- `docs/20_IMPLEMENTATION_PLAN.md`;
+- `docs/21_ARCHITECTURE_SIGNOFF.md`.
+
+Creation of this specification does not authorize implementation.
+
+## Architecture Alignment Status
+
+The Architecture Board approved and applied the MF-02 command alignment recorded in:
+
+- `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md`;
+- `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md`.
+
+The governing sign-off now approves:
+
+1. default Prisma `7.8.0` generation as the no-model generation path;
+2. a controlled negative `prisma generate --require-models` command proving that the schema contains no models;
+3. explicit config selection;
+4. a non-secret validation URL;
+5. verification from repository-root and database-package contexts.
+
+The architecture blocker is resolved. Sprint 8 implementation still requires separate explicit authorization.
+
+# Goal
+
+Create the minimal `@fas/database` package that:
+
+- owns Prisma configuration and generated client output;
+- validates a PostgreSQL datasource contract;
+- generates Prisma Client from a schema containing no models;
+- proves Prisma `7.8.0`, TypeScript `6.0.3`, ESM, and the PostgreSQL driver adapter are compatible;
+- adds a narrow database-client lifecycle adapter without connecting to a database at module load;
+- integrates generation into repository validation and package build gates;
+- mechanically rejects Prisma imports outside `packages/database`.
+
+Sprint 8 closes:
+
+- MF-01 — Prisma Generation Dependency Graph;
+- MF-02 — Prisma No-model Bootstrap Contract;
+- the Prisma-generation portion of MF-06;
+- the planned Prisma acceptance gap in `docs/20_IMPLEMENTATION_PLAN.md`.
+
+It does not add domain persistence, migrations, runtime database connectivity, or database-aware application readiness.
+
+# Business Value
+
+Prisma is a foundational build-time and persistence boundary for later Milestone 3A work.
+
+A minimal no-model bootstrap provides:
+
+- clean-clone evidence that Prisma generation is reproducible;
+- explicit ownership of Prisma inside one infrastructure package;
+- validated Prisma 7 configuration rather than Prisma 6-era assumptions;
+- deterministic generated-client placement;
+- proof that TypeScript, ESM, Prisma, and the PostgreSQL adapter compile together;
+- an executable generation dependency before generated types are consumed;
+- prevention of accidental domain-table invention during repository bootstrap;
+- a stable boundary for later migration and persistence Sprints;
+- no dependency on a running PostgreSQL service.
+
+The Sprint reduces compatibility risk without introducing football-analysis behavior.
+
+# Scope
+
+## Architecture Precondition
+
+The MF-02 command conflict is resolved.
+
+Implementation may begin only after:
+
+- the alignment proposal, approval record, corrected sign-off, and this specification are reviewed and tracked;
+- Sprint 8 receives separate explicit implementation authorization.
+
+The implementation must stop if Prisma `7.8.0` is no longer the approved exact baseline, the Architecture Board selects a different no-model contract, or another higher-authority document requires a model or migration in this Sprint.
+
+## New Workspace Package
+
+Create:
+
+```text
+packages/database
+```
+
+Package identity:
+
+```text
+@fas/database
+```
+
+The package must be:
+
+- private;
+- ESM;
+- versioned `0.0.0`;
+- included through the existing `packages/*` workspace glob;
+- the sole owner of Prisma and PostgreSQL adapter dependencies;
+- built with TypeScript `6.0.3`;
+- configured through `@fas/tsconfig`;
+- exposed only through an explicit root export map.
+
+## Prisma Configuration
+
+Create:
+
+```text
+packages/database/prisma.config.ts
+```
+
+The config must:
+
+- use `defineConfig` and `env` from `prisma/config`;
+- point explicitly to `prisma/schema.prisma`;
+- read only `DATABASE_URL`;
+- require the value through process environment at command execution;
+- contain no credential, fallback password, production host, or secret;
+- contain no migration, seed, Studio, Accelerate, or datasource-shadow configuration;
+- avoid `dotenv` unless a revised specification explicitly authorizes it.
+
+The repository must not load `.env` files as part of this Sprint.
+
+## No-model Prisma Schema
+
+Create:
+
+```text
+packages/database/prisma/schema.prisma
+```
+
+The schema must contain only:
+
+```prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+```
+
+Equivalent formatting generated by Prisma `7.8.0` is acceptable.
+
+The schema must contain:
+
+- zero models;
+- zero enums;
+- zero composite types;
+- zero migrations;
+- zero preview features;
+- zero domain names;
+- zero seed behavior.
+
+The datasource URL must remain in `prisma.config.ts`, not `schema.prisma`.
+
+## Generated Client Ownership
+
+Generated output must remain under:
+
+```text
+packages/database/generated/prisma
+```
+
+The generated directory must:
+
+- be reproducible;
+- be ignored by Git;
+- never be manually edited;
+- never be imported outside `packages/database`;
+- be regenerated before database package typecheck, test, and build;
+- not be published as a domain or API contract.
+
+No generated file may be committed.
+
+## Database Client Lifecycle Adapter
+
+Create a minimal adapter owned by `@fas/database`.
+
+The adapter must:
+
+- construct Prisma Client with `@prisma/adapter-pg`;
+- accept an explicit PostgreSQL connection string or equivalent narrow connection options;
+- perform no environment lookup;
+- perform no connection at module import;
+- perform no connection at construction;
+- expose only lifecycle operations required to prove adapter compatibility;
+- avoid exposing Prisma delegates, generated model types, or `pg` objects as domain contracts;
+- avoid logging the connection string;
+- avoid retry, pooling policy, transaction policy, migration, readiness, or repository behavior.
+
+The adapter may expose a narrow infrastructure lifecycle contract:
+
+```ts
+export interface DatabaseClientLifecycle {
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+}
+```
+
+No model query API exists in Sprint 8.
+
+## Package Scripts
+
+`@fas/database` must define:
+
+- `generate`
+  - runs Prisma generation with explicit config;
+- `prisma:validate`
+  - runs Prisma schema validation with explicit config;
+- `build`
+  - generates before TypeScript build;
+- `typecheck`
+  - generates before no-emit TypeScript validation;
+- `test`
+  - generates before the explicit database Vitest project.
+
+Direct package commands must not depend on pre-existing generated local state.
+
+## Root Scripts
+
+Add:
+
+- `prisma:validate`
+  - invokes the database package validation command;
+- `prisma:generate`
+  - invokes the database package first-class generation command.
+
+Update root validation so:
+
+1. toolchain checks run first;
+2. workspace validation remains before repository evidence;
+3. Prisma validation and generation run before quality, typecheck, tests, and build;
+4. the existing relative order of quality, typecheck, tests, and build remains unchanged.
+
+## Turborepo Generation Contract
+
+Add a first-class `generate` task to `turbo.json`.
+
+The task must:
+
+- declare package-relative `generated/**` output;
+- contain no environment secret in cache metadata;
+- allow `@fas/database` generation to be invoked explicitly through Turbo;
+- not add migration execution or service startup.
+
+Database package `build`, `typecheck`, and `test` scripts must each invoke generation directly so package-local execution is correct even outside Turbo.
+
+Turbo is an orchestration and cache layer, not the sole generation dependency.
+
+## Explicit Vitest Project
+
+Add one `database` project to root `vitest.config.ts`.
+
+The project must:
+
+- use the Node environment;
+- include only `packages/database/test/**/*.spec.ts`;
+- use a fixed non-secret validation URL where a config import requires one;
+- perform no network request;
+- require no running PostgreSQL service;
+- coexist with the existing `config` project.
+
+Tests must prove:
+
+- schema configuration points to PostgreSQL;
+- no model exists;
+- generated output is package-local;
+- client-adapter construction is side-effect free;
+- public exports do not expose model delegates or domain contracts.
+
+## Prisma Ownership Enforcement
+
+Extend dependency-cruiser policy so Prisma and PostgreSQL driver imports are permitted only from:
+
+```text
+packages/database
+```
+
+The prohibited import set must include:
+
+- `prisma`;
+- `@prisma/*`;
+- `pg`.
+
+Add a controlled forbidden-import fixture outside the database package and extend the existing boundary negative-test script to prove the new rule rejects it.
+
+The existing boundary fixture and rule must continue to pass.
+
+## Validation URL
+
+Use one non-secret, local, non-production validation URL:
+
+```text
+postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation
+```
+
+The value is test-only command input.
+
+It must:
+
+- never be treated as a real credential;
+- never be used to connect in Sprint 8;
+- never be embedded in application source;
+- never be emitted in logs or reports;
+- remain outside generated output and cache artifacts.
+
+Documentation may represent it with a clearly non-secret placeholder rather than repeating the full value.
+
+## Prisma Command Contract
+
+Under the approved MF-02 alignment:
+
+- default generation must succeed with zero models;
+- `--require-models` must fail specifically because the schema has zero models;
+- no unsupported affirmative no-model option may be used;
+- validation and generation must be verified from repository-root and database-package contexts.
+
+## Documentation and Evidence
+
+Update only current developer-facing documentation needed to describe:
+
+- exact Prisma versions;
+- non-secret validation environment;
+- root validation and generation commands;
+- generated-output ownership;
+- zero-model and zero-migration scope;
+- remediation when generated output is missing or stale.
+
+Sprint completion must generate `docs/sprints/SPRINT8_REPORT.md` and update `docs/PROJECT_STATE.md`.
+
+# Explicit Non-goals
+
+Sprint 8 must not introduce:
+
+- a Prisma model, enum, composite type, or relation;
+- a migration or migrations directory;
+- a production migration;
+- a development migration;
+- `prisma migrate dev`, `deploy`, `reset`, `db push`, `db pull`, or seed execution;
+- a real database connection;
+- a PostgreSQL server or Docker container;
+- database-aware API readiness;
+- API, web, or worker database consumption;
+- a domain entity, repository, use case, service, or contract;
+- match, evidence, analysis, review, engine, user, or audit tables;
+- durable jobs;
+- Redis, BullMQ, pgvector, object storage, or provider SDKs;
+- browser-safe, secret, queue, storage, feature-flag, or observability configuration;
+- authentication or authorization;
+- runtime retry, transaction, pooling, or shutdown policy;
+- application source changes;
+- a TypeScript, Node.js, pnpm, NestJS, Next.js, React, Vitest, or Zod version change;
+- a Prisma version other than exact `7.8.0`;
+- dependency overrides or mixed Prisma versions;
+- `dotenv`;
+- TailwindCSS or UI work;
+- Dockerfiles, Compose, CI, Dependabot, or security scanning;
+- Turbo environment/cache-policy completion beyond the narrow generation task;
+- architecture-document or ADR changes;
+- DA-04 remediation;
+- Sprint 9 planning or implementation.
+
+The words `Match`, `Evidence`, `Analysis`, `Review`, `Knowledge`, `Rule`, `Case`, `Evaluation`, and `Statistics` must not appear as Prisma model declarations.
+
+# Packages Affected
+
+## Root Orchestration Package
+
+### `ai-fsa`
+
+Affected only for:
+
+- exact Prisma-related development dependencies if root command resolution requires them;
+- root Prisma validation and generation scripts;
+- root validation ordering.
+
+Preferred ownership keeps Prisma dependencies in `@fas/database`. Root must not become a Prisma runtime owner.
+
+## New Shared Infrastructure Package
+
+### `@fas/database`
+
+Owns:
+
+- Prisma configuration;
+- Prisma schema;
+- generated Prisma Client;
+- PostgreSQL driver adapter construction;
+- no-model validation;
+- package-local generation, typecheck, test, and build commands.
+
+## Validation-only Packages
+
+The following remain unchanged but must continue to validate:
+
+- `@fas/api`;
+- `@fas/web`;
+- `@fas/worker`;
+- `@fas/config`;
+- `@fas/tsconfig`.
+
+No application consumes `@fas/database` in Sprint 8.
+
+# Files Allowed to Change
+
+Implementation is restricted to this exact allowlist.
+
+## Root Orchestration and Policy
+
+```text
+package.json
+pnpm-lock.yaml
+turbo.json
+vitest.config.ts
+dependency-cruiser.config.cjs
+.gitignore
+scripts/validate-boundary-fixture.mjs
+tooling/dependency-cruiser/fixtures/forbidden-prisma-import.ts
+```
+
+## Database Package
+
+```text
+packages/database/package.json
+packages/database/tsconfig.json
+packages/database/prisma.config.ts
+packages/database/prisma/schema.prisma
+packages/database/src/index.ts
+packages/database/src/client.ts
+packages/database/test/config.spec.ts
+```
+
+The generated directory may be created during validation but must remain ignored and untracked:
+
+```text
+packages/database/generated/prisma/**
+```
+
+## Documentation and Evidence
+
+```text
+README.md
+docs/15_DEVELOPMENT_GUIDE.md
+docs/PROJECT_STATE.md
+docs/sprints/SPRINT8_REPORT.md
+```
+
+No other file may change.
+
+In particular, implementation must not modify:
+
+- `AGENTS.md`;
+- `.nvmrc`;
+- `pnpm-workspace.yaml`;
+- `tsconfig.base.json`;
+- any existing file under `apps/`;
+- any existing package source, test, manifest, or TypeScript config;
+- any file under `packages/tsconfig`;
+- any previous Sprint specification or report;
+- `docs/sprints/SPRINT8_SPECIFICATION.md`;
+- any numbered architecture document;
+- any ADR;
+- any Sprint 9 file.
+
+The approved MF-02 architecture alignment is a completed governance precondition and is not part of the implementation allowlist.
+
+If implementation requires another file, stop and request a specification revision.
+
+# Dependencies
+
+Sprint 8 may add only the following exact dependencies.
+
+## Runtime Dependencies of `@fas/database`
+
+```text
+@prisma/adapter-pg@7.8.0
+@prisma/client@7.8.0
+pg@8.22.0
+```
+
+## Development Dependencies of `@fas/database`
+
+```text
+@fas/tsconfig@workspace:*
+@types/pg@8.20.0
+prisma@7.8.0
+typescript@6.0.3
+```
+
+Version evidence:
+
+- the implementation plan approves Prisma CLI, client, and adapter `7.8.0`;
+- `@prisma/adapter-pg@7.8.0` accepts `pg` `^8.16.3`;
+- `pg@8.22.0` satisfies that range;
+- `@types/pg@8.20.0` satisfies the adapter's `^8.16.0` type dependency;
+- TypeScript `6.0.3` is the approved repository compiler baseline.
+
+Dependency rules:
+
+- use pnpm `11.13.0`;
+- add dependencies through pnpm;
+- preserve exact direct pins;
+- use one root lockfile;
+- do not edit the lockfile manually;
+- do not add `dotenv`;
+- do not add a test library;
+- do not add a migration library;
+- do not add a database server dependency;
+- stop if Prisma packages resolve to mixed direct versions;
+- stop if unrelated dependency versions change.
+
+# Acceptance Criteria
+
+## Architecture Precondition
+
+- MF-02 approves default no-model generation and negative `--require-models` evidence.
+- The alignment proposal, approval record, corrected sign-off, and specification are reviewed and tracked before implementation starts.
+- Sprint 8 receives separate explicit implementation authorization.
+- No implementation change is used to bypass the authority conflict.
+
+## Package Definition
+
+- `@fas/database` is a private ESM workspace package.
+- Package version is `0.0.0`.
+- The package uses an explicit root export map.
+- Direct dependencies match the exact approved matrix.
+- `@fas/tsconfig` is consumed through `workspace:*`.
+- TypeScript is exact `6.0.3`.
+- No unrelated dependency is installed.
+- Workspace validation discovers six child packages after creation.
+
+## Prisma Configuration
+
+- `prisma.config.ts` uses Prisma 7 config APIs.
+- Config selects `prisma/schema.prisma` explicitly.
+- Datasource URL comes from `DATABASE_URL`.
+- Missing `DATABASE_URL` fails clearly.
+- No `.env` file is loaded automatically.
+- No connection occurs during config validation.
+- No secret or production endpoint is committed.
+
+## Schema Contract
+
+- Generator provider is `prisma-client`.
+- Generator output is explicit and package-local.
+- Datasource provider is `postgresql`.
+- Datasource URL is absent from the schema.
+- Schema contains zero models.
+- Schema contains zero enums and composite types.
+- No migration or seed exists.
+- No preview feature is enabled.
+
+## Generation Contract
+
+- `pnpm prisma:validate` succeeds with the non-secret validation URL.
+- `pnpm prisma:generate` succeeds with zero models.
+- Database-package validation succeeds from package context.
+- Database-package generation succeeds from package context.
+- `prisma generate --require-models` fails because no model exists.
+- No unsupported affirmative no-model option is used.
+- Generated output remains under `packages/database/generated/prisma`.
+- Generated output is ignored and untracked.
+- Deleting generated output and rerunning generation restores it.
+- Package build, typecheck, and test do not rely on hidden pre-existing generation.
+
+## Generation Dependency Graph
+
+- Root `generate` task exists in Turborepo.
+- Generated output is declared package-relatively.
+- Root validation generates before static evidence.
+- Database build generates before compilation.
+- Database typecheck generates before no-emit compilation.
+- Database test generates before test execution.
+- Migration execution and service startup remain outside the task graph.
+
+## Client Adapter
+
+- Prisma Client is constructed with `@prisma/adapter-pg`.
+- Construction takes explicit connection input.
+- Module import performs no connection.
+- Construction performs no connection.
+- Connection string is not logged.
+- Public API exposes no model delegate or generated record as a domain contract.
+- No query, repository, transaction policy, retry, readiness, or migration API exists.
+
+## Test Discovery
+
+- Root Vitest config contains existing `config` and new `database` projects.
+- Both projects are discovered.
+- Existing 17 configuration tests still pass.
+- Database tests pass without network or PostgreSQL.
+- Test execution uses a non-secret validation value.
+
+## Ownership and Boundaries
+
+- Prisma and `pg` imports exist only under `packages/database`.
+- dependency-cruiser accepts the implemented graph.
+- Existing forbidden application-import fixture remains rejected.
+- New forbidden Prisma-import fixture is rejected by the intended ownership rule.
+- No application or other package imports `@fas/database`.
+- No generated Prisma file is imported outside the database package.
+
+## Repository Integrity
+
+- Supported normal installation succeeds.
+- Frozen installation succeeds.
+- Toolchain checks pass.
+- Workspace validation succeeds.
+- Quality and boundary checks pass.
+- Typechecking succeeds.
+- Existing and database tests succeed.
+- Production builds succeed.
+- Root validation succeeds.
+- No application source or behavior changes.
+- No existing shared-package source or behavior changes.
+- No architecture document or ADR changes.
+
+## Documentation and Evidence
+
+- README documents Prisma validate and generate commands.
+- Development Guide describes zero-model, no-migration scope.
+- `docs/sprints/SPRINT8_REPORT.md` records exact dependencies and files.
+- The report records root and package-context generation evidence.
+- The report records the controlled `--require-models` failure.
+- The report records test discovery and boundary evidence.
+- The report records failures, corrections, fallbacks, and remaining work.
+- `docs/PROJECT_STATE.md` records Sprint 8 only after all criteria pass.
+- Documentation does not claim PostgreSQL runtime, migration, model, Milestone 3A, or canonical v0.1 completion.
+- Sprint 9 is not started.
+
+# Validation Commands
+
+Run from the repository root with Node.js `24.18.0` and pnpm `11.13.0`.
+
+## Architecture Precondition
+
+Before implementation:
+
+```bash
+pnpm dlx prisma@7.8.0 generate --help
+```
+
+Confirm:
+
+- `--require-models` is present;
+- no affirmative no-model option is present;
+- the separately approved MF-02 alignment matches that CLI contract.
+
+This command is evidence only. After Prisma is installed, use the repository-owned exact dependency rather than `pnpm dlx`.
+
+## Toolchain and Installation
+
+```bash
+node --version
+pnpm --version
+pnpm toolchain:check
+pnpm toolchain:test
+pnpm install
+pnpm install --frozen-lockfile
+pnpm workspace:check
+```
+
+Required results:
+
+- Node.js reports `v24.18.0`;
+- pnpm reports `11.13.0`;
+- toolchain validation and all controlled enforcement tests pass;
+- both installation modes pass;
+- six child workspace packages are discovered.
+
+## Root Prisma Validation
+
+Use a non-secret local validation URL supplied only to the process:
+
+```bash
+DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:validate
+DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:generate
+```
+
+Both commands must pass without connecting to PostgreSQL.
+
+## Database-package Context
+
+```bash
+cd packages/database
+DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:validate
+DATABASE_URL="<non-secret-local-validation-url>" pnpm generate
+cd ../..
+```
+
+Both package-context commands must pass.
+
+## Controlled No-model Negative Evidence
+
+From `packages/database`:
+
+```bash
+DATABASE_URL="<non-secret-local-validation-url>" pnpm exec prisma generate --config prisma.config.ts --require-models
+```
+
+Required result:
+
+- command exits non-zero;
+- output identifies the absence of models;
+- failure is not caused by configuration, environment, dependency, or path resolution.
+
+## Generated-output Reproducibility
+
+After confirming the generated directory is ignored:
+
+```bash
+rm -rf packages/database/generated
+DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:generate
+git status --short
+```
+
+Required result:
+
+- generation restores package-local output;
+- no generated file appears in Git status;
+- no file outside the generated directory changes.
+
+The delete command is restricted to the ignored generated directory created by this Sprint.
+
+## Test Discovery and Package Gates
+
+```bash
+DATABASE_URL="<non-secret-local-validation-url>" pnpm exec vitest list
+DATABASE_URL="<non-secret-local-validation-url>" pnpm --filter @fas/database typecheck
+DATABASE_URL="<non-secret-local-validation-url>" pnpm --filter @fas/database test
+DATABASE_URL="<non-secret-local-validation-url>" pnpm --filter @fas/database build
+```
+
+Required results:
+
+- `config` and `database` projects are discovered;
+- database generation precedes each package gate;
+- package typecheck, test, and build pass without a database connection.
+
+## Architecture Boundaries
+
+```bash
+pnpm boundaries
+pnpm boundaries:test
+```
+
+Required results:
+
+- implemented graph has no violation;
+- existing boundary fixture is rejected;
+- new Prisma ownership fixture is rejected by the intended rule.
+
+## Existing Repository Gates
+
+```bash
+DATABASE_URL="<non-secret-local-validation-url>" pnpm quality
+DATABASE_URL="<non-secret-local-validation-url>" pnpm typecheck
+DATABASE_URL="<non-secret-local-validation-url>" pnpm test
+DATABASE_URL="<non-secret-local-validation-url>" pnpm build
+DATABASE_URL="<non-secret-local-validation-url>" pnpm validate
+```
+
+All existing and new gates must pass.
+
+## Final Integrity Review
+
+```bash
+pnpm list --depth 0
+git diff --check
+git status --short
+git diff -- pnpm-lock.yaml
+git check-ignore packages/database/generated/prisma
+```
+
+The final review must confirm:
+
+- only allowlisted implementation files changed;
+- generated output is ignored and untracked;
+- no migration exists;
+- no model exists;
+- exact dependencies match the approved matrix;
+- no unrelated lockfile content changed;
+- no application or existing package source changed;
+- no architecture document or ADR changed;
+- existing uncommitted work was preserved;
+- no Sprint 9 file changed.
+
+# Risks
+
+## Regression to the Pre-alignment CLI Contract
+
+Risk: implementation follows the superseded affirmative-flag assumption or silently violates the aligned MF-02 contract.
+
+Mitigation:
+
+- require the corrected sign-off and approval record;
+- preserve exact CLI evidence;
+- use supported default generation and negative `--require-models` evidence.
+
+## Accidental Domain Modeling
+
+Risk: Prisma tooling or implementation convenience introduces example models.
+
+Mitigation:
+
+- hand-author the minimal schema;
+- prohibit generator example models;
+- assert zero models;
+- fail if any migration appears.
+
+## Hidden Generated State
+
+Risk: typecheck or build passes only because generated output already exists locally.
+
+Mitigation:
+
+- make package gates invoke generation;
+- delete and regenerate output in acceptance;
+- keep generated output ignored.
+
+## Prisma 7 Configuration Drift
+
+Risk: Prisma 6-era examples place datasource URL in schema or use `prisma-client-js`.
+
+Mitigation:
+
+- use `prisma.config.ts`;
+- use `prisma-client`;
+- require explicit output;
+- validate with exact Prisma `7.8.0`.
+
+## Driver-adapter Compatibility
+
+Risk: Prisma Client, adapter, `pg`, TypeScript, or ESM do not compile together.
+
+Mitigation:
+
+- exact-pin the approved matrix;
+- compile generated output and the narrow adapter;
+- stop rather than change versions or add overrides.
+
+## No-model Generated API Instability
+
+Risk: generated zero-model client shape does not support an assumed public adapter API.
+
+Mitigation:
+
+- expose only lifecycle behavior;
+- do not expose delegates;
+- stop if a source or policy expansion is required.
+
+## Validation URL Leakage
+
+Risk: a placeholder connection string is logged, cached, committed, or mistaken for a real credential.
+
+Mitigation:
+
+- use an explicitly non-secret local value;
+- pass it only through process environment;
+- do not print it;
+- inspect Git status and generated output.
+
+## Generation Duplication
+
+Risk: direct package gates and root orchestration run generation more than once.
+
+Mitigation:
+
+- accept deterministic repeated generation;
+- prefer correctness outside Turbo over hidden local state;
+- measure before optimizing.
+
+## Lockfile Overreach
+
+Risk: adding Prisma and PostgreSQL dependencies re-resolves unrelated packages.
+
+Mitigation:
+
+- use pinned pnpm;
+- inspect importer and snapshot changes;
+- stop if unrelated direct versions move.
+
+## Boundary False Positive
+
+Risk: the new negative fixture fails for an unrelated rule.
+
+Mitigation:
+
+- assert the exact Prisma-ownership rule name;
+- preserve the existing fixture as independent evidence.
+
+## Premature Runtime Integration
+
+Risk: the database package is connected to API or worker to prove usefulness.
+
+Mitigation:
+
+- prohibit application imports;
+- prove package compatibility without a database connection;
+- defer readiness and runtime integration.
+
+## Scope Leakage
+
+Risk: Prisma bootstrap expands into models, migrations, containers, CI, jobs, or Sprint 9.
+
+Mitigation:
+
+- stop at configuration, no-model generation, lifecycle adapter, tests, ownership enforcement, documentation, report, and state update.
+
+# Stop Boundary
+
+Sprint 8 stops when:
+
+- the approved MF-02 alignment and Sprint 8 authorization are reviewed and tracked;
+- exact Prisma and PostgreSQL dependencies are installed only in `@fas/database`;
+- Prisma config and zero-model schema validate;
+- root and package-context generation succeed;
+- controlled `--require-models` rejection proves zero-model state;
+- generated output is reproducible, ignored, and package-local;
+- database package build, typecheck, and test generate first;
+- Prisma ownership boundaries and both negative fixtures pass;
+- normal and frozen installation pass;
+- toolchain, workspace, quality, typecheck, test, build, and root validation pass;
+- documentation is aligned;
+- `docs/sprints/SPRINT8_REPORT.md` is generated;
+- `docs/PROJECT_STATE.md` is updated.
+
+After reaching this boundary:
+
+- do not add a model, enum, migration, seed, or repository;
+- do not start PostgreSQL;
+- do not connect API or worker to the database package;
+- do not add database-aware readiness;
+- do not add containers, CI, security scanning, or runtime smoke;
+- do not add durable jobs;
+- do not modify application source;
+- do not modify existing package source;
+- do not change approved dependency versions;
+- do not address DA-04;
+- do not create another canonical document;
+- do not plan or implement Sprint 9;
+- stop and wait for review.
+
+If Prisma `7.8.0`, TypeScript `6.0.3`, the approved adapter matrix, or no-model generation cannot satisfy the acceptance criteria within the allowlist, stop. Record the command, exit status, output, resolved versions, and affected files. Do not add a model, change a version, introduce an override, connect a database, or weaken a boundary without a revised specification and any required architecture approval.
+
+# Deliverables
+
+Sprint 8 implementation must deliver:
+
+1. Architecture-aligned no-model command contract
+   - supported default generation;
+   - controlled `--require-models` negative evidence.
+2. `@fas/database`
+   - private ESM package;
+   - explicit export map;
+   - exact dependency matrix.
+3. Prisma configuration
+   - `prisma.config.ts`;
+   - PostgreSQL datasource;
+   - non-secret environment contract.
+4. No-model schema
+   - `prisma-client` generator;
+   - explicit package-local output;
+   - zero models and migrations.
+5. Generated client
+   - reproducible;
+   - ignored;
+   - database-package ownership only.
+6. Lifecycle adapter
+   - Prisma PostgreSQL adapter construction;
+   - no module-load connection;
+   - no model contract exposure.
+7. Generation dependency graph
+   - first-class root task;
+   - package build, typecheck, and test generate first.
+8. Explicit tests
+   - root Vitest `database` project;
+   - no network or PostgreSQL.
+9. Ownership enforcement
+   - dependency rule;
+   - controlled forbidden Prisma fixture.
+10. Documentation
+    - README and Development Guide command alignment.
+11. Evidence and state
+    - `docs/sprints/SPRINT8_REPORT.md`;
+    - updated `docs/PROJECT_STATE.md`.
+
+# Sprint Completion Definition
+
+Sprint 8 is complete only when:
+
+1. the approved MF-02 alignment and separate Sprint 8 authorization are reviewed and tracked;
+2. every changed implementation file is in the allowlist;
+3. `@fas/database` is the only Prisma and PostgreSQL driver owner;
+4. direct dependencies match the exact approved matrix;
+5. Prisma config uses the version 7 config contract;
+6. schema contains zero models, enums, composites, migrations, and domain behavior;
+7. default no-model generation succeeds from root and package contexts;
+8. `--require-models` fails for the intended zero-model reason;
+9. no unsupported affirmative no-model option is used;
+10. generated output is reproducible, ignored, package-local, and uncommitted;
+11. database package build, typecheck, and test generate before consuming output;
+12. lifecycle adapter compiles without connecting or exposing model contracts;
+13. both Vitest projects are discovered and all tests pass;
+14. dependency-cruiser accepts the graph and rejects both controlled fixtures;
+15. normal and frozen installation pass;
+16. toolchain, workspace, quality, typecheck, test, build, and root validation pass;
+17. no application, domain, migration, runtime database, architecture, ADR, or Sprint 9 behavior changes;
+18. the Sprint 8 report records positive, negative, compatibility, dependency, and integrity evidence;
+19. project state is updated only after all validation passes;
+20. Milestone 3A and canonical v0.1 remain explicitly incomplete;
+21. implementation stops before PostgreSQL runtime, application integration, containers, CI, durable jobs, or Sprint 9.

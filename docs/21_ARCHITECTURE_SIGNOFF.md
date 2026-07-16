@@ -48,7 +48,7 @@ Every finding is assigned exactly one category:
 ### MF-02 — Prisma No-model Bootstrap Contract
 
 - **Review finding:** The bootstrap intentionally has no domain models, but the planned generation command does not define no-model behavior, config location, or validation environment.
-- **Decision:** Use explicit Prisma config selection, `--allow-no-models`, and a non-secret CI validation URL. Verify commands from both repository root and database-package context.
+- **Decision:** Use explicit Prisma config selection, Prisma `7.8.0` default no-model generation, and a non-secret validation URL. Prove the zero-model boundary with two complementary checks: default `prisma generate` must succeed, while a controlled `prisma generate --require-models` command must fail specifically because the schema contains no models. Verify validation and generation from both repository-root and database-package contexts. Do not treat an unknown-option, configuration, environment, dependency, or path-resolution failure as no-model evidence.
 - **Architectural rationale:** Domain tables must not be invented to satisfy tooling. Explicit no-model generation preserves the milestone boundary.
 - **Impact:** Prisma scripts, CI environment, database tests, and README commands.
 - **Owner:** Database Platform

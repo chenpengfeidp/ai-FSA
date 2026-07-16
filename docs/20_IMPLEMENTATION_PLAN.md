@@ -6,7 +6,7 @@
 - Scope: Repository Bootstrap
 - Delivery label: Milestone 3A
 - Canonical roadmap mapping: v0.1 / M1 Foundation
-- Implementation state: In progress — Sprints 1 through 5 complete; Milestone 3A incomplete
+- Implementation state: In progress — Sprints 1 through 7 complete; Milestone 3A incomplete
 
 This document is the official implementation blueprint for the repository bootstrap. It translates the architecture contracts into an executable delivery plan without defining football-analysis business behavior.
 
@@ -36,6 +36,8 @@ If this plan conflicts with those authorities, the higher authority wins and thi
 - Sprint 3 created and connected `@fas/tsconfig`.
 - Sprint 4 added Biome, dependency-cruiser, guarded Husky/lint-staged checks, and unified validation.
 - Sprint 5 created and connected `@fas/config`, added focused configuration tests, and integrated test execution into root validation.
+- Sprint 6 added native and repository-owned exact toolchain enforcement.
+- Sprint 7 aligned every workspace-owned compiler entry point on explicit TypeScript `6.0.3`.
 - Application tests beyond the configuration contract, Prisma no-model bootstrap, containers, deterministic runtime smoke validation, security gates, and CI remain planned and unimplemented.
 
 Current repository truth and sprint evidence are maintained in [PROJECT_STATE](./PROJECT_STATE.md) and `docs/sprints/`. Planned files and commands below are not evidence of implementation until their owning sprint report records successful validation.
@@ -718,14 +720,14 @@ The implemented Vitest project discovers and passes the `@fas/config` contract t
 
 ### 10.4 Prisma
 
-Status after Sprint 5: planned and not implemented.
+Status after Sprint 7: specified and architecture-aligned, not implemented or authorized.
 
 ```bash
 pnpm prisma:validate
 pnpm prisma:generate
 ```
 
-When implemented, acceptance requires both commands to succeed, generated output to remain inside the database package, and no other package to import Prisma directly.
+When implemented, acceptance requires both commands to succeed, generated output to remain inside the database package, and no other package to import Prisma directly. The aligned MF-02 decision additionally requires successful default no-model generation and a controlled `--require-models` failure that identifies the absence of models.
 
 ### 10.5 Containers
 

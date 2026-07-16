@@ -197,6 +197,7 @@ Result: PASS for all three images.
 1. Before resumed implementation, `docker` was unavailable. Implementation stopped under the declared prerequisite boundary. Docker Desktop was installed and both `docker version` and `docker info` passed before work resumed.
 2. A preliminary API-only probe used noncanonical `/ready` and `/live` paths and failed its wait assertion. Container logs proved the image had started; the probe was corrected to the specification's `/health/ready` and `/health/live` paths before acceptance evidence was collected.
 3. The first full runtime validation stopped after API shutdown because the unwrapped Node.js PID 1 required forced termination and exited `137` with `OOMKilled=false`. API and web Dockerfiles were corrected with a signal-forwarding wrapper around their existing Node.js commands. Both images were rebuilt, and the complete runtime workflow then passed.
+4. The resumed repository regression shell initially resolved Node.js `22.9.0`, so pnpm rejected execution before installation or validation began. The shell was explicitly switched to the pinned Node.js `24.18.0`; the complete frozen-install and `pnpm validate` sequence was then rerun and passed.
 
 No failure was hidden, no assertion was weakened, and no file outside the allowlist was changed.
 

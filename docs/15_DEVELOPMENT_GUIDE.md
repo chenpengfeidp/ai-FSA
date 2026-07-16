@@ -58,7 +58,9 @@ pnpm quality        # run Biome and both boundary checks
 pnpm test           # run the currently configured Vitest projects
 pnpm toolchain:check # validate active Node.js/pnpm identity and metadata
 pnpm toolchain:test # run controlled positive and negative enforcement tests
-pnpm validate       # toolchain, workspace, quality, typecheck, test, and build
+pnpm prisma:validate # validate the explicit Prisma config and zero-model schema
+pnpm prisma:generate # generate the package-local Prisma client
+pnpm validate       # toolchain, workspace, Prisma, quality, typecheck, test, and build
 ```
 
 Husky invokes lint-staged before local commits. The hook runs Biome only against supported staged files; it does not run repository-wide typecheck, build, or boundary validation. Set `HUSKY=0` in CI and production-only/container dependency stages.
@@ -71,9 +73,22 @@ API and worker startup configuration is loaded through `@fas/config`. The curren
 
 Supply current values through the process environment. Browser-safe, secret, database, provider, queue, storage, feature-flag, and observability configuration remain deferred until an approved capability has an immediate consumer.
 
+### 3.3 Prisma Bootstrap Commands
+
+`@fas/database` owns Prisma `7.8.0`, the PostgreSQL datasource contract, generated client output, and PostgreSQL driver-adapter construction. The current schema intentionally contains no models, enums, composite types, migrations, or seeds.
+
+Run validation and generation with an explicitly non-secret local value:
+
+```bash
+DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:validate
+DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:generate
+```
+
+These commands validate configuration and generate code without connecting to PostgreSQL. The repository does not load `.env` files automatically. Generated files remain under `packages/database/generated/prisma`, are ignored, and must not be imported outside `@fas/database`.
+
 ## 4. Local Environment
 
-The following is the target M1 workflow, not the current post-Sprint 6 repository state:
+The following is the target M1 workflow, not the current post-Sprint 8 repository state:
 
 1. Copy the committed environment example to a local ignored environment file.
 2. Provide local-only secrets.
@@ -158,6 +173,9 @@ Any intentional exception requires an Architecture Decision Record and updates t
 ## 8. Database and Prisma Conventions
 
 - The Prisma schema and migrations live only in `@fas/database`.
+- The current bootstrap schema is deliberately model-free; migration and runtime integration remain deferred.
+- Prisma, generated-client, and `pg` imports are prohibited outside `@fas/database`.
+- Constructing the database lifecycle adapter must not open a connection; callers connect and disconnect explicitly.
 - Use explicit relation names where ambiguity is possible.
 - Map database `snake_case` consistently; application APIs remain `camelCase`.
 - Do not use Prisma entities as domain entities.

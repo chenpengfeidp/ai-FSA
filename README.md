@@ -1,8 +1,8 @@
 # Football Analysis System (FAS)
 
-FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, the shared `@fas/tsconfig` and `@fas/config` packages, the Biome/dependency-cruiser engineering-quality foundation, and focused configuration-contract tests.
+FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, the shared `@fas/tsconfig`, `@fas/config`, and no-model `@fas/database` packages, the Biome/dependency-cruiser engineering-quality foundation, and focused configuration and database-bootstrap contract tests.
 
-No football-domain, AI-engine, database, authentication, or production behavior is implemented. V1 has no user or authentication system, so public deployment is prohibited.
+No football-domain, AI-engine, database model, migration, runtime database integration, authentication, or production behavior is implemented. V1 has no user or authentication system, so public deployment is prohibited.
 
 ## Current Delivery State
 
@@ -23,6 +23,8 @@ pnpm format:check
 pnpm lint
 pnpm boundaries
 pnpm quality
+DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:validate
+DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:generate
 pnpm typecheck
 pnpm test
 pnpm build
@@ -34,6 +36,8 @@ The root `package.json` is the version authority. `.nvmrc` must agree with its e
 If a command reports an unsupported toolchain, activate Node.js `24.18.0` with an already installed version manager and invoke an existing pnpm `11.13.0` installation. Do not bypass the check, relax the version declarations, or use npm or Yarn. Re-run `pnpm toolchain:check` before installation.
 
 `pnpm format` is the explicit writing formatter command. Local pre-commit checks use Husky and lint-staged to run Biome only on supported staged files.
+
+Prisma commands require a non-secret PostgreSQL-format `DATABASE_URL` supplied through the process environment. Validation and zero-model client generation do not connect to PostgreSQL. Generated client files remain package-local and ignored.
 
 ## Runtime Configuration
 
@@ -80,6 +84,8 @@ Current Milestone 3A delivery governance:
 - [Final Repository Health Report](docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md)
 - [Sprint 7 Report](docs/sprints/SPRINT7_REPORT.md)
 - [Sprint 8 Specification](docs/sprints/SPRINT8_SPECIFICATION.md)
+- [Sprint 8 Specification Revision](docs/sprints/SPRINT8_SPECIFICATION_REVISION.md)
+- [Sprint 8 Report](docs/sprints/SPRINT8_REPORT.md)
 - [Sprint 8 Architecture Alignment](docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md)
 - [Sprint 8 Architecture Alignment Approval](docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md)
 - [Sprint 8 Pre-implementation Audit](docs/sprints/SPRINT8_PRE_IMPLEMENTATION_AUDIT.md)

@@ -61,6 +61,18 @@ module.exports = {
       },
     },
     {
+      name: "no-prisma-outside-database",
+      comment:
+        "Prisma and PostgreSQL driver ownership is restricted to @fas/database.",
+      severity: "error",
+      from: {
+        pathNot: "^packages/database/",
+      },
+      to: {
+        path: "(^|node_modules/)(@prisma/|prisma(/|$)|pg(/|$))",
+      },
+    },
+    {
       name: "fixture-no-app-imports",
       comment:
         "The controlled fixture proves forbidden dependency enforcement is executable.",
@@ -78,7 +90,7 @@ module.exports = {
       path: "node_modules",
     },
     exclude: {
-      path: "(^|/)(node_modules|\\.next|dist|coverage|\\.turbo)(/|$)",
+      path: "(^|/)(node_modules|\\.next|dist|coverage|\\.turbo|packages/database/generated)(/|$)",
     },
     tsConfig: {
       fileName: "tsconfig.base.json",

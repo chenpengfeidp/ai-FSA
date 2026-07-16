@@ -5,10 +5,10 @@
 - Last updated: 2026-07-16
 - Current delivery milestone: Milestone 3A — Repository Bootstrap
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
-- Current task status: Sprint 8 architecture alignment approved; no implementation sprint active
+- Current task status: Sprint 8 complete; no implementation sprint active
 - Current sprint: No implementation sprint active
-- Last completed sprint: Sprint 7 — TypeScript Compiler Baseline Alignment
-- Next sprint: Sprint 8, specified and architecture-aligned but not authorized
+- Last completed sprint: Sprint 8 — Prisma No-model Bootstrap
+- Next sprint: Not specified or authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -20,18 +20,21 @@ The repository contains:
 - a pnpm and Turborepo workspace;
 - the reusable `@fas/tsconfig` TypeScript configuration package;
 - the reusable `@fas/config` typed runtime configuration package;
+- the reusable `@fas/database` no-model Prisma bootstrap package;
 - exact runtime and package-manager pins;
 - a minimal NestJS API application;
 - a minimal Next.js web application;
 - a minimal standalone NestJS worker;
 - Biome formatting and source linting;
-- dependency-cruiser boundary enforcement with a controlled negative test;
+- dependency-cruiser boundary enforcement with controlled application and Prisma-ownership negative tests;
 - guarded Husky and lint-staged pre-commit checks;
-- focused Vitest configuration-contract tests;
+- focused Vitest configuration and database-bootstrap contract tests;
 - pnpm-native exact Node.js and package-manager rejection;
 - repository-owned toolchain diagnostics and 15 controlled enforcement tests;
 - explicit TypeScript `6.0.3` ownership for every implemented workspace that invokes `tsc`;
-- unified toolchain, workspace, quality, typecheck, test, and build validation commands;
+- Prisma `7.8.0` default no-model generation with controlled `--require-models` negative evidence;
+- exact pnpm lifecycle-build approval for Prisma packages;
+- unified toolchain, workspace, Prisma, quality, typecheck, test, and build validation commands;
 - architecture documents, ADRs, sprint reports, and AI-agent governance.
 
 The API currently exposes only:
@@ -45,7 +48,7 @@ The web application contains only the repository-bootstrap homepage.
 
 The worker initializes, logs `Worker started.`, and closes without a queue or artificial idle loop.
 
-No football-domain, AI-engine, database, authentication, durable-job, or business behavior exists.
+No football-domain, AI-engine, database model, migration, runtime database integration, authentication, durable-job, or business behavior exists.
 
 ## Current Toolchain
 
@@ -62,6 +65,8 @@ No football-domain, AI-engine, database, authentication, durable-job, or busines
 - Next.js: `16.2.10`
 - React / React DOM: `19.2.7`
 - NestJS: `11.1.28`
+- Prisma CLI / Client / PostgreSQL adapter: `7.8.0`
+- PostgreSQL driver: `8.22.0`
 
 TypeScript 6.0.3 is the approved compiler baseline. TypeScript 7.0.2 failed because Nest CLI 11 requires a programmatic compiler API that TypeScript 7.0 does not expose.
 
@@ -79,6 +84,7 @@ TypeScript 6.0.3 is the approved compiler baseline. TypeScript 7.0.2 failed beca
 - Milestone 3A Sprint 5 — Configuration Foundation: complete.
 - Milestone 3A Sprint 6 — Toolchain Enforcement: complete.
 - Milestone 3A Sprint 7 — TypeScript Compiler Baseline Alignment: complete.
+- Milestone 3A Sprint 8 — Prisma No-model Bootstrap: complete.
 
 Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation work remains.
 
@@ -144,6 +150,17 @@ Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation
 - Added no source, script, compiler-policy, application-behavior, architecture, ADR, or Sprint 8 change.
 - Evidence: `docs/sprints/SPRINT7_REPORT.md`.
 
+### Sprint 8 — Prisma No-model Bootstrap
+
+- Created private workspace package `@fas/database`.
+- Added explicit Prisma `7.8.0` configuration and a PostgreSQL zero-model schema.
+- Proved default no-model generation and controlled `--require-models` rejection from root and package contexts.
+- Added a side-effect-free PostgreSQL driver-adapter lifecycle boundary.
+- Integrated generation into root and package validation, build, typecheck, and test gates.
+- Added 4 database-bootstrap tests and executable Prisma-ownership enforcement.
+- Added no model, migration, runtime connection, application integration, domain behavior, architecture change, ADR, or Sprint 9 work.
+- Evidence: `docs/sprints/SPRINT8_REPORT.md`.
+
 ## Architecture Status
 
 Architecture direction is **approved with conditions**.
@@ -164,7 +181,7 @@ The following principles remain binding:
 - append-only match-result versions;
 - executable acceptance evidence.
 
-Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager rejection evidence. Sprint 7 aligned workspace-owned compiler resolution with the approved TypeScript `6.0.3` baseline. Open Milestone 3A conditions include automated application tests beyond the configuration contract, Prisma no-model bootstrap, remaining Prisma/container compatibility evidence, container strategy and acceptance, deterministic runtime smoke testing, Turbo environment/cache policy, security gates, and CI.
+Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager rejection evidence. Sprint 7 aligned workspace-owned compiler resolution with the approved TypeScript `6.0.3` baseline. Sprint 8 closed the no-model Prisma bootstrap and generation dependency-graph conditions. Open Milestone 3A conditions include automated application tests beyond configuration and database-bootstrap contracts, remaining container compatibility evidence, container strategy and acceptance, deterministic runtime smoke testing, broader Turbo environment/cache policy, security gates, and CI.
 
 ## Approved Documents
 
@@ -187,6 +204,7 @@ Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager re
 - `docs/sprints/SPRINT6_SPECIFICATION.md`
 - `docs/sprints/SPRINT7_SPECIFICATION.md`
 - `docs/sprints/SPRINT8_SPECIFICATION.md`
+- `docs/sprints/SPRINT8_SPECIFICATION_REVISION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
 
@@ -203,6 +221,7 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT5_REPORT.md`
 - `docs/sprints/SPRINT6_REPORT.md`
 - `docs/sprints/SPRINT7_REPORT.md`
+- `docs/sprints/SPRINT8_REPORT.md`
 - `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md`
 - `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md`
 - `docs/sprints/SPRINT8_PRE_IMPLEMENTATION_AUDIT.md`
@@ -222,9 +241,10 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Live or in-play analysis is out of scope.
 - AI cannot make authoritative deterministic, lifecycle, publication, or governance decisions.
 - No AI provider or engine implementation is currently authorized.
-- No Prisma schema, PostgreSQL runtime, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
+- The Prisma schema intentionally contains no models, enums, composite types, migrations, or seeds.
+- No PostgreSQL runtime integration, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
 - No speculative engine or shared business packages may be created.
-- `@fas/tsconfig` and `@fas/config` are the only shared platform packages currently implemented.
+- `@fas/tsconfig`, `@fas/config`, and `@fas/database` are the only shared platform packages currently implemented.
 - `@fas/config` validates only `NODE_ENV`, API `HOST`, and API `PORT`.
 - No browser-safe, secret, database, provider, queue, storage, feature-flag, or observability configuration is implemented.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
@@ -241,15 +261,15 @@ No known broken Markdown links, obsolete sprint locations, active documentation-
 
 ## Next Sprint
 
-Sprint 7 is complete. Sprint 8 is specified and architecture-aligned but has not received explicit implementation authorization.
+Sprint 8 is complete. No Sprint 9 specification or implementation is active or authorized.
 
 Before any later implementation sprint:
 
-1. review and track the Sprint 8 specification, architecture-alignment proposal, approval record, and pre-implementation audit;
-2. obtain explicit Sprint 8 implementation authorization;
-3. start from a reviewable worktree;
-4. follow the Sprint 8 allowlist, validation commands, acceptance criteria, and stop boundary;
-5. stop before Sprint 9 or any excluded persistence capability.
+1. review the Sprint 8 report and current repository state;
+2. create and approve a separate Sprint specification;
+3. obtain explicit implementation authorization;
+4. start from a reviewable worktree;
+5. follow the new allowlist, validation commands, acceptance criteria, and stop boundary.
 
 ## Future Roadmap
 

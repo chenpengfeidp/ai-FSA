@@ -10,6 +10,17 @@ export default defineConfig({
           include: ["packages/config/test/**/*.spec.ts"],
         },
       },
+      {
+        test: {
+          name: "database",
+          environment: "node",
+          env: {
+            DATABASE_URL:
+              "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
+          },
+          include: ["packages/database/test/**/*.spec.ts"],
+        },
+      },
     ],
   },
 });

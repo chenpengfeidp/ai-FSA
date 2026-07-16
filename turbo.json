@@ -4,11 +4,17 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "passThroughEnv": ["DATABASE_URL"]
+    },
+    "generate": {
+      "outputs": ["generated/**"],
+      "passThroughEnv": ["DATABASE_URL"]
     },
     "typecheck": {
       "dependsOn": ["^build", "^typecheck"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["DATABASE_URL"]
     },
     "lint": {
       "dependsOn": ["^lint"],
@@ -16,7 +22,8 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["DATABASE_URL"]
     },
     "dev": {
       "cache": false,

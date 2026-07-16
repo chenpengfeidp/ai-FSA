@@ -6,8 +6,8 @@
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
 - Sprint: 8
 - Theme: Prisma No-model Bootstrap
-- Specification status: Complete and architecture-aligned
-- Implementation status: Not started and not authorized
+- Specification status: Revised after build-approval allowlist correction
+- Implementation status: Paused at the allowlist boundary; this revision does not authorize resumption
 
 This document defines the proposed Sprint 8 implementation boundary.
 
@@ -426,6 +426,7 @@ Implementation is restricted to this exact allowlist.
 ```text
 package.json
 pnpm-lock.yaml
+pnpm-workspace.yaml
 turbo.json
 vitest.config.ts
 dependency-cruiser.config.cjs
@@ -467,7 +468,6 @@ In particular, implementation must not modify:
 
 - `AGENTS.md`;
 - `.nvmrc`;
-- `pnpm-workspace.yaml`;
 - `tsconfig.base.json`;
 - any existing file under `apps/`;
 - any existing package source, test, manifest, or TypeScript config;
@@ -518,6 +518,10 @@ Dependency rules:
 - preserve exact direct pins;
 - use one root lockfile;
 - do not edit the lockfile manually;
+- pnpm `11.13.0` requires an explicit lifecycle-build decision for `prisma` and `@prisma/engines`;
+- add build approval only for exact `prisma@7.8.0` and `@prisma/engines@7.8.0` matchers in `pnpm-workspace.yaml`;
+- preserve the pre-existing `sharp` build approval unchanged;
+- do not approve, deny, or otherwise alter lifecycle-build policy for any other package;
 - do not add `dotenv`;
 - do not add a test library;
 - do not add a migration library;
@@ -618,6 +622,9 @@ Dependency rules:
 
 ## Repository Integrity
 
+- `pnpm-workspace.yaml` adds build approval only for exact `prisma@7.8.0` and `@prisma/engines@7.8.0` matchers.
+- The pre-existing `sharp` approval remains unchanged.
+- No other package receives a new or changed lifecycle-build decision.
 - Supported normal installation succeeds.
 - Frozen installation succeeds.
 - Toolchain checks pass.
@@ -785,6 +792,7 @@ pnpm list --depth 0
 git diff --check
 git status --short
 git diff -- pnpm-lock.yaml
+git diff -- pnpm-workspace.yaml
 git check-ignore packages/database/generated/prisma
 ```
 
@@ -796,6 +804,8 @@ The final review must confirm:
 - no model exists;
 - exact dependencies match the approved matrix;
 - no unrelated lockfile content changed;
+- workspace build approval was added only for exact `prisma@7.8.0` and `@prisma/engines@7.8.0` matchers;
+- the pre-existing `sharp` approval and every unrelated workspace policy remain unchanged;
 - no application or existing package source changed;
 - no architecture document or ADR changed;
 - existing uncommitted work was preserved;
@@ -896,6 +906,18 @@ Mitigation:
 - inspect importer and snapshot changes;
 - stop if unrelated direct versions move.
 
+## Unapproved Dependency Build Execution
+
+Risk: pnpm `11.13.0` rejects installation when Prisma lifecycle scripts have no explicit repository-owned build decision, or an overly broad approval permits unrelated dependency scripts.
+
+Mitigation:
+
+- approve only exact `prisma@7.8.0` and `@prisma/engines@7.8.0` matchers;
+- preserve the existing `sharp` approval without modification;
+- reject wildcard, unversioned, or additional Sprint 8 approvals;
+- inspect the `pnpm-workspace.yaml` diff before completion;
+- require both normal and frozen installation to pass.
+
 ## Boundary False Positive
 
 Risk: the new negative fixture fails for an unrelated rule.
@@ -929,6 +951,7 @@ Sprint 8 stops when:
 
 - the approved MF-02 alignment and Sprint 8 authorization are reviewed and tracked;
 - exact Prisma and PostgreSQL dependencies are installed only in `@fas/database`;
+- pnpm lifecycle-build approval is limited to exact `prisma@7.8.0` and `@prisma/engines@7.8.0` matchers;
 - Prisma config and zero-model schema validate;
 - root and package-context generation succeed;
 - controlled `--require-models` rejection proves zero-model state;
@@ -1009,20 +1032,21 @@ Sprint 8 is complete only when:
 2. every changed implementation file is in the allowlist;
 3. `@fas/database` is the only Prisma and PostgreSQL driver owner;
 4. direct dependencies match the exact approved matrix;
-5. Prisma config uses the version 7 config contract;
-6. schema contains zero models, enums, composites, migrations, and domain behavior;
-7. default no-model generation succeeds from root and package contexts;
-8. `--require-models` fails for the intended zero-model reason;
-9. no unsupported affirmative no-model option is used;
-10. generated output is reproducible, ignored, package-local, and uncommitted;
-11. database package build, typecheck, and test generate before consuming output;
-12. lifecycle adapter compiles without connecting or exposing model contracts;
-13. both Vitest projects are discovered and all tests pass;
-14. dependency-cruiser accepts the graph and rejects both controlled fixtures;
-15. normal and frozen installation pass;
-16. toolchain, workspace, quality, typecheck, test, build, and root validation pass;
-17. no application, domain, migration, runtime database, architecture, ADR, or Sprint 9 behavior changes;
-18. the Sprint 8 report records positive, negative, compatibility, dependency, and integrity evidence;
-19. project state is updated only after all validation passes;
-20. Milestone 3A and canonical v0.1 remain explicitly incomplete;
-21. implementation stops before PostgreSQL runtime, application integration, containers, CI, durable jobs, or Sprint 9.
+5. build approval is limited to exact `prisma@7.8.0` and `@prisma/engines@7.8.0` matchers, with the pre-existing `sharp` decision unchanged;
+6. Prisma config uses the version 7 config contract;
+7. schema contains zero models, enums, composites, migrations, and domain behavior;
+8. default no-model generation succeeds from root and package contexts;
+9. `--require-models` fails for the intended zero-model reason;
+10. no unsupported affirmative no-model option is used;
+11. generated output is reproducible, ignored, package-local, and uncommitted;
+12. database package build, typecheck, and test generate before consuming output;
+13. lifecycle adapter compiles without connecting or exposing model contracts;
+14. both Vitest projects are discovered and all tests pass;
+15. dependency-cruiser accepts the graph and rejects both controlled fixtures;
+16. normal and frozen installation pass;
+17. toolchain, workspace, quality, typecheck, test, build, and root validation pass;
+18. no application, domain, migration, runtime database, architecture, ADR, or Sprint 9 behavior changes;
+19. the Sprint 8 report records positive, negative, compatibility, dependency, and integrity evidence;
+20. project state is updated only after all validation passes;
+21. Milestone 3A and canonical v0.1 remain explicitly incomplete;
+22. implementation stops before PostgreSQL runtime, application integration, containers, CI, durable jobs, or Sprint 9.

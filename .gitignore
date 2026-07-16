@@ -8,5 +8,6 @@ dist/
 coverage/
 .turbo/
 apps/web/next-env.d.ts
+packages/database/generated/prisma/
 *.tsbuildinfo
 *.log

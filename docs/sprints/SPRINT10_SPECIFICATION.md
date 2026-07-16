@@ -943,8 +943,11 @@ const api = rows.find((row) => row.Service === "api");
 const web = rows.find((row) => row.Service === "web");
 
 assert(postgres.Health === "healthy", "PostgreSQL is not healthy");
+const postgresPublishedHostPorts = (postgres.Publishers ?? []).filter(
+  (entry) => Number(entry.PublishedPort) > 0,
+);
 assert(
-  !postgres.Publishers || postgres.Publishers.length === 0,
+  postgresPublishedHostPorts.length === 0,
   "PostgreSQL publishes a host port",
 );
 
@@ -1160,7 +1163,9 @@ Risk: short port syntax or an omitted host IP publishes API, web, or PostgreSQL
 on all interfaces.
 
 Mitigation: normalized JSON and running publisher data must both report
-`127.0.0.1` for API and web; PostgreSQL must report no publisher.
+`127.0.0.1` for API and web; PostgreSQL must report no published host port
+(`PublishedPort > 0`). Image `EXPOSE` metadata with `PublishedPort: 0` is not
+host port publication.
 
 ### Credential Leakage
 

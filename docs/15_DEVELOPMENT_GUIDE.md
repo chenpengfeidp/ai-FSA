@@ -86,22 +86,44 @@ DATABASE_URL="<non-secret-local-validation-url>" pnpm prisma:generate
 
 These commands validate configuration and generate code without connecting to PostgreSQL. The repository does not load `.env` files automatically. Generated files remain under `packages/database/generated/prisma`, are ignored, and must not be imported outside `@fas/database`.
 
+### 3.4 Container Image Commands
+
+Sprint 9 implements the Turbo-prune packaging strategy approved separately in `docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT_APPROVAL.md`. Each image uses a repository-root build context, a target-specific pruned workspace, the exact Node.js `24.18.0` base-image tag, and an explicit non-root runtime user.
+
+Build:
+
+```bash
+docker build -f apps/api/Dockerfile -t fas-api:sprint9 .
+docker build -f apps/worker/Dockerfile -t fas-worker:sprint9 .
+docker build -f apps/web/Dockerfile -t fas-web:sprint9 .
+```
+
+Run:
+
+```bash
+docker run --rm -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3001 -p 127.0.0.1:3001:3001 fas-api:sprint9
+docker run --rm fas-worker:sprint9
+docker run --rm -e NODE_ENV=production -e HOSTNAME=0.0.0.0 -e PORT=3000 -p 127.0.0.1:3000:3000 fas-web:sprint9
+```
+
+`HOST=0.0.0.0` and `HOSTNAME=0.0.0.0` are container-internal listener settings. The shown `-p 127.0.0.1:...` mappings keep manual verification loopback-only. The API and web images run their existing bootstrap behavior; the worker logs `Worker started.` and exits successfully. No image consumes `@fas/database` or requires PostgreSQL.
+
 ## 4. Local Environment
 
-The following is the target M1 workflow, not the current post-Sprint 8 repository state:
+The following distinguishes the demonstrated post-Sprint 9 repository state from the remaining target M1 workflow:
 
 1. Copy the committed environment example to a local ignored environment file.
 2. Provide local-only secrets.
-3. Start PostgreSQL and object storage through Docker Compose.
-4. Install dependencies with the frozen workspace lockfile policy used by the environment.
-5. Generate Prisma client artifacts.
-6. Apply development migrations.
-7. Start web, API, and worker development tasks.
-8. Verify readiness endpoints before testing workflows.
+3. Install dependencies with the frozen workspace lockfile policy used by the environment. **Demonstrated.**
+4. Generate the zero-model Prisma client artifacts. **Demonstrated without a database connection.**
+5. Build and run the API, web, and worker images independently. **Demonstrated without Compose or PostgreSQL.**
+6. Start PostgreSQL and object storage through Docker Compose. **Planned, not implemented.**
+7. Apply development migrations. **Planned; no models or migrations exist.**
+8. Start the integrated local topology and verify database-aware readiness. **Planned; current readiness is configuration-only.**
 
 Never commit `.env` files, provider keys, production data, full prompts containing sensitive source material, database dumps, or object-storage credentials.
 
-Redis and pgvector are not required in v1 local setup. Phase 2 profiles may add them as opt-in Compose services.
+Docker Compose, PostgreSQL runtime integration, the non-default worker profile, database-aware readiness, deterministic Compose smoke testing, and CI remain open Milestone 3A work. Redis and pgvector are not required in v1 local setup. Phase 2 profiles may add them as opt-in Compose services.
 
 ## 5. TypeScript Conventions
 

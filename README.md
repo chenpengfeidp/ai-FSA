@@ -1,6 +1,6 @@
 # Football Analysis System (FAS)
 
-FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, the shared `@fas/tsconfig`, `@fas/config`, and no-model `@fas/database` packages, the Biome/dependency-cruiser engineering-quality foundation, and focused configuration and database-bootstrap contract tests.
+FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, target-specific container images, the shared `@fas/tsconfig`, `@fas/config`, and no-model `@fas/database` packages, the Biome/dependency-cruiser engineering-quality foundation, and focused configuration and database-bootstrap contract tests.
 
 No football-domain, AI-engine, database model, migration, runtime database integration, authentication, or production behavior is implemented. V1 has no user or authentication system, so public deployment is prohibited.
 
@@ -49,6 +49,26 @@ API and worker environment configuration is loaded through `@fas/config`.
 
 The repository does not load `.env` files automatically. Supply variables through the process environment. Invalid supported values stop startup before NestJS initialization.
 
+## Container Images
+
+Sprint 9 applies the separately approved Turbo-prune strategy in [Sprint 9 Architecture Alignment Approval](docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT_APPROVAL.md). Build each target from the repository root:
+
+```bash
+docker build -f apps/api/Dockerfile -t fas-api:sprint9 .
+docker build -f apps/worker/Dockerfile -t fas-worker:sprint9 .
+docker build -f apps/web/Dockerfile -t fas-web:sprint9 .
+```
+
+Run the existing bootstrap behavior with loopback-only published ports:
+
+```bash
+docker run --rm -e NODE_ENV=production -e HOST=0.0.0.0 -e PORT=3001 -p 127.0.0.1:3001:3001 fas-api:sprint9
+docker run --rm fas-worker:sprint9
+docker run --rm -e NODE_ENV=production -e HOSTNAME=0.0.0.0 -e PORT=3000 -p 127.0.0.1:3000:3000 fas-web:sprint9
+```
+
+These images demonstrate build-only container acceptance. Docker Compose, PostgreSQL runtime integration, database-aware readiness, worker profiles, deterministic Compose smoke testing, image publication, and public deployment remain out of scope.
+
 ## Reading Order
 
 Read the numbered documents in order:
@@ -89,6 +109,10 @@ Current Milestone 3A delivery governance:
 - [Sprint 8 Architecture Alignment](docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md)
 - [Sprint 8 Architecture Alignment Approval](docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md)
 - [Sprint 8 Pre-implementation Audit](docs/sprints/SPRINT8_PRE_IMPLEMENTATION_AUDIT.md)
+- [Sprint 9 Specification](docs/sprints/SPRINT9_SPECIFICATION.md)
+- [Sprint 9 Architecture Alignment Approval](docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT_APPROVAL.md)
+- [Sprint 9 Implementation Authorization](docs/sprints/SPRINT9_IMPLEMENTATION_AUTHORIZATION.md)
+- [Sprint 9 Report](docs/sprints/SPRINT9_REPORT.md)
 
 ## Mandatory Paths by Change
 

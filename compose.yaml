@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: "${FAS_POSTGRES_DB:?FAS_POSTGRES_DB is required}"
+      POSTGRES_USER: "${FAS_POSTGRES_USER:?FAS_POSTGRES_USER is required}"
+      POSTGRES_PASSWORD: "${FAS_POSTGRES_PASSWORD:?FAS_POSTGRES_PASSWORD is required}"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"'
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    volumes:
+      - type: volume
+        source: postgres-data
+        target: /var/lib/postgresql/data
+    networks:
+      - application
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3001"
+    ports:
+      - name: api
+        target: 3001
+        published: "${FAS_API_PUBLISHED_PORT:?FAS_API_PUBLISHED_PORT is required}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    networks:
+      - application
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+    ports:
+      - name: web
+        target: 3000
+        published: "${FAS_WEB_PUBLISHED_PORT:?FAS_WEB_PUBLISHED_PORT is required}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    networks:
+      - application
+
+  worker:
+    profiles:
+      - worker
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    networks:
+      - application
+
+networks:
+  application:
+
+volumes:
+  postgres-data:

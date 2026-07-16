@@ -108,22 +108,58 @@ docker run --rm -e NODE_ENV=production -e HOSTNAME=0.0.0.0 -e PORT=3000 -p 127.0
 
 `HOST=0.0.0.0` and `HOSTNAME=0.0.0.0` are container-internal listener settings. The shown `-p 127.0.0.1:...` mappings keep manual verification loopback-only. The API and web images run their existing bootstrap behavior; the worker logs `Worker started.` and exits successfully. No image consumes `@fas/database` or requires PostgreSQL.
 
+### 3.5 Local Compose Topology
+
+Sprint 10 assembles the existing images with `postgres:17-alpine` on one project-owned private network. PostgreSQL uses one named development volume and a bounded `pg_isready` health check. It publishes no host port. API and web publish only to host loopback, and the worker remains opt-in behind the `worker` profile.
+
+Prepare local Compose interpolation values:
+
+```bash
+cp .env.example .env
+```
+
+`.env.example` contains local-only placeholders. Keep `.env` ignored and never place production credentials in it.
+
+Start the default topology:
+
+```bash
+docker compose up --build --detach --wait --wait-timeout 120
+```
+
+With the example port values, API is available at `http://127.0.0.1:3001` and web at `http://127.0.0.1:3000`. Default startup contains only PostgreSQL, API, and web.
+
+Run the existing one-shot worker behavior explicitly:
+
+```bash
+docker compose --profile worker run --rm worker
+```
+
+Stop API and web, then remove all project containers, the private network, and the local PostgreSQL data volume:
+
+```bash
+docker compose stop --timeout 10 api web
+docker compose --profile worker down --volumes --remove-orphans --timeout 10
+```
+
+This is topology acceptance, not application database integration. API readiness remains configuration-only and does not inspect PostgreSQL. API, web, and worker receive no database URL or PostgreSQL credential. No Prisma model or migration exists, and Compose runs no generation, migration, `db push`, or schema mutation automatically. Database-aware readiness and the full deterministic runtime smoke workflow require separate authorization.
+
 ## 4. Local Environment
 
-The following distinguishes the demonstrated post-Sprint 9 repository state from the remaining target M1 workflow:
+The following distinguishes the demonstrated post-Sprint 10 repository state from the remaining target M1 workflow:
 
 1. Copy the committed environment example to a local ignored environment file.
 2. Provide local-only secrets.
 3. Install dependencies with the frozen workspace lockfile policy used by the environment. **Demonstrated.**
 4. Generate the zero-model Prisma client artifacts. **Demonstrated without a database connection.**
 5. Build and run the API, web, and worker images independently. **Demonstrated without Compose or PostgreSQL.**
-6. Start PostgreSQL and object storage through Docker Compose. **Planned, not implemented.**
-7. Apply development migrations. **Planned; no models or migrations exist.**
-8. Start the integrated local topology and verify database-aware readiness. **Planned; current readiness is configuration-only.**
+6. Start PostgreSQL, API, and web through the private local Compose topology. **Demonstrated without application database integration.**
+7. Run the one-shot worker through its explicit non-default Compose profile. **Demonstrated.**
+8. Apply development migrations. **Planned; no models or migrations exist.**
+9. Verify database-aware readiness through the integrated topology. **Planned; current readiness is configuration-only.**
 
 Never commit `.env` files, provider keys, production data, full prompts containing sensitive source material, database dumps, or object-storage credentials.
 
-Docker Compose, PostgreSQL runtime integration, the non-default worker profile, database-aware readiness, deterministic Compose smoke testing, and CI remain open Milestone 3A work. Redis and pgvector are not required in v1 local setup. Phase 2 profiles may add them as opt-in Compose services.
+Application PostgreSQL consumption, database-aware readiness, deterministic Compose smoke testing, and CI remain open Milestone 3A work. Object storage is not part of the demonstrated Sprint 10 topology. Redis and pgvector are not required in v1 local setup. Phase 2 profiles may add them as opt-in Compose services.
 
 ## 5. TypeScript Conventions
 

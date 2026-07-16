@@ -1,6 +1,6 @@
 # Football Analysis System (FAS)
 
-FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, target-specific container images, the shared `@fas/tsconfig`, `@fas/config`, and no-model `@fas/database` packages, the Biome/dependency-cruiser engineering-quality foundation, and focused configuration and database-bootstrap contract tests.
+FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, target-specific container images, a private local Compose topology with PostgreSQL, the shared `@fas/tsconfig`, `@fas/config`, and no-model `@fas/database` packages, the Biome/dependency-cruiser engineering-quality foundation, and focused configuration and database-bootstrap contract tests.
 
 No football-domain, AI-engine, database model, migration, runtime database integration, authentication, or production behavior is implemented. V1 has no user or authentication system, so public deployment is prohibited.
 
@@ -67,7 +67,45 @@ docker run --rm fas-worker:sprint9
 docker run --rm -e NODE_ENV=production -e HOSTNAME=0.0.0.0 -e PORT=3000 -p 127.0.0.1:3000:3000 fas-web:sprint9
 ```
 
-These images demonstrate build-only container acceptance. Docker Compose, PostgreSQL runtime integration, database-aware readiness, worker profiles, deterministic Compose smoke testing, image publication, and public deployment remain out of scope.
+These images also remain independently runnable without Compose or PostgreSQL.
+
+## Local Compose Topology
+
+Create a local ignored Compose environment file from the committed example:
+
+```bash
+cp .env.example .env
+```
+
+The example contains local-only placeholders for the PostgreSQL database, user, password, and loopback-published API and web ports. Replace them only with local development values. Never commit `.env`.
+
+Start the default PostgreSQL, API, and web topology and wait for health:
+
+```bash
+docker compose up --build --detach --wait --wait-timeout 120
+```
+
+The API is available at `http://127.0.0.1:3001`, and the web application is available at `http://127.0.0.1:3000` with the example values. PostgreSQL is private to the project-owned Compose network and publishes no host port.
+
+The worker is excluded from default startup. Run its existing one-shot bootstrap behavior through the explicit profile:
+
+```bash
+docker compose --profile worker run --rm worker
+```
+
+Stop the long-running application services within the demonstrated shutdown bound:
+
+```bash
+docker compose stop --timeout 10 api web
+```
+
+Remove the containers, private network, and local PostgreSQL data volume:
+
+```bash
+docker compose --profile worker down --volumes --remove-orphans --timeout 10
+```
+
+This topology demonstrates PostgreSQL container health and existing application behavior only. API readiness remains configuration-only; no application receives database configuration or connects to PostgreSQL. No Prisma model or migration exists, and startup runs no generation, migration, `db push`, or schema mutation. Database-aware readiness, the full deterministic runtime smoke contract, CI, security scanning, image publication, and public deployment remain out of scope.
 
 ## Reading Order
 
@@ -113,6 +151,10 @@ Current Milestone 3A delivery governance:
 - [Sprint 9 Architecture Alignment Approval](docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT_APPROVAL.md)
 - [Sprint 9 Implementation Authorization](docs/sprints/SPRINT9_IMPLEMENTATION_AUTHORIZATION.md)
 - [Sprint 9 Report](docs/sprints/SPRINT9_REPORT.md)
+- [Sprint 10 Planning](docs/sprints/SPRINT10_PLANNING.md)
+- [Sprint 10 Specification](docs/sprints/SPRINT10_SPECIFICATION.md)
+- [Sprint 10 Architecture Review](docs/sprints/SPRINT10_ARCHITECTURE_REVIEW.md)
+- [Sprint 10 Report](docs/sprints/SPRINT10_REPORT.md)
 
 ## Mandatory Paths by Change
 

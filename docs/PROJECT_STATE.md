@@ -5,9 +5,9 @@
 - Last updated: 2026-07-16
 - Current delivery milestone: Milestone 3A — Repository Bootstrap
 - Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
-- Current task status: Sprint 9 complete; no implementation sprint active
+- Current task status: Sprint 10 complete; no implementation sprint active
 - Current sprint: No implementation sprint active
-- Last completed sprint: Sprint 9 — Container Image Packaging Foundation
+- Last completed sprint: Sprint 10 — Local Compose Topology Foundation
 - Next sprint: Not specified or authorized
 - Release status: Pre-release; canonical v0.1 is not complete
 
@@ -38,6 +38,11 @@ The repository contains:
 - exact `node:24.18.0-slim` multi-stage images with production-only or standalone runtime artifacts;
 - explicit non-root container execution and deterministic build-only runtime evidence;
 - Next.js standalone server output for the web image;
+- one root-owned local Compose topology for PostgreSQL, API, web, and the profiled worker;
+- PostgreSQL `17-alpine` health, named-volume, private-network, and no-host-publication evidence;
+- loopback-only Compose publication for API and web;
+- explicit non-default `worker` profile with preserved one-shot startup and clean exit;
+- deterministic default/profiled Compose configuration and runtime cleanup evidence;
 - unified toolchain, workspace, Prisma, quality, typecheck, test, and build validation commands;
 - architecture documents, ADRs, sprint reports, and AI-agent governance.
 
@@ -72,6 +77,7 @@ No football-domain, AI-engine, database model, migration, runtime database integ
 - Prisma CLI / Client / PostgreSQL adapter: `7.8.0`
 - PostgreSQL driver: `8.22.0`
 - Docker Engine validation baseline: `29.6.1` on `darwin/arm64`
+- Docker Compose validation baseline: `5.3.0`
 
 TypeScript 6.0.3 is the approved compiler baseline. TypeScript 7.0.2 failed because Nest CLI 11 requires a programmatic compiler API that TypeScript 7.0 does not expose.
 
@@ -91,6 +97,7 @@ TypeScript 6.0.3 is the approved compiler baseline. TypeScript 7.0.2 failed beca
 - Milestone 3A Sprint 7 — TypeScript Compiler Baseline Alignment: complete.
 - Milestone 3A Sprint 8 — Prisma No-model Bootstrap: complete.
 - Milestone 3A Sprint 9 — Container Image Packaging Foundation: complete.
+- Milestone 3A Sprint 10 — Local Compose Topology Foundation: complete.
 
 Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation work remains.
 
@@ -178,6 +185,16 @@ Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation
 - Left Compose acceptance, worker profile, database-aware readiness, deterministic runtime smoke, CI, and security scanning open.
 - Evidence: `docs/sprints/SPRINT9_REPORT.md`.
 
+### Sprint 10 — Local Compose Topology Foundation
+
+- Added the exact PostgreSQL, API, web, and profiled-worker Compose topology.
+- Added bounded PostgreSQL `pg_isready` health and one named local data volume.
+- Proved the default topology excludes worker and the explicit `worker` profile preserves its one-shot behavior.
+- Proved API and web publish only to loopback and PostgreSQL publishes no host port.
+- Preserved application commands, responses, non-root execution, and the no-database-consumer boundary.
+- Added no model, migration, schema command, application database integration, or Sprint 11 work.
+- Evidence: `docs/sprints/SPRINT10_REPORT.md`.
+
 ## Architecture Status
 
 Architecture direction is **approved with conditions**.
@@ -198,7 +215,7 @@ The following principles remain binding:
 - append-only match-result versions;
 - executable acceptance evidence.
 
-Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager rejection evidence. Sprint 7 aligned workspace-owned compiler resolution with the approved TypeScript `6.0.3` baseline. Sprint 8 closed the no-model Prisma bootstrap and generation dependency-graph conditions. Sprint 9 closed the MF-08 packaging-strategy decision and demonstrated target-specific build-only container acceptance. Open Milestone 3A conditions include automated application tests beyond configuration and database-bootstrap contracts, Compose-level container acceptance, worker profile policy, database-aware readiness, deterministic runtime smoke testing, broader Turbo environment/cache policy, security gates, and CI.
+Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager rejection evidence. Sprint 7 aligned workspace-owned compiler resolution with the approved TypeScript `6.0.3` baseline. Sprint 8 closed the no-model Prisma bootstrap and generation dependency-graph conditions. Sprint 9 closed the MF-08 packaging-strategy decision and demonstrated target-specific build-only container acceptance. Sprint 10 completed the local Compose topology, satisfied MF-14 host-binding acceptance, and satisfied only the Compose-profile portion of MF-10. Open Milestone 3A conditions include automated application tests beyond configuration and database-bootstrap contracts, remaining MF-09 container acceptance, the MF-10 worker bootstrap signal-handling test, database-aware readiness, deterministic runtime smoke testing, broader Turbo environment/cache policy, security gates, and CI.
 
 ## Approved Documents
 
@@ -225,6 +242,7 @@ Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager re
 - `docs/sprints/SPRINT9_SPECIFICATION.md`
 - `docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT_APPROVAL.md`
 - `docs/sprints/SPRINT9_IMPLEMENTATION_AUTHORIZATION.md`
+- `docs/sprints/SPRINT10_SPECIFICATION.md`
 
 The sign-off narrows and conditions the implementation plan where they differ.
 
@@ -248,6 +266,9 @@ The sign-off narrows and conditions the implementation plan where they differ.
 - `docs/sprints/SPRINT9_REPORT.md`
 - `docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT.md`
 - `docs/sprints/SPRINT9_FINAL_REVIEW.md`
+- `docs/sprints/SPRINT10_PLANNING.md`
+- `docs/sprints/SPRINT10_ARCHITECTURE_REVIEW.md`
+- `docs/sprints/SPRINT10_REPORT.md`
 - `docs/22_MILESTONE_3A_GATE.md`
 - `docs/23_RELEASE_BASELINE.md`
 - `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`
@@ -265,8 +286,8 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - AI cannot make authoritative deterministic, lifecycle, publication, or governance decisions.
 - No AI provider or engine implementation is currently authorized.
 - The Prisma schema intentionally contains no models, enums, composite types, migrations, or seeds.
-- No PostgreSQL runtime integration, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
-- Current images prove independent build and bootstrap runtime behavior only; Docker Compose, integrated topology, database-aware readiness, worker profiles, host-binding acceptance, deterministic runtime smoke, image publication, and public deployment are not implemented.
+- No application PostgreSQL runtime integration, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
+- Current images prove independent build and bootstrap runtime behavior, and the local Compose topology proves PostgreSQL health, private networking, worker-profile behavior, loopback-only application publication, and PostgreSQL non-publication. Database-aware readiness, full deterministic runtime smoke, image publication, and public deployment are not implemented.
 - No speculative engine or shared business packages may be created.
 - `@fas/tsconfig`, `@fas/config`, and `@fas/database` are the only shared platform packages currently implemented.
 - `@fas/config` validates only `NODE_ENV`, API `HOST`, and API `PORT`.
@@ -285,11 +306,11 @@ No known broken Markdown links, obsolete sprint locations, active documentation-
 
 ## Next Sprint
 
-Sprint 9 is complete. No later sprint specification or implementation is active or authorized.
+Sprint 10 is complete. No later sprint specification or implementation is active or authorized.
 
 Before any later implementation sprint:
 
-1. review the Sprint 9 report and current repository state;
+1. review the Sprint 10 report and current repository state;
 2. create and approve a separate Sprint specification;
 3. obtain explicit implementation authorization;
 4. start from a reviewable worktree;

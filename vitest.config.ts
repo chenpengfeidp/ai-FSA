@@ -21,6 +21,13 @@ export default defineConfig({
           include: ["packages/database/test/**/*.spec.ts"],
         },
       },
+      {
+        test: {
+          name: "evidence",
+          environment: "node",
+          include: ["packages/evidence/test/**/*.spec.ts"],
+        },
+      },
     ],
   },
 });

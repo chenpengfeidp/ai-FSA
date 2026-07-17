@@ -38,6 +38,9 @@ importers:
       '@fas/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@fas/evidence':
+        specifier: workspace:*
+        version: link:../../packages/evidence
       '@nestjs/common':
         specifier: 11.1.28
         version: 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -160,6 +163,28 @@ importers:
       prisma:
         specifier: 7.8.0
         version: 7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/domain:
+    devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/evidence:
+    dependencies:
+      '@fas/domain':
+        specifier: workspace:*
+        version: link:../domain
+    devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       typescript:
         specifier: 6.0.3
         version: 6.0.3

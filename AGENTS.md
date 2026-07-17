@@ -117,64 +117,78 @@ Redis, BullMQ, pgvector, microservices, and semantic retrieval are Phase 2 decis
 
 ## Development Workflow
 
-The governing lifecycle is documented in `docs/DEVELOPMENT_WORKFLOW.md`.
+For small, well-bounded work inside the existing architecture, use:
 
-The short form is:
+`Small implementation task -> Code -> Test -> Review -> Sprint Report (optional) -> Tag / Release`
 
-`Idea -> Project Bible -> Architecture -> ADR -> Implementation Plan -> Architecture Review -> Implementation Gate -> Sprint Planning -> Sprint Implementation -> Code Review -> Validation -> Release -> Retrospective`
+Planning and specification documents are optional for normal feature and
+maintenance work. Their absence must not block a small implementation task
+whose goal, scope, affected area, and acceptance evidence are clear.
 
-Before implementation:
+A dedicated plan, specification, and architecture review are required when work
+introduces:
 
-1. identify the owning milestone and canonical documents;
-2. read the required architecture and applicable ADRs;
-3. resolve ambiguities in documentation;
-4. obtain an approved implementation gate;
-5. confirm explicit sprint scope and exclusions.
+- a major architectural change;
+- new infrastructure;
+- cross-module refactoring;
+- a breaking architectural decision.
 
-During implementation:
+Significant decisions still follow the comprehensive governance lifecycle in
+`docs/DEVELOPMENT_WORKFLOW.md`. Existing architecture documents, ADRs,
+implementation plans, sign-offs, and technical standards remain authoritative.
 
-1. keep changes inside the authorized sprint;
+Before coding:
+
+1. identify the task goal, explicit scope, exclusions, and affected files or
+   areas;
+2. read the owning canonical documents and applicable ADRs;
+3. inspect the working tree without discarding unrelated work;
+4. escalate only when the task crosses one of the planning triggers above or a
+   higher-authority conflict is present.
+
+During coding:
+
+1. keep changes inside the stated task scope;
 2. preserve package and dependency direction;
-3. update tests and documentation with changed contracts;
-4. collect executable validation evidence;
-5. stop when a higher-authority conflict appears.
+3. add or update tests with behavior changes;
+4. update documentation alongside or after implementation when behavior or a
+   contract changes;
+5. collect executable validation evidence;
+6. stop when a higher-authority conflict appears.
 
-After implementation:
+After coding:
 
-1. run affected quality gates;
-2. review the diff for scope leakage and secrets;
-3. create or update the sprint report;
-4. update `docs/PROJECT_STATE.md`;
-5. stop before the next sprint unless separately authorized.
+1. run affected tests and quality gates;
+2. review the diff for correctness, scope leakage, generated files, and secrets;
+3. perform code review;
+4. create a sprint report only when requested or when the change needs a durable
+   delivery evidence record;
+5. create tags or releases only when explicitly requested and after validation.
 
 ## Sprint Workflow
 
-Every sprint must define:
+Small tasks do not require separate `Planning.md` or `Specification.md`
+artifacts. The user request, issue, or task brief may define the implementation
+scope directly.
 
-- goal;
-- included deliverables;
-- explicit exclusions;
-- files or areas allowed to change;
-- acceptance commands;
-- required report;
-- stop boundary.
+Every implementation task still needs:
 
-An AI agent must not continue from one sprint into another based on roadmap proximity.
+- a clear goal;
+- explicit inclusions and exclusions;
+- identifiable permitted change areas;
+- acceptance behavior or commands;
+- a stop boundary when the request is part of a larger roadmap.
 
-At sprint start:
-
-- verify the previous sprint status;
-- inspect the working tree without discarding unrelated work;
-- read the implementation plan and gate;
-- restate constraints internally before editing.
-
-At sprint completion:
+At task completion:
 
 - validate in proportion to risk;
-- record failures, fallbacks, and final evidence;
-- distinguish sprint completion from milestone or release completion;
-- list remaining work without implementing it;
+- record material failures and fallbacks in the review or optional report;
+- distinguish task completion from milestone or release completion;
 - leave the repository in a reviewable state.
+
+Existing Sprint planning, specification, review, approval, and report documents
+remain immutable historical records. They do not impose a documentation-first
+requirement on later small implementation tasks.
 
 ## Rules for AI Agents
 
@@ -196,7 +210,8 @@ At sprint completion:
 - Do not create commits, push branches, or open pull requests unless explicitly requested.
 - Prefer existing repository tools and patterns over introducing alternatives.
 - Ask one focused question when a missing decision materially changes the result.
-- Stop when an authority conflict, missing gate, or destructive choice requires human review.
+- Stop when an authority conflict, a triggered planning requirement, or a
+  destructive choice requires human review.
 
 ## Validation Baseline
 

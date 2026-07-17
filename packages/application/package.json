@@ -1,0 +1,30 @@
+{
+  "name": "@fas/application",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project application",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fas/evidence-import": "workspace:*"
+  },
+  "devDependencies": {
+    "@fas/evidence": "workspace:*",
+    "@fas/provider-fixture": "workspace:*",
+    "@fas/tsconfig": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

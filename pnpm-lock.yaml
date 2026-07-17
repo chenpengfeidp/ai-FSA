@@ -132,6 +132,25 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
+  packages/application:
+    dependencies:
+      '@fas/evidence-import':
+        specifier: workspace:*
+        version: link:../evidence-import
+    devDependencies:
+      '@fas/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+      '@fas/provider-fixture':
+        specifier: workspace:*
+        version: link:../provider-fixture
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/config:
     dependencies:
       zod:

@@ -1,4 +1,5 @@
 import type { JsonObject, JsonValue } from "@fas/domain";
+import { createMatchId, type MatchId } from "@fas/match";
 
 export type EvidenceFreshness = "fresh" | "stale" | "unknown";
 export type EvidenceQuality = "rejected" | "unverified" | "verified";
@@ -12,6 +13,7 @@ export interface Evidence {
   readonly id: string;
   readonly source: string;
   readonly sourceId: string;
+  readonly matchId?: MatchId;
   readonly collectedAt: string;
   readonly eventTime: string;
   readonly freshness: EvidenceFreshness;
@@ -24,6 +26,7 @@ export interface CreateEvidenceInput {
   readonly id: string;
   readonly source: string;
   readonly sourceId: string;
+  readonly matchId?: MatchId;
   readonly collectedAt: string;
   readonly eventTime: string;
   readonly freshness: EvidenceFreshness;
@@ -111,11 +114,14 @@ export function createEvidence(input: CreateEvidenceInput): Evidence {
     method: requireNonEmpty(input.provenance.method, "provenance.method"),
   });
   const payload = cloneAndFreezeJson(input.payload) as JsonObject;
+  const matchReference =
+    input.matchId === undefined ? {} : { matchId: createMatchId(input.matchId) };
 
   return Object.freeze({
     id: requireNonEmpty(input.id, "id"),
     source: requireNonEmpty(input.source, "source"),
     sourceId: requireNonEmpty(input.sourceId, "sourceId"),
+    ...matchReference,
     collectedAt: requireTimestamp(input.collectedAt, "collectedAt"),
     eventTime: requireTimestamp(input.eventTime, "eventTime"),
     freshness: requireAllowedValue(input.freshness, freshnessValues, "freshness"),

@@ -1,5 +1,6 @@
 // biome-ignore lint/style/useImportType: NestJS uses the service class as constructor metadata.
 import { type CreateEvidenceInput, EvidenceService } from "@fas/evidence";
+import { createMatchId } from "@fas/match";
 import { Injectable, type OnModuleInit } from "@nestjs/common";
 
 export const exampleEvidenceId = "evidence-example";
@@ -8,6 +9,7 @@ const exampleEvidenceInput = {
   id: exampleEvidenceId,
   source: "fixture",
   sourceId: "fixture-match-001",
+  matchId: createMatchId("match-example"),
   collectedAt: "2026-07-16T15:00:00.000Z",
   eventTime: "2026-07-16T14:55:00.000Z",
   freshness: "fresh",
@@ -18,7 +20,6 @@ const exampleEvidenceInput = {
   },
   payload: {
     kind: "match-status",
-    matchId: "match-example",
     status: "scheduled",
   },
 } as const satisfies CreateEvidenceInput;

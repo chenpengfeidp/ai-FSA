@@ -41,6 +41,9 @@ importers:
       '@fas/evidence':
         specifier: workspace:*
         version: link:../../packages/evidence
+      '@fas/match':
+        specifier: workspace:*
+        version: link:../../packages/match
       '@nestjs/common':
         specifier: 11.1.28
         version: 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -181,6 +184,9 @@ importers:
       '@fas/domain':
         specifier: workspace:*
         version: link:../domain
+      '@fas/match':
+        specifier: workspace:*
+        version: link:../match
     devDependencies:
       '@fas/tsconfig':
         specifier: workspace:*

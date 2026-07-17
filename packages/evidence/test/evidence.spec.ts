@@ -1,3 +1,4 @@
+import { createMatchId } from "@fas/match";
 import { describe, expect, it } from "vitest";
 import { createEvidence, EvidenceValidationError } from "../src/index.js";
 
@@ -5,6 +6,7 @@ const validInput = {
   id: "evidence-example",
   source: "fixture",
   sourceId: "fixture-match-001",
+  matchId: createMatchId("match-example"),
   collectedAt: "2026-07-16T15:00:00.000Z",
   eventTime: "2026-07-16T14:55:00.000Z",
   freshness: "fresh",
@@ -14,7 +16,6 @@ const validInput = {
     method: "fixture",
   },
   payload: {
-    matchId: "match-example",
     status: "scheduled",
     score: {
       away: 0,
@@ -32,6 +33,15 @@ describe("Evidence", () => {
     expect(Object.isFrozen(evidence.provenance)).toBe(true);
     expect(Object.isFrozen(evidence.payload)).toBe(true);
     expect(Object.isFrozen(evidence.payload.score)).toBe(true);
+    expect(evidence.payload).not.toHaveProperty("matchId");
+  });
+
+  it("supports evidence without a match relationship", () => {
+    const { matchId, ...inputWithoutMatch } = validInput;
+    const evidence = createEvidence(inputWithoutMatch);
+
+    expect(matchId).toBe(createMatchId("match-example"));
+    expect(evidence).not.toHaveProperty("matchId");
   });
 
   it("rejects missing identity and invalid timestamps", () => {

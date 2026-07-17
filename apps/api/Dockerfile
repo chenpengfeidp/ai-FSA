@@ -60,6 +60,8 @@ COPY --from=builder --chown=node:node /app/packages/domain/dist ./packages/domai
 COPY --from=builder --chown=node:node /app/packages/domain/package.json ./packages/domain/package.json
 COPY --from=builder --chown=node:node /app/packages/evidence/dist ./packages/evidence/dist
 COPY --from=builder --chown=node:node /app/packages/evidence/package.json ./packages/evidence/package.json
+COPY --from=builder --chown=node:node /app/packages/match/dist ./packages/match/dist
+COPY --from=builder --chown=node:node /app/packages/match/package.json ./packages/match/package.json
 
 WORKDIR /app/apps/api
 

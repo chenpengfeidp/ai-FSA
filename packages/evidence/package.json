@@ -19,7 +19,8 @@
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@fas/domain": "workspace:*"
+    "@fas/domain": "workspace:*",
+    "@fas/match": "workspace:*"
   },
   "devDependencies": {
     "@fas/tsconfig": "workspace:*",

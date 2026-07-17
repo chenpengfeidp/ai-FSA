@@ -50,18 +50,32 @@ WORKDIR /app
 
 COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --from=production-dependencies --chown=node:node /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=production-dependencies --chown=node:node /app/packages/application/node_modules ./packages/application/node_modules
 COPY --from=production-dependencies --chown=node:node /app/packages/config/node_modules ./packages/config/node_modules
 COPY --from=production-dependencies --chown=node:node /app/packages/evidence/node_modules ./packages/evidence/node_modules
+COPY --from=production-dependencies --chown=node:node /app/packages/evidence-import/node_modules ./packages/evidence-import/node_modules
+COPY --from=production-dependencies --chown=node:node /app/packages/evidence-normalizer/node_modules ./packages/evidence-normalizer/node_modules
+COPY --from=production-dependencies --chown=node:node /app/packages/evidence-query/node_modules ./packages/evidence-query/node_modules
 COPY --from=builder --chown=node:node /app/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=node:node /app/apps/api/package.json ./apps/api/package.json
+COPY --from=builder --chown=node:node /app/packages/application/dist ./packages/application/dist
+COPY --from=builder --chown=node:node /app/packages/application/package.json ./packages/application/package.json
 COPY --from=builder --chown=node:node /app/packages/config/dist ./packages/config/dist
 COPY --from=builder --chown=node:node /app/packages/config/package.json ./packages/config/package.json
 COPY --from=builder --chown=node:node /app/packages/domain/dist ./packages/domain/dist
 COPY --from=builder --chown=node:node /app/packages/domain/package.json ./packages/domain/package.json
 COPY --from=builder --chown=node:node /app/packages/evidence/dist ./packages/evidence/dist
 COPY --from=builder --chown=node:node /app/packages/evidence/package.json ./packages/evidence/package.json
+COPY --from=builder --chown=node:node /app/packages/evidence-import/dist ./packages/evidence-import/dist
+COPY --from=builder --chown=node:node /app/packages/evidence-import/package.json ./packages/evidence-import/package.json
+COPY --from=builder --chown=node:node /app/packages/evidence-normalizer/dist ./packages/evidence-normalizer/dist
+COPY --from=builder --chown=node:node /app/packages/evidence-normalizer/package.json ./packages/evidence-normalizer/package.json
+COPY --from=builder --chown=node:node /app/packages/evidence-query/dist ./packages/evidence-query/dist
+COPY --from=builder --chown=node:node /app/packages/evidence-query/package.json ./packages/evidence-query/package.json
 COPY --from=builder --chown=node:node /app/packages/match/dist ./packages/match/dist
 COPY --from=builder --chown=node:node /app/packages/match/package.json ./packages/match/package.json
+COPY --from=builder --chown=node:node /app/packages/provider-fixture/dist ./packages/provider-fixture/dist
+COPY --from=builder --chown=node:node /app/packages/provider-fixture/package.json ./packages/provider-fixture/package.json
 
 WORKDIR /app/apps/api
 

@@ -13,7 +13,7 @@
     "boundaries:test": "node scripts/validate-boundary-fixture.mjs",
     "build": "turbo run build",
     "check": "biome check .",
-    "dev:api": "pnpm --filter @fas/config build && pnpm --filter @fas/domain build && pnpm --filter @fas/match build && pnpm --filter @fas/evidence build && pnpm --filter @fas/api dev",
+    "dev:api": "pnpm exec turbo run build --filter=@fas/api... && pnpm --filter @fas/api dev",
     "dev:web": "pnpm --filter @fas/web dev",
     "dev:worker": "pnpm --filter @fas/config build && pnpm --filter @fas/worker dev",
     "format": "biome format --write .",

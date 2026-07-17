@@ -140,3 +140,15 @@ export function normalizeFixtureEvidence(
     );
   }
 }
+
+export class FixtureEvidenceNormalizer {
+  readonly #context: FixtureEvidenceContext;
+
+  constructor(context: FixtureEvidenceContext) {
+    this.#context = Object.freeze({ ...context });
+  }
+
+  normalize(input: unknown): EvidenceNormalizationResult {
+    return normalizeFixtureEvidence(input, this.#context);
+  }
+}

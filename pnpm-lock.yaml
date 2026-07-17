@@ -35,15 +35,30 @@ importers:
 
   apps/api:
     dependencies:
+      '@fas/application':
+        specifier: workspace:*
+        version: link:../../packages/application
       '@fas/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@fas/evidence':
         specifier: workspace:*
         version: link:../../packages/evidence
+      '@fas/evidence-import':
+        specifier: workspace:*
+        version: link:../../packages/evidence-import
+      '@fas/evidence-normalizer':
+        specifier: workspace:*
+        version: link:../../packages/evidence-normalizer
+      '@fas/evidence-query':
+        specifier: workspace:*
+        version: link:../../packages/evidence-query
       '@fas/match':
         specifier: workspace:*
         version: link:../../packages/match
+      '@fas/provider-fixture':
+        specifier: workspace:*
+        version: link:../../packages/provider-fixture
       '@nestjs/common':
         specifier: 11.1.28
         version: 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)

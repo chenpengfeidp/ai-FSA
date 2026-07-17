@@ -2,6 +2,7 @@ import type { Evidence } from "@fas/evidence";
 import { describe, expect, it } from "vitest";
 import {
   type EvidenceNormalizationResult,
+  FixtureEvidenceNormalizer,
   normalizeFixtureEvidence,
 } from "../src/index.js";
 
@@ -29,6 +30,16 @@ function requireEvidence(result: EvidenceNormalizationResult): Evidence {
 }
 
 describe("normalizeFixtureEvidence", () => {
+  it("supports an injected immutable context through FixtureEvidenceNormalizer", () => {
+    const normalizer = new FixtureEvidenceNormalizer(context);
+
+    const evidence = requireEvidence(normalizer.normalize(rawInput));
+
+    expect(evidence.id).toBe(context.evidenceId);
+    expect(evidence.sourceId).toBe(context.sourceId);
+    expect(evidence.collectedAt).toBe(context.collectedAt);
+  });
+
   it("normalizes fixture match information into Evidence", () => {
     const result = normalizeFixtureEvidence(rawInput, context);
     const evidence = requireEvidence(result);

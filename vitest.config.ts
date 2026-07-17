@@ -5,6 +5,13 @@ export default defineConfig({
     projects: [
       {
         test: {
+          name: "api",
+          environment: "node",
+          include: ["apps/api/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
           name: "application",
           environment: "node",
           include: ["packages/application/test/**/*.spec.ts"],

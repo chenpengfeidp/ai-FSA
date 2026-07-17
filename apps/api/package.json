@@ -7,12 +7,18 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main.js",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project api",
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@fas/application": "workspace:*",
     "@fas/config": "workspace:*",
     "@fas/evidence": "workspace:*",
+    "@fas/evidence-import": "workspace:*",
+    "@fas/evidence-normalizer": "workspace:*",
+    "@fas/evidence-query": "workspace:*",
     "@fas/match": "workspace:*",
+    "@fas/provider-fixture": "workspace:*",
     "@nestjs/common": "11.1.28",
     "@nestjs/core": "11.1.28",
     "@nestjs/platform-express": "11.1.28",

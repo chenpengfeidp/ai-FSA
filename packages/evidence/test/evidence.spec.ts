@@ -1,11 +1,29 @@
 import { createMatchId } from "@fas/match";
 import { describe, expect, it } from "vitest";
-import { createEvidence, EvidenceValidationError } from "../src/index.js";
+import {
+  createEvidence,
+  type EvidenceType,
+  EvidenceValidationError,
+} from "../src/index.js";
+
+const evidenceTypes = [
+  "MATCH_INFO",
+  "ODDS",
+  "TEAM_FORM",
+  "HEAD_TO_HEAD",
+  "LINEUP",
+  "INJURY",
+  "WEATHER",
+  "NEWS",
+  "RANKING",
+  "STATISTICS",
+] as const satisfies ReadonlyArray<EvidenceType>;
 
 const validInput = {
   id: "evidence-example",
   source: "fixture",
   sourceId: "fixture-match-001",
+  type: "MATCH_INFO",
   matchId: createMatchId("match-example"),
   collectedAt: "2026-07-16T15:00:00.000Z",
   eventTime: "2026-07-16T14:55:00.000Z",
@@ -42,6 +60,22 @@ describe("Evidence", () => {
 
     expect(matchId).toBe(createMatchId("match-example"));
     expect(evidence).not.toHaveProperty("matchId");
+  });
+
+  it.each(evidenceTypes)("accepts the %s evidence type", (type) => {
+    expect(createEvidence({ ...validInput, type }).type).toBe(type);
+  });
+
+  it("rejects unknown evidence types", () => {
+    expect(() => createEvidence({ ...validInput, type: "UNKNOWN" })).toThrow(
+      EvidenceValidationError,
+    );
+  });
+
+  it("serializes its classification and match relationship", () => {
+    const evidence = createEvidence(validInput);
+
+    expect(JSON.parse(JSON.stringify(evidence))).toEqual(validInput);
   });
 
   it("rejects missing identity and invalid timestamps", () => {
@@ -89,7 +123,7 @@ describe("Evidence", () => {
   it("prevents mutation of the evidence object", () => {
     const evidence = createEvidence(validInput);
 
-    expect(Reflect.set(evidence, "source", "changed")).toBe(false);
-    expect(evidence.source).toBe("fixture");
+    expect(Reflect.set(evidence, "type", "ODDS")).toBe(false);
+    expect(evidence.type).toBe("MATCH_INFO");
   });
 });

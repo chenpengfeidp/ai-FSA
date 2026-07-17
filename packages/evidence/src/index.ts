@@ -8,6 +8,7 @@ export type {
   EvidenceFreshness,
   EvidenceProvenance,
   EvidenceQuality,
+  EvidenceType,
 } from "./domain/evidence.js";
 export { DuplicateEvidenceError } from "./repository/evidence-repository.js";
 export type { EvidenceRepository } from "./repository/evidence-repository.js";

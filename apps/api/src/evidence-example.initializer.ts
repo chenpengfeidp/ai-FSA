@@ -9,6 +9,7 @@ const exampleEvidenceInput = {
   id: exampleEvidenceId,
   source: "fixture",
   sourceId: "fixture-match-001",
+  type: "MATCH_INFO",
   matchId: createMatchId("match-example"),
   collectedAt: "2026-07-16T15:00:00.000Z",
   eventTime: "2026-07-16T14:55:00.000Z",

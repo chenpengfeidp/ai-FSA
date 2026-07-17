@@ -3,6 +3,17 @@ import { createMatchId, type MatchId } from "@fas/match";
 
 export type EvidenceFreshness = "fresh" | "stale" | "unknown";
 export type EvidenceQuality = "rejected" | "unverified" | "verified";
+export type EvidenceType =
+  | "HEAD_TO_HEAD"
+  | "INJURY"
+  | "LINEUP"
+  | "MATCH_INFO"
+  | "NEWS"
+  | "ODDS"
+  | "RANKING"
+  | "STATISTICS"
+  | "TEAM_FORM"
+  | "WEATHER";
 
 export interface EvidenceProvenance {
   readonly collector: string;
@@ -13,6 +24,7 @@ export interface Evidence {
   readonly id: string;
   readonly source: string;
   readonly sourceId: string;
+  readonly type: EvidenceType;
   readonly matchId?: MatchId;
   readonly collectedAt: string;
   readonly eventTime: string;
@@ -26,6 +38,7 @@ export interface CreateEvidenceInput {
   readonly id: string;
   readonly source: string;
   readonly sourceId: string;
+  readonly type: string;
   readonly matchId?: MatchId;
   readonly collectedAt: string;
   readonly eventTime: string;
@@ -49,6 +62,18 @@ const qualityValues: ReadonlySet<string> = new Set([
   "rejected",
   "unverified",
   "verified",
+]);
+const evidenceTypeValues: ReadonlySet<string> = new Set([
+  "HEAD_TO_HEAD",
+  "INJURY",
+  "LINEUP",
+  "MATCH_INFO",
+  "NEWS",
+  "ODDS",
+  "RANKING",
+  "STATISTICS",
+  "TEAM_FORM",
+  "WEATHER",
 ]);
 
 function requireNonEmpty(value: string, field: string): string {
@@ -121,6 +146,11 @@ export function createEvidence(input: CreateEvidenceInput): Evidence {
     id: requireNonEmpty(input.id, "id"),
     source: requireNonEmpty(input.source, "source"),
     sourceId: requireNonEmpty(input.sourceId, "sourceId"),
+    type: requireAllowedValue(
+      input.type,
+      evidenceTypeValues,
+      "type",
+    ) as EvidenceType,
     ...matchReference,
     collectedAt: requireTimestamp(input.collectedAt, "collectedAt"),
     eventTime: requireTimestamp(input.eventTime, "eventTime"),

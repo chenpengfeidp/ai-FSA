@@ -49,6 +49,13 @@ export default defineConfig({
           include: ["packages/match/test/**/*.spec.ts"],
         },
       },
+      {
+        test: {
+          name: "provider-fixture",
+          environment: "node",
+          include: ["packages/provider-fixture/test/**/*.spec.ts"],
+        },
+      },
     ],
   },
 });

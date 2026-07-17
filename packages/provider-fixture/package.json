@@ -1,0 +1,25 @@
+{
+  "name": "@fas/provider-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project provider-fixture",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@fas/tsconfig": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

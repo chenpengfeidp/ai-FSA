@@ -44,6 +44,13 @@ export default defineConfig({
       },
       {
         test: {
+          name: "evidence-query",
+          environment: "node",
+          include: ["packages/evidence-query/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
           name: "evidence-normalizer",
           environment: "node",
           include: ["packages/evidence-normalizer/test/**/*.spec.ts"],

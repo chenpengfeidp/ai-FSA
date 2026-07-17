@@ -165,6 +165,7 @@ describe("EvidenceImportPipeline", () => {
 
   it("converts repository runtime exceptions into typed failures", () => {
     const repository: EvidenceRepository = {
+      findAll: () => [],
       findById: () => undefined,
       save: () => {
         throw new Error("repository unavailable");

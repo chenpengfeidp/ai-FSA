@@ -124,6 +124,7 @@ describe("ImportMatchUseCase", () => {
 
   it("returns repository failures from the import pipeline", () => {
     const repository: EvidenceRepository = {
+      findAll: () => [],
       findById: () => undefined,
       save: () => {
         throw new Error("repository unavailable");

@@ -1,5 +1,5 @@
 {
-  "name": "@fas/application",
+  "name": "@fas/evidence-query",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,16 +15,14 @@
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "test": "vitest run --root ../.. --config vitest.config.ts --project application",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project evidence-query",
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@fas/evidence-import": "workspace:*",
-    "@fas/match": "workspace:*"
+    "@fas/evidence": "workspace:*"
   },
   "devDependencies": {
-    "@fas/evidence": "workspace:*",
-    "@fas/provider-fixture": "workspace:*",
+    "@fas/match": "workspace:*",
     "@fas/tsconfig": "workspace:*",
     "typescript": "6.0.3"
   }

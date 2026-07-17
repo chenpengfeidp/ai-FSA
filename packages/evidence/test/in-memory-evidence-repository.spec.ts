@@ -30,8 +30,19 @@ describe("InMemoryEvidenceRepository", () => {
     const repository = new InMemoryEvidenceRepository();
 
     expect(repository.findById(evidence.id)).toBeUndefined();
+    expect(repository.findAll()).toEqual([]);
     expect(repository.save(evidence)).toBe(evidence);
     expect(repository.findById(evidence.id)).toBe(evidence);
+  });
+
+  it("returns an immutable snapshot of stored evidence", () => {
+    const repository = new InMemoryEvidenceRepository();
+    repository.save(evidence);
+
+    const snapshot = repository.findAll();
+
+    expect(snapshot).toEqual([evidence]);
+    expect(Object.isFrozen(snapshot)).toBe(true);
   });
 
   it("does not overwrite immutable evidence identities", () => {

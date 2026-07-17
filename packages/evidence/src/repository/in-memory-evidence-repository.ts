@@ -7,6 +7,10 @@ import {
 export class InMemoryEvidenceRepository implements EvidenceRepository {
   readonly #evidenceById = new Map<string, Evidence>();
 
+  findAll(): readonly Evidence[] {
+    return Object.freeze([...this.#evidenceById.values()]);
+  }
+
   findById(id: string): Evidence | undefined {
     return this.#evidenceById.get(id);
   }

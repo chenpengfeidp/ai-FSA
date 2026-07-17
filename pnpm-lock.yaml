@@ -137,6 +137,9 @@ importers:
       '@fas/evidence-import':
         specifier: workspace:*
         version: link:../evidence-import
+      '@fas/match':
+        specifier: workspace:*
+        version: link:../match
     devDependencies:
       '@fas/evidence':
         specifier: workspace:*
@@ -239,6 +242,22 @@ importers:
         specifier: workspace:*
         version: link:../match
     devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/evidence-query:
+    dependencies:
+      '@fas/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+    devDependencies:
+      '@fas/match':
+        specifier: workspace:*
+        version: link:../match
       '@fas/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig

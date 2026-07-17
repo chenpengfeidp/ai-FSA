@@ -189,6 +189,15 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
+  packages/match:
+    devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/tsconfig: {}
 
 packages:

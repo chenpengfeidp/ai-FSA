@@ -28,6 +28,13 @@ export default defineConfig({
           include: ["packages/evidence/test/**/*.spec.ts"],
         },
       },
+      {
+        test: {
+          name: "match",
+          environment: "node",
+          include: ["packages/match/test/**/*.spec.ts"],
+        },
+      },
     ],
   },
 });

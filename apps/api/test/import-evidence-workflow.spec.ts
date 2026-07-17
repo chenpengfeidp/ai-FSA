@@ -3,6 +3,7 @@ import type { INestApplication } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AppModule } from "../src/app.module.js";
+import { configureOpenApi } from "../src/openapi.js";
 
 const importedEvidenceId = "evidence-fixture-match-example";
 
@@ -38,12 +39,22 @@ describe("HTTP import and Evidence query workflow", () => {
 
   beforeEach(async () => {
     app = await NestFactory.create(AppModule, { logger: false });
+    configureOpenApi(app);
     await app.listen(0, "127.0.0.1");
     baseUrl = await app.getUrl();
   });
 
   afterEach(async () => {
     await app?.close();
+  });
+
+  it("serves the interactive Swagger UI", async () => {
+    const response = await fetch(`${baseUrl}/docs`);
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/html");
+    expect(html).toContain("Swagger UI");
   });
 
   it("imports a fixture Match successfully", async () => {

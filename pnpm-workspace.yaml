@@ -7,6 +7,7 @@ pmOnFail: error
 
 allowBuilds:
   "@prisma/engines@7.8.0": true
+  "@scarf/scarf": false
   "prisma@7.8.0": true
   sharp: true
 

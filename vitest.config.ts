@@ -5,6 +5,13 @@ export default defineConfig({
     projects: [
       {
         test: {
+          name: "analysis",
+          environment: "node",
+          include: ["packages/analysis/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
           name: "api",
           environment: "node",
           include: ["apps/api/test/**/*.spec.ts"],
@@ -82,6 +89,13 @@ export default defineConfig({
           name: "provider-fixture",
           environment: "node",
           include: ["packages/provider-fixture/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
+          name: "rule",
+          environment: "node",
+          include: ["packages/rule/test/**/*.spec.ts"],
         },
       },
     ],

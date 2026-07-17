@@ -150,6 +150,43 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
+  packages/analysis:
+    dependencies:
+      '@fas/application':
+        specifier: workspace:*
+        version: link:../application
+      '@fas/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+      '@fas/evidence-query':
+        specifier: workspace:*
+        version: link:../evidence-query
+      '@fas/feature':
+        specifier: workspace:*
+        version: link:../feature
+      '@fas/match':
+        specifier: workspace:*
+        version: link:../match
+      '@fas/rule':
+        specifier: workspace:*
+        version: link:../rule
+    devDependencies:
+      '@fas/evidence-import':
+        specifier: workspace:*
+        version: link:../evidence-import
+      '@fas/evidence-normalizer':
+        specifier: workspace:*
+        version: link:../evidence-normalizer
+      '@fas/provider-fixture':
+        specifier: workspace:*
+        version: link:../provider-fixture
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/application:
     dependencies:
       '@fas/evidence-import':
@@ -312,6 +349,22 @@ importers:
         version: 6.0.3
 
   packages/provider-fixture:
+    devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/rule:
+    dependencies:
+      '@fas/feature':
+        specifier: workspace:*
+        version: link:../feature
+      '@fas/match':
+        specifier: workspace:*
+        version: link:../match
     devDependencies:
       '@fas/tsconfig':
         specifier: workspace:*

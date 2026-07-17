@@ -1,0 +1,36 @@
+{
+  "name": "@fas/analysis",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project analysis",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fas/application": "workspace:*",
+    "@fas/evidence": "workspace:*",
+    "@fas/evidence-query": "workspace:*",
+    "@fas/feature": "workspace:*",
+    "@fas/match": "workspace:*",
+    "@fas/rule": "workspace:*"
+  },
+  "devDependencies": {
+    "@fas/evidence-import": "workspace:*",
+    "@fas/evidence-normalizer": "workspace:*",
+    "@fas/provider-fixture": "workspace:*",
+    "@fas/tsconfig": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

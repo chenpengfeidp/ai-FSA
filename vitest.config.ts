@@ -65,6 +65,13 @@ export default defineConfig({
       },
       {
         test: {
+          name: "feature",
+          environment: "node",
+          include: ["packages/feature/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
           name: "match",
           environment: "node",
           include: ["packages/match/test/**/*.spec.ts"],

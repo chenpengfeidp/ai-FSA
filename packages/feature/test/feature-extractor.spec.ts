@@ -1,0 +1,153 @@
+import type { JsonObject } from "@fas/domain";
+import { createEvidence, type Evidence, type EvidenceType } from "@fas/evidence";
+import { createMatchId, type MatchId } from "@fas/match";
+import { describe, expect, it } from "vitest";
+import { FeatureExtractionError, FeatureExtractor } from "../src/index.js";
+
+interface EvidenceOptions {
+  readonly matchId?: MatchId | null;
+  readonly payload?: JsonObject;
+  readonly type?: EvidenceType;
+}
+
+function makeEvidence(options: EvidenceOptions = {}): Evidence {
+  const matchId =
+    options.matchId === undefined ? createMatchId("match-1") : options.matchId;
+
+  return createEvidence({
+    id: "evidence-1",
+    source: "fixture",
+    sourceId: "fixture-match-1",
+    type: options.type ?? "MATCH_INFO",
+    ...(matchId === null ? {} : { matchId }),
+    collectedAt: "2026-07-17T10:00:00Z",
+    eventTime: "2026-08-01T19:30:00Z",
+    freshness: "fresh",
+    quality: "unverified",
+    provenance: {
+      collector: "@fas/evidence-normalizer",
+      method: "fixture",
+    },
+    payload: options.payload ?? {
+      away: "Chelsea",
+      home: "Liverpool",
+      kickoff: "2026-08-01T19:30:00Z",
+    },
+  });
+}
+
+describe("FeatureExtractor", () => {
+  it("extracts ordered MATCH_INFO Features without inference", () => {
+    const evidence = makeEvidence();
+    const extractor = new FeatureExtractor();
+
+    const features = extractor.extract(evidence);
+
+    expect(features).toEqual([
+      {
+        featureId: "feature:evidence-1:homeTeam",
+        matchId: "match-1",
+        name: "homeTeam",
+        value: "Liverpool",
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      },
+      {
+        featureId: "feature:evidence-1:awayTeam",
+        matchId: "match-1",
+        name: "awayTeam",
+        value: "Chelsea",
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      },
+      {
+        featureId: "feature:evidence-1:kickoff",
+        matchId: "match-1",
+        name: "kickoff",
+        value: "2026-08-01T19:30:00Z",
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      },
+    ]);
+  });
+
+  it("is deterministic for the same Evidence", () => {
+    const evidence = makeEvidence();
+    const extractor = new FeatureExtractor();
+
+    const first = extractor.extract(evidence);
+    const second = extractor.extract(evidence);
+
+    expect(second).toEqual(first);
+    expect(second.map(({ featureId }) => featureId)).toEqual(
+      first.map(({ featureId }) => featureId),
+    );
+  });
+
+  it("never mutates source Evidence", () => {
+    const evidence = makeEvidence();
+    const snapshot = JSON.stringify(evidence);
+
+    new FeatureExtractor().extract(evidence);
+
+    expect(JSON.stringify(evidence)).toBe(snapshot);
+  });
+
+  it("returns an immutable empty array for unsupported Evidence types", () => {
+    const features = new FeatureExtractor().extract(makeEvidence({ type: "ODDS" }));
+
+    expect(features).toEqual([]);
+    expect(Object.isFrozen(features)).toBe(true);
+  });
+
+  it("requires MATCH_INFO Evidence to reference a MatchId", () => {
+    const extractor = new FeatureExtractor();
+
+    expect(() => extractor.extract(makeEvidence({ matchId: null }))).toThrow(
+      FeatureExtractionError,
+    );
+
+    try {
+      extractor.extract(makeEvidence({ matchId: null }));
+    } catch (error: unknown) {
+      expect(error).toMatchObject({
+        code: "MATCH_ID_REQUIRED",
+        field: "matchId",
+      });
+    }
+  });
+
+  it.each([
+    "home",
+    "away",
+    "kickoff",
+  ] as const)("rejects an invalid %s payload field", (field) => {
+    const payload = {
+      away: "Chelsea",
+      home: "Liverpool",
+      kickoff: "2026-08-01T19:30:00Z",
+      [field]: " ",
+    };
+    const extractor = new FeatureExtractor();
+
+    expect(() => extractor.extract(makeEvidence({ payload }))).toThrow(
+      FeatureExtractionError,
+    );
+
+    try {
+      extractor.extract(makeEvidence({ payload }));
+    } catch (error: unknown) {
+      expect(error).toMatchObject({
+        code: "MATCH_INFO_FIELD_INVALID",
+        field,
+      });
+    }
+  });
+
+  it("returns an immutable Feature collection", () => {
+    const features = new FeatureExtractor().extract(makeEvidence());
+
+    expect(Object.isFrozen(features)).toBe(true);
+    expect(features.every(Object.isFrozen)).toBe(true);
+  });
+});

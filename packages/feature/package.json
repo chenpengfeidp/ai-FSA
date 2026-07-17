@@ -1,0 +1,30 @@
+{
+  "name": "@fas/feature",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project feature",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fas/domain": "workspace:*",
+    "@fas/evidence": "workspace:*",
+    "@fas/match": "workspace:*"
+  },
+  "devDependencies": {
+    "@fas/tsconfig": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

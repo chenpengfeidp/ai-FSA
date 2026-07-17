@@ -76,6 +76,59 @@ describe("HTTP import and Evidence query workflow", () => {
     });
   });
 
+  it("runs the complete deterministic analysis and returns AnalysisReport JSON", async () => {
+    const response = await request(
+      baseUrl,
+      "/api/analyze/match/match-example",
+      "POST",
+    );
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      reportId: "report:match-example:2026-07-17T10:00:00Z",
+      matchId: "match-example",
+      generatedAt: "2026-07-17T10:00:00Z",
+    });
+    expect(report.summary).toEqual([
+      "Match information is complete.",
+      "Home team: Liverpool.",
+      "Away team: Chelsea.",
+      "Kickoff: 2026-08-01T19:30:00Z.",
+    ]);
+    expect(report.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "homeTeam", value: "Liverpool" }),
+        expect.objectContaining({ name: "awayTeam", value: "Chelsea" }),
+        expect.objectContaining({
+          name: "kickoff",
+          value: "2026-08-01T19:30:00Z",
+        }),
+      ]),
+    );
+    expect(report.rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleName: "HOME_TEAM_PRESENT",
+          status: "PASS",
+        }),
+        expect.objectContaining({
+          ruleName: "AWAY_TEAM_PRESENT",
+          status: "PASS",
+        }),
+        expect.objectContaining({
+          ruleName: "KICKOFF_PRESENT",
+          status: "PASS",
+        }),
+      ]),
+    );
+
+    const openApiResponse = await request(baseUrl, "/docs-json");
+    const openApi = requireRecord(openApiResponse.body);
+    const paths = requireRecord(openApi.paths);
+    expect(paths).toHaveProperty("/api/analyze/match/{matchId}");
+  });
+
   it("returns a typed failure for an unknown Match", async () => {
     const response = await request(
       baseUrl,

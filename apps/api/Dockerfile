@@ -50,14 +50,20 @@ WORKDIR /app
 
 COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --from=production-dependencies --chown=node:node /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=production-dependencies --chown=node:node /app/packages/analysis/node_modules ./packages/analysis/node_modules
 COPY --from=production-dependencies --chown=node:node /app/packages/application/node_modules ./packages/application/node_modules
 COPY --from=production-dependencies --chown=node:node /app/packages/config/node_modules ./packages/config/node_modules
 COPY --from=production-dependencies --chown=node:node /app/packages/evidence/node_modules ./packages/evidence/node_modules
 COPY --from=production-dependencies --chown=node:node /app/packages/evidence-import/node_modules ./packages/evidence-import/node_modules
 COPY --from=production-dependencies --chown=node:node /app/packages/evidence-normalizer/node_modules ./packages/evidence-normalizer/node_modules
 COPY --from=production-dependencies --chown=node:node /app/packages/evidence-query/node_modules ./packages/evidence-query/node_modules
+COPY --from=production-dependencies --chown=node:node /app/packages/feature/node_modules ./packages/feature/node_modules
+COPY --from=production-dependencies --chown=node:node /app/packages/report/node_modules ./packages/report/node_modules
+COPY --from=production-dependencies --chown=node:node /app/packages/rule/node_modules ./packages/rule/node_modules
 COPY --from=builder --chown=node:node /app/apps/api/dist ./apps/api/dist
 COPY --from=builder --chown=node:node /app/apps/api/package.json ./apps/api/package.json
+COPY --from=builder --chown=node:node /app/packages/analysis/dist ./packages/analysis/dist
+COPY --from=builder --chown=node:node /app/packages/analysis/package.json ./packages/analysis/package.json
 COPY --from=builder --chown=node:node /app/packages/application/dist ./packages/application/dist
 COPY --from=builder --chown=node:node /app/packages/application/package.json ./packages/application/package.json
 COPY --from=builder --chown=node:node /app/packages/config/dist ./packages/config/dist
@@ -72,10 +78,16 @@ COPY --from=builder --chown=node:node /app/packages/evidence-normalizer/dist ./p
 COPY --from=builder --chown=node:node /app/packages/evidence-normalizer/package.json ./packages/evidence-normalizer/package.json
 COPY --from=builder --chown=node:node /app/packages/evidence-query/dist ./packages/evidence-query/dist
 COPY --from=builder --chown=node:node /app/packages/evidence-query/package.json ./packages/evidence-query/package.json
+COPY --from=builder --chown=node:node /app/packages/feature/dist ./packages/feature/dist
+COPY --from=builder --chown=node:node /app/packages/feature/package.json ./packages/feature/package.json
 COPY --from=builder --chown=node:node /app/packages/match/dist ./packages/match/dist
 COPY --from=builder --chown=node:node /app/packages/match/package.json ./packages/match/package.json
 COPY --from=builder --chown=node:node /app/packages/provider-fixture/dist ./packages/provider-fixture/dist
 COPY --from=builder --chown=node:node /app/packages/provider-fixture/package.json ./packages/provider-fixture/package.json
+COPY --from=builder --chown=node:node /app/packages/report/dist ./packages/report/dist
+COPY --from=builder --chown=node:node /app/packages/report/package.json ./packages/report/package.json
+COPY --from=builder --chown=node:node /app/packages/rule/dist ./packages/rule/dist
+COPY --from=builder --chown=node:node /app/packages/rule/package.json ./packages/rule/package.json
 
 WORKDIR /app/apps/api
 

@@ -35,6 +35,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@fas/analysis':
+        specifier: workspace:*
+        version: link:../../packages/analysis
       '@fas/application':
         specifier: workspace:*
         version: link:../../packages/application
@@ -53,12 +56,21 @@ importers:
       '@fas/evidence-query':
         specifier: workspace:*
         version: link:../../packages/evidence-query
+      '@fas/feature':
+        specifier: workspace:*
+        version: link:../../packages/feature
       '@fas/match':
         specifier: workspace:*
         version: link:../../packages/match
       '@fas/provider-fixture':
         specifier: workspace:*
         version: link:../../packages/provider-fixture
+      '@fas/report':
+        specifier: workspace:*
+        version: link:../../packages/report
+      '@fas/rule':
+        specifier: workspace:*
+        version: link:../../packages/rule
       '@nestjs/common':
         specifier: 11.1.28
         version: 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -350,6 +362,31 @@ importers:
 
   packages/provider-fixture:
     devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/report:
+    dependencies:
+      '@fas/analysis':
+        specifier: workspace:*
+        version: link:../analysis
+      '@fas/feature':
+        specifier: workspace:*
+        version: link:../feature
+      '@fas/match':
+        specifier: workspace:*
+        version: link:../match
+      '@fas/rule':
+        specifier: workspace:*
+        version: link:../rule
+    devDependencies:
+      '@fas/evidence':
+        specifier: workspace:*
+        version: link:../evidence
       '@fas/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig

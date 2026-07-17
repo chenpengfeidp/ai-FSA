@@ -11,14 +11,18 @@
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@fas/analysis": "workspace:*",
     "@fas/application": "workspace:*",
     "@fas/config": "workspace:*",
     "@fas/evidence": "workspace:*",
     "@fas/evidence-import": "workspace:*",
     "@fas/evidence-normalizer": "workspace:*",
     "@fas/evidence-query": "workspace:*",
+    "@fas/feature": "workspace:*",
     "@fas/match": "workspace:*",
     "@fas/provider-fixture": "workspace:*",
+    "@fas/report": "workspace:*",
+    "@fas/rule": "workspace:*",
     "@nestjs/common": "11.1.28",
     "@nestjs/core": "11.1.28",
     "@nestjs/platform-express": "11.1.28",

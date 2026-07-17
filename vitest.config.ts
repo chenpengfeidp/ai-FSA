@@ -98,6 +98,13 @@ export default defineConfig({
           include: ["packages/rule/test/**/*.spec.ts"],
         },
       },
+      {
+        test: {
+          name: "report",
+          environment: "node",
+          include: ["packages/report/test/**/*.spec.ts"],
+        },
+      },
     ],
   },
 });

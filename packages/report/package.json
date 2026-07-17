@@ -1,0 +1,32 @@
+{
+  "name": "@fas/report",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project report",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fas/analysis": "workspace:*",
+    "@fas/feature": "workspace:*",
+    "@fas/match": "workspace:*",
+    "@fas/rule": "workspace:*"
+  },
+  "devDependencies": {
+    "@fas/evidence": "workspace:*",
+    "@fas/tsconfig": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

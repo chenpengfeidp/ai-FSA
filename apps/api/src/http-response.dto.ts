@@ -146,3 +146,119 @@ export class EvidenceQueryErrorResponseDto {
   @ApiProperty({ type: () => EvidenceQueryErrorDto })
   declare readonly error: EvidenceQueryErrorDto;
 }
+
+export class FeatureDto {
+  @ApiProperty({ example: "feature:evidence-fixture-match-example:homeTeam" })
+  declare readonly featureId: string;
+
+  @ApiProperty({ example: "match-example" })
+  declare readonly matchId: string;
+
+  @ApiProperty({
+    enum: ["awayTeam", "homeTeam", "kickoff"],
+    example: "homeTeam",
+  })
+  declare readonly name: string;
+
+  @ApiProperty({ example: "Liverpool" })
+  declare readonly value: unknown;
+
+  @ApiProperty({ example: "evidence-fixture-match-example" })
+  declare readonly sourceEvidenceId: string;
+
+  @ApiProperty({ example: "2026-07-17T10:00:00Z", format: "date-time" })
+  declare readonly generatedAt: string;
+}
+
+export class RuleResultDto {
+  @ApiProperty({ example: "rule:home-team-present:v1" })
+  declare readonly ruleId: string;
+
+  @ApiProperty({ example: "match-example" })
+  declare readonly matchId: string;
+
+  @ApiProperty({
+    enum: ["AWAY_TEAM_PRESENT", "HOME_TEAM_PRESENT", "KICKOFF_PRESENT"],
+    example: "HOME_TEAM_PRESENT",
+  })
+  declare readonly ruleName: string;
+
+  @ApiProperty({ enum: ["FAIL", "PASS"], example: "PASS" })
+  declare readonly status: string;
+
+  @ApiProperty({ example: 1 })
+  declare readonly score: number;
+
+  @ApiProperty({
+    example: "HOME_TEAM_PRESENT passed because its source Feature is present.",
+  })
+  declare readonly explanation: string;
+
+  @ApiProperty({
+    example: ["feature:evidence-fixture-match-example:homeTeam"],
+    isArray: true,
+    type: String,
+  })
+  declare readonly sourceFeatureIds: readonly string[];
+
+  @ApiProperty({ example: "2026-07-17T10:00:00Z", format: "date-time" })
+  declare readonly evaluatedAt: string;
+}
+
+export class AnalysisReportDto {
+  @ApiProperty({
+    example: "report:match-example:2026-07-17T10:00:00Z",
+  })
+  declare readonly reportId: string;
+
+  @ApiProperty({ example: "match-example" })
+  declare readonly matchId: string;
+
+  @ApiProperty({ example: "2026-07-17T10:00:00Z", format: "date-time" })
+  declare readonly generatedAt: string;
+
+  @ApiProperty({
+    example: [
+      "Match information is complete.",
+      "Home team: Liverpool.",
+      "Away team: Chelsea.",
+      "Kickoff: 2026-08-01T19:30:00Z.",
+    ],
+    isArray: true,
+    type: String,
+  })
+  declare readonly summary: readonly string[];
+
+  @ApiProperty({ isArray: true, type: () => FeatureDto })
+  declare readonly features: readonly FeatureDto[];
+
+  @ApiProperty({ isArray: true, type: () => RuleResultDto })
+  declare readonly rules: readonly RuleResultDto[];
+}
+
+export class AnalysisErrorCauseDto {
+  @ApiProperty({ example: "MATCH_NOT_FOUND" })
+  declare readonly code: string;
+
+  @ApiProperty({ example: 'Match "match-unknown" was not found.' })
+  declare readonly message: string;
+}
+
+export class AnalysisEndpointErrorDto {
+  @ApiProperty({ example: "IMPORT_FAILED" })
+  declare readonly code: string;
+
+  @ApiProperty({ example: "Match import failed." })
+  declare readonly message: string;
+
+  @ApiPropertyOptional({ type: () => AnalysisErrorCauseDto })
+  declare readonly cause?: AnalysisErrorCauseDto;
+}
+
+export class AnalysisEndpointErrorResponseDto {
+  @ApiProperty({ enum: [false], example: false })
+  declare readonly ok: false;
+
+  @ApiProperty({ type: () => AnalysisEndpointErrorDto })
+  declare readonly error: AnalysisEndpointErrorDto;
+}

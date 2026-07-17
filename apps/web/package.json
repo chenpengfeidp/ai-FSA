@@ -5,20 +5,37 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "dev": "next dev --hostname 127.0.0.1 --port 3000",
+    "dev": "next dev --hostname 127.0.0.1 --port 5173",
     "start": "next start --hostname 127.0.0.1 --port 3000",
+    "test": "vitest run --config vitest.config.ts",
     "typecheck": "next typegen && tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@radix-ui/react-collapsible": "^1.1.16",
+    "@radix-ui/react-slot": "^1.3.0",
+    "@tanstack/react-query": "^5.101.2",
+    "axios": "^1.18.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.24.0",
     "next": "16.2.10",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "react-hook-form": "^7.81.0",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@fas/tsconfig": "workspace:*",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "24.13.3",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4.3.3",
     "typescript": "6.0.3"
   }
 }

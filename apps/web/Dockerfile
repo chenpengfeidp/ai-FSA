@@ -20,6 +20,9 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 
 FROM base AS builder
 
+ARG API_BASE_URL="http://api:3001"
+ENV API_BASE_URL="$API_BASE_URL"
+
 COPY --from=pruner /app/out/json/ .
 COPY scripts/install-git-hooks.mjs ./scripts/install-git-hooks.mjs
 

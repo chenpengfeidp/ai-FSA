@@ -1,10 +1,6 @@
 import type { ReactElement } from "react";
+import { AnalysisDashboard } from "../components/analysis-dashboard";
 
 export default function HomePage(): ReactElement {
-  return (
-    <main>
-      <h1>AI Football Analysis Platform</h1>
-      <p>Repository Bootstrap Completed</p>
-    </main>
-  );
+  return <AnalysisDashboard />;
 }

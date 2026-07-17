@@ -30,6 +30,13 @@ export default defineConfig({
       },
       {
         test: {
+          name: "evidence-normalizer",
+          environment: "node",
+          include: ["packages/evidence-normalizer/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
           name: "match",
           environment: "node",
           include: ["packages/match/test/**/*.spec.ts"],

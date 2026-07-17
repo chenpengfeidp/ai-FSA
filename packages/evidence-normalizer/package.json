@@ -1,0 +1,29 @@
+{
+  "name": "@fas/evidence-normalizer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project evidence-normalizer",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fas/evidence": "workspace:*",
+    "@fas/match": "workspace:*"
+  },
+  "devDependencies": {
+    "@fas/tsconfig": "workspace:*",
+    "typescript": "6.0.3"
+  }
+}

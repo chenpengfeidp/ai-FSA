@@ -195,6 +195,22 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
+  packages/evidence-import:
+    dependencies:
+      '@fas/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+    devDependencies:
+      '@fas/evidence-normalizer':
+        specifier: workspace:*
+        version: link:../evidence-normalizer
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/evidence-normalizer:
     dependencies:
       '@fas/evidence':

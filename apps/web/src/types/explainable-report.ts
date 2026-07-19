@@ -1,0 +1,95 @@
+import type { RuleStatus } from "./analysis";
+import type { EvidenceFreshness, EvidenceQuality, EvidenceType } from "./evidence";
+
+export type ConfidenceLevel = "Low" | "Medium" | "High" | "Very High";
+
+export type GoalRangeId = "0-1" | "2-3" | "4+";
+
+export interface ExplainableMatchHeader {
+  readonly competition: string;
+  readonly kickoffTime: string;
+  readonly homeTeam: string;
+  readonly awayTeam: string;
+  readonly matchId: string;
+}
+
+export interface WinnerPredictionView {
+  readonly homeTeam: string;
+  readonly awayTeam: string;
+  readonly homePercent: number;
+  readonly awayPercent: number;
+  readonly recommendedTeam: string | null;
+}
+
+export interface MostLikelyScoreView {
+  readonly available: boolean;
+  readonly homeGoals: number | null;
+  readonly awayGoals: number | null;
+  readonly confidence: ConfidenceLevel;
+  readonly note: string;
+}
+
+export interface GoalRangeOptionView {
+  readonly id: GoalRangeId;
+  readonly label: string;
+  readonly recommended: boolean;
+}
+
+export interface GoalRangeView {
+  readonly available: boolean;
+  readonly options: readonly GoalRangeOptionView[];
+  readonly recommendedLabel: string | null;
+  readonly note: string;
+}
+
+export interface ConfidenceMeterView {
+  readonly level: ConfidenceLevel;
+  readonly percent: number;
+  readonly passCount: number;
+  readonly ruleCount: number;
+}
+
+export interface EvidenceTimelineItemView {
+  readonly id: string;
+  readonly title: string;
+  readonly type: EvidenceType;
+  readonly timestamp: string;
+  readonly freshness: EvidenceFreshness;
+  readonly quality: EvidenceQuality;
+  readonly detail: string;
+}
+
+export interface FeatureImportanceItemView {
+  readonly featureId: string;
+  readonly label: string;
+  readonly percent: number;
+  readonly valueLabel: string;
+}
+
+export interface RuleEvaluationItemView {
+  readonly ruleId: string;
+  readonly title: string;
+  readonly status: RuleStatus;
+  readonly weight: number;
+  readonly explanation: string;
+}
+
+export interface FinalRecommendationView {
+  readonly recommendedWinner: string;
+  readonly recommendedScore: string;
+  readonly recommendedGoalRange: string;
+  readonly confidence: ConfidenceLevel;
+  readonly summaryLines: readonly string[];
+}
+
+export interface ExplainableReportView {
+  readonly header: ExplainableMatchHeader;
+  readonly winnerPrediction: WinnerPredictionView;
+  readonly mostLikelyScore: MostLikelyScoreView;
+  readonly goalRange: GoalRangeView;
+  readonly confidence: ConfidenceMeterView;
+  readonly evidenceTimeline: readonly EvidenceTimelineItemView[];
+  readonly featureImportance: readonly FeatureImportanceItemView[];
+  readonly ruleEvaluations: readonly RuleEvaluationItemView[];
+  readonly finalRecommendation: FinalRecommendationView;
+}

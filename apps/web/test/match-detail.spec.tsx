@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MatchDetailPage } from "../src/components/match-detail-page";
@@ -37,6 +36,22 @@ const report: AnalysisReportDto = {
       sourceEvidenceId: "evidence-fixture-match-example-1",
       value: "Liverpool",
     },
+    {
+      featureId: "feature-away",
+      generatedAt: "2026-08-01T19:30:00.000Z",
+      matchId: "match-example-1",
+      name: "awayTeam",
+      sourceEvidenceId: "evidence-fixture-match-example-1",
+      value: "Chelsea",
+    },
+    {
+      featureId: "feature-kickoff",
+      generatedAt: "2026-08-01T19:30:00.000Z",
+      matchId: "match-example-1",
+      name: "kickoff",
+      sourceEvidenceId: "evidence-fixture-match-example-1",
+      value: "2026-08-01T19:30:00Z",
+    },
   ],
   rules: [
     {
@@ -47,6 +62,26 @@ const report: AnalysisReportDto = {
       ruleName: "HOME_TEAM_PRESENT",
       score: 1,
       sourceFeatureIds: ["feature-home"],
+      status: "PASS",
+    },
+    {
+      evaluatedAt: "2026-08-01T19:30:00.000Z",
+      explanation: "Away team is present.",
+      matchId: "match-example-1",
+      ruleId: "rule-away",
+      ruleName: "AWAY_TEAM_PRESENT",
+      score: 1,
+      sourceFeatureIds: ["feature-away"],
+      status: "PASS",
+    },
+    {
+      evaluatedAt: "2026-08-01T19:30:00.000Z",
+      explanation: "Kickoff is present.",
+      matchId: "match-example-1",
+      ruleId: "rule-kickoff",
+      ruleName: "KICKOFF_PRESENT",
+      score: 1,
+      sourceFeatureIds: ["feature-kickoff"],
       status: "PASS",
     },
   ],
@@ -117,54 +152,30 @@ describe("MatchDetailPage", () => {
     expect(document.querySelector("[aria-busy='true']")).not.toBeNull();
   });
 
-  it("loads analysis data and renders detail tabs", async () => {
+  it("loads analysis data and renders the explainable report", async () => {
     vi.mocked(analyzeMatch).mockResolvedValue(report);
     vi.mocked(getEvidenceByMatch).mockResolvedValue([evidence]);
-    const user = userEvent.setup();
     renderPage("match-example-1");
 
-    expect(await screen.findByText("ANALYZED")).toBeInTheDocument();
+    expect(await screen.findByText("Explainable Report")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Winner Prediction" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Matches")).toBeInTheDocument();
-    expect(screen.getByText("Match Detail")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Liverpool vs Chelsea" }),
-    ).toBeInTheDocument();
     expect(screen.getAllByText("Premier League").length).toBeGreaterThan(0);
+    expect(screen.getByText("Kickoff 19:30")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Final Recommendation" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Home Team Present")).toBeInTheDocument();
+    expect(screen.getByText("Match information")).toBeInTheDocument();
+    expect(screen.getByText("Match information is complete.")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(analyzeMatch).toHaveBeenCalledWith("match-example-1");
       expect(getEvidenceByMatch).toHaveBeenCalledWith("match-example-1");
     });
-
-    expect(screen.getByText("Home team: Liverpool.")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("tab", { name: "Evidence" }));
-    expect(screen.getByText("MATCH_INFO")).toBeInTheDocument();
-    expect(screen.getByText("fixture")).toBeInTheDocument();
-    expect(screen.getByText("unverified")).toBeInTheDocument();
-    expect(screen.getByText("fresh")).toBeInTheDocument();
-
-    await user.click(
-      screen.getByRole("button", {
-        name: "Toggle payload for evidence-fixture-match-example-1",
-      }),
-    );
-    expect(screen.getByText(/"kickoff"/)).toBeInTheDocument();
-
-    await user.click(screen.getByRole("tab", { name: "Features" }));
-    expect(screen.getByText("homeTeam")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("tab", { name: "Rules" }));
-    expect(screen.getByText("HOME_TEAM_PRESENT")).toBeInTheDocument();
-    expect(screen.getByText("PASS")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("tab", { name: "Report" }));
-    expect(screen.getByText("Analysis complete")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("tab", { name: "Raw JSON" }));
-    await user.click(screen.getByRole("button", { name: "Toggle raw report" }));
-    expect(screen.getByText(/"report-match-example-1"/)).toBeInTheDocument();
   });
 
   it("shows an error page when analysis fails", async () => {

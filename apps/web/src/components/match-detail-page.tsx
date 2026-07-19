@@ -9,9 +9,9 @@ import type { MatchStatus } from "../types/match-center";
 import { Breadcrumb } from "./breadcrumb";
 import { EmptyState } from "./empty-state";
 import { ErrorPanel } from "./error-panel";
+import { ExplainableMatchReport } from "./explainable-report/explainable-match-report";
+import { ExplainableReportSkeleton } from "./explainable-report-skeleton";
 import { MatchDetailHeader } from "./match-detail-header";
-import { MatchDetailPanels } from "./match-detail-panels";
-import { MatchDetailSkeleton } from "./match-detail-skeleton";
 import { PageContainer } from "./page-container";
 import { Button } from "./ui/button";
 
@@ -72,7 +72,7 @@ export function MatchDetailPage({
           items={[
             { href: "/", label: "Dashboard" },
             { href: "/", label: "Matches" },
-            { label: "Match Detail" },
+            { label: "Explainable Report" },
           ]}
         />
 
@@ -86,35 +86,38 @@ export function MatchDetailPage({
             description={`No catalog entry exists for "${matchId}". Choose a match from today's fixtures.`}
             title="Match not found"
           />
-        ) : (
+        ) : null}
+
+        {match !== undefined && detail.isPending ? (
           <>
             <MatchDetailHeader match={match} status={status} />
-
-            {detail.isPending ? <MatchDetailSkeleton /> : null}
-
-            {detail.isError ? (
-              <div className="space-y-4">
-                <ErrorPanel message={detail.error.message} />
-                <EmptyState
-                  action={
-                    <Button asChild variant="outline">
-                      <Link href="/">Back to Match Center</Link>
-                    </Button>
-                  }
-                  description="The analysis pipeline could not complete for this match. Return to the dashboard and try another fixture."
-                  title="Unable to load match analysis"
-                />
-              </div>
-            ) : null}
-
-            {detail.data ? (
-              <MatchDetailPanels
-                evidence={detail.data.evidence}
-                report={detail.data.report}
-              />
-            ) : null}
+            <ExplainableReportSkeleton />
           </>
-        )}
+        ) : null}
+
+        {match !== undefined && detail.isError ? (
+          <div className="space-y-4">
+            <MatchDetailHeader match={match} status={status} />
+            <ErrorPanel message={detail.error.message} />
+            <EmptyState
+              action={
+                <Button asChild variant="outline">
+                  <Link href="/">Back to Match Center</Link>
+                </Button>
+              }
+              description="The analysis pipeline could not complete for this match. Return to the dashboard and try another fixture."
+              title="Unable to load match analysis"
+            />
+          </div>
+        ) : null}
+
+        {match !== undefined && detail.data ? (
+          <ExplainableMatchReport
+            evidence={detail.data.evidence}
+            match={match}
+            report={detail.data.report}
+          />
+        ) : null}
       </div>
     </PageContainer>
   );

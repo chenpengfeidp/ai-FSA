@@ -5,10 +5,10 @@
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: P.2 durable Evidence persistence + ZH-1 Chinese UI delivered
+- Current task status: Multi-league odds/scores fan-out + ZH-2 Chinese Workspace/Library/report delivered (local)
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Platform slice P.2 — Prisma Evidence/Match models + ZH-1 Chinese Match Center/Session
-- Next authorized work: ZH-2 report/workspace copy; true shots/xG; Evaluation-qualified calibration later
+- Last completed delivery: Multi-league Match Center scores fan-out + ZH-2 UI copy (pending commit)
+- Next authorized work: True shots/xG STATISTICS provider; Compose postgres smoke; Evaluation-qualified calibration later
 - Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -41,7 +41,7 @@ Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
   → Web Match Center / Session / Workspace / Library
 ```
 
-Default API odds mode is `ODDS_PROVIDER_MODE=recorded`: fixture form/stats/h2h remain, while mapped demo matches overlay The Odds API–shaped recorded **1X2 + spreads (Asian handicap)** cassettes (`source=the-odds-api`). Live fetch requests `markets=h2h,spreads` and requires `THE_ODDS_API_KEY`. Match Center list remains demo fixtures.
+Default API odds mode is `ODDS_PROVIDER_MODE=recorded`: fixture form/stats/h2h remain, while mapped demo matches overlay The Odds API–shaped recorded **1X2 + spreads (Asian handicap)** cassettes (`source=the-odds-api`). Live mode requires `THE_ODDS_API_KEY` and fans out Match Center upcoming odds + scores across `ODDS_SPORT_KEYS` (default: big-5, K/J League, Nordics, Portugal, UEFA club comps, World Cup). `odds:*` rows become analyzable when both sides appear in the scores window (`daysFrom=3`).
 
 Implemented packages used by the slice (non-exhaustive):
 
@@ -145,6 +145,8 @@ Not a numbered Sprint 11 authorization; delivered as bounded implementation agai
 | P.1 | Database-aware `/health/ready` via `@fas/database` ping (no domain models) | `docs/sprints/VERTICAL_SLICE_P1_DATABASE_READY_SPEC.md` |
 | P.2 | First Prisma Evidence/Match models + `EVIDENCE_REPOSITORY_MODE` adapter | `docs/sprints/VERTICAL_SLICE_P2_EVIDENCE_PERSISTENCE_SPEC.md` |
 | ZH-1 | Chinese UI chrome for Match Center + Analysis Session | `apps/web/src/copy/zh.ts` |
+| C.2+ | Multi-league live scores fan-out (same sport keys as Match Center odds) | `@fas/provider-odds` `LiveTheOddsApiScoresSource` |
+| ZH-2 | Chinese UI for Workspace / explainable report / Library | `apps/web/src/copy/zh.ts` |
 
 Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2/A.1/P.1/P.2 specs above.
 
@@ -208,7 +210,7 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Demo evidence is fixture-backed and may be `unverified`.
 - Prisma now includes the first Evidence/Match catalog models (P.2); default API mode remains in-memory Evidence unless `EVIDENCE_REPOSITORY_MODE=postgres` after migrate.
 - Durable jobs, Redis, BullMQ, pgvector, analysis snapshots, and object storage are not implemented.
-- Web ZH-1 Chinese copy covers Match Center/Session chrome; Workspace/Library/report labels remain English until ZH-2.
+- Web ZH-1/ZH-2 Chinese copy covers Match Center/Session/Workspace/Library/report chrome; team and competition names stay English.
 - No OpenAI or other network provider SDK is installed for narrative generation.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
 - Speculative empty engine directories must not be treated as implemented packages.
@@ -225,11 +227,12 @@ No numbered sprint is active. B.1/B.2/C.1/C.2/A.1/P.1/P.2/ZH-1 path is implement
 
 Recommended follow-ons (ordered):
 
-1. ZH-2 Chinese copy for Workspace / explainable report / Library;
-2. True shots/xG STATISTICS provider (replace goals-proxy);
-3. Compose migrate automation / postgres-mode smoke evidence;
-4. Evaluation-qualified calibration / larger reviewed populations;
-5. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
+1. True shots/xG STATISTICS provider (replace goals-proxy) — needs provider choice + slice spec;
+2. Compose migrate automation / postgres-mode smoke evidence;
+3. Evaluation-qualified calibration / larger reviewed populations;
+4. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
+
+Recently delivered (local, pending commit): Match Center date filter; multi-league live odds list; `dev:api` loads `.env` before Prisma build; multi-league live scores prime; ZH-2 Chinese Workspace/Library/report.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

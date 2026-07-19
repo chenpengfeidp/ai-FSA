@@ -78,12 +78,19 @@ export interface RuleEvaluationItemView {
   readonly explanation: string;
 }
 
+export interface NarrativeSectionView {
+  readonly title: string;
+  readonly body: string;
+}
+
 export interface FinalRecommendationView {
   readonly recommendedWinner: string;
   readonly recommendedScore: string;
   readonly recommendedGoalRange: string;
   readonly confidence: ConfidenceLevel;
   readonly summaryLines: readonly string[];
+  readonly narrativeSections: readonly NarrativeSectionView[];
+  readonly narrativeDisclaimer: string;
 }
 
 export interface ExplainableReportView {

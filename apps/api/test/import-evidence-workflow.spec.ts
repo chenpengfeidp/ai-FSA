@@ -142,6 +142,19 @@ describe("HTTP import and Evidence query workflow", () => {
       calibrationStatus: "uncalibrated_baseline",
       calibrationQualified: false,
     });
+    expect(report.narrative).toMatchObject({
+      epistemicKind: "inference",
+      providerId: "local_deterministic_v1",
+    });
+    const narrative = requireRecord(report.narrative);
+    expect(narrative.sections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          title: "Overview",
+          body: expect.stringContaining("were not recomputed"),
+        }),
+      ]),
+    );
     expect(report.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "homeTeam", value: "Liverpool" }),

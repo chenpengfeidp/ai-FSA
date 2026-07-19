@@ -5,6 +5,13 @@ export default defineConfig({
     projects: [
       {
         test: {
+          name: "ai-provider",
+          environment: "node",
+          include: ["packages/ai-provider/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
           name: "analysis",
           environment: "node",
           include: ["packages/analysis/test/**/*.spec.ts"],
@@ -82,6 +89,13 @@ export default defineConfig({
           name: "match",
           environment: "node",
           include: ["packages/match/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
+          name: "prompt",
+          environment: "node",
+          include: ["packages/prompt/test/**/*.spec.ts"],
         },
       },
       {

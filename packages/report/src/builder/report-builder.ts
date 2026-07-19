@@ -1,5 +1,8 @@
+import type { NarrativeDraft } from "@fas/ai-provider";
+import { LocalDeterministicNarrativeAdapter } from "@fas/ai-provider";
 import type { AnalysisResult, DeterministicMatchProjection } from "@fas/analysis";
 import type { Feature } from "@fas/feature";
+import { composeNarrativePrompt } from "@fas/prompt";
 import type { RuleResult } from "@fas/rule";
 import {
   createAnalysisReport,
@@ -66,16 +69,62 @@ function buildSummary(analysis: AnalysisResult): readonly string[] {
   return Object.freeze(summary);
 }
 
+function teamName(
+  features: readonly Feature[],
+  name: "awayTeam" | "homeTeam",
+): string {
+  const feature = features.find((entry) => entry.name === name);
+  return typeof feature?.value === "string" ? feature.value : name;
+}
+
+function marketConflict(projection: DeterministicMatchProjection): boolean {
+  return projection.limitations.some((line) =>
+    line.includes("Market lean conflicts with football-model directional lean"),
+  );
+}
+
+function buildNarrative(analysis: AnalysisResult, reportId: string): NarrativeDraft {
+  const matchedRuleNames = analysis.ruleResults
+    .filter((rule) => rule.status === "PASS" && !isPresenceRule(rule))
+    .map((rule) => rule.ruleName);
+  const composition = composeNarrativePrompt({
+    reportId,
+    matchId: analysis.matchId,
+    homeTeam: teamName(analysis.features, "homeTeam"),
+    awayTeam: teamName(analysis.features, "awayTeam"),
+    recommendation: analysis.projection.recommendation,
+    pHome: analysis.projection.pHome,
+    pDraw: analysis.projection.pDraw,
+    pAway: analysis.projection.pAway,
+    confidence: analysis.projection.confidence,
+    limitations: analysis.projection.limitations,
+    matchedRuleNames,
+    marketConflict: marketConflict(analysis.projection),
+    calibrationArtifactId: analysis.projection.calibrationArtifactId,
+    calibrationStatus: analysis.projection.calibrationStatus,
+    calibrationQualified: analysis.projection.calibrationQualified,
+    deterministicChecksum: analysis.projection.checksum,
+  });
+
+  return new LocalDeterministicNarrativeAdapter().generate(
+    composition,
+    analysis.generatedAt,
+  );
+}
+
 export class ReportBuilder {
   build(analysis: AnalysisResult): AnalysisReport {
+    const reportId = `report:${analysis.matchId}:${analysis.generatedAt}`;
+
     return createAnalysisReport({
-      reportId: `report:${analysis.matchId}:${analysis.generatedAt}`,
+      reportId,
       matchId: analysis.matchId,
       generatedAt: analysis.generatedAt,
       summary: buildSummary(analysis),
       features: analysis.features,
       rules: analysis.ruleResults,
       deterministic: analysis.projection,
+      narrative: buildNarrative(analysis, reportId),
     });
   }
 }

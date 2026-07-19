@@ -547,6 +547,16 @@ DeterministicMatchProjection {
 
 ## 9. Report Specification (`reportSchemaVersion = report.v2.slice1`)
 
+### 9.0 Narrative attachment (slice 1.4)
+
+After the deterministic report body is sealed, Prompt composition may build a narrative prompt manifest from exact sealed projection fields. A local deterministic narrator may produce an `inference` draft that:
+
+- copies sealed 1X2 / recommendation / limitations / matched findings into prose;
+- records `promptManifestId` / checksum / provider id;
+- never invents or alters probabilities, λ, scorelines, confidence, or recommendations.
+
+Network AI providers are out of scope for this slice.
+
 ### 9.1 Assembly rules
 
 Report assembly copies FeatureBundle, RuleEvaluationSet, and DeterministicMatchProjection. It may:
@@ -707,8 +717,8 @@ This specification is now an authorized build order for the first vertical slice
 ## 15. Out of Scope
 
 - Any code change performed solely because this file exists;
-- Prompt/AI text generation;
-- Statistics calibration implementation;
+- Live OpenAI/network provider SDKs (slice 1.4 uses local deterministic narrator only);
+- Statistics population metric refresh / trained calibration maps;
 - Broad Evidence catalog expansion;
 - Frontend redesign;
 - New infrastructure;

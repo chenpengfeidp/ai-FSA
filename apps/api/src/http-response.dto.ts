@@ -303,6 +303,43 @@ export class DeterministicProjectionDto {
   declare readonly checksum: string;
 }
 
+export class NarrativeSectionDto {
+  @ApiProperty({ example: "Overview" })
+  declare readonly title: string;
+
+  @ApiProperty({
+    example:
+      "Liverpool vs Chelsea: sealed recommendation is lean_home. These values were not recomputed.",
+  })
+  declare readonly body: string;
+}
+
+export class NarrativeDraftDto {
+  @ApiProperty({ enum: ["inference"], example: "inference" })
+  declare readonly epistemicKind: string;
+
+  @ApiProperty({ example: "local_deterministic_v1" })
+  declare readonly providerId: string;
+
+  @ApiProperty({ example: "prompt-manifest:report:match-example:abc" })
+  declare readonly promptManifestId: string;
+
+  @ApiProperty({ example: "fnv1a-deadbeef" })
+  declare readonly promptManifestChecksum: string;
+
+  @ApiProperty({ isArray: true, type: () => NarrativeSectionDto })
+  declare readonly sections: readonly NarrativeSectionDto[];
+
+  @ApiProperty({
+    example:
+      "Inference draft only. Not fact, not market truth, not wagering advice.",
+  })
+  declare readonly disclaimer: string;
+
+  @ApiProperty({ example: "2026-07-17T10:00:00Z", format: "date-time" })
+  declare readonly generatedAt: string;
+}
+
 export class AnalysisReportDto {
   @ApiProperty({
     example: "report:match-example:2026-07-17T10:00:00Z",
@@ -335,6 +372,9 @@ export class AnalysisReportDto {
 
   @ApiProperty({ type: () => DeterministicProjectionDto })
   declare readonly deterministic: DeterministicProjectionDto;
+
+  @ApiProperty({ type: () => NarrativeDraftDto })
+  declare readonly narrative: NarrativeDraftDto;
 }
 
 export class AnalysisErrorCauseDto {

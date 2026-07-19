@@ -63,6 +63,15 @@ const report: AnalysisReportDto = {
     status: "completed_nonempty",
     checksum: "checksum-session",
   },
+  narrative: {
+    epistemicKind: "inference",
+    providerId: "local_deterministic_v1",
+    promptManifestId: "prompt-manifest:session",
+    promptManifestChecksum: "fnv1a-session",
+    sections: [{ title: "Overview", body: "Session narrative." }],
+    disclaimer: "Inference draft only.",
+    generatedAt: "2026-07-17T10:00:00.000Z",
+  },
 };
 
 const evidence: EvidenceDto = {

@@ -102,6 +102,21 @@ export interface DeterministicProjectionDto {
   readonly checksum: string;
 }
 
+export interface NarrativeSectionDto {
+  readonly title: string;
+  readonly body: string;
+}
+
+export interface NarrativeDraftDto {
+  readonly epistemicKind: "inference";
+  readonly providerId: string;
+  readonly promptManifestId: string;
+  readonly promptManifestChecksum: string;
+  readonly sections: readonly NarrativeSectionDto[];
+  readonly disclaimer: string;
+  readonly generatedAt: string;
+}
+
 export interface AnalysisReportDto {
   readonly reportId: string;
   readonly matchId: string;
@@ -110,6 +125,7 @@ export interface AnalysisReportDto {
   readonly features: readonly FeatureDto[];
   readonly rules: readonly RuleResultDto[];
   readonly deterministic: DeterministicProjectionDto;
+  readonly narrative: NarrativeDraftDto;
 }
 
 export interface BackendErrorDto {

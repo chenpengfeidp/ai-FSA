@@ -1,5 +1,5 @@
 {
-  "name": "@fas/report",
+  "name": "@fas/ai-provider",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,19 +15,13 @@
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "test": "vitest run --root ../.. --config vitest.config.ts --project report",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project ai-provider",
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@fas/ai-provider": "workspace:*",
-    "@fas/analysis": "workspace:*",
-    "@fas/feature": "workspace:*",
-    "@fas/match": "workspace:*",
-    "@fas/prompt": "workspace:*",
-    "@fas/rule": "workspace:*"
+    "@fas/prompt": "workspace:*"
   },
   "devDependencies": {
-    "@fas/evidence": "workspace:*",
     "@fas/tsconfig": "workspace:*",
     "typescript": "6.0.3"
   }

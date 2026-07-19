@@ -193,6 +193,12 @@ Must not recalculate features, rule truth values, λ/probabilities/scorelines, c
 
 Owns prompt template/version policy, section composition, output schema selection, rendering, and prompt manifest checksums. No provider network calls.
 
+Current repository composition uses `@fas/prompt` as an implementation package for Prompt composition of sealed deterministic-report narrative context until full engine-package migration. Ownership semantics remain those of the Prompt Engine: no retrieval and no provider network calls.
+
+#### `@fas/ai-provider` (interim narrative generation)
+
+Owns provider-neutral narrative generation ports and adapters. V1 ships `LocalDeterministicNarrativeAdapter` only — it explains sealed deterministic values and must not recompute probabilities. OpenAI/network SDKs remain out of scope until a separate approved milestone.
+
 #### `@fas/knowledge-engine`
 
 Owns knowledge item/version lifecycle, approval/effective-date rules, source requirements, and retrieval. V1 uses repository metadata/full-text ports; Phase 2 adds a semantic retrieval adapter.

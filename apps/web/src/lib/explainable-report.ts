@@ -371,6 +371,12 @@ export function buildExplainableReportView(
       recommendedGoalRange: goalRange.recommendedLabel ?? "Unavailable",
       confidence: confidenceLevel,
       summaryLines: report.summary,
+      narrativeSections: Object.freeze(
+        report.narrative.sections.map((section) =>
+          Object.freeze({ title: section.title, body: section.body }),
+        ),
+      ),
+      narrativeDisclaimer: report.narrative.disclaimer,
     }),
   });
 }

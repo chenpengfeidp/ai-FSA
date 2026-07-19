@@ -213,6 +213,19 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
+  packages/ai-provider:
+    dependencies:
+      '@fas/prompt':
+        specifier: workspace:*
+        version: link:../prompt
+    devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/analysis:
     dependencies:
       '@fas/application':
@@ -417,6 +430,15 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
+  packages/prompt:
+    devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
   packages/provider-fixture:
     devDependencies:
       '@fas/tsconfig':
@@ -428,6 +450,9 @@ importers:
 
   packages/report:
     dependencies:
+      '@fas/ai-provider':
+        specifier: workspace:*
+        version: link:../ai-provider
       '@fas/analysis':
         specifier: workspace:*
         version: link:../analysis
@@ -437,6 +462,9 @@ importers:
       '@fas/match':
         specifier: workspace:*
         version: link:../match
+      '@fas/prompt':
+        specifier: workspace:*
+        version: link:../prompt
       '@fas/rule':
         specifier: workspace:*
         version: link:../rule

@@ -163,6 +163,9 @@ describe("ReportBuilder", () => {
     expect(report.summary.some((line) => line.startsWith("Projection "))).toBe(true);
     expect(report.features).toEqual(analysis.features);
     expect(report.rules).toEqual(analysis.ruleResults);
+    expect(report.narrative.epistemicKind).toBe("inference");
+    expect(report.narrative.sections.length).toBeGreaterThan(0);
+    expect(report.narrative.sections[0]?.body).toContain("were not recomputed");
   });
 
   it("returns a deeply immutable report", () => {
@@ -173,6 +176,7 @@ describe("ReportBuilder", () => {
     expect(Object.isFrozen(report.features)).toBe(true);
     expect(Object.isFrozen(report.rules)).toBe(true);
     expect(Object.isFrozen(report.deterministic)).toBe(true);
+    expect(Object.isFrozen(report.narrative)).toBe(true);
   });
 
   it("produces equal output for the same AnalysisResult", () => {

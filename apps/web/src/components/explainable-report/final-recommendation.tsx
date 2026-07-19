@@ -82,6 +82,26 @@ export function FinalRecommendation({
               </ul>
             </>
           ) : null}
+
+          {recommendation.narrativeSections.length > 0 ? (
+            <>
+              <Divider className="my-0" />
+              <div className="space-y-4">
+                <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
+                  Inference narrative
+                </p>
+                {recommendation.narrativeSections.map((section) => (
+                  <div className="space-y-1" key={section.title}>
+                    <h3 className="text-title text-foreground">{section.title}</h3>
+                    <p className="text-body text-muted-foreground">{section.body}</p>
+                  </div>
+                ))}
+                <p className="text-caption text-subtle">
+                  {recommendation.narrativeDisclaimer}
+                </p>
+              </div>
+            </>
+          ) : null}
         </CardContent>
       </Card>
     </section>

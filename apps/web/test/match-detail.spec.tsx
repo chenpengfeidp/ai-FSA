@@ -127,6 +127,20 @@ const report: AnalysisReportDto = {
     status: "completed_nonempty",
     checksum: "checksum-1",
   },
+  narrative: {
+    epistemicKind: "inference",
+    providerId: "local_deterministic_v1",
+    promptManifestId: "prompt-manifest:test",
+    promptManifestChecksum: "fnv1a-test",
+    sections: [
+      {
+        title: "Overview",
+        body: "Sealed recommendation lean_home. Values were not recomputed by this narrator.",
+      },
+    ],
+    disclaimer: "Inference draft only.",
+    generatedAt: "2026-07-17T10:00:00.000Z",
+  },
 };
 
 const evidence: EvidenceDto = {

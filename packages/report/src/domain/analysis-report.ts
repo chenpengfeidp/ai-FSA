@@ -1,4 +1,5 @@
 import type { DeterministicMatchProjection } from "@fas/analysis";
+import type { NarrativeDraft } from "@fas/ai-provider";
 import type { Feature } from "@fas/feature";
 import { createMatchId, type MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
@@ -11,6 +12,7 @@ export interface AnalysisReport {
   readonly features: readonly Feature[];
   readonly rules: readonly RuleResult[];
   readonly deterministic: DeterministicMatchProjection;
+  readonly narrative: NarrativeDraft;
 }
 
 export interface CreateAnalysisReportInput {
@@ -21,6 +23,7 @@ export interface CreateAnalysisReportInput {
   readonly features: readonly Feature[];
   readonly rules: readonly RuleResult[];
   readonly deterministic: DeterministicMatchProjection;
+  readonly narrative: NarrativeDraft;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -99,6 +102,16 @@ export function createAnalysisReport(
     );
   }
 
+  if (input.narrative.epistemicKind !== "inference") {
+    throw new AnalysisReportValidationError(
+      "narrative.epistemicKind must be inference.",
+    );
+  }
+
+  if (input.narrative.sections.length === 0) {
+    throw new AnalysisReportValidationError("narrative.sections must not be empty.");
+  }
+
   return Object.freeze({
     reportId: requireNonEmpty(input.reportId, "reportId"),
     matchId,
@@ -107,5 +120,11 @@ export function createAnalysisReport(
     features,
     rules,
     deterministic: input.deterministic,
+    narrative: Object.freeze({
+      ...input.narrative,
+      sections: Object.freeze(
+        input.narrative.sections.map((section) => Object.freeze({ ...section })),
+      ),
+    }),
   });
 }

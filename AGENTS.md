@@ -241,8 +241,9 @@ For every task:
 
 1. `AGENTS.md`
 2. `docs/PROJECT_STATE.md`
-3. `README.md`
-4. `docs/00_PROJECT_BIBLE.md`
+3. `docs/PROJECT_INDEX.md` (document + code map; optional after state when surveying the repo)
+4. `README.md`
+5. `docs/00_PROJECT_BIBLE.md`
 
 Then read by change type:
 

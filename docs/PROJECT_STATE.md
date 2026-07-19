@@ -5,11 +5,12 @@
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: Multi-league odds/scores fan-out + ZH-2 Chinese Workspace/Library/report delivered (local)
+- Current task status: Multi-league odds/scores fan-out + ZH-2 Chinese Workspace/Library/report delivered
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Multi-league Match Center scores fan-out + ZH-2 UI copy (pending commit)
+- Last completed delivery: Multi-league Match Center + ZH-2 (commits `1057f02`, `53c15c5`, `38c040b`)
 - Next authorized work: True shots/xG STATISTICS provider; Compose postgres smoke; Evaluation-qualified calibration later
 - Release status: Pre-release; private trusted environment only; not production
+- Document map for AI/onboarding: `docs/PROJECT_INDEX.md`
 
 Update this document after every sprint, implementation gate, or material governance change.
 

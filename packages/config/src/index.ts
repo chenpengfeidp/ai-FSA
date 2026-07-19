@@ -14,6 +14,8 @@ export type {
   EnvironmentSource,
   EvidenceRepositoryConfig,
   EvidenceRepositoryMode,
+  FootballDataProviderConfig,
+  FootballDataProviderMode,
   HttpConfig,
   OddsProviderConfig,
   OddsProviderMode,

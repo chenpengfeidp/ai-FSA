@@ -92,6 +92,7 @@ export function AnalysisDashboard(): ReactElement {
 
           <div className="mb-5">
             <MatchCenterFilters
+              footballDataProviderMode={upcoming.footballDataProviderMode}
               horizonDays={horizonDays}
               includeDemos={includeDemos}
               oddsProviderMode={upcoming.oddsProviderMode}
@@ -99,6 +100,7 @@ export function AnalysisDashboard(): ReactElement {
               onIncludeDemosChange={setIncludeDemos}
               onStartDateChange={setStartDate}
               rangeEnd={rangeEnd}
+              scheduleSource={upcoming.scheduleSource}
               shownCount={filteredMatches.length}
               startDate={startDate}
               totalCount={upcoming.matches.length}

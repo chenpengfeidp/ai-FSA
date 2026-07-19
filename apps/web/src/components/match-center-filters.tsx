@@ -2,7 +2,11 @@
 
 import type { ReactElement } from "react";
 import { zh } from "../copy/zh";
-import type { OddsProviderModeLabel } from "../types/match-center";
+import type {
+  FootballDataProviderModeLabel,
+  OddsProviderModeLabel,
+  ScheduleSourceLabel,
+} from "../types/match-center";
 import { Input } from "./ui/input";
 
 export function MatchCenterFilters({
@@ -10,6 +14,8 @@ export function MatchCenterFilters({
   horizonDays,
   includeDemos,
   oddsProviderMode,
+  footballDataProviderMode,
+  scheduleSource,
   usedRecordedFallback,
   shownCount,
   totalCount,
@@ -22,6 +28,8 @@ export function MatchCenterFilters({
   horizonDays: number;
   includeDemos: boolean;
   oddsProviderMode: OddsProviderModeLabel | undefined;
+  footballDataProviderMode: FootballDataProviderModeLabel | undefined;
+  scheduleSource: ScheduleSourceLabel | undefined;
   usedRecordedFallback: boolean;
   shownCount: number;
   totalCount: number;
@@ -30,27 +38,12 @@ export function MatchCenterFilters({
   onHorizonDaysChange: (value: number) => void;
   onIncludeDemosChange: (value: boolean) => void;
 }>): ReactElement {
-  const modeLabel =
-    oddsProviderMode === "live" && usedRecordedFallback
-      ? zh.matchCenter.modeLiveFallback
-      : oddsProviderMode === "live"
-        ? zh.matchCenter.modeLive
-        : oddsProviderMode === "fixture"
-          ? zh.matchCenter.modeFixture
-          : oddsProviderMode === "recorded"
-            ? zh.matchCenter.modeRecorded
-            : zh.matchCenter.modeUnknown;
-
-  const modeHint =
-    oddsProviderMode === "live" && usedRecordedFallback
-      ? zh.matchCenter.modeHintLiveFallback
-      : oddsProviderMode === "live"
-        ? zh.matchCenter.modeHintLive
-        : oddsProviderMode === "fixture"
-          ? zh.matchCenter.modeHintFixture
-          : oddsProviderMode === "recorded"
-            ? zh.matchCenter.modeHintRecorded
-            : zh.matchCenter.modeHintUnknown;
+  const { modeLabel, modeHint } = resolveModeCopy({
+    scheduleSource,
+    footballDataProviderMode,
+    oddsProviderMode,
+    usedRecordedFallback,
+  });
 
   return (
     <div className="space-y-3 rounded-xl border border-border bg-surface-muted/40 px-4 py-3">
@@ -126,4 +119,65 @@ export function MatchCenterFilters({
       </p>
     </div>
   );
+}
+
+function resolveModeCopy(input: {
+  readonly scheduleSource: ScheduleSourceLabel | undefined;
+  readonly footballDataProviderMode: FootballDataProviderModeLabel | undefined;
+  readonly oddsProviderMode: OddsProviderModeLabel | undefined;
+  readonly usedRecordedFallback: boolean;
+}): { readonly modeLabel: string; readonly modeHint: string } {
+  if (input.scheduleSource === "football-data") {
+    if (input.footballDataProviderMode === "live" && input.usedRecordedFallback) {
+      return {
+        modeLabel: zh.matchCenter.modeFootballLiveFallback,
+        modeHint: zh.matchCenter.modeHintFootballLiveFallback,
+      };
+    }
+
+    if (input.footballDataProviderMode === "live") {
+      return {
+        modeLabel: zh.matchCenter.modeFootballLive,
+        modeHint: zh.matchCenter.modeHintFootballLive,
+      };
+    }
+
+    return {
+      modeLabel: zh.matchCenter.modeFootballRecorded,
+      modeHint: zh.matchCenter.modeHintFootballRecorded,
+    };
+  }
+
+  if (input.oddsProviderMode === "live" && input.usedRecordedFallback) {
+    return {
+      modeLabel: zh.matchCenter.modeLiveFallback,
+      modeHint: zh.matchCenter.modeHintLiveFallback,
+    };
+  }
+
+  if (input.oddsProviderMode === "live") {
+    return {
+      modeLabel: zh.matchCenter.modeLive,
+      modeHint: zh.matchCenter.modeHintLive,
+    };
+  }
+
+  if (input.oddsProviderMode === "fixture") {
+    return {
+      modeLabel: zh.matchCenter.modeFixture,
+      modeHint: zh.matchCenter.modeHintFixture,
+    };
+  }
+
+  if (input.oddsProviderMode === "recorded") {
+    return {
+      modeLabel: zh.matchCenter.modeRecorded,
+      modeHint: zh.matchCenter.modeHintRecorded,
+    };
+  }
+
+  return {
+    modeLabel: zh.matchCenter.modeUnknown,
+    modeHint: zh.matchCenter.modeHintUnknown,
+  };
 }

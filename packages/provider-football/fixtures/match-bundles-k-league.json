@@ -1,0 +1,249 @@
+{
+  "bundles": [
+    {
+      "fixture": {
+        "fixtureId": "100001",
+        "matchId": "football:100001",
+        "competitionId": "292",
+        "competitionName": "K League 1",
+        "season": 2026,
+        "kickoff": "2026-07-19T10:30:00+00:00",
+        "homeTeamId": "2766",
+        "homeTeamName": "FC Seoul",
+        "awayTeamId": "2765",
+        "awayTeamName": "Ulsan Hyundai FC",
+        "status": "SCHEDULED",
+        "providerMethod": "recorded-snapshot"
+      },
+      "homeForm": {
+        "teamId": "2766",
+        "teamName": "FC Seoul",
+        "teamSide": "home",
+        "window": 5,
+        "results": ["W", "D", "W", "L", "W"],
+        "goalsFor": [2, 1, 3, 0, 2],
+        "goalsAgainst": [0, 1, 1, 2, 1],
+        "providerMethod": "recorded-snapshot"
+      },
+      "awayForm": {
+        "teamId": "2765",
+        "teamName": "Ulsan Hyundai FC",
+        "teamSide": "away",
+        "window": 5,
+        "results": ["W", "W", "D", "W", "L"],
+        "goalsFor": [2, 1, 1, 3, 0],
+        "goalsAgainst": [1, 0, 1, 1, 1],
+        "providerMethod": "recorded-snapshot"
+      },
+      "homeStats": {
+        "teamId": "2766",
+        "teamName": "FC Seoul",
+        "teamSide": "home",
+        "windowMatches": 5,
+        "shotsForPerMatch": 12.4,
+        "shotsAgainstPerMatch": 9.2,
+        "xgForPerMatch": 0,
+        "xgAgainstPerMatch": 0,
+        "providerMethod": "recorded-snapshot",
+        "statsBasis": "shots"
+      },
+      "awayStats": {
+        "teamId": "2765",
+        "teamName": "Ulsan Hyundai FC",
+        "teamSide": "away",
+        "windowMatches": 5,
+        "shotsForPerMatch": 13.1,
+        "shotsAgainstPerMatch": 8.6,
+        "xgForPerMatch": 0,
+        "xgAgainstPerMatch": 0,
+        "providerMethod": "recorded-snapshot",
+        "statsBasis": "shots"
+      },
+      "headToHead": {
+        "homeTeamId": "2766",
+        "awayTeamId": "2765",
+        "sampleSize": 3,
+        "meetings": [
+          { "playedAt": "2026-05-10T10:00:00Z", "homeGoals": 1, "awayGoals": 2 },
+          { "playedAt": "2025-10-18T07:00:00Z", "homeGoals": 0, "awayGoals": 0 },
+          { "playedAt": "2025-05-03T07:00:00Z", "homeGoals": 2, "awayGoals": 1 }
+        ],
+        "providerMethod": "recorded-snapshot"
+      },
+      "standings": {
+        "competitionId": "292",
+        "competitionName": "K League 1",
+        "season": 2026,
+        "providerMethod": "recorded-snapshot",
+        "rows": [
+          {
+            "rank": 1,
+            "teamId": "2765",
+            "teamName": "Ulsan Hyundai FC",
+            "played": 22,
+            "won": 14,
+            "drawn": 5,
+            "lost": 3,
+            "goalsFor": 38,
+            "goalsAgainst": 18,
+            "points": 47
+          },
+          {
+            "rank": 4,
+            "teamId": "2766",
+            "teamName": "FC Seoul",
+            "played": 22,
+            "won": 10,
+            "drawn": 6,
+            "lost": 6,
+            "goalsFor": 31,
+            "goalsAgainst": 24,
+            "points": 36
+          }
+        ]
+      }
+    },
+    {
+      "fixture": {
+        "fixtureId": "100002",
+        "matchId": "football:100002",
+        "competitionId": "292",
+        "competitionName": "K League 1",
+        "season": 2026,
+        "kickoff": "2026-07-19T11:00:00+00:00",
+        "homeTeamId": "2768",
+        "homeTeamName": "Jeonbuk Hyundai Motors",
+        "awayTeamId": "2770",
+        "awayTeamName": "Daejeon Citizen",
+        "status": "SCHEDULED",
+        "providerMethod": "recorded-snapshot"
+      },
+      "homeForm": {
+        "teamId": "2768",
+        "teamName": "Jeonbuk Hyundai Motors",
+        "teamSide": "home",
+        "window": 4,
+        "results": ["W", "W", "D", "W"],
+        "goalsFor": [2, 3, 1, 1],
+        "goalsAgainst": [0, 1, 1, 0],
+        "providerMethod": "recorded-snapshot"
+      },
+      "awayForm": {
+        "teamId": "2770",
+        "teamName": "Daejeon Citizen",
+        "teamSide": "away",
+        "window": 4,
+        "results": ["L", "D", "W", "L"],
+        "goalsFor": [0, 1, 2, 1],
+        "goalsAgainst": [2, 1, 0, 3],
+        "providerMethod": "recorded-snapshot"
+      },
+      "homeStats": {
+        "teamId": "2768",
+        "teamName": "Jeonbuk Hyundai Motors",
+        "teamSide": "home",
+        "windowMatches": 4,
+        "shotsForPerMatch": 14.0,
+        "shotsAgainstPerMatch": 8.5,
+        "xgForPerMatch": 0,
+        "xgAgainstPerMatch": 0,
+        "providerMethod": "recorded-snapshot",
+        "statsBasis": "shots"
+      },
+      "awayStats": {
+        "teamId": "2770",
+        "teamName": "Daejeon Citizen",
+        "teamSide": "away",
+        "windowMatches": 4,
+        "shotsForPerMatch": 9.5,
+        "shotsAgainstPerMatch": 12.0,
+        "xgForPerMatch": 0,
+        "xgAgainstPerMatch": 0,
+        "providerMethod": "recorded-snapshot",
+        "statsBasis": "shots"
+      },
+      "headToHead": {
+        "homeTeamId": "2768",
+        "awayTeamId": "2770",
+        "sampleSize": 2,
+        "meetings": [
+          { "playedAt": "2026-04-12T07:00:00Z", "homeGoals": 2, "awayGoals": 0 },
+          { "playedAt": "2025-09-20T07:00:00Z", "homeGoals": 1, "awayGoals": 1 }
+        ],
+        "providerMethod": "recorded-snapshot"
+      },
+      "standings": null
+    },
+    {
+      "fixture": {
+        "fixtureId": "100003",
+        "matchId": "football:100003",
+        "competitionId": "98",
+        "competitionName": "J1 League",
+        "season": 2026,
+        "kickoff": "2026-07-20T10:00:00+00:00",
+        "homeTeamId": "282",
+        "homeTeamName": "Kawasaki Frontale",
+        "awayTeamId": "281",
+        "awayTeamName": "Yokohama F. Marinos",
+        "status": "SCHEDULED",
+        "providerMethod": "recorded-snapshot"
+      },
+      "homeForm": {
+        "teamId": "282",
+        "teamName": "Kawasaki Frontale",
+        "teamSide": "home",
+        "window": 3,
+        "results": ["W", "D", "W"],
+        "goalsFor": [2, 1, 3],
+        "goalsAgainst": [1, 1, 0],
+        "providerMethod": "recorded-snapshot"
+      },
+      "awayForm": {
+        "teamId": "281",
+        "teamName": "Yokohama F. Marinos",
+        "teamSide": "away",
+        "window": 3,
+        "results": ["L", "W", "D"],
+        "goalsFor": [0, 2, 1],
+        "goalsAgainst": [2, 1, 1],
+        "providerMethod": "recorded-snapshot"
+      },
+      "homeStats": {
+        "teamId": "282",
+        "teamName": "Kawasaki Frontale",
+        "teamSide": "home",
+        "windowMatches": 3,
+        "shotsForPerMatch": 11.0,
+        "shotsAgainstPerMatch": 10.0,
+        "xgForPerMatch": 0,
+        "xgAgainstPerMatch": 0,
+        "providerMethod": "recorded-snapshot",
+        "statsBasis": "shots"
+      },
+      "awayStats": {
+        "teamId": "281",
+        "teamName": "Yokohama F. Marinos",
+        "teamSide": "away",
+        "windowMatches": 3,
+        "shotsForPerMatch": 10.3,
+        "shotsAgainstPerMatch": 11.7,
+        "xgForPerMatch": 0,
+        "xgAgainstPerMatch": 0,
+        "providerMethod": "recorded-snapshot",
+        "statsBasis": "shots"
+      },
+      "headToHead": {
+        "homeTeamId": "282",
+        "awayTeamId": "281",
+        "sampleSize": 2,
+        "meetings": [
+          { "playedAt": "2026-03-01T05:00:00Z", "homeGoals": 1, "awayGoals": 0 },
+          { "playedAt": "2025-08-15T10:00:00Z", "homeGoals": 2, "awayGoals": 2 }
+        ],
+        "providerMethod": "recorded-snapshot"
+      },
+      "standings": null
+    }
+  ]
+}

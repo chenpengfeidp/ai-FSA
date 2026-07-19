@@ -7,4 +7,5 @@ export type {
   NarrativeEpistemicKind,
   NarrativeSection,
 } from "./domain/narrative-draft.js";
+export type { NarrativeGenerator } from "./domain/narrative-generator.js";
 export { LocalDeterministicNarrativeAdapter } from "./local/local-deterministic-narrative-adapter.js";

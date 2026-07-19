@@ -1,12 +1,30 @@
 # Football Analysis System (FAS)
 
-FAS is an evidence-based, reviewable football analysis platform. The repository currently contains the architecture source of truth, a pnpm/Turborepo foundation, minimal API/web/worker application shells, target-specific container images, a private local Compose topology with PostgreSQL, the shared `@fas/tsconfig`, `@fas/config`, and no-model `@fas/database` packages, the Biome/dependency-cruiser engineering-quality foundation, and focused configuration and database-bootstrap contract tests.
+FAS is an evidence-first, reviewable football analysis platform for a trusted private environment (V1: no users, auth, public deployment, or wagering advice).
 
-No football-domain, AI-engine, database model, migration, runtime database integration, authentication, or production behavior is implemented. V1 has no user or authentication system, so public deployment is prohibited.
+The repository is a pnpm/Turborepo TypeScript modular monolith with NestJS API, Next.js web, NestJS worker shells, Compose topology, quality gates, and a working deterministic analysis vertical slice.
 
 ## Current Delivery State
 
-Read [AGENTS](AGENTS.md) first for repository-wide collaboration rules, then [PROJECT_STATE](docs/PROJECT_STATE.md) for the current milestone, completed sprints, constraints, and next approved step.
+**Architecture Freeze: v0.2** (stability cleanup complete; pipeline layer rules enforced).
+
+Live snapshot: [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)  
+AI collaboration entry: [AGENTS.md](AGENTS.md)  
+Document/code map: [docs/PROJECT_INDEX.md](docs/PROJECT_INDEX.md)
+
+Implemented (non-exhaustive):
+
+- Platform: `@fas/tsconfig`, `@fas/config`, `@fas/database` (Prisma; P.2 Evidence/Match models; default Evidence mode remains memory)
+- Facts path: `@fas/provider-football` (API-Football via API-Sports; FAS domain model before Evidence), `@fas/provider-fixture`
+- Odds layer: `@fas/provider-odds` (optional market overlay; not Match Center schedule source when Football Data is active)
+- Pipeline: Evidence → Feature → Rule → Analysis → Report → Prompt → AI (`LocalDeterministicNarrativeAdapter` wired at composition root)
+- Web Match Center / Session / Workspace / Library (ZH-1/ZH-2 Chinese chrome)
+
+Not in scope without a new gate: Redis, BullMQ, pgvector, microservices, public auth, network AI SDKs, F.1.1 true xG.
+
+## Current Delivery State Pointer
+
+Read [AGENTS](AGENTS.md) first for repository-wide collaboration rules, then [PROJECT_STATE](docs/PROJECT_STATE.md) for the current milestone, constraints, and next approved step.
 
 ## Repository Commands
 
@@ -37,7 +55,7 @@ If a command reports an unsupported toolchain, activate Node.js `24.18.0` with a
 
 `pnpm format` is the explicit writing formatter command. Local pre-commit checks use Husky and lint-staged to run Biome only on supported staged files.
 
-Prisma commands require a non-secret PostgreSQL-format `DATABASE_URL` supplied through the process environment. Validation and zero-model client generation do not connect to PostgreSQL. Generated client files remain package-local and ignored.
+Prisma commands require a non-secret PostgreSQL-format `DATABASE_URL` supplied through the process environment. Generated client files remain package-local and ignored.
 
 ## Runtime Configuration
 
@@ -46,8 +64,13 @@ API and worker environment configuration is loaded through `@fas/config`.
 - `NODE_ENV`: `development`, `test`, or `production`; defaults to `development`.
 - `HOST`: API listener host; defaults to `127.0.0.1`.
 - `PORT`: API listener port from `1` through `65535`; defaults to `3001`.
+- `FOOTBALL_DATA_PROVIDER_MODE`: `recorded` (default) | `live` | `fixture` — Match Center schedule source.
+- `API_FOOTBALL_KEY`: required when Football Data mode is `live` (API-Sports `x-apisports-key`).
+- `ODDS_PROVIDER_MODE`: `recorded` (default) | `live` | `fixture` — optional odds layer.
+- `THE_ODDS_API_KEY`: required when Odds mode is `live`.
+- `EVIDENCE_REPOSITORY_MODE`: `memory` (default) | `postgres`.
 
-`pnpm dev:api` loads a local gitignored `.env` via `scripts/dev-api.mjs` (existing process-env values win). Other commands do not auto-load `.env`; supply variables through the process environment. Invalid supported values stop startup before NestJS initialization.
+See `.env.example` for Football Data league ids and Odds sport keys. `pnpm dev:api` loads a local gitignored `.env` via `scripts/dev-api.mjs` (existing process-env values win). Never commit `.env`.
 
 ## Container Images
 
@@ -105,7 +128,7 @@ Remove the containers, private network, and local PostgreSQL data volume:
 docker compose --profile worker down --volumes --remove-orphans --timeout 10
 ```
 
-This topology demonstrates PostgreSQL container health and existing application behavior only. API readiness remains configuration-only; no application receives database configuration or connects to PostgreSQL. No Prisma model or migration exists, and startup runs no generation, migration, `db push`, or schema mutation. Database-aware readiness, the full deterministic runtime smoke contract, CI, security scanning, image publication, and public deployment remain out of scope.
+API `/health/ready` can ping PostgreSQL when `DATABASE_CLIENT_MODE=live`. Evidence persistence defaults to in-memory unless `EVIDENCE_REPOSITORY_MODE=postgres` with a migrated database. Public deployment, auth, CI image publication, and Redis/BullMQ remain out of scope without a new gate.
 
 ## Reading Order
 
@@ -136,35 +159,7 @@ Read the numbered documents in order:
 23. [22_MILESTONE_3A_GATE](docs/22_MILESTONE_3A_GATE.md)
 24. [23_RELEASE_BASELINE](docs/23_RELEASE_BASELINE.md)
 
-Current Milestone 3A delivery governance:
-
-- [Final Milestone 3A Gate Review](docs/sprints/MILESTONE_3A_GATE_REVIEW.md)
-- [Final Repository Health Report](docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md)
-- [Sprint 7 Report](docs/sprints/SPRINT7_REPORT.md)
-- [Sprint 8 Specification](docs/sprints/SPRINT8_SPECIFICATION.md)
-- [Sprint 8 Specification Revision](docs/sprints/SPRINT8_SPECIFICATION_REVISION.md)
-- [Sprint 8 Report](docs/sprints/SPRINT8_REPORT.md)
-- [Sprint 8 Architecture Alignment](docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md)
-- [Sprint 8 Architecture Alignment Approval](docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md)
-- [Sprint 8 Pre-implementation Audit](docs/sprints/SPRINT8_PRE_IMPLEMENTATION_AUDIT.md)
-- [Sprint 9 Specification](docs/sprints/SPRINT9_SPECIFICATION.md)
-- [Sprint 9 Architecture Alignment Approval](docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT_APPROVAL.md)
-- [Sprint 9 Implementation Authorization](docs/sprints/SPRINT9_IMPLEMENTATION_AUTHORIZATION.md)
-- [Sprint 9 Report](docs/sprints/SPRINT9_REPORT.md)
-- [Sprint 10 Planning](docs/sprints/SPRINT10_PLANNING.md)
-- [Sprint 10 Specification](docs/sprints/SPRINT10_SPECIFICATION.md)
-- [Sprint 10 Architecture Review](docs/sprints/SPRINT10_ARCHITECTURE_REVIEW.md)
-- [Sprint 10 Report](docs/sprints/SPRINT10_REPORT.md)
-
-## Mandatory Paths by Change
-
-- **Product or architecture:** read 00 through 04, then the relevant downstream contracts.
-- **Engine work:** read 00, 04, 15, and the relevant engine document from 05 through 11.
-- **Analysis workflow:** read 00, 02 through 11, 13, and 17.
-- **Data or API:** read 00, 02, 04, 12, 13, 19, and the owning engine document.
-- **Backend implementation:** read 00, 02, 04, 12 through 19, and the relevant engine documents.
-- **Delivery or repository structure:** read 00, 04, 14 through 16, 18, 20 through 23, and the current milestone delivery-governance documents above.
-- **Architecture decision changes:** read 00, 04, 14, 15, and all applicable ADRs; add or supersede an ADR when the decision changes.
+For the live map of what is implemented vs target-only, prefer [PROJECT_INDEX](docs/PROJECT_INDEX.md) and [PROJECT_STATE](docs/PROJECT_STATE.md) over older numbered-doc status headers.
 
 ## Architecture Decision Records
 

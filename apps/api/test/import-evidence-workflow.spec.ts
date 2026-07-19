@@ -257,7 +257,7 @@ describe("HTTP import and Evidence query workflow", () => {
     expect(paths).toHaveProperty("/api/matches/upcoming");
   });
 
-  it("lists upcoming Match Center fixtures from the recorded odds board", async () => {
+  it("lists upcoming Match Center fixtures from the recorded football-data board", async () => {
     const response = await request(baseUrl, "/api/matches/upcoming");
     const body = requireRecord(response.body);
     const value = body.value;
@@ -267,27 +267,46 @@ describe("HTTP import and Evidence query workflow", () => {
     expect(Array.isArray(value)).toBe(true);
     expect(body.meta).toEqual({
       oddsProviderMode: "recorded",
+      footballDataProviderMode: "recorded",
+      scheduleSource: "football-data",
       usedRecordedFallback: false,
     });
     expect(value).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          matchId: "match-example-2",
-          homeTeam: "Arsenal",
-          awayTeam: "Coventry City",
+          matchId: "football:100001",
+          homeTeam: "FC Seoul",
+          awayTeam: "Ulsan Hyundai FC",
           analyzable: true,
-          providerSource: "the-odds-api",
-        }),
-        expect.objectContaining({
-          matchId: "odds:evt_epl_unmapped_tottenham_everton",
-          analyzable: true,
-          providerSource: "the-odds-api",
+          providerSource: "api-football",
         }),
         expect.objectContaining({
           matchId: "match-example-3",
           analyzable: true,
           providerSource: "fixture",
         }),
+      ]),
+    );
+  });
+
+  it("analyzes a recorded football-data match with shots-based statistics", async () => {
+    const response = await request(
+      baseUrl,
+      "/api/analyze/match/football:100001",
+      "POST",
+    );
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      matchId: "football:100001",
+    });
+    expect(report.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "homeTeam", value: "FC Seoul" }),
+        expect.objectContaining({ name: "awayTeam", value: "Ulsan Hyundai FC" }),
+        expect.objectContaining({ name: "momentumHome" }),
+        expect.objectContaining({ name: "attackRatingHome" }),
       ]),
     );
   });

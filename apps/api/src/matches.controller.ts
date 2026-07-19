@@ -27,7 +27,8 @@ export class MatchesController {
 
   @Get("upcoming")
   @ApiOperation({
-    summary: "List upcoming Match Center fixtures (Odds calendar + fixture demos)",
+    summary:
+      "List upcoming Match Center fixtures (Football Data primary + optional fixture demos)",
   })
   @ApiOkResponse({
     description: "Merged upcoming board or typed failure.",
@@ -43,13 +44,15 @@ export class MatchesController {
   > {
     try {
       const board = await this.upcomingBoard.listUpcoming();
-      const oddsProviderMode = loadApiConfig().oddsProvider.mode;
+      const config = loadApiConfig();
 
       return Object.freeze({
         ok: true as const,
         value: board.rows,
         meta: Object.freeze({
-          oddsProviderMode,
+          oddsProviderMode: config.oddsProvider.mode,
+          footballDataProviderMode: config.footballDataProvider.mode,
+          scheduleSource: board.scheduleSource,
           usedRecordedFallback: board.usedRecordedFallback,
         }),
       });

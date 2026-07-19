@@ -3,33 +3,10 @@ import type {
   PreMatchOddsOverlay,
 } from "../domain/pre-match-odds.js";
 
-export interface TheOddsApiOutcome {
-  readonly name: string;
-  readonly price: number;
-  readonly point?: number;
-}
-
-export interface TheOddsApiMarket {
-  readonly key: string;
-  readonly last_update?: string;
-  readonly outcomes: readonly TheOddsApiOutcome[];
-}
-
-export interface TheOddsApiBookmaker {
-  readonly key: string;
-  readonly title?: string;
-  readonly last_update?: string;
-  readonly markets: readonly TheOddsApiMarket[];
-}
-
-/** Real-shaped The Odds API event payload (subset used for pre-match h2h + spreads). */
-export interface TheOddsApiEventOdds {
-  readonly id: string;
-  readonly home_team: string;
-  readonly away_team: string;
-  readonly commence_time?: string;
-  readonly bookmakers: readonly TheOddsApiBookmaker[];
-}
+/**
+ * Maps vendor JSON via `unknown` + structural checks.
+ * The Odds API event shape is intentionally not a public FAS contract.
+ */
 
 export interface MapTheOddsApiH2hOptions {
   readonly providerMethod: OddsProviderMethod;

@@ -26,6 +26,8 @@ export default defineConfig({
             EVIDENCE_REPOSITORY_MODE: "memory",
             DATABASE_URL:
               "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
+            FOOTBALL_DATA_PROVIDER_MODE: "recorded",
+            ODDS_PROVIDER_MODE: "recorded",
           },
           include: ["apps/api/test/**/*.spec.ts"],
         },
@@ -109,6 +111,13 @@ export default defineConfig({
           name: "provider-fixture",
           environment: "node",
           include: ["packages/provider-fixture/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
+          name: "provider-football",
+          environment: "node",
+          include: ["packages/provider-football/test/**/*.spec.ts"],
         },
       },
       {

@@ -44,13 +44,7 @@ export { LiveTheOddsApiUpcomingFixturesSource } from "./live/live-the-odds-api-u
 export type { LiveTheOddsApiUpcomingFixturesSourceOptions } from "./live/live-the-odds-api-upcoming-fixtures-source.js";
 export { mapPool } from "./live/map-pool.js";
 export { mapTheOddsApiH2h } from "./mapper/map-the-odds-api-h2h.js";
-export type {
-  MapTheOddsApiH2hOptions,
-  TheOddsApiBookmaker,
-  TheOddsApiEventOdds,
-  TheOddsApiMarket,
-  TheOddsApiOutcome,
-} from "./mapper/map-the-odds-api-h2h.js";
+export type { MapTheOddsApiH2hOptions } from "./mapper/map-the-odds-api-h2h.js";
 export { mapTheOddsApiOddsList } from "./mapper/map-the-odds-api-odds-list.js";
 export { mapTheOddsApiScores } from "./mapper/map-the-odds-api-scores.js";
 export { RecordedOddsSnapshotSource } from "./recorded/recorded-odds-snapshot-source.js";

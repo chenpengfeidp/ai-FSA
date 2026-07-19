@@ -2,11 +2,18 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getUpcomingMatches } from "../services/api";
-import type { MatchSummary, OddsProviderModeLabel } from "../types/match-center";
+import type {
+  FootballDataProviderModeLabel,
+  MatchSummary,
+  OddsProviderModeLabel,
+  ScheduleSourceLabel,
+} from "../types/match-center";
 
 export function useUpcomingMatches(): {
   readonly matches: readonly MatchSummary[];
   readonly oddsProviderMode: OddsProviderModeLabel | undefined;
+  readonly footballDataProviderMode: FootballDataProviderModeLabel | undefined;
+  readonly scheduleSource: ScheduleSourceLabel | undefined;
   readonly usedRecordedFallback: boolean;
   readonly isLoading: boolean;
   readonly isError: boolean;
@@ -20,6 +27,8 @@ export function useUpcomingMatches(): {
   return {
     matches: query.data?.matches ?? [],
     oddsProviderMode: query.data?.meta.oddsProviderMode,
+    footballDataProviderMode: query.data?.meta.footballDataProviderMode,
+    scheduleSource: query.data?.meta.scheduleSource,
     usedRecordedFallback: query.data?.meta.usedRecordedFallback === true,
     isLoading: query.isLoading,
     isError: query.isError,

@@ -5,12 +5,14 @@
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: Multi-league odds/scores fan-out + ZH-2 Chinese Workspace/Library/report delivered
+- Current task status: **Architecture Freeze v0.2** complete; F.1 Football Data Provider landed (`@fas/provider-football`)
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Multi-league Match Center + ZH-2 (commits `1057f02`, `53c15c5`, `38c040b`)
-- Next authorized work: True shots/xG STATISTICS provider; Compose postgres smoke; Evaluation-qualified calibration later
+- Last completed delivery: Architecture Freeze Cleanup v0.2 (Report narrative DI, pipeline depcruise rules, Odds DTO scoping, docs sync); F.1 facts≠odds split
+- Next authorized work: F.1.1 true xG (separate gate); Compose postgres smoke; Evaluation-qualified calibration later
 - Release status: Pre-release; private trusted environment only; not production
+- Architecture freeze: **v0.2** (stable for long-term feature work inside frozen boundaries)
 - Document map for AI/onboarding: `docs/PROJECT_INDEX.md`
+- Approved gate: `docs/sprints/VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` (API-Football, `@fas/provider-football`, API-Sports direct, xG → F.1.1)
 
 Update this document after every sprint, implementation gate, or material governance change.
 
@@ -21,7 +23,7 @@ The repository contains the Milestone 3A bootstrap platform **and** a working pr
 ### Platform / bootstrap (still true)
 
 - pnpm and Turborepo workspace with exact Node.js `24.18.0` and pnpm `11.13.0` pins;
-- `@fas/tsconfig`, `@fas/config`, `@fas/database` (Prisma no-model bootstrap);
+- `@fas/tsconfig`, `@fas/config`, `@fas/database` (Prisma; P.2 Evidence/Match models; bootstrap plus first domain persistence);
 - NestJS API, Next.js web, standalone NestJS worker;
 - Biome, dependency-cruiser, Husky/lint-staged, Vitest, toolchain enforcement;
 - container images and local Compose topology for PostgreSQL, API, web, and profiled worker;
@@ -42,12 +44,12 @@ Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
   → Web Match Center / Session / Workspace / Library
 ```
 
-Default API odds mode is `ODDS_PROVIDER_MODE=recorded`: fixture form/stats/h2h remain, while mapped demo matches overlay The Odds API–shaped recorded **1X2 + spreads (Asian handicap)** cassettes (`source=the-odds-api`). Live mode requires `THE_ODDS_API_KEY` and fans out Match Center upcoming odds + scores across `ODDS_SPORT_KEYS` (default: big-5, K/J League, Nordics, Portugal, UEFA club comps, World Cup). `odds:*` rows become analyzable when both sides appear in the scores window (`daysFrom=3`).
+Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG is deferred to F.1.1.
 
 Implemented packages used by the slice (non-exhaustive):
 
 - `@fas/match`, `@fas/evidence`, `@fas/evidence-normalizer`, `@fas/evidence-import`, `@fas/evidence-query`
-- `@fas/provider-fixture`, `@fas/provider-odds`, `@fas/application`
+- `@fas/provider-fixture`, `@fas/provider-football`, `@fas/provider-odds`, `@fas/application`
 - `@fas/feature`, `@fas/rule`, `@fas/analysis`, `@fas/report`
 - `@fas/statistics` (pinned `population_demo_v1` frequency-ratio candidate by default; identity still selectable; no match-run training)
 - `@fas/prompt` (sealed-context composition; no retrieval / no network)
@@ -228,12 +230,13 @@ No numbered sprint is active. B.1/B.2/C.1/C.2/A.1/P.1/P.2/ZH-1 path is implement
 
 Recommended follow-ons (ordered):
 
-1. True shots/xG STATISTICS provider (replace goals-proxy) — needs provider choice + slice spec;
-2. Compose migrate automation / postgres-mode smoke evidence;
-3. Evaluation-qualified calibration / larger reviewed populations;
-4. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
+1. **F.1.1** true xG (do not start without an explicit gate);
+2. Keep Odds as optional market layer only; do not re-merge schedule ownership into Odds;
+3. Compose migrate automation / postgres-mode smoke evidence;
+4. Evaluation-qualified calibration / larger reviewed populations;
+5. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
 
-Recently delivered (local, pending commit): Match Center date filter; multi-league live odds list; `dev:api` loads `.env` before Prisma build; multi-league live scores prime; ZH-2 Chinese Workspace/Library/report.
+Recently delivered: Architecture Freeze v0.2; F.1 Football Data Provider; Match Center date filter; multi-league odds/scores; ZH-2; `docs/PROJECT_INDEX.md`.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

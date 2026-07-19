@@ -15,6 +15,8 @@ export interface HttpConfig {
 
 export type OddsProviderMode = "fixture" | "live" | "recorded";
 
+export type FootballDataProviderMode = "fixture" | "live" | "recorded";
+
 export type CalibrationArtifactMode = "identity" | "population_demo_v1";
 
 export interface OddsProviderConfig {
@@ -23,6 +25,15 @@ export interface OddsProviderConfig {
   readonly baseUrl: string;
   /** The Odds API sport keys for Match Center live fan-out; undefined → provider default. */
   readonly sportKeys: readonly string[] | undefined;
+}
+
+export interface FootballDataProviderConfig {
+  readonly mode: FootballDataProviderMode;
+  readonly apiKey: string | undefined;
+  /** API-Sports official host (not RapidAPI). */
+  readonly baseUrl: string;
+  /** API-Football league ids; undefined → provider default catalog. */
+  readonly leagueIds: readonly number[] | undefined;
 }
 
 export interface CalibrationConfig {
@@ -46,6 +57,7 @@ export interface ApiConfig {
   readonly runtime: RuntimeConfig;
   readonly http: HttpConfig;
   readonly oddsProvider: OddsProviderConfig;
+  readonly footballDataProvider: FootballDataProviderConfig;
   readonly calibration: CalibrationConfig;
   readonly database: DatabaseConfig;
   readonly evidenceRepository: EvidenceRepositoryConfig;
@@ -94,6 +106,20 @@ const oddsApiBaseUrlSchema = z
 
 const oddsSportKeysSchema = z.string().optional();
 
+const footballDataProviderModeSchema = z
+  .enum(["fixture", "live", "recorded"])
+  .default("recorded");
+
+const apiFootballKeySchema = z.string().optional();
+
+const apiFootballBaseUrlSchema = z
+  .string()
+  .trim()
+  .url({ error: "API_FOOTBALL_BASE_URL must be a valid URL." })
+  .default("https://v3.football.api-sports.io");
+
+const footballDataLeagueIdsSchema = z.string().optional();
+
 const calibrationArtifactModeSchema = z
   .enum(["identity", "population_demo_v1"])
   .default("population_demo_v1");
@@ -122,6 +148,10 @@ const apiEnvironmentSchema = z
     THE_ODDS_API_KEY: oddsApiKeySchema,
     THE_ODDS_API_BASE_URL: oddsApiBaseUrlSchema,
     ODDS_SPORT_KEYS: oddsSportKeysSchema,
+    FOOTBALL_DATA_PROVIDER_MODE: footballDataProviderModeSchema,
+    API_FOOTBALL_KEY: apiFootballKeySchema,
+    API_FOOTBALL_BASE_URL: apiFootballBaseUrlSchema,
+    FOOTBALL_DATA_LEAGUE_IDS: footballDataLeagueIdsSchema,
     CALIBRATION_ARTIFACT: calibrationArtifactModeSchema,
     DATABASE_URL: databaseUrlSchema,
     DATABASE_CLIENT_MODE: databaseClientModeSchema,
@@ -136,6 +166,19 @@ const apiEnvironmentSchema = z
           code: "custom",
           path: ["THE_ODDS_API_KEY"],
           message: "THE_ODDS_API_KEY is required when ODDS_PROVIDER_MODE is live.",
+        });
+      }
+    }
+
+    if (value.FOOTBALL_DATA_PROVIDER_MODE === "live") {
+      const apiKey = value.API_FOOTBALL_KEY?.trim() ?? "";
+
+      if (apiKey.length === 0) {
+        context.addIssue({
+          code: "custom",
+          path: ["API_FOOTBALL_KEY"],
+          message:
+            "API_FOOTBALL_KEY is required when FOOTBALL_DATA_PROVIDER_MODE is live.",
         });
       }
     }
@@ -214,6 +257,28 @@ function issueDetails(variable: string): Readonly<{
         code: "INVALID_ODDS_SPORT_KEYS",
         message:
           "ODDS_SPORT_KEYS must be a comma-separated list of The Odds API sport keys.",
+      };
+    case "FOOTBALL_DATA_PROVIDER_MODE":
+      return {
+        code: "INVALID_FOOTBALL_DATA_PROVIDER_MODE",
+        message: "FOOTBALL_DATA_PROVIDER_MODE must be recorded, live, or fixture.",
+      };
+    case "API_FOOTBALL_KEY":
+      return {
+        code: "MISSING_API_FOOTBALL_KEY",
+        message:
+          "API_FOOTBALL_KEY is required when FOOTBALL_DATA_PROVIDER_MODE is live.",
+      };
+    case "API_FOOTBALL_BASE_URL":
+      return {
+        code: "INVALID_API_FOOTBALL_BASE_URL",
+        message: "API_FOOTBALL_BASE_URL must be a valid URL.",
+      };
+    case "FOOTBALL_DATA_LEAGUE_IDS":
+      return {
+        code: "INVALID_FOOTBALL_DATA_LEAGUE_IDS",
+        message:
+          "FOOTBALL_DATA_LEAGUE_IDS must be a comma-separated list of positive integers.",
       };
     case "CALIBRATION_ARTIFACT":
       return {
@@ -299,6 +364,56 @@ function parseOddsSportKeys(raw: string | undefined): readonly string[] | undefi
   return Object.freeze(keys);
 }
 
+function parseFootballLeagueIds(
+  raw: string | undefined,
+): readonly number[] | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+
+  const ids: number[] = [];
+
+  for (const part of raw.split(",")) {
+    const trimmed = part.trim();
+
+    if (trimmed.length === 0) {
+      continue;
+    }
+
+    if (!/^[0-9]+$/.test(trimmed)) {
+      throw new ConfigurationValidationError([
+        Object.freeze({
+          variable: "FOOTBALL_DATA_LEAGUE_IDS",
+          code: "INVALID_FOOTBALL_DATA_LEAGUE_IDS",
+          message:
+            "FOOTBALL_DATA_LEAGUE_IDS must be a comma-separated list of positive integers.",
+        }),
+      ]);
+    }
+
+    const id = Number(trimmed);
+
+    if (!Number.isInteger(id) || id < 1) {
+      throw new ConfigurationValidationError([
+        Object.freeze({
+          variable: "FOOTBALL_DATA_LEAGUE_IDS",
+          code: "INVALID_FOOTBALL_DATA_LEAGUE_IDS",
+          message:
+            "FOOTBALL_DATA_LEAGUE_IDS must be a comma-separated list of positive integers.",
+        }),
+      ]);
+    }
+
+    ids.push(id);
+  }
+
+  if (ids.length === 0) {
+    return undefined;
+  }
+
+  return Object.freeze(ids);
+}
+
 export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
   const parsed = parseConfiguration(
     apiEnvironmentSchema,
@@ -306,10 +421,12 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
   );
 
   const apiKey = parsed.THE_ODDS_API_KEY?.trim();
+  const footballApiKey = parsed.API_FOOTBALL_KEY?.trim();
   const clientMode =
     parsed.DATABASE_CLIENT_MODE ?? (parsed.NODE_ENV === "test" ? "stub" : "live");
   const evidenceRepositoryMode = parsed.EVIDENCE_REPOSITORY_MODE ?? "memory";
   const sportKeys = parseOddsSportKeys(parsed.ODDS_SPORT_KEYS);
+  const leagueIds = parseFootballLeagueIds(parsed.FOOTBALL_DATA_LEAGUE_IDS);
 
   return Object.freeze({
     runtime: Object.freeze({
@@ -324,6 +441,15 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
       apiKey: apiKey !== undefined && apiKey.length > 0 ? apiKey : undefined,
       baseUrl: parsed.THE_ODDS_API_BASE_URL,
       sportKeys,
+    }),
+    footballDataProvider: Object.freeze({
+      mode: parsed.FOOTBALL_DATA_PROVIDER_MODE,
+      apiKey:
+        footballApiKey !== undefined && footballApiKey.length > 0
+          ? footballApiKey
+          : undefined,
+      baseUrl: parsed.API_FOOTBALL_BASE_URL,
+      leagueIds,
     }),
     calibration: Object.freeze({
       artifactMode: parsed.CALIBRATION_ARTIFACT,

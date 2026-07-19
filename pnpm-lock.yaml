@@ -35,6 +35,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@fas/ai-provider':
+        specifier: workspace:*
+        version: link:../../packages/ai-provider
       '@fas/analysis':
         specifier: workspace:*
         version: link:../../packages/analysis
@@ -68,6 +71,9 @@ importers:
       '@fas/provider-fixture':
         specifier: workspace:*
         version: link:../../packages/provider-fixture
+      '@fas/provider-football':
+        specifier: workspace:*
+        version: link:../../packages/provider-football
       '@fas/provider-odds':
         specifier: workspace:*
         version: link:../../packages/provider-odds
@@ -462,6 +468,21 @@ importers:
       '@fas/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/provider-football:
+    devDependencies:
+      '@fas/evidence-normalizer':
+        specifier: workspace:*
+        version: link:../evidence-normalizer
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/node':
+        specifier: 24.13.3
+        version: 24.13.3
       typescript:
         specifier: 6.0.3
         version: 6.0.3

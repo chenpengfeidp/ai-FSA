@@ -4,6 +4,7 @@ import {
   type NarrativeDraft,
   NarrativeGenerationError,
 } from "../domain/narrative-draft.js";
+import type { NarrativeGenerator } from "../domain/narrative-generator.js";
 
 function percent(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
@@ -13,7 +14,7 @@ function percent(value: number): string {
  * Local deterministic narrator for private V1.
  * Explains sealed projection values only; never calls a network provider SDK.
  */
-export class LocalDeterministicNarrativeAdapter {
+export class LocalDeterministicNarrativeAdapter implements NarrativeGenerator {
   generate(
     composition: NarrativePromptComposition,
     generatedAt: string,

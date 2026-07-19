@@ -11,6 +11,7 @@
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@fas/ai-provider": "workspace:*",
     "@fas/analysis": "workspace:*",
     "@fas/application": "workspace:*",
     "@fas/config": "workspace:*",
@@ -22,6 +23,7 @@
     "@fas/feature": "workspace:*",
     "@fas/match": "workspace:*",
     "@fas/provider-fixture": "workspace:*",
+    "@fas/provider-football": "workspace:*",
     "@fas/provider-odds": "workspace:*",
     "@fas/report": "workspace:*",
     "@fas/rule": "workspace:*",

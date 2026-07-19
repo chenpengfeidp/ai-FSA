@@ -1,4 +1,12 @@
-import type { OddsProviderConfig } from "@fas/config";
+import type { FootballDataProviderConfig, OddsProviderConfig } from "@fas/config";
+import {
+  AsyncFootballMatchProvider,
+  CompositeFootballFirstLookup,
+  FootballMatchProvider,
+  LiveApiSportsMatchCatalog,
+  PrimedFootballMatchProvider,
+  RecordedFootballCatalog,
+} from "@fas/provider-football";
 import { FixtureProvider } from "@fas/provider-fixture";
 import {
   CompositeMatchProvider,
@@ -14,6 +22,7 @@ import {
   type ScoresSnapshotPrimer,
   UpcomingEventStore,
 } from "@fas/provider-odds";
+import type { FootballMatchPrimer } from "./football-match-primer.bridge.js";
 
 export interface MatchProviderWiring {
   readonly matchProvider: MatchLookup;
@@ -21,11 +30,93 @@ export interface MatchProviderWiring {
   readonly scoresPrimer: ScoresSnapshotPrimer;
   readonly eventStore: UpcomingEventStore;
   readonly scoresSource: RecordedScoresSnapshotSource | LiveTheOddsApiScoresSource;
+  readonly footballPrimer: FootballMatchPrimer;
 }
+
+const noopFootballPrimer: FootballMatchPrimer = Object.freeze({
+  async ensureMatch(): Promise<void> {
+    // Recorded / disabled football modes need no network priming.
+  },
+});
 
 export function createMatchProviderWiring(
   oddsProvider: OddsProviderConfig,
+  footballProvider: FootballDataProviderConfig,
 ): MatchProviderWiring {
+  const oddsWiring = createOddsMatchProviderWiring(oddsProvider);
+  const football = createFootballLookup(footballProvider);
+
+  return Object.freeze({
+    matchProvider: new CompositeFootballFirstLookup(
+      football.lookup,
+      oddsWiring.matchProvider,
+    ),
+    oddsPrimer: oddsWiring.oddsPrimer,
+    scoresPrimer: oddsWiring.scoresPrimer,
+    eventStore: oddsWiring.eventStore,
+    scoresSource: oddsWiring.scoresSource,
+    footballPrimer: football.primer,
+  });
+}
+
+function createFootballLookup(footballProvider: FootballDataProviderConfig): {
+  readonly lookup: MatchLookup;
+  readonly primer: FootballMatchPrimer;
+} {
+  if (footballProvider.mode === "fixture") {
+    return Object.freeze({
+      lookup: Object.freeze({
+        getMatch(): undefined {
+          return undefined;
+        },
+      }),
+      primer: noopFootballPrimer,
+    });
+  }
+
+  if (footballProvider.mode === "live") {
+    const apiKey = footballProvider.apiKey;
+
+    if (apiKey === undefined) {
+      throw new Error(
+        "API_FOOTBALL_KEY is required when FOOTBALL_DATA_PROVIDER_MODE is live.",
+      );
+    }
+
+    const catalog = new LiveApiSportsMatchCatalog({
+      apiKey,
+      baseUrl: footballProvider.baseUrl,
+    });
+    const asyncProvider = new AsyncFootballMatchProvider(catalog);
+
+    return Object.freeze({
+      lookup: new PrimedFootballMatchProvider(asyncProvider),
+      primer: Object.freeze({
+        async ensureMatch(matchId: string): Promise<void> {
+          if (!matchId.startsWith("football:")) {
+            return;
+          }
+
+          await asyncProvider.ensureMatch(matchId);
+        },
+      }),
+    });
+  }
+
+  const catalog = new RecordedFootballCatalog();
+
+  return Object.freeze({
+    lookup: new FootballMatchProvider(catalog),
+    primer: noopFootballPrimer,
+  });
+}
+
+function createOddsMatchProviderWiring(oddsProvider: OddsProviderConfig): Omit<
+  MatchProviderWiring,
+  "footballPrimer" | "matchProvider"
+> & {
+  readonly matchProvider: MatchLookup;
+} {
   const fixtureProvider = new FixtureProvider();
   const eventStore = new UpcomingEventStore();
 

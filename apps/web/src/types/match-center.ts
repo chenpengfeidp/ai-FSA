@@ -2,6 +2,10 @@ export type MatchStatus = "ANALYZED" | "FAILED" | "LOADING" | "SCHEDULED";
 
 export type OddsProviderModeLabel = "recorded" | "live" | "fixture";
 
+export type FootballDataProviderModeLabel = "recorded" | "live" | "fixture";
+
+export type ScheduleSourceLabel = "football-data" | "odds";
+
 export interface MatchSummary {
   readonly id: string;
   readonly homeTeam: string;
@@ -14,11 +18,13 @@ export interface MatchSummary {
   readonly status: MatchStatus;
   /** False for Odds-calendar rows without fixture evidence in this slice. */
   readonly analyzable?: boolean;
-  readonly providerSource?: "fixture" | "the-odds-api" | string;
+  readonly providerSource?: "api-football" | "fixture" | "the-odds-api" | string;
 }
 
 export interface UpcomingMatchesMeta {
   readonly oddsProviderMode: OddsProviderModeLabel;
+  readonly footballDataProviderMode?: FootballDataProviderModeLabel;
+  readonly scheduleSource?: ScheduleSourceLabel;
   readonly usedRecordedFallback?: boolean;
 }
 

@@ -1,3 +1,4 @@
+import { LocalDeterministicNarrativeAdapter } from "@fas/ai-provider";
 import {
   computeDeterministicMatchProjection,
   createAnalysisResult,
@@ -9,6 +10,10 @@ import { createMatchId } from "@fas/match";
 import { RuleEvaluator } from "@fas/rule";
 import { describe, expect, it } from "vitest";
 import { GenerateMatchReportUseCase, ReportBuilder } from "../src/index.js";
+
+function createReportBuilder(): ReportBuilder {
+  return new ReportBuilder(new LocalDeterministicNarrativeAdapter());
+}
 
 const matchId = createMatchId("match-1");
 const generatedAt = "2026-07-17T10:00:00Z";
@@ -155,7 +160,7 @@ function makeCompletedAnalysis(): AnalysisResult {
 describe("ReportBuilder", () => {
   it("builds a successful deterministic match report without recomputing projection", () => {
     const analysis = makeCompletedAnalysis();
-    const report = new ReportBuilder().build(analysis);
+    const report = createReportBuilder().build(analysis);
 
     expect(report.reportId).toBe(`report:match-1:${generatedAt}`);
     expect(report.deterministic).toEqual(analysis.projection);
@@ -169,7 +174,7 @@ describe("ReportBuilder", () => {
   });
 
   it("returns a deeply immutable report", () => {
-    const report = new ReportBuilder().build(makeCompletedAnalysis());
+    const report = createReportBuilder().build(makeCompletedAnalysis());
 
     expect(Object.isFrozen(report)).toBe(true);
     expect(Object.isFrozen(report.summary)).toBe(true);
@@ -181,7 +186,7 @@ describe("ReportBuilder", () => {
 
   it("produces equal output for the same AnalysisResult", () => {
     const analysis = makeCompletedAnalysis();
-    const builder = new ReportBuilder();
+    const builder = createReportBuilder();
 
     expect(builder.build(analysis)).toEqual(builder.build(analysis));
   });
@@ -190,7 +195,7 @@ describe("ReportBuilder", () => {
     const analysis = makeCompletedAnalysis();
     const snapshot = JSON.stringify(analysis);
 
-    new ReportBuilder().build(analysis);
+    createReportBuilder().build(analysis);
 
     expect(JSON.stringify(analysis)).toBe(snapshot);
   });
@@ -201,12 +206,12 @@ describe("GenerateMatchReportUseCase", () => {
     const analysis = makeCompletedAnalysis();
     const useCase = new GenerateMatchReportUseCase(
       { execute: async () => ({ ok: true, value: analysis }) },
-      new ReportBuilder(),
+      createReportBuilder(),
     );
 
     const result = await useCase.execute(matchId);
 
-    expect(result).toEqual(new ReportBuilder().build(analysis));
+    expect(result).toEqual(createReportBuilder().build(analysis));
     expect("ok" in result).toBe(false);
   });
 
@@ -221,7 +226,7 @@ describe("GenerateMatchReportUseCase", () => {
           ok: false,
         }),
       },
-      new ReportBuilder(),
+      createReportBuilder(),
     );
 
     await expect(useCase.execute(matchId)).resolves.toEqual({
@@ -240,7 +245,7 @@ describe("GenerateMatchReportUseCase", () => {
           throw new Error("analysis failed");
         },
       },
-      new ReportBuilder(),
+      createReportBuilder(),
     );
     const reportFailure = new GenerateMatchReportUseCase(
       { execute: async () => ({ ok: true, value: makeCompletedAnalysis() }) },

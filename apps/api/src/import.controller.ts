@@ -14,6 +14,8 @@ import {
   ImportSuccessResponseDto,
 } from "./http-response.dto.js";
 // biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
+import { FootballMatchPrimerBridge } from "./football-match-primer.bridge.js";
+// biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 
 @ApiTags("Evidence import")
@@ -22,6 +24,7 @@ import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 export class ImportController {
   constructor(
     private readonly importMatch: ImportMatchUseCase,
+    private readonly footballPrimer: FootballMatchPrimerBridge,
     private readonly oddsPrimer: OddsSnapshotPrimerBridge,
   ) {}
 
@@ -48,6 +51,7 @@ export class ImportController {
     },
   })
   async importMatchById(matchId: string): Promise<ImportMatchResult> {
+    await this.footballPrimer.ensureMatch(matchId);
     await this.oddsPrimer.ensurePreMatch1x2(matchId);
     return await this.importMatch.execute(matchId);
   }

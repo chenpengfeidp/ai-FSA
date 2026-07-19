@@ -14,6 +14,7 @@ import { FixtureEvidenceNormalizer } from "@fas/evidence-normalizer";
 import { EvidenceQueryService } from "@fas/evidence-query";
 import { FeatureExtractor } from "@fas/feature";
 import type { MatchLookup } from "@fas/provider-odds";
+import { LocalDeterministicNarrativeAdapter } from "@fas/ai-provider";
 import { GenerateMatchReportUseCase, ReportBuilder } from "@fas/report";
 import { RuleEvaluator } from "@fas/rule";
 import { Module } from "@nestjs/common";
@@ -23,6 +24,7 @@ import { EvidenceController } from "./evidence.controller.js";
 import { matchProviderToken } from "./evidence.tokens.js";
 import { ImportController } from "./import.controller.js";
 import { MatchesController } from "./matches.controller.js";
+import { FootballMatchPrimerBridge } from "./football-match-primer.bridge.js";
 import { createMatchProviderWiring } from "./match-provider.factory.js";
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 import { createApiEvidenceRepository } from "./runtime-database.js";
@@ -33,13 +35,20 @@ import { createUpcomingMatchesBoard } from "./upcoming-matches.factory.js";
 const evidenceRepositoryToken = Symbol("EvidenceRepository");
 
 const apiConfig = loadApiConfig();
-const matchProviderWiring = createMatchProviderWiring(apiConfig.oddsProvider);
-const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider, {
-  eventStore: matchProviderWiring.eventStore,
-  scoresSource: matchProviderWiring.scoresSource,
-  scoresPrimer: matchProviderWiring.scoresPrimer,
-  scoresMethod: () => matchProviderWiring.scoresSource.providerMethod(),
-});
+const matchProviderWiring = createMatchProviderWiring(
+  apiConfig.oddsProvider,
+  apiConfig.footballDataProvider,
+);
+const upcomingMatchesBoard = createUpcomingMatchesBoard(
+  apiConfig.footballDataProvider,
+  apiConfig.oddsProvider,
+  {
+    eventStore: matchProviderWiring.eventStore,
+    scoresSource: matchProviderWiring.scoresSource,
+    scoresPrimer: matchProviderWiring.scoresPrimer,
+    scoresMethod: () => matchProviderWiring.scoresSource.providerMethod(),
+  },
+);
 
 @Module({
   controllers: [
@@ -79,6 +88,10 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider, 
     {
       provide: OddsSnapshotPrimerBridge,
       useValue: new OddsSnapshotPrimerBridge(matchProviderWiring.oddsPrimer),
+    },
+    {
+      provide: FootballMatchPrimerBridge,
+      useValue: new FootballMatchPrimerBridge(matchProviderWiring.footballPrimer),
     },
     {
       provide: UpcomingMatchesBoardBridge,
@@ -129,7 +142,11 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider, 
           resolvePinnedCalibrationArtifact(apiConfig.calibration.artifactMode),
         ),
     },
-    ReportBuilder,
+    {
+      provide: ReportBuilder,
+      useFactory: (): ReportBuilder =>
+        new ReportBuilder(new LocalDeterministicNarrativeAdapter()),
+    },
     {
       provide: GenerateMatchReportUseCase,
       inject: [AnalyzeMatchUseCase, ReportBuilder],

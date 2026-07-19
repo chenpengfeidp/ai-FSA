@@ -1,5 +1,4 @@
-import type { NarrativeDraft } from "@fas/ai-provider";
-import { LocalDeterministicNarrativeAdapter } from "@fas/ai-provider";
+import type { NarrativeDraft, NarrativeGenerator } from "@fas/ai-provider";
 import type { AnalysisResult, DeterministicMatchProjection } from "@fas/analysis";
 import type { Feature } from "@fas/feature";
 import { composeNarrativePrompt } from "@fas/prompt";
@@ -83,36 +82,13 @@ function marketConflict(projection: DeterministicMatchProjection): boolean {
   );
 }
 
-function buildNarrative(analysis: AnalysisResult, reportId: string): NarrativeDraft {
-  const matchedRuleNames = analysis.ruleResults
-    .filter((rule) => rule.status === "PASS" && !isPresenceRule(rule))
-    .map((rule) => rule.ruleName);
-  const composition = composeNarrativePrompt({
-    reportId,
-    matchId: analysis.matchId,
-    homeTeam: teamName(analysis.features, "homeTeam"),
-    awayTeam: teamName(analysis.features, "awayTeam"),
-    recommendation: analysis.projection.recommendation,
-    pHome: analysis.projection.pHome,
-    pDraw: analysis.projection.pDraw,
-    pAway: analysis.projection.pAway,
-    confidence: analysis.projection.confidence,
-    limitations: analysis.projection.limitations,
-    matchedRuleNames,
-    marketConflict: marketConflict(analysis.projection),
-    calibrationArtifactId: analysis.projection.calibrationArtifactId,
-    calibrationStatus: analysis.projection.calibrationStatus,
-    calibrationQualified: analysis.projection.calibrationQualified,
-    deterministicChecksum: analysis.projection.checksum,
-  });
-
-  return new LocalDeterministicNarrativeAdapter().generate(
-    composition,
-    analysis.generatedAt,
-  );
-}
-
 export class ReportBuilder {
+  readonly #narrativeGenerator: NarrativeGenerator;
+
+  constructor(narrativeGenerator: NarrativeGenerator) {
+    this.#narrativeGenerator = narrativeGenerator;
+  }
+
   build(analysis: AnalysisResult): AnalysisReport {
     const reportId = `report:${analysis.matchId}:${analysis.generatedAt}`;
 
@@ -124,7 +100,33 @@ export class ReportBuilder {
       features: analysis.features,
       rules: analysis.ruleResults,
       deterministic: analysis.projection,
-      narrative: buildNarrative(analysis, reportId),
+      narrative: this.#buildNarrative(analysis, reportId),
     });
+  }
+
+  #buildNarrative(analysis: AnalysisResult, reportId: string): NarrativeDraft {
+    const matchedRuleNames = analysis.ruleResults
+      .filter((rule) => rule.status === "PASS" && !isPresenceRule(rule))
+      .map((rule) => rule.ruleName);
+    const composition = composeNarrativePrompt({
+      reportId,
+      matchId: analysis.matchId,
+      homeTeam: teamName(analysis.features, "homeTeam"),
+      awayTeam: teamName(analysis.features, "awayTeam"),
+      recommendation: analysis.projection.recommendation,
+      pHome: analysis.projection.pHome,
+      pDraw: analysis.projection.pDraw,
+      pAway: analysis.projection.pAway,
+      confidence: analysis.projection.confidence,
+      limitations: analysis.projection.limitations,
+      matchedRuleNames,
+      marketConflict: marketConflict(analysis.projection),
+      calibrationArtifactId: analysis.projection.calibrationArtifactId,
+      calibrationStatus: analysis.projection.calibrationStatus,
+      calibrationQualified: analysis.projection.calibrationQualified,
+      deterministicChecksum: analysis.projection.checksum,
+    });
+
+    return this.#narrativeGenerator.generate(composition, analysis.generatedAt);
   }
 }

@@ -34,6 +34,12 @@ describe("@fas/config environment loading", () => {
         baseUrl: "https://api.the-odds-api.com",
         sportKeys: undefined,
       },
+      footballDataProvider: {
+        mode: "recorded",
+        apiKey: undefined,
+        baseUrl: "https://v3.football.api-sports.io",
+        leagueIds: undefined,
+      },
       calibration: {
         artifactMode: "population_demo_v1",
       },
@@ -80,6 +86,12 @@ describe("@fas/config environment loading", () => {
         baseUrl: "https://api.the-odds-api.com",
         sportKeys: undefined,
       },
+      footballDataProvider: {
+        mode: "recorded",
+        apiKey: undefined,
+        baseUrl: "https://v3.football.api-sports.io",
+        leagueIds: undefined,
+      },
       calibration: {
         artifactMode: "population_demo_v1",
       },
@@ -123,6 +135,12 @@ describe("@fas/config environment loading", () => {
         baseUrl: "https://odds.example.test",
         sportKeys: undefined,
       },
+      footballDataProvider: {
+        mode: "recorded",
+        apiKey: undefined,
+        baseUrl: "https://v3.football.api-sports.io",
+        leagueIds: undefined,
+      },
       calibration: {
         artifactMode: "identity",
       },
@@ -134,6 +152,36 @@ describe("@fas/config environment loading", () => {
         mode: "memory",
       },
     });
+  });
+
+  it("loads live football data mode when an API key is provided", () => {
+    expect(
+      loadApiConfig({
+        FOOTBALL_DATA_PROVIDER_MODE: "live",
+        API_FOOTBALL_KEY: "football-key",
+        FOOTBALL_DATA_LEAGUE_IDS: "292,98",
+      }).footballDataProvider,
+    ).toEqual({
+      mode: "live",
+      apiKey: "football-key",
+      baseUrl: "https://v3.football.api-sports.io",
+      leagueIds: [292, 98],
+    });
+  });
+
+  it("rejects live football data mode without API_FOOTBALL_KEY", () => {
+    const error = captureConfigurationError(() =>
+      loadApiConfig({ FOOTBALL_DATA_PROVIDER_MODE: "live" }),
+    );
+
+    expect(error.issues).toEqual([
+      {
+        variable: "API_FOOTBALL_KEY",
+        code: "MISSING_API_FOOTBALL_KEY",
+        message:
+          "API_FOOTBALL_KEY is required when FOOTBALL_DATA_PROVIDER_MODE is live.",
+      },
+    ]);
   });
 
   it("parses ODDS_SPORT_KEYS into a frozen list", () => {

@@ -30,19 +30,28 @@ export const zh = {
     loadingFixtures: "正在加载赛程…",
     fixturesAvailable: (count: number): string => `${String(count)} 场可用赛程`,
     loadError: "无法加载即将进行的比赛。",
-    modeRecorded: "录制演示",
+    modeRecorded: "录制演示（赔率）",
     modeLive: "实时赔率",
     modeFixture: "纯 Fixture",
     modeUnknown: "模式未知",
+    modeFootballRecorded: "足球数据·录制",
+    modeFootballLive: "足球数据·实时",
+    modeFootballLiveFallback: "足球数据·live→录制回退",
     modeHintRecorded:
-      "当前为 recorded：赛程来自本地 cassette（常为演示日期，不是今天的英超）。",
+      "赛程来自 Odds recorded cassette（常为演示日期）。若需足球事实源，设置 FOOTBALL_DATA_PROVIDER_MODE=recorded|live。",
     modeHintLive:
-      "当前为 live：赛程来自 The Odds API 多联赛即将开赛列表（五大联赛、韩日、北欧、欧战等）。",
+      "当前为 Odds live：赛程来自 The Odds API（Football Data 已设为 fixture/关闭）。",
     modeHintLiveFallback:
-      "配置为 live，但 Odds API 拉取失败，已回退 recorded cassette（多为 8 月演示日期）。请检查额度/限流，或把起始日期调到 cassette 日期。",
+      "Odds live 拉取失败，已回退 Odds recorded cassette（多为 8 月演示日期）。请检查额度/限流，或启用 Football Data 主源。",
     modeHintFixture: "当前为 fixture：仅演示种子赛程。",
-    modeHintUnknown: "赛程元数据尚未返回；若刚失败过，请刷新或检查 Odds API 额度。",
-    modeLiveFallback: "live→录制回退",
+    modeHintUnknown: "赛程元数据尚未返回；请刷新或检查 Football Data / Odds 配置。",
+    modeHintFootballRecorded:
+      "赛程主源为 Football Data recorded cassette（Fixture/Form/Stats/H2H），不消耗 The Odds API 额度。",
+    modeHintFootballLive:
+      "赛程主源为 API-Football（API-Sports 直连）。赔率层仍可选；分析前会拉取 Form/Stats/H2H。",
+    modeHintFootballLiveFallback:
+      "Football Data live 为空或失败，已回退 football recorded cassette。请检查 API_FOOTBALL_KEY / 日配额，或调整日期窗口。",
+    modeLiveFallback: "赔率 live→录制回退",
     filterStart: "起始日期",
     filterHorizon: "窗口天数",
     filterHorizonOption: (days: number): string => `${String(days)} 天`,
@@ -50,7 +59,7 @@ export const zh = {
     emptyFiltered:
       "当前日期窗口内没有比赛。可改起始日期或窗口天数；录制模式可打开演示赛；live 下休赛期联赛可能为空。",
     emptyFilteredOutsideWindow: (total: number, earliest: string): string =>
-      `板上有 ${String(total)} 场，但不在当前日期窗口内（最早一场约 ${earliest}）。live 额度不足时会回退到 8 月演示 cassette，看起来像「有总数却显示 0」。`,
+      `板上有 ${String(total)} 场，但不在当前日期窗口内（最早一场约 ${earliest}）。若误用 Odds cassette，日期常落在 8 月；Football Data recorded 多为当前窗口附近。`,
     jumpToEarliest: (date: string): string => `跳到 ${date} 查看`,
     showingRange: (from: string, to: string, shown: number, total: number): string =>
       `${from} → ${to} · 显示 ${String(shown)} / ${String(total)} 场`,

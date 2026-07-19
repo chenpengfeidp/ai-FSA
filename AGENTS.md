@@ -43,13 +43,29 @@ Stop and request review when a conflict cannot be resolved by this hierarchy. Ne
 
 FAS is a full-TypeScript modular monolith in a pnpm workspace coordinated by Turborepo.
 
+**Architecture Freeze: v0.2.** Pipeline direction is enforced by dependency-cruiser. Live package inventory and delivery status live in `docs/PROJECT_STATE.md` (do not invent missing packages from older bootstrap wording).
+
 Runtime composition roots are:
 
-- `apps/web`: Next.js App Router presentation;
-- `apps/api`: NestJS REST transport;
+- `apps/web`: Next.js App Router presentation (HTTP client only; no `@fas/*` engine imports);
+- `apps/api`: NestJS REST transport and composition root (wires providers, Evidence, analysis, report, narrative adapter);
 - `apps/worker`: standalone NestJS background-runtime composition.
 
-Implemented shared platform packages are `@fas/tsconfig` for compiler policy and `@fas/config` for server-side API and worker startup configuration.
+Implemented platform packages include `@fas/tsconfig`, `@fas/config`, and `@fas/database` (Prisma owned here only; P.2 Evidence/Match models exist; default Evidence repository mode remains memory).
+
+Implemented football-slice packages (interim names; target `*-engine` rename is a later migration) include:
+
+- `@fas/match`, `@fas/evidence`, `@fas/evidence-normalizer`, `@fas/evidence-import`, `@fas/evidence-query`
+- `@fas/provider-fixture`, `@fas/provider-football` (facts; FAS domain model before Evidence), `@fas/provider-odds` (market layer)
+- `@fas/application`, `@fas/feature`, `@fas/rule`, `@fas/analysis`, `@fas/statistics`
+- `@fas/report` (report assembly; narrative via injected `NarrativeGenerator` port)
+- `@fas/prompt`, `@fas/ai-provider` (`LocalDeterministicNarrativeAdapter` only; no network AI SDK)
+
+Pipeline (must not reverse):
+
+```text
+Provider → Evidence → Feature → Rule → Analysis → Report → Prompt → AI Provider
+```
 
 The target architecture uses ports and adapters:
 
@@ -59,7 +75,7 @@ The target architecture uses ports and adapters:
 - infrastructure implements inward-facing ports;
 - PostgreSQL is the V1 system of record;
 - Prisma is owned only by the database package;
-- provider-specific AI details remain inside provider adapters.
+- provider-specific AI details remain inside provider adapters (composition root injects them into Report).
 
 The seven governed engines are Prompt, Knowledge, Rule, Case, Review, Evaluation, and Statistics.
 

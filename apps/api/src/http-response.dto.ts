@@ -437,7 +437,10 @@ export class UpcomingMatchDto {
   })
   declare readonly analyzable: boolean;
 
-  @ApiProperty({ enum: ["fixture", "the-odds-api"], example: "the-odds-api" })
+  @ApiProperty({
+    enum: ["api-football", "fixture", "the-odds-api"],
+    example: "api-football",
+  })
   declare readonly providerSource: string;
 
   @ApiProperty({
@@ -451,14 +454,29 @@ export class UpcomingMatchesMetaDto {
   @ApiProperty({
     enum: ["recorded", "live", "fixture"],
     example: "recorded",
-    description: "API ODDS_PROVIDER_MODE used to build the Match Center board.",
+    description: "API ODDS_PROVIDER_MODE (odds overlay / fallback path).",
   })
   declare readonly oddsProviderMode: "recorded" | "live" | "fixture";
 
   @ApiProperty({
+    enum: ["recorded", "live", "fixture"],
+    example: "recorded",
+    description:
+      "API FOOTBALL_DATA_PROVIDER_MODE. When not fixture, Match Center schedule is Football Data primary.",
+  })
+  declare readonly footballDataProviderMode: "recorded" | "live" | "fixture";
+
+  @ApiProperty({
+    enum: ["football-data", "odds"],
+    example: "football-data",
+    description: "Which provider built the primary Match Center schedule.",
+  })
+  declare readonly scheduleSource: "football-data" | "odds";
+
+  @ApiProperty({
     example: false,
     description:
-      "True when live Odds fan-out failed and the board fell back to the recorded cassette.",
+      "True when the primary live schedule source failed and fell back to a recorded cassette.",
   })
   declare readonly usedRecordedFallback: boolean;
 }

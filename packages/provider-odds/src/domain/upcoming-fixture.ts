@@ -10,7 +10,7 @@ export interface UpcomingFixture {
   readonly awayTeam: string;
   readonly kickoff: string;
   readonly analyzable: boolean;
-  readonly providerSource: "the-odds-api" | "fixture";
+  readonly providerSource: "api-football" | "fixture" | "the-odds-api";
   readonly providerMethod: UpcomingFixtureProviderMethod | "fixture";
 }
 

@@ -20,10 +20,12 @@
 | 校准 A.1 | **已落地**（`population_demo_v1`，未 Evaluation 合格） |
 | 平台 P.1 / P.2 | **已落地**（`/health/ready`；Evidence 可选 postgres） |
 | UI 中文 ZH-1 / ZH-2 | **已落地**（比赛中心/会话 + 工作区/报告/资料库） |
-| 真 shots/xG | **未做**（仍用 scores goals-proxy） |
+| Football Data ≠ Odds（F.1） | **已落地**（`@fas/provider-football`；Match Center 主源；Odds 为可选赔率层） |
+| Architecture Freeze | **v0.2**（Report narrative DI；pipeline depcruise；Odds vendor DTO 非公共契约） |
+| 真 xG（F.1.1） | **未做**（F.1 可用 shots-based STATISTICS；goals-proxy 仅 Odds 回退路径） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**私有环境里「可演示的确定性分析闭环」已通；live 多联赛受 The Odds API 额度约束；v0.1 完整 Foundation（全量持久化、任务队列、CI/ops 全关）仍未宣称完成。**
+一句话：**私有环境确定性闭环已通；Football Data 与 Odds 已拆分；架构冻结 v0.2。下一步须单独门禁（F.1.1 xG / postgres 冒烟 / Evaluation 校准），禁止擅自开 Redis/微服务/网络 AI。**
 
 ---
 
@@ -110,6 +112,7 @@ Agent 规则：`AGENTS.md` → 再读 `PROJECT_STATE.md`。
 | `docs/sprints/VERTICAL_SLICE_A1_CALIBRATION_POPULATION_SPEC.md` | 人口频率比校准 artifact。 |
 | `docs/sprints/VERTICAL_SLICE_P1_DATABASE_READY_SPEC.md` | `/health/ready` DB ping。 |
 | `docs/sprints/VERTICAL_SLICE_P2_EVIDENCE_PERSISTENCE_SPEC.md` | 首批 Evidence/Match Prisma 持久化。 |
+| `docs/sprints/VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` | Football Data≠Odds；Match Center 事实源（**已落地**；xG → F.1.1）。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 
@@ -163,7 +166,7 @@ Agent 规则：`AGENTS.md` → 再读 `PROJECT_STATE.md`。
 | 包 | 职责 | 状态 |
 |----|------|------|
 | `@fas/tsconfig` | TS 编译策略 | 已落地 |
-| `@fas/config` | API/worker 环境配置（含 `ODDS_*`） | 已落地 |
+| `@fas/config` | API/worker 环境配置（含 `FOOTBALL_DATA_*` / `ODDS_*`） | 已落地 |
 | `@fas/database` | Prisma client、Evidence 仓储适配、health ping | P.1/P.2 已落地 |
 | `@fas/domain` | 共享领域类型 | 已落地 |
 
@@ -174,7 +177,8 @@ Agent 规则：`AGENTS.md` → 再读 `PROJECT_STATE.md`。
 | `@fas/match` | MatchId 等身份 |
 | `@fas/evidence` (+ normalizer/import/query) | 证据模型与导入查询 |
 | `@fas/provider-fixture` | Demo fixture 证据 |
-| `@fas/provider-odds` | Odds/scores cassette + live fan-out、`ODDS_SPORT_KEYS` |
+| `@fas/provider-football` | Football Data（API-Football）domain model + recorded/live；Match Center 事实源 |
+| `@fas/provider-odds` | Odds/scores cassette + live fan-out、`ODDS_SPORT_KEYS`（赔率层） |
 | `@fas/application` | 应用编排 |
 | `@fas/feature` | FeatureBundle |
 | `@fas/rule` | 确定性规则 findings |
@@ -188,14 +192,14 @@ Agent 规则：`AGENTS.md` → 再读 `PROJECT_STATE.md`。
 
 ```text
 Match Center (web)
-  → GET /api/matches/upcoming  (@fas/provider-odds + fixture merge)
+  → GET /api/matches/upcoming  (@fas/provider-football primary + fixture demos)
   → [analyzable] POST import + analyze
-       → Evidence → Feature → Rule → Analysis projection
+       → Football domain → Evidence → Feature → Rule → Analysis projection
        → Report (+ local narrative)
   → Session → Workspace / Library
 ```
 
-**Live 注意：** `ODDS_PROVIDER_MODE=live` 且额度不足时会 **回退 recorded cassette**（UI 显示「live→录制回退」）；收窄联赛用根目录 `.env` 的 `ODDS_SPORT_KEYS`（见 `.env.example`）。
+**配置注意：** 默认 `FOOTBALL_DATA_PROVIDER_MODE=recorded`。Football live 用 `API_FOOTBALL_KEY`（API-Sports 直连）。`FOOTBALL_DATA_PROVIDER_MODE=fixture` 时才回退 Odds 赛程板。Odds 额度问题不再主导 Match Center 日期窗。
 
 ---
 
@@ -210,6 +214,8 @@ Match Center (web)
 | A.1 | population 校准候选 | `VERTICAL_SLICE_A1_*` |
 | P.1 / P.2 | ready ping + Evidence Prisma | `VERTICAL_SLICE_P1/P2_*` |
 | ZH-1 / ZH-2 | 中文 chrome | `apps/web/src/copy/zh.ts` |
+| F.1 (landed) | `@fas/provider-football`；Match Center 事实源与 Odds 拆分 | `VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` |
+| Freeze v0.2 | Report DI + pipeline depcruise + docs sync | `PROJECT_STATE.md` |
 
 ---
 
@@ -227,12 +233,11 @@ Match Center (web)
 
 ## 8. 推荐下一步（与 PROJECT_STATE 一致）
 
-1. **真 shots/xG provider**（需选型 + 切片规格）  
+1. **F.1.1** true xG（单独门禁）  
 2. Compose migrate / postgres-mode 冒烟证据  
 3. Evaluation-qualified calibration  
-4. 更后：战意等独立证据种类  
 
-环境操作：收窄/扩宽 Match Center 联赛 → 编辑根目录 `.env` 的 `ODDS_SPORT_KEYS` → 重启 `pnpm dev:api`（说明见 `.env.example`）。
+环境操作：Football Data 联赛收窄 → `.env` 的 `FOOTBALL_DATA_LEAGUE_IDS`；Odds 联赛收窄 → `ODDS_SPORT_KEYS`。
 
 ---
 

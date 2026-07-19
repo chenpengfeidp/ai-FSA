@@ -8,7 +8,7 @@
 - Current task status: B.2 international 1X2 + Asian handicap market signals implemented (recorded default)
 - Current sprint: No numbered implementation sprint active
 - Last completed delivery: Vertical slice B.2 — ODDS carries 1X2 + primary Asian handicap via `@fas/provider-odds`
-- Next authorized work: Live The Odds API key for a real event, or mainline A true calibration population, or volume/战意 evidence later
+- Next authorized work: Verify live odds on `match-example-2` (Arsenal vs Coventry) with local `.env`; then Match Center calendar or mainline A calibration
 - Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.

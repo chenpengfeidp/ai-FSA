@@ -19,6 +19,13 @@ export const DEMO_ODDS_CATALOG: readonly DemoOddsCatalogEntry[] = Object.freeze(
     eventId: "evt_match_example_1_liverpool_chelsea",
     cassetteFile: "match-example-1.json",
   }),
+  Object.freeze({
+    matchId: "match-example-2",
+    sportKey: "soccer_epl",
+    /** Live The Odds API event (Arsenal vs Coventry City); refresh if expired. */
+    eventId: "eb2553d10d63dc912b99f8fd0d675721",
+    cassetteFile: "match-example-2.json",
+  }),
 ]);
 
 export function findDemoOddsCatalogEntry(

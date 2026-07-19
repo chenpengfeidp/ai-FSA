@@ -63,7 +63,7 @@ describe("CompositeMatchProvider", () => {
   });
 
   it("keeps the inner match when no odds overlay exists", () => {
-    const innerMatch = Object.freeze({ matchId: "match-example-2", odds: null });
+    const innerMatch = Object.freeze({ matchId: "match-unknown", odds: null });
     const provider = new CompositeMatchProvider(
       {
         getMatch: () => innerMatch,
@@ -71,7 +71,7 @@ describe("CompositeMatchProvider", () => {
       new RecordedOddsSnapshotSource(),
     );
 
-    expect(provider.getMatch("match-example-2")).toBe(innerMatch);
+    expect(provider.getMatch("match-unknown")).toBe(innerMatch);
   });
 });
 
@@ -111,5 +111,24 @@ describe("LiveTheOddsApiOddsSource", () => {
     expect(source.getPreMatch1x2("match-example")?.homeOdds).toBe(1.6);
     expect(source.getPreMatch1x2("match-example")?.providerMethod).toBe("http-live");
     expect(fetchImpl).toHaveBeenCalledOnce();
+    expect(String(fetchImpl.mock.calls[0]?.[0])).toContain("regions=eu%2Cuk");
+  });
+});
+
+describe("match-example-2 recorded cassette", () => {
+  it("loads Arsenal vs Coventry 1X2 and AH overlay", () => {
+    const source = new RecordedOddsSnapshotSource();
+    const overlay = source.getPreMatch1x2("match-example-2");
+
+    expect(overlay).toMatchObject({
+      homeOdds: 1.14,
+      drawOdds: 7.82,
+      awayOdds: 15.37,
+      asianHandicapLine: -2,
+      asianHandicapHomeOdds: 1.84,
+      asianHandicapAwayOdds: 1.96,
+      providerSource: "the-odds-api",
+      providerMethod: "recorded-snapshot",
+    });
   });
 });

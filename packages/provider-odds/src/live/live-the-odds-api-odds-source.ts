@@ -51,7 +51,7 @@ export class LiveTheOddsApiOddsSource
       `${this.#baseUrl}/v4/sports/${entry.sportKey}/events/${entry.eventId}/odds`,
     );
     url.searchParams.set("apiKey", this.#apiKey);
-    url.searchParams.set("regions", "uk");
+    url.searchParams.set("regions", "eu,uk");
     url.searchParams.set("markets", "h2h,spreads");
     url.searchParams.set("oddsFormat", "decimal");
 

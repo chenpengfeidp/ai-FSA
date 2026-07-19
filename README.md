@@ -47,7 +47,7 @@ API and worker environment configuration is loaded through `@fas/config`.
 - `HOST`: API listener host; defaults to `127.0.0.1`.
 - `PORT`: API listener port from `1` through `65535`; defaults to `3001`.
 
-The repository does not load `.env` files automatically. Supply variables through the process environment. Invalid supported values stop startup before NestJS initialization.
+`pnpm dev:api` loads a local gitignored `.env` via `scripts/dev-api.mjs` (existing process-env values win). Other commands do not auto-load `.env`; supply variables through the process environment. Invalid supported values stop startup before NestJS initialization.
 
 ## Container Images
 

@@ -16,8 +16,8 @@ const demoMatches = [
   {
     matchId: "match-example-2",
     home: "Arsenal",
-    away: "Manchester City",
-    kickoff: "2026-08-01T20:00:00Z",
+    away: "Coventry City",
+    kickoff: "2026-08-21T19:00:00Z",
   },
   {
     matchId: "match-example-3",

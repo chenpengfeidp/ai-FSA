@@ -12,8 +12,8 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
   Object.freeze({
     id: "match-example-2",
     homeTeam: "Arsenal",
-    awayTeam: "Manchester City",
-    kickoffTime: "20:00",
+    awayTeam: "Coventry City",
+    kickoffTime: "19:00",
     competition: "Premier League",
     status: "SCHEDULED",
   }),

@@ -285,16 +285,16 @@ export class DeterministicProjectionDto {
   })
   declare readonly recommendation: string;
 
-  @ApiProperty({ example: "calibration:identity:v1" })
+  @ApiProperty({ example: "calibration:population-demo:v1" })
   declare readonly calibrationArtifactId: string;
 
-  @ApiProperty({ example: "calibration.v1.identity" })
+  @ApiProperty({ example: "calibration.v1.frequency_ratio_1x2" })
   declare readonly calibrationModelVersion: string;
 
-  @ApiProperty({ example: "uncalibrated_baseline" })
+  @ApiProperty({ example: "computed_candidate" })
   declare readonly calibrationStatus: string;
 
-  @ApiProperty({ example: "calibration-identity-v1-checksum" })
+  @ApiProperty({ example: "calibration-population-demo-v1-…" })
   declare readonly calibrationChecksum: string;
 
   @ApiProperty({ example: false })

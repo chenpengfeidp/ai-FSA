@@ -1,0 +1,193 @@
+import type { CalibrationPopulationRow } from "../domain/calibration-population.js";
+
+/** Declared immutable demo population for offline frequency-ratio fitting. */
+export const POPULATION_1X2_DEMO_V1: readonly CalibrationPopulationRow[] =
+  Object.freeze([
+    Object.freeze({
+      pHome: 0.62,
+      pDraw: 0.22,
+      pAway: 0.16,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.58,
+      pDraw: 0.24,
+      pAway: 0.18,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.55,
+      pDraw: 0.25,
+      pAway: 0.2,
+      outcome: "draw" as const,
+    }),
+    Object.freeze({
+      pHome: 0.5,
+      pDraw: 0.28,
+      pAway: 0.22,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.48,
+      pDraw: 0.3,
+      pAway: 0.22,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.45,
+      pDraw: 0.3,
+      pAway: 0.25,
+      outcome: "draw" as const,
+    }),
+    Object.freeze({
+      pHome: 0.42,
+      pDraw: 0.32,
+      pAway: 0.26,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.4,
+      pDraw: 0.33,
+      pAway: 0.27,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.38,
+      pDraw: 0.34,
+      pAway: 0.28,
+      outcome: "draw" as const,
+    }),
+    Object.freeze({
+      pHome: 0.35,
+      pDraw: 0.35,
+      pAway: 0.3,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.7,
+      pDraw: 0.18,
+      pAway: 0.12,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.68,
+      pDraw: 0.2,
+      pAway: 0.12,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.65,
+      pDraw: 0.2,
+      pAway: 0.15,
+      outcome: "draw" as const,
+    }),
+    Object.freeze({
+      pHome: 0.6,
+      pDraw: 0.22,
+      pAway: 0.18,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.33,
+      pDraw: 0.3,
+      pAway: 0.37,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.3,
+      pDraw: 0.28,
+      pAway: 0.42,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.28,
+      pDraw: 0.3,
+      pAway: 0.42,
+      outcome: "draw" as const,
+    }),
+    Object.freeze({
+      pHome: 0.25,
+      pDraw: 0.28,
+      pAway: 0.47,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.55,
+      pDraw: 0.27,
+      pAway: 0.18,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.52,
+      pDraw: 0.28,
+      pAway: 0.2,
+      outcome: "home" as const,
+    }),
+    Object.freeze({ pHome: 0.5, pDraw: 0.3, pAway: 0.2, outcome: "draw" as const }),
+    Object.freeze({
+      pHome: 0.47,
+      pDraw: 0.3,
+      pAway: 0.23,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.44,
+      pDraw: 0.31,
+      pAway: 0.25,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.41,
+      pDraw: 0.32,
+      pAway: 0.27,
+      outcome: "draw" as const,
+    }),
+    Object.freeze({
+      pHome: 0.36,
+      pDraw: 0.33,
+      pAway: 0.31,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.72,
+      pDraw: 0.16,
+      pAway: 0.12,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.22,
+      pDraw: 0.26,
+      pAway: 0.52,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.57,
+      pDraw: 0.25,
+      pAway: 0.18,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.53,
+      pDraw: 0.26,
+      pAway: 0.21,
+      outcome: "draw" as const,
+    }),
+    Object.freeze({
+      pHome: 0.49,
+      pDraw: 0.27,
+      pAway: 0.24,
+      outcome: "home" as const,
+    }),
+    Object.freeze({
+      pHome: 0.31,
+      pDraw: 0.29,
+      pAway: 0.4,
+      outcome: "away" as const,
+    }),
+    Object.freeze({
+      pHome: 0.46,
+      pDraw: 0.29,
+      pAway: 0.25,
+      outcome: "draw" as const,
+    }),
+  ]);

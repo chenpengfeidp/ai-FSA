@@ -1,6 +1,10 @@
-import { AnalyzeMatchUseCase } from "@fas/analysis";
+import {
+  AnalyzeMatchUseCase,
+  resolvePinnedCalibrationArtifact,
+} from "@fas/analysis";
 import { ImportMatchUseCase } from "@fas/application";
 import { loadApiConfig } from "@fas/config";
+
 import {
   type EvidenceRepository,
   EvidenceService,
@@ -126,6 +130,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider, 
           evidenceQuery,
           featureExtractor,
           ruleEvaluator,
+          resolvePinnedCalibrationArtifact(apiConfig.calibration.artifactMode),
         ),
     },
     ReportBuilder,

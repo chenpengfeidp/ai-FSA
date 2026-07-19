@@ -56,6 +56,14 @@ export function applyCalibration(
     return normalized;
   }
 
+  if (artifact.map.type === "frequency_ratio_1x2") {
+    return renormalize({
+      pHome: normalized.pHome * artifact.map.homeMultiplier,
+      pDraw: normalized.pDraw * artifact.map.drawMultiplier,
+      pAway: normalized.pAway * artifact.map.awayMultiplier,
+    });
+  }
+
   throw new CalibrationApplicationError(
     `Unsupported calibration map type: ${String((artifact.map as { type: string }).type)}`,
   );

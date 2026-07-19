@@ -5,10 +5,10 @@
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: C.2 scores-backed TEAM_FORM + goals-proxy STATISTICS implemented (recorded default; live optional)
+- Current task status: A.1 population frequency-ratio calibration artifact pinned (default)
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Vertical slice C.2 — Odds scores → form/stats for analyzable `odds:*` rows
-- Next authorized work: Step 3 true calibration population; interleave platform persistence
+- Last completed delivery: Vertical slice A.1 — Statistics-owned `calibration:population-demo:v1`
+- Next authorized work: Platform persistence interleave; true shots/xG; Chinese UI parallel; Evaluation-qualified calibration later
 - Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -48,7 +48,7 @@ Implemented packages used by the slice (non-exhaustive):
 - `@fas/match`, `@fas/evidence`, `@fas/evidence-normalizer`, `@fas/evidence-import`, `@fas/evidence-query`
 - `@fas/provider-fixture`, `@fas/provider-odds`, `@fas/application`
 - `@fas/feature`, `@fas/rule`, `@fas/analysis`, `@fas/report`
-- `@fas/statistics` (pinned identity calibration artifact; no population training)
+- `@fas/statistics` (pinned `population_demo_v1` frequency-ratio candidate by default; identity still selectable; no match-run training)
 - `@fas/prompt` (sealed-context composition; no retrieval / no network)
 - `@fas/ai-provider` (`LocalDeterministicNarrativeAdapter` only; no provider SDK)
 
@@ -141,8 +141,9 @@ Not a numbered Sprint 11 authorization; delivered as bounded implementation agai
 | B.2 | International 1X2 + Asian handicap on ODDS; AH features/rules; AH conflict limitation | `docs/sprints/VERTICAL_SLICE_B2_AH_MARKET_SPEC.md` |
 | C.1 | Match Center upcoming fixtures from Odds-shaped feed + fixture demos | `docs/sprints/VERTICAL_SLICE_C1_MATCH_CENTER_FIXTURES_SPEC.md` |
 | C.2 | Scores-backed TEAM_FORM + goals-proxy STATISTICS; `odds:*` analyzable when both sides have results | `docs/sprints/VERTICAL_SLICE_C2_SCORES_FORM_STATS_SPEC.md` |
+| A.1 | Population frequency-ratio 1X2 calibration artifact (`calibration:population-demo:v1`) | `docs/sprints/VERTICAL_SLICE_A1_CALIBRATION_POPULATION_SPEC.md` |
 
-Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2 specs above.
+Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2/A.1 specs above.
 
 ## Architecture Status
 
@@ -158,7 +159,7 @@ Open Milestone 3A / v0.1 items (unchanged in spirit):
 
 Vertical-slice deferrals (intentional):
 
-- trained / population calibration maps (only identity baseline);
+- Evaluation-qualified calibration / release gates (A.1 ships `computed_candidate` only);
 - network AI provider SDKs;
 - Redis, BullMQ, pgvector;
 - authentication, public deployment, wagering advice.
@@ -198,7 +199,7 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - AI cannot make authoritative deterministic, lifecycle, publication, or governance decisions.
 - Narrative output is labeled `inference` and must not alter sealed projection numbers.
 - Market odds are market signals, not ground truth; slice 1.2 does not blend them into 1X2.
-- Calibration is the pinned identity artifact (`calibration:identity:v1`); not Evaluation-qualified; not trained from populations.
+- Default calibration is pinned `calibration:population-demo:v1` (frequency-ratio over a recorded demo population); still not Evaluation-qualified; match runs do not retrain.
 - Demo evidence is fixture-backed and may be `unverified`.
 - The Prisma schema intentionally contains no football domain models, migrations, or seeds.
 - No application PostgreSQL runtime integration for domain persistence, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
@@ -214,14 +215,15 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. B.1/B.2/C.1/C.2 path is implemented with default offline recorded mode.
+No numbered sprint is active. B.1/B.2/C.1/C.2/A.1 path is implemented with default offline recorded mode.
 
 Recommended follow-ons (ordered):
 
-1. **Step 3 — true calibration population**;
-2. Interleave Milestone 3A platform persistence / jobs / CI gates;
-3. True shots/xG STATISTICS provider (replace goals-proxy);
-4. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
+1. Interleave Milestone 3A platform persistence / jobs / CI gates;
+2. True shots/xG STATISTICS provider (replace goals-proxy);
+3. Chinese UI (parallel);
+4. Evaluation-qualified calibration / larger reviewed populations;
+5. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

@@ -6,6 +6,8 @@ export {
 
 export type {
   ApiConfig,
+  CalibrationArtifactMode,
+  CalibrationConfig,
   ConfigurationIssue,
   EnvironmentSource,
   HttpConfig,

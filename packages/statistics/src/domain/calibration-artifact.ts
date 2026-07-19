@@ -1,13 +1,23 @@
 export const IDENTITY_CALIBRATION_ARTIFACT_ID = "calibration:identity:v1";
 export const CALIBRATION_MODEL_VERSION_IDENTITY = "calibration.v1.identity";
 
+export const POPULATION_DEMO_CALIBRATION_ARTIFACT_ID =
+  "calibration:population-demo:v1";
+export const CALIBRATION_MODEL_VERSION_POPULATION_DEMO =
+  "calibration.v1.frequency_ratio_1x2";
+
 export type CalibrationArtifactStatus =
   | "computed_candidate"
   | "uncalibrated_baseline";
 
-export type CalibrationMap = Readonly<{
-  type: "identity";
-}>;
+export type CalibrationMap =
+  | Readonly<{ type: "identity" }>
+  | Readonly<{
+      type: "frequency_ratio_1x2";
+      homeMultiplier: number;
+      drawMultiplier: number;
+      awayMultiplier: number;
+    }>;
 
 export interface CalibrationArtifact {
   readonly artifactId: string;
@@ -48,12 +58,35 @@ function requireNonEmpty(value: string, field: string): string {
   return normalized;
 }
 
+function requirePositiveFinite(value: number, field: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    throw new CalibrationArtifactValidationError(
+      `${field} must be a finite number greater than 0.`,
+    );
+  }
+
+  return value;
+}
+
+function freezeMap(map: CalibrationMap): CalibrationMap {
+  if (map.type === "identity") {
+    return Object.freeze({ type: "identity" as const });
+  }
+
+  return Object.freeze({
+    type: "frequency_ratio_1x2" as const,
+    homeMultiplier: requirePositiveFinite(map.homeMultiplier, "homeMultiplier"),
+    drawMultiplier: requirePositiveFinite(map.drawMultiplier, "drawMultiplier"),
+    awayMultiplier: requirePositiveFinite(map.awayMultiplier, "awayMultiplier"),
+  });
+}
+
 export function createCalibrationArtifact(
   input: CreateCalibrationArtifactInput,
 ): CalibrationArtifact {
-  if (input.map.type !== "identity") {
+  if (input.map.type !== "identity" && input.map.type !== "frequency_ratio_1x2") {
     throw new CalibrationArtifactValidationError(
-      "Only identity calibration maps are supported in this slice.",
+      "Unsupported calibration map type.",
     );
   }
 
@@ -73,13 +106,29 @@ export function createCalibrationArtifact(
     );
   }
 
+  if (input.status === "uncalibrated_baseline" && input.map.type !== "identity") {
+    throw new CalibrationArtifactValidationError(
+      "uncalibrated_baseline artifacts must use an identity map.",
+    );
+  }
+
+  if (
+    input.status === "computed_candidate" &&
+    input.map.type === "frequency_ratio_1x2" &&
+    input.sampleSize < 1
+  ) {
+    throw new CalibrationArtifactValidationError(
+      "computed_candidate frequency_ratio maps require sampleSize >= 1.",
+    );
+  }
+
   return Object.freeze({
     artifactId: requireNonEmpty(input.artifactId, "artifactId"),
     calibrationModelVersion: requireNonEmpty(
       input.calibrationModelVersion,
       "calibrationModelVersion",
     ),
-    map: Object.freeze({ type: "identity" as const }),
+    map: freezeMap(input.map),
     sampleSize: input.sampleSize,
     qualified: input.qualified,
     status: input.status,

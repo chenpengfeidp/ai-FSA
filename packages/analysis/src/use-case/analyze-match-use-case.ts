@@ -5,6 +5,10 @@ import type { Feature, FeatureBundle } from "@fas/feature";
 import type { MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
 import {
+  type CalibrationArtifact,
+  IDENTITY_CALIBRATION_ARTIFACT,
+} from "@fas/statistics";
+import {
   createAnalysisResult,
   type AnalysisResult,
 } from "../domain/analysis-result.js";
@@ -122,17 +126,20 @@ export class AnalyzeMatchUseCase {
   readonly #evidenceQuery: EvidenceByMatchQuery;
   readonly #featureExtractor: FeatureExtractionOperation;
   readonly #ruleEvaluator: RuleEvaluationOperation;
+  readonly #calibrationArtifact: CalibrationArtifact;
 
   constructor(
     importMatch: MatchImportOperation,
     evidenceQuery: EvidenceByMatchQuery,
     featureExtractor: FeatureExtractionOperation,
     ruleEvaluator: RuleEvaluationOperation,
+    calibrationArtifact: CalibrationArtifact = IDENTITY_CALIBRATION_ARTIFACT,
   ) {
     this.#importMatch = importMatch;
     this.#evidenceQuery = evidenceQuery;
     this.#featureExtractor = featureExtractor;
     this.#ruleEvaluator = ruleEvaluator;
+    this.#calibrationArtifact = calibrationArtifact;
   }
 
   execute(matchId: MatchId): AnalyzeMatchResult {
@@ -204,6 +211,7 @@ export class AnalyzeMatchUseCase {
         featureBundle,
         ruleResults,
         requiredEvidencePresentCount: countRequiredEvidence(evidenceSet),
+        calibrationArtifact: this.#calibrationArtifact,
       });
     } catch {
       return failure(

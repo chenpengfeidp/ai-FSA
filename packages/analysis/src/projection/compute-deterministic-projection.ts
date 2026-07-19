@@ -1,6 +1,10 @@
 import type { Feature, FeatureBundle, FeatureName } from "@fas/feature";
 import type { RuleResult } from "@fas/rule";
-import { applyCalibration, IDENTITY_CALIBRATION_ARTIFACT } from "@fas/statistics";
+import {
+  applyCalibration,
+  type CalibrationArtifact,
+  IDENTITY_CALIBRATION_ARTIFACT,
+} from "@fas/statistics";
 import {
   createDeterministicMatchProjection,
   type DeterministicMatchProjection,
@@ -96,7 +100,10 @@ export function computeDeterministicMatchProjection(input: {
   readonly featureBundle: FeatureBundle;
   readonly ruleResults: readonly RuleResult[];
   readonly requiredEvidencePresentCount: number;
+  readonly calibrationArtifact?: CalibrationArtifact;
 }): DeterministicMatchProjection {
+  const calibrationArtifact =
+    input.calibrationArtifact ?? IDENTITY_CALIBRATION_ARTIFACT;
   const features = new Map(
     input.featureBundle.features.map((feature) => [feature.name, feature]),
   );
@@ -141,14 +148,14 @@ export function computeDeterministicMatchProjection(input: {
       limitations: Object.freeze([
         "Required TEAM_FORM/STATISTICS evidence is missing for deterministic projection.",
         "Uncalibrated independent Poisson baseline; not validated for real-world decision making.",
-        `Pinned calibration artifact ${IDENTITY_CALIBRATION_ARTIFACT.artifactId} (${IDENTITY_CALIBRATION_ARTIFACT.status}).`,
+        `Pinned calibration artifact ${calibrationArtifact.artifactId} (${calibrationArtifact.status}).`,
       ]),
       truncationMass: 0,
-      calibrationArtifactId: IDENTITY_CALIBRATION_ARTIFACT.artifactId,
-      calibrationModelVersion: IDENTITY_CALIBRATION_ARTIFACT.calibrationModelVersion,
-      calibrationStatus: IDENTITY_CALIBRATION_ARTIFACT.status,
-      calibrationChecksum: IDENTITY_CALIBRATION_ARTIFACT.checksum,
-      calibrationQualified: IDENTITY_CALIBRATION_ARTIFACT.qualified,
+      calibrationArtifactId: calibrationArtifact.artifactId,
+      calibrationModelVersion: calibrationArtifact.calibrationModelVersion,
+      calibrationStatus: calibrationArtifact.status,
+      calibrationChecksum: calibrationArtifact.checksum,
+      calibrationQualified: calibrationArtifact.qualified,
       featureBundleChecksum: input.featureBundle.checksum,
       ruleEvaluationRefs: input.ruleResults.map((rule) => rule.ruleId),
       checksum: "blocked",
@@ -238,7 +245,6 @@ export function computeDeterministicMatchProjection(input: {
   const marketLeanAway = marketRules.some(
     (rule) => rule.ruleName === "MARKET_LEAN_AWAY" && rule.status === "PASS",
   );
-  const calibrationArtifact = IDENTITY_CALIBRATION_ARTIFACT;
   const calibrated = applyCalibration(
     {
       pHome: adjusted.pHome,

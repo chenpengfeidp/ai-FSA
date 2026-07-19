@@ -193,8 +193,8 @@ describe("HTTP import and Evidence query workflow", () => {
     );
     expect(report.deterministic).toMatchObject({
       status: "completed_nonempty",
-      calibrationArtifactId: "calibration:identity:v1",
-      calibrationStatus: "uncalibrated_baseline",
+      calibrationArtifactId: "calibration:population-demo:v1",
+      calibrationStatus: "computed_candidate",
       calibrationQualified: false,
     });
     expect(report.narrative).toMatchObject({
@@ -403,7 +403,7 @@ describe("HTTP import and Evidence query workflow", () => {
     }
   });
 
-  it("forces cautious recommendation when market lean conflicts with football lean", async () => {
+  it("keeps the market-away conflict fixture cautious under population calibration", async () => {
     const response = await request(
       baseUrl,
       "/api/analyze/match/match-example-1",
@@ -426,9 +426,16 @@ describe("HTTP import and Evidence query workflow", () => {
       ]),
     );
     expect(deterministic.recommendation).toBe("cautious");
+    expect(deterministic.calibrationArtifactId).toBe(
+      "calibration:population-demo:v1",
+    );
+    expect(deterministic.calibrationStatus).toBe("computed_candidate");
+    expect(deterministic.calibrationQualified).toBe(false);
+    // Conflict gate uses post-calibration football lean; when multipliers remove
+    // the conflict, cautious may come from confidence/policy instead.
     expect(deterministic.limitations).toEqual(
       expect.arrayContaining([
-        "Market lean conflicts with football-model directional lean; recommendation forced to cautious.",
+        expect.stringContaining("Frequency-ratio 1X2 calibration"),
       ]),
     );
   });

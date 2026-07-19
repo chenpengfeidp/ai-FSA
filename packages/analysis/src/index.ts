@@ -45,3 +45,5 @@ export {
   roundProbability,
   softmaxAdjust,
 } from "./projection/projection-math.js";
+export { resolvePinnedCalibrationArtifact } from "@fas/statistics";
+export type { CalibrationArtifactMode } from "@fas/statistics";

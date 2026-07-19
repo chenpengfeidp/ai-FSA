@@ -33,6 +33,9 @@ describe("@fas/config environment loading", () => {
         apiKey: undefined,
         baseUrl: "https://api.the-odds-api.com",
       },
+      calibration: {
+        artifactMode: "population_demo_v1",
+      },
     });
   });
 
@@ -65,6 +68,9 @@ describe("@fas/config environment loading", () => {
         apiKey: undefined,
         baseUrl: "https://api.the-odds-api.com",
       },
+      calibration: {
+        artifactMode: "population_demo_v1",
+      },
     });
   });
 
@@ -74,6 +80,7 @@ describe("@fas/config environment loading", () => {
         ODDS_PROVIDER_MODE: "live",
         THE_ODDS_API_KEY: "test-key",
         THE_ODDS_API_BASE_URL: "https://odds.example.test",
+        CALIBRATION_ARTIFACT: "identity",
       }),
     ).toEqual({
       runtime: {
@@ -87,6 +94,9 @@ describe("@fas/config environment loading", () => {
         mode: "live",
         apiKey: "test-key",
         baseUrl: "https://odds.example.test",
+      },
+      calibration: {
+        artifactMode: "identity",
       },
     });
   });

@@ -15,16 +15,23 @@ export interface HttpConfig {
 
 export type OddsProviderMode = "fixture" | "live" | "recorded";
 
+export type CalibrationArtifactMode = "identity" | "population_demo_v1";
+
 export interface OddsProviderConfig {
   readonly mode: OddsProviderMode;
   readonly apiKey: string | undefined;
   readonly baseUrl: string;
 }
 
+export interface CalibrationConfig {
+  readonly artifactMode: CalibrationArtifactMode;
+}
+
 export interface ApiConfig {
   readonly runtime: RuntimeConfig;
   readonly http: HttpConfig;
   readonly oddsProvider: OddsProviderConfig;
+  readonly calibration: CalibrationConfig;
 }
 
 export interface WorkerConfig {
@@ -68,6 +75,10 @@ const oddsApiBaseUrlSchema = z
   .url({ error: "THE_ODDS_API_BASE_URL must be a valid URL." })
   .default("https://api.the-odds-api.com");
 
+const calibrationArtifactModeSchema = z
+  .enum(["identity", "population_demo_v1"])
+  .default("population_demo_v1");
+
 const apiEnvironmentSchema = z
   .object({
     NODE_ENV: runtimeEnvironmentSchema,
@@ -76,6 +87,7 @@ const apiEnvironmentSchema = z
     ODDS_PROVIDER_MODE: oddsProviderModeSchema,
     THE_ODDS_API_KEY: oddsApiKeySchema,
     THE_ODDS_API_BASE_URL: oddsApiBaseUrlSchema,
+    CALIBRATION_ARTIFACT: calibrationArtifactModeSchema,
   })
   .superRefine((value, context) => {
     if (value.ODDS_PROVIDER_MODE !== "live") {
@@ -148,6 +160,11 @@ function issueDetails(variable: string): Readonly<{
         code: "INVALID_ODDS_API_BASE_URL",
         message: "THE_ODDS_API_BASE_URL must be a valid URL.",
       };
+    case "CALIBRATION_ARTIFACT":
+      return {
+        code: "INVALID_CALIBRATION_ARTIFACT",
+        message: "CALIBRATION_ARTIFACT must be identity or population_demo_v1.",
+      };
     default:
       return {
         code: "INVALID_CONFIGURATION",
@@ -214,6 +231,9 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
       mode: parsed.ODDS_PROVIDER_MODE,
       apiKey: apiKey !== undefined && apiKey.length > 0 ? apiKey : undefined,
       baseUrl: parsed.THE_ODDS_API_BASE_URL,
+    }),
+    calibration: Object.freeze({
+      artifactMode: parsed.CALIBRATION_ARTIFACT,
     }),
   });
 }

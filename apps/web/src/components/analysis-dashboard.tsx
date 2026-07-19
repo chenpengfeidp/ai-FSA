@@ -19,7 +19,7 @@ export function AnalysisDashboard(): ReactElement {
   const history = useAnalysisHistory();
 
   function analyze(match: MatchSummary): void {
-    router.push(`/matches/${encodeURIComponent(match.id)}`);
+    router.push(`/matches/${encodeURIComponent(match.id)}/session`);
   }
 
   return (

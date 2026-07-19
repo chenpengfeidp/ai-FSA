@@ -33,6 +33,39 @@ input {
   }
 }
 
+@keyframes fas-session-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(37 99 235 / 0.35);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgb(37 99 235 / 0);
+  }
+}
+
+@keyframes fas-session-enter {
+  from {
+    opacity: 0.55;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fas-session-complete {
+  from {
+    transform: scale(0.985);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
 .animate-fade-in {
   animation: fas-fade-in 420ms ease-out both;
 }
@@ -49,11 +82,26 @@ input {
   animation: fas-fade-in 420ms ease-out 240ms both;
 }
 
+.session-stage-pulse {
+  animation: fas-session-pulse 1.4s ease-in-out infinite;
+}
+
+.session-stage-enter {
+  animation: fas-session-enter 360ms ease-out both;
+}
+
+.session-stage-complete {
+  animation: fas-session-complete 280ms ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
   .animate-fade-in-delay-1,
   .animate-fade-in-delay-2,
-  .animate-fade-in-delay-3 {
+  .animate-fade-in-delay-3,
+  .session-stage-pulse,
+  .session-stage-enter,
+  .session-stage-complete {
     animation: none;
   }
 }

@@ -163,7 +163,7 @@ describe("AnalysisDashboard", () => {
     expect(push).toHaveBeenCalledWith("/matches/match-example-1");
   });
 
-  it("navigates to the Match Detail route when Analyze is clicked", async () => {
+  it("navigates to the Analysis Session route when Analyze is clicked", async () => {
     const user = userEvent.setup();
     renderDashboard();
 
@@ -173,6 +173,6 @@ describe("AnalysisDashboard", () => {
       }),
     );
 
-    expect(push).toHaveBeenCalledWith("/matches/match-example-1");
+    expect(push).toHaveBeenCalledWith("/matches/match-example-1/session");
   });
 });

@@ -17,6 +17,18 @@ export interface FixtureStatistics {
   readonly xgAgainstPerMatch: number;
 }
 
+/** Meetings oriented to the current fixture: homeGoals/awayGoals are for the current home/away sides. */
+export interface FixtureHeadToHeadMeeting {
+  readonly playedAt: string;
+  readonly homeGoals: number;
+  readonly awayGoals: number;
+}
+
+export interface FixtureHeadToHead {
+  readonly sampleSize: number;
+  readonly meetings: readonly FixtureHeadToHeadMeeting[];
+}
+
 export interface FixtureMatch {
   readonly matchId: string;
   readonly home: string;
@@ -24,6 +36,7 @@ export interface FixtureMatch {
   readonly kickoff: string;
   readonly teamForm: readonly FixtureTeamForm[];
   readonly statistics: readonly FixtureStatistics[];
+  readonly headToHead: FixtureHeadToHead;
 }
 
 function form(
@@ -59,6 +72,15 @@ function stats(
   });
 }
 
+function h2h(meetings: readonly FixtureHeadToHeadMeeting[]): FixtureHeadToHead {
+  return Object.freeze({
+    sampleSize: meetings.length,
+    meetings: Object.freeze(
+      meetings.map((meeting) => Object.freeze({ ...meeting })),
+    ),
+  });
+}
+
 function fixture(
   matchId: string,
   home: string,
@@ -68,6 +90,7 @@ function fixture(
   awayForm: FixtureTeamForm,
   homeStats: FixtureStatistics,
   awayStats: FixtureStatistics,
+  headToHead: FixtureHeadToHead,
 ): FixtureMatch {
   return Object.freeze({
     matchId,
@@ -76,6 +99,7 @@ function fixture(
     kickoff,
     teamForm: Object.freeze([homeForm, awayForm]),
     statistics: Object.freeze([homeStats, awayStats]),
+    headToHead,
   });
 }
 
@@ -109,6 +133,26 @@ const balancedAwayForm = form(
 const balancedHomeStats = stats("home", 5, 12, 12, 1.3, 1.3);
 const balancedAwayStats = stats("away", 5, 12, 12, 1.3, 1.3);
 
+const homeLeanH2h = h2h([
+  { playedAt: "2025-12-01T15:00:00Z", homeGoals: 2, awayGoals: 0 },
+  { playedAt: "2025-05-10T15:00:00Z", homeGoals: 1, awayGoals: 0 },
+  { playedAt: "2024-11-20T15:00:00Z", homeGoals: 2, awayGoals: 1 },
+  { playedAt: "2024-04-02T15:00:00Z", homeGoals: 1, awayGoals: 1 },
+  { playedAt: "2023-10-15T15:00:00Z", homeGoals: 3, awayGoals: 1 },
+]);
+const balancedH2h = h2h([
+  { playedAt: "2025-12-01T15:00:00Z", homeGoals: 1, awayGoals: 1 },
+  { playedAt: "2025-05-10T15:00:00Z", homeGoals: 0, awayGoals: 1 },
+  { playedAt: "2024-11-20T15:00:00Z", homeGoals: 2, awayGoals: 2 },
+  { playedAt: "2024-04-02T15:00:00Z", homeGoals: 1, awayGoals: 0 },
+]);
+const awayLeanH2h = h2h([
+  { playedAt: "2025-12-01T15:00:00Z", homeGoals: 0, awayGoals: 2 },
+  { playedAt: "2025-05-10T15:00:00Z", homeGoals: 1, awayGoals: 2 },
+  { playedAt: "2024-11-20T15:00:00Z", homeGoals: 0, awayGoals: 1 },
+  { playedAt: "2024-04-02T15:00:00Z", homeGoals: 1, awayGoals: 1 },
+]);
+
 const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
   "match-example": fixture(
     "match-example",
@@ -119,6 +163,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     weakAwayForm,
     strongHomeStats,
     weakAwayStats,
+    homeLeanH2h,
   ),
   "match-example-1": fixture(
     "match-example-1",
@@ -129,6 +174,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     weakAwayForm,
     strongHomeStats,
     weakAwayStats,
+    homeLeanH2h,
   ),
   "match-example-2": fixture(
     "match-example-2",
@@ -139,6 +185,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     balancedAwayForm,
     balancedHomeStats,
     balancedAwayStats,
+    balancedH2h,
   ),
   "match-example-3": fixture(
     "match-example-3",
@@ -149,6 +196,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     balancedAwayForm,
     strongHomeStats,
     balancedAwayStats,
+    homeLeanH2h,
   ),
   "match-example-4": fixture(
     "match-example-4",
@@ -159,6 +207,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     weakAwayForm,
     balancedHomeStats,
     weakAwayStats,
+    awayLeanH2h,
   ),
   "match-example-5": fixture(
     "match-example-5",
@@ -169,6 +218,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     weakAwayForm,
     strongHomeStats,
     weakAwayStats,
+    homeLeanH2h,
   ),
   "match-example-6": fixture(
     "match-example-6",
@@ -179,6 +229,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     balancedAwayForm,
     balancedHomeStats,
     balancedAwayStats,
+    balancedH2h,
   ),
 });
 

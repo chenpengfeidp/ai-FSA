@@ -161,6 +161,8 @@ export class FeatureDto {
       "awayTeam",
       "defenseRatingAway",
       "defenseRatingHome",
+      "h2hLean",
+      "h2hSampleSize",
       "homeAdvantage",
       "homeTeam",
       "kickoff",
@@ -195,6 +197,8 @@ export class RuleResultDto {
     enum: [
       "AWAY_ATTACK_EDGE",
       "AWAY_TEAM_PRESENT",
+      "H2H_SUPPORTS_AWAY",
+      "H2H_SUPPORTS_HOME",
       "HOME_ADVANTAGE_MATERIAL",
       "HOME_ATTACK_EDGE",
       "HOME_TEAM_PRESENT",

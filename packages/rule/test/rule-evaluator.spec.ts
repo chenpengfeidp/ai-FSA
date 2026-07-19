@@ -21,6 +21,8 @@ function makeFeature(name: FeatureName, options: FeatureOptions = {}): Feature {
     momentumHome: 0.5,
     momentumAway: -0.2,
     homeAdvantage: 0.35,
+    h2hLean: 0.5,
+    h2hSampleSize: 5,
   };
 
   return createFeature({
@@ -138,6 +140,8 @@ describe("RuleEvaluator", () => {
       makeFeature("momentumHome"),
       makeFeature("momentumAway"),
       makeFeature("homeAdvantage"),
+      makeFeature("h2hLean"),
+      makeFeature("h2hSampleSize"),
     ]);
 
     expect(
@@ -150,6 +154,34 @@ describe("RuleEvaluator", () => {
       { ruleName: "MOMENTUM_HOME", status: "PASS", score: 0.45 },
       { ruleName: "MOMENTUM_AWAY", status: "FAIL", score: 0 },
       { ruleName: "HOME_ADVANTAGE_MATERIAL", status: "PASS", score: 0.55 },
+      { ruleName: "H2H_SUPPORTS_HOME", status: "PASS", score: 0.25 },
+      { ruleName: "H2H_SUPPORTS_AWAY", status: "FAIL", score: 0 },
+    ]);
+  });
+
+  it("marks H2H rules inapplicable without H2H Features", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+    ]);
+
+    expect(
+      results
+        .filter(
+          (result) =>
+            result.ruleName === "H2H_SUPPORTS_HOME" ||
+            result.ruleName === "H2H_SUPPORTS_AWAY",
+        )
+        .map(({ ruleName, status }) => ({ ruleName, status })),
+    ).toEqual([
+      { ruleName: "H2H_SUPPORTS_HOME", status: "INAPPLICABLE" },
+      { ruleName: "H2H_SUPPORTS_AWAY", status: "INAPPLICABLE" },
     ]);
   });
 

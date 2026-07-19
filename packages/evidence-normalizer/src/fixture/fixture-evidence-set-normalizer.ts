@@ -307,6 +307,123 @@ function parseStatistics(
   }
 }
 
+function parseHeadToHead(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): EvidenceNormalizationResult {
+  if (!isRecord(value)) {
+    return failure("INVALID_FIELD", "headToHead must be an object.", "headToHead");
+  }
+
+  if (
+    typeof value.sampleSize !== "number" ||
+    !Number.isInteger(value.sampleSize) ||
+    value.sampleSize < 1 ||
+    value.sampleSize > 20
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "sampleSize must be an integer between 1 and 20.",
+      "sampleSize",
+    );
+  }
+
+  if (!Array.isArray(value.meetings) || value.meetings.length !== value.sampleSize) {
+    return failure(
+      "INVALID_FIELD",
+      "meetings must be an array of length sampleSize.",
+      "meetings",
+    );
+  }
+
+  const meetings: Array<{
+    playedAt: string;
+    homeGoals: number;
+    awayGoals: number;
+  }> = [];
+
+  for (const entry of value.meetings) {
+    if (!isRecord(entry)) {
+      return failure(
+        "INVALID_FIELD",
+        "meetings entries must be objects.",
+        "meetings",
+      );
+    }
+
+    if (
+      typeof entry.playedAt !== "string" ||
+      entry.playedAt.trim().length === 0 ||
+      Number.isNaN(Date.parse(entry.playedAt))
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "playedAt must be a valid ISO 8601 timestamp.",
+        "playedAt",
+      );
+    }
+
+    if (
+      typeof entry.homeGoals !== "number" ||
+      !Number.isInteger(entry.homeGoals) ||
+      entry.homeGoals < 0 ||
+      typeof entry.awayGoals !== "number" ||
+      !Number.isInteger(entry.awayGoals) ||
+      entry.awayGoals < 0
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "homeGoals and awayGoals must be non-negative integers.",
+        "meetings",
+      );
+    }
+
+    meetings.push({
+      playedAt: entry.playedAt,
+      homeGoals: entry.homeGoals,
+      awayGoals: entry.awayGoals,
+    });
+  }
+
+  try {
+    return success(
+      createEvidence({
+        id: `evidence-fixture-${matchId}-h2h`,
+        source: "fixture",
+        sourceId: `fixture-${matchId}-h2h`,
+        type: "HEAD_TO_HEAD",
+        matchId: createMatchId(matchId),
+        collectedAt,
+        eventTime,
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          sampleSize: value.sampleSize,
+          meetings: Object.freeze(meetings.map((meeting) => Object.freeze(meeting))),
+        },
+      }),
+    );
+  } catch (error: unknown) {
+    if (
+      error instanceof EvidenceValidationError ||
+      error instanceof MatchValidationError
+    ) {
+      return failure("DOMAIN_VALIDATION_FAILED", error.message);
+    }
+
+    return failure(
+      "UNEXPECTED_ERROR",
+      "HEAD_TO_HEAD evidence normalization failed unexpectedly.",
+    );
+  }
+}
+
 export function normalizeFixtureEvidenceSet(
   input: unknown,
   context: FixtureEvidenceContext,
@@ -366,6 +483,21 @@ export function normalizeFixtureEvidenceSet(
   for (const entry of statistics) {
     const normalized = parseStatistics(
       entry,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalized.ok) {
+      return normalized;
+    }
+
+    evidences.push(normalized.value);
+  }
+
+  if (input.headToHead !== undefined) {
+    const normalized = parseHeadToHead(
+      input.headToHead,
       matchId,
       context.collectedAt,
       matchInfo.value.eventTime,

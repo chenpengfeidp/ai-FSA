@@ -12,6 +12,8 @@ export type FeatureName =
   | "awayTeam"
   | "defenseRatingAway"
   | "defenseRatingHome"
+  | "h2hLean"
+  | "h2hSampleSize"
   | "homeAdvantage"
   | "homeTeam"
   | "kickoff"
@@ -31,6 +33,8 @@ export interface FeatureDto {
 export type RuleName =
   | "AWAY_ATTACK_EDGE"
   | "AWAY_TEAM_PRESENT"
+  | "H2H_SUPPORTS_AWAY"
+  | "H2H_SUPPORTS_HOME"
   | "HOME_ADVANTAGE_MATERIAL"
   | "HOME_ATTACK_EDGE"
   | "HOME_TEAM_PRESENT"

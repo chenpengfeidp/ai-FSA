@@ -153,4 +153,47 @@ describe("FeatureExtractor", () => {
     expect(Object.isFrozen(features)).toBe(true);
     expect(features.every(Object.isFrozen)).toBe(true);
   });
+
+  it("extracts h2hLean and h2hSampleSize from HEAD_TO_HEAD evidence", () => {
+    const matchInfo = makeEvidence();
+    const headToHead = createEvidence({
+      id: "evidence-h2h",
+      source: "fixture",
+      sourceId: "fixture-match-1-h2h",
+      type: "HEAD_TO_HEAD",
+      matchId: createMatchId("match-1"),
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        sampleSize: 4,
+        meetings: [
+          { playedAt: "2025-12-01T15:00:00Z", homeGoals: 2, awayGoals: 0 },
+          { playedAt: "2025-05-10T15:00:00Z", homeGoals: 1, awayGoals: 0 },
+          { playedAt: "2024-11-20T15:00:00Z", homeGoals: 2, awayGoals: 1 },
+          { playedAt: "2024-04-02T15:00:00Z", homeGoals: 1, awayGoals: 1 },
+        ],
+      },
+    });
+    const bundle = new FeatureExtractor().extractBundle([matchInfo, headToHead]);
+
+    expect(bundle.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "h2hLean",
+          sourceEvidenceId: "evidence-h2h",
+        }),
+        expect.objectContaining({
+          name: "h2hSampleSize",
+          value: 4,
+          sourceEvidenceId: "evidence-h2h",
+        }),
+      ]),
+    );
+  });
 });

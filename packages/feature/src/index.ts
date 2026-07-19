@@ -32,6 +32,7 @@ export {
   clamp,
   computeAttackRating,
   computeDefenseRating,
+  computeH2hLean,
   computeMomentum,
   DEFAULT_HOME_ADVANTAGE,
   mean,

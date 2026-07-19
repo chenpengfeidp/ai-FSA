@@ -1,0 +1,33 @@
+import { describe, expect, it } from "vitest";
+import { computeH2hLean, shrink } from "../src/extraction/feature-math.js";
+
+describe("computeH2hLean", () => {
+  it("returns 0 for an empty meeting list", () => {
+    expect(computeH2hLean([])).toBe(0);
+  });
+
+  it("leans positive when the current home side dominates", () => {
+    const lean = computeH2hLean([
+      { homeGoals: 2, awayGoals: 0 },
+      { homeGoals: 1, awayGoals: 0 },
+      { homeGoals: 2, awayGoals: 1 },
+      { homeGoals: 1, awayGoals: 1 },
+      { homeGoals: 3, awayGoals: 1 },
+    ]);
+
+    expect(lean).toBeCloseTo(shrink(0.8, 0, 5), 6);
+    expect(lean).toBeGreaterThan(0.2);
+  });
+
+  it("leans negative when the current away side dominates", () => {
+    const lean = computeH2hLean([
+      { homeGoals: 0, awayGoals: 2 },
+      { homeGoals: 1, awayGoals: 2 },
+      { homeGoals: 0, awayGoals: 1 },
+      { homeGoals: 1, awayGoals: 1 },
+    ]);
+
+    expect(lean).toBeCloseTo(shrink(-0.75, 0, 4), 6);
+    expect(lean).toBeLessThan(-0.2);
+  });
+});

@@ -76,3 +76,33 @@ export function computeMomentum(results: readonly ("D" | "L" | "W")[]): number {
 export function roundFeature(value: number): number {
   return Math.round(value * 1e6) / 1e6;
 }
+
+/**
+ * Head-to-head lean from meetings oriented to the current fixture.
+ * Positive favors the current home side. Shrinks toward 0 with small samples.
+ */
+export function computeH2hLean(
+  meetings: readonly Readonly<{
+    homeGoals: number;
+    awayGoals: number;
+  }>[],
+): number {
+  if (meetings.length === 0) {
+    return 0;
+  }
+
+  const points = meetings.map((meeting) => {
+    if (meeting.homeGoals > meeting.awayGoals) {
+      return 1;
+    }
+
+    if (meeting.homeGoals < meeting.awayGoals) {
+      return -1;
+    }
+
+    return 0;
+  });
+  const raw = mean(points);
+
+  return clamp(shrink(raw, 0, meetings.length), -1, 1);
+}

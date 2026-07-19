@@ -148,6 +148,8 @@ describe("HTTP import and Evidence query workflow", () => {
           value: "2026-08-01T19:30:00Z",
         }),
         expect.objectContaining({ name: "attackRatingHome" }),
+        expect.objectContaining({ name: "h2hLean" }),
+        expect.objectContaining({ name: "h2hSampleSize", value: 5 }),
       ]),
     );
     expect(report.rules).toEqual(
@@ -162,6 +164,10 @@ describe("HTTP import and Evidence query workflow", () => {
         }),
         expect.objectContaining({
           ruleName: "KICKOFF_PRESENT",
+          status: "PASS",
+        }),
+        expect.objectContaining({
+          ruleName: "H2H_SUPPORTS_HOME",
           status: "PASS",
         }),
       ]),
@@ -210,6 +216,8 @@ describe("HTTP import and Evidence query workflow", () => {
           }),
           expect.objectContaining({ name: "attackRatingHome" }),
           expect.objectContaining({ name: "homeAdvantage" }),
+          expect.objectContaining({ name: "h2hLean" }),
+          expect.objectContaining({ name: "h2hSampleSize" }),
         ]),
       );
       expect(report.rules).toEqual(
@@ -228,6 +236,12 @@ describe("HTTP import and Evidence query workflow", () => {
           }),
           expect.objectContaining({
             ruleName: "HOME_ADVANTAGE_MATERIAL",
+          }),
+          expect.objectContaining({
+            ruleName: "H2H_SUPPORTS_HOME",
+          }),
+          expect.objectContaining({
+            ruleName: "H2H_SUPPORTS_AWAY",
           }),
         ]),
       );

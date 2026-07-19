@@ -26,6 +26,8 @@ export class RuleEvaluationError extends Error {
 const TAU_ATTACK = 8;
 const TAU_MOM = 0.25;
 const TAU_HOME = 0.3;
+const TAU_H2H = 0.2;
+const H2H_N_MIN = 3;
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -154,6 +156,50 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
       const homeAdvantage = numericValue(features.get("homeAdvantage"));
 
       return homeAdvantage !== undefined && homeAdvantage >= TAU_HOME;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:h2h-supports-home:v1",
+    ruleName: "H2H_SUPPORTS_HOME",
+    weight: 0.25,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "h2hLean",
+      "h2hSampleSize",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const lean = numericValue(features.get("h2hLean"));
+      const sample = numericValue(features.get("h2hSampleSize"));
+
+      return (
+        lean !== undefined &&
+        sample !== undefined &&
+        lean >= TAU_H2H &&
+        sample >= H2H_N_MIN
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:h2h-supports-away:v1",
+    ruleName: "H2H_SUPPORTS_AWAY",
+    weight: 0.25,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "h2hLean",
+      "h2hSampleSize",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const lean = numericValue(features.get("h2hLean"));
+      const sample = numericValue(features.get("h2hSampleSize"));
+
+      return (
+        lean !== undefined &&
+        sample !== undefined &&
+        lean <= -TAU_H2H &&
+        sample >= H2H_N_MIN
+      );
     },
   }) satisfies FootballRuleDefinition,
 ]);

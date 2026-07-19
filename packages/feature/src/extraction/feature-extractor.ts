@@ -9,6 +9,7 @@ import { createFeature, type Feature, type FeatureName } from "../domain/feature
 import {
   computeAttackRating,
   computeDefenseRating,
+  computeH2hLean,
   computeMomentum,
   DEFAULT_HOME_ADVANTAGE,
   roundFeature,
@@ -319,6 +320,57 @@ export class FeatureExtractor {
         generatedAt,
       }),
     );
+
+    const headToHead = evidences.find(
+      (evidence) => evidence.type === "HEAD_TO_HEAD",
+    );
+
+    if (headToHead !== undefined) {
+      const sampleSize = asFiniteNumber(headToHead.payload.sampleSize);
+      const meetingsRaw = headToHead.payload.meetings;
+      const meetings: Array<{ homeGoals: number; awayGoals: number }> = [];
+
+      if (Array.isArray(meetingsRaw) && sampleSize !== undefined) {
+        for (const entry of meetingsRaw) {
+          if (
+            entry !== null &&
+            typeof entry === "object" &&
+            !Array.isArray(entry) &&
+            typeof entry.homeGoals === "number" &&
+            typeof entry.awayGoals === "number"
+          ) {
+            meetings.push({
+              homeGoals: entry.homeGoals,
+              awayGoals: entry.awayGoals,
+            });
+          }
+        }
+      }
+
+      if (meetings.length === sampleSize && sampleSize > 0) {
+        const lean = roundFeature(computeH2hLean(meetings));
+        features.push(
+          createFeature({
+            featureId: featureId(headToHead.id, "h2hLean"),
+            matchId,
+            name: "h2hLean",
+            value: lean,
+            explanation: `H2H lean ${lean} from ${sampleSize} meetings (shrunken).`,
+            sourceEvidenceId: headToHead.id,
+            generatedAt,
+          }),
+          createFeature({
+            featureId: featureId(headToHead.id, "h2hSampleSize"),
+            matchId,
+            name: "h2hSampleSize",
+            value: sampleSize,
+            explanation: `H2H sample size ${sampleSize}.`,
+            sourceEvidenceId: headToHead.id,
+            generatedAt,
+          }),
+        );
+      }
+    }
 
     const requiredFootballPresent =
       homeForm !== undefined &&

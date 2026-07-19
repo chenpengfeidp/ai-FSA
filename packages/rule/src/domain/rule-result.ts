@@ -3,6 +3,8 @@ import { createMatchId, type MatchId } from "@fas/match";
 export type RuleId =
   | "rule:away-attack-edge:v1"
   | "rule:away-team-present:v1"
+  | "rule:h2h-supports-away:v1"
+  | "rule:h2h-supports-home:v1"
   | "rule:home-advantage-material:v1"
   | "rule:home-attack-edge:v1"
   | "rule:home-team-present:v1"
@@ -13,6 +15,8 @@ export type RuleId =
 export type RuleName =
   | "AWAY_ATTACK_EDGE"
   | "AWAY_TEAM_PRESENT"
+  | "H2H_SUPPORTS_AWAY"
+  | "H2H_SUPPORTS_HOME"
   | "HOME_ADVANTAGE_MATERIAL"
   | "HOME_ATTACK_EDGE"
   | "HOME_TEAM_PRESENT"
@@ -60,6 +64,8 @@ export class RuleResultValidationError extends Error {
 const ruleIds: ReadonlySet<string> = new Set([
   "rule:away-attack-edge:v1",
   "rule:away-team-present:v1",
+  "rule:h2h-supports-away:v1",
+  "rule:h2h-supports-home:v1",
   "rule:home-advantage-material:v1",
   "rule:home-attack-edge:v1",
   "rule:home-team-present:v1",
@@ -70,6 +76,8 @@ const ruleIds: ReadonlySet<string> = new Set([
 const ruleNames: ReadonlySet<string> = new Set([
   "AWAY_ATTACK_EDGE",
   "AWAY_TEAM_PRESENT",
+  "H2H_SUPPORTS_AWAY",
+  "H2H_SUPPORTS_HOME",
   "HOME_ADVANTAGE_MATERIAL",
   "HOME_ATTACK_EDGE",
   "HOME_TEAM_PRESENT",

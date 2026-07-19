@@ -154,8 +154,11 @@ For a match to enter projection:
 | `MATCH_INFO` | match | yes |
 | `TEAM_FORM` | home team, away team | yes |
 | `STATISTICS` | home team, away team | yes |
+| `HEAD_TO_HEAD` | match (current-side oriented) | optional (slice 1.1) |
 
 Missing any required item → Feature stage may partially compute, but Projection stage is `blocked` with `insufficient_evidence`.
+
+Optional `HEAD_TO_HEAD` thickens evidence when present. Absence must not block projection and must not permanently cap football-rule alignment `A` (inapplicable H2H rules are excluded from the alignment denominator).
 
 ### 5.2 `TEAM_FORM` required payload fields
 
@@ -178,7 +181,19 @@ Missing any required item → Feature stage may partially compute, but Projectio
 | `xgForPerMatch` | finite number `≥ 0` | Average xG for (provider fixture value; not computed here) |
 | `xgAgainstPerMatch` | finite number `≥ 0` | Average xG against |
 
-### 5.4 Quality / freshness for the slice
+### 5.4 `HEAD_TO_HEAD` optional payload fields (slice 1.1)
+
+Meetings are oriented to the **current** fixture sides (`homeGoals` / `awayGoals` refer to the current home/away teams, regardless of venue in the historical meeting).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `sampleSize` | integer `n` where `1 ≤ n ≤ 20` | Number of meetings |
+| `meetings` | array length `n` | Historical meetings |
+| `meetings[].playedAt` | ISO 8601 timestamp | Kickoff of the meeting |
+| `meetings[].homeGoals` | non-negative integer | Goals by current home side |
+| `meetings[].awayGoals` | non-negative integer | Goals by current away side |
+
+### 5.5 Quality / freshness for the slice
 
 - Rejected evidence cannot contribute.
 - Fixture/demo evidence may be `unverified`.
@@ -261,7 +276,19 @@ HomeAdvantage = DEFAULT_HOME_ADVANTAGE
 
 Explanation must state that the value is the slice baseline, not derived splits.
 
-### 6.6 Feature bundle output
+### 6.6 `H2hLean` / `H2hSampleSize` (optional, slice 1.1)
+
+Present only when `HEAD_TO_HEAD` evidence is present and valid.
+
+Map each meeting to points `W=1`, `D=0`, `L=-1` from the current home side’s perspective:
+
+```text
+raw = mean(points)
+H2hLean = clamp(shrink(raw, 0, sampleSize), -1, 1)
+H2hSampleSize = sampleSize
+```
+
+### 6.7 Feature bundle output
 
 ```text
 FeatureBundle {
@@ -289,6 +316,8 @@ Rules consume FeatureBundle values only. They emit findings; they do not compute
 | `τ_attack` | `8` |
 | `τ_mom` | `0.25` |
 | `τ_home` | `0.30` |
+| `τ_h2h` | `0.20` |
+| `n_min_h2h` | `3` |
 
 ### 7.2 Rules
 
@@ -299,6 +328,8 @@ Rules consume FeatureBundle values only. They emit findings; they do not compute
 | `MOMENTUM_HOME` | `Momentum_home - Momentum_away ≥ τ_mom` | `0.45` | home+ |
 | `MOMENTUM_AWAY` | `Momentum_away - Momentum_home ≥ τ_mom` | `0.45` | away+ |
 | `HOME_ADVANTAGE_MATERIAL` | `HomeAdvantage ≥ τ_home` | `0.55` | home+ |
+| `H2H_SUPPORTS_HOME` | `H2hLean ≥ τ_h2h` and `H2hSampleSize ≥ n_min_h2h` | `0.25` | home+ |
+| `H2H_SUPPORTS_AWAY` | `H2hLean ≤ -τ_h2h` and `H2hSampleSize ≥ n_min_h2h` | `0.25` | away+ |
 
 Status mapping for this slice:
 

@@ -7,6 +7,8 @@ export type FeatureName =
   | "awayTeam"
   | "defenseRatingAway"
   | "defenseRatingHome"
+  | "h2hLean"
+  | "h2hSampleSize"
   | "homeAdvantage"
   | "homeTeam"
   | "kickoff"
@@ -46,6 +48,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "awayTeam",
   "defenseRatingAway",
   "defenseRatingHome",
+  "h2hLean",
+  "h2hSampleSize",
   "homeAdvantage",
   "homeTeam",
   "kickoff",

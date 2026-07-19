@@ -15,7 +15,6 @@ import {
 } from "./projection-math.js";
 import { stableChecksum } from "./stable-checksum.js";
 
-const FOOTBALL_RULE_WEIGHT_TOTAL = 0.7 + 0.7 + 0.45 + 0.45 + 0.55;
 const REQUIRED_EVIDENCE_WEIGHT = 5;
 
 function numericFeature(
@@ -139,7 +138,9 @@ export function computeDeterministicMatchProjection(input: {
       rule.ruleName === "AWAY_ATTACK_EDGE" ||
       rule.ruleName === "MOMENTUM_HOME" ||
       rule.ruleName === "MOMENTUM_AWAY" ||
-      rule.ruleName === "HOME_ADVANTAGE_MATERIAL",
+      rule.ruleName === "HOME_ADVANTAGE_MATERIAL" ||
+      rule.ruleName === "H2H_SUPPORTS_HOME" ||
+      rule.ruleName === "H2H_SUPPORTS_AWAY",
   );
   const homeSignal = footballRules
     .filter((rule) => rule.status === "PASS" && rule.channel === "home+")
@@ -170,7 +171,12 @@ export function computeDeterministicMatchProjection(input: {
   const alignedWeight = footballRules
     .filter((rule) => rule.status === "PASS")
     .reduce((sum, rule) => sum + rule.weight, 0);
-  const A = alignedWeight / Math.max(FOOTBALL_RULE_WEIGHT_TOTAL, 1e-12);
+  // Optional H2H rules are INAPPLICABLE when absent; exclude them from the
+  // denominator so missing optional evidence does not permanently cap A.
+  const applicableWeight = footballRules
+    .filter((rule) => rule.status !== "INAPPLICABLE")
+    .reduce((sum, rule) => sum + rule.weight, 0);
+  const A = alignedWeight / Math.max(applicableWeight, 1e-12);
   const C = input.requiredEvidencePresentCount / REQUIRED_EVIDENCE_WEIGHT;
   const strengthValues = [
     Math.abs(attackHome - 50) / 50,

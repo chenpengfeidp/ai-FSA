@@ -26,6 +26,8 @@ const FEATURE_LABELS: Readonly<Record<FeatureName, string>> = Object.freeze({
   awayTeam: "Away Team",
   defenseRatingAway: "Away Defense Rating",
   defenseRatingHome: "Home Defense Rating",
+  h2hLean: "H2H Lean",
+  h2hSampleSize: "H2H Sample Size",
   homeAdvantage: "Home Advantage",
   homeTeam: "Home Team",
   kickoff: "Kickoff",
@@ -36,6 +38,8 @@ const FEATURE_LABELS: Readonly<Record<FeatureName, string>> = Object.freeze({
 const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
   AWAY_ATTACK_EDGE: "Away Attack Edge",
   AWAY_TEAM_PRESENT: "Away Team Present",
+  H2H_SUPPORTS_AWAY: "H2H Supports Away",
+  H2H_SUPPORTS_HOME: "H2H Supports Home",
   HOME_ADVANTAGE_MATERIAL: "Material Home Advantage",
   HOME_ATTACK_EDGE: "Home Attack Edge",
   HOME_TEAM_PRESENT: "Home Team Present",

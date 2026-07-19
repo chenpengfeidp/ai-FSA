@@ -119,6 +119,7 @@ describe("LiveTheOddsApiUpcomingFixturesSource", () => {
     const source = new LiveTheOddsApiUpcomingFixturesSource({
       apiKey: "test-key",
       baseUrl: "https://api.the-odds-api.com",
+      sportKeys: ["soccer_epl"],
       fetchImpl,
     });
 
@@ -127,6 +128,62 @@ describe("LiveTheOddsApiUpcomingFixturesSource", () => {
     expect(rows[0]?.providerMethod).toBe("http-live");
     expect(String(fetchImpl.mock.calls[0]?.[0])).toContain(
       "/v4/sports/soccer_epl/odds",
+    );
+  });
+
+  it("fans out across sport keys and keeps partial successes", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/soccer_korea_kleague1/")) {
+        return Response.json([
+          {
+            id: "evt_k_league",
+            sport_key: "soccer_korea_kleague1",
+            sport_title: "K League 1",
+            commence_time: "2026-07-19T10:00:00Z",
+            home_team: "FC Seoul",
+            away_team: "Ulsan",
+          },
+        ]);
+      }
+
+      if (url.includes("/soccer_sweden_allsvenskan/")) {
+        return new Response("not found", { status: 404 });
+      }
+
+      return Response.json([]);
+    });
+
+    const source = new LiveTheOddsApiUpcomingFixturesSource({
+      apiKey: "test-key",
+      baseUrl: "https://api.the-odds-api.com",
+      sportKeys: [
+        "soccer_korea_kleague1",
+        "soccer_sweden_allsvenskan",
+        "soccer_japan_j_league",
+      ],
+      fetchImpl,
+    });
+
+    const rows = await source.listUpcoming();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.competition).toBe("K League 1");
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+  });
+
+  it("throws only when every configured sport request fails", async () => {
+    const fetchImpl = vi.fn(async () => new Response("nope", { status: 429 }));
+    const source = new LiveTheOddsApiUpcomingFixturesSource({
+      apiKey: "test-key",
+      baseUrl: "https://api.the-odds-api.com",
+      sportKeys: ["soccer_epl", "soccer_korea_kleague1"],
+      concurrency: 2,
+      fetchImpl,
+    });
+
+    await expect(source.listUpcoming()).rejects.toThrow(
+      /failed for all configured sports/,
     );
   });
 });

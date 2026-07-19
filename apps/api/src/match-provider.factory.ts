@@ -2,6 +2,7 @@ import type { OddsProviderConfig } from "@fas/config";
 import { FixtureProvider } from "@fas/provider-fixture";
 import {
   CompositeMatchProvider,
+  DEFAULT_MATCH_CENTER_SPORT_KEYS,
   EnrichedMatchProvider,
   LiveTheOddsApiOddsSource,
   LiveTheOddsApiScoresSource,
@@ -54,6 +55,7 @@ export function createMatchProviderWiring(
       );
     }
 
+    const sportKeys = oddsProvider.sportKeys ?? DEFAULT_MATCH_CENTER_SPORT_KEYS;
     const liveOdds = new LiveTheOddsApiOddsSource({
       apiKey,
       baseUrl: oddsProvider.baseUrl,
@@ -61,6 +63,7 @@ export function createMatchProviderWiring(
     const liveScores = new LiveTheOddsApiScoresSource({
       apiKey,
       baseUrl: oddsProvider.baseUrl,
+      sportKeys,
     });
     const withOdds = new CompositeMatchProvider(fixtureProvider, liveOdds);
     const enriched = new EnrichedMatchProvider(

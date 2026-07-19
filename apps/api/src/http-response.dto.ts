@@ -447,12 +447,31 @@ export class UpcomingMatchDto {
   declare readonly providerMethod: string;
 }
 
+export class UpcomingMatchesMetaDto {
+  @ApiProperty({
+    enum: ["recorded", "live", "fixture"],
+    example: "recorded",
+    description: "API ODDS_PROVIDER_MODE used to build the Match Center board.",
+  })
+  declare readonly oddsProviderMode: "recorded" | "live" | "fixture";
+
+  @ApiProperty({
+    example: false,
+    description:
+      "True when live Odds fan-out failed and the board fell back to the recorded cassette.",
+  })
+  declare readonly usedRecordedFallback: boolean;
+}
+
 export class UpcomingMatchesSuccessResponseDto {
   @ApiProperty({ enum: [true], example: true })
   declare readonly ok: true;
 
   @ApiProperty({ isArray: true, type: () => UpcomingMatchDto })
   declare readonly value: readonly UpcomingMatchDto[];
+
+  @ApiProperty({ type: () => UpcomingMatchesMetaDto })
+  declare readonly meta: UpcomingMatchesMetaDto;
 }
 
 export class UpcomingMatchesErrorDto {

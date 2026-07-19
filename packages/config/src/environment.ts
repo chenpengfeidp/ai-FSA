@@ -21,6 +21,8 @@ export interface OddsProviderConfig {
   readonly mode: OddsProviderMode;
   readonly apiKey: string | undefined;
   readonly baseUrl: string;
+  /** The Odds API sport keys for Match Center live fan-out; undefined → provider default. */
+  readonly sportKeys: readonly string[] | undefined;
 }
 
 export interface CalibrationConfig {
@@ -90,6 +92,8 @@ const oddsApiBaseUrlSchema = z
   .url({ error: "THE_ODDS_API_BASE_URL must be a valid URL." })
   .default("https://api.the-odds-api.com");
 
+const oddsSportKeysSchema = z.string().optional();
+
 const calibrationArtifactModeSchema = z
   .enum(["identity", "population_demo_v1"])
   .default("population_demo_v1");
@@ -117,6 +121,7 @@ const apiEnvironmentSchema = z
     ODDS_PROVIDER_MODE: oddsProviderModeSchema,
     THE_ODDS_API_KEY: oddsApiKeySchema,
     THE_ODDS_API_BASE_URL: oddsApiBaseUrlSchema,
+    ODDS_SPORT_KEYS: oddsSportKeysSchema,
     CALIBRATION_ARTIFACT: calibrationArtifactModeSchema,
     DATABASE_URL: databaseUrlSchema,
     DATABASE_CLIENT_MODE: databaseClientModeSchema,
@@ -204,6 +209,12 @@ function issueDetails(variable: string): Readonly<{
         code: "INVALID_ODDS_API_BASE_URL",
         message: "THE_ODDS_API_BASE_URL must be a valid URL.",
       };
+    case "ODDS_SPORT_KEYS":
+      return {
+        code: "INVALID_ODDS_SPORT_KEYS",
+        message:
+          "ODDS_SPORT_KEYS must be a comma-separated list of The Odds API sport keys.",
+      };
     case "CALIBRATION_ARTIFACT":
       return {
         code: "INVALID_CALIBRATION_ARTIFACT",
@@ -271,6 +282,23 @@ export class ConfigurationValidationError extends Error {
   }
 }
 
+function parseOddsSportKeys(raw: string | undefined): readonly string[] | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+
+  const keys = raw
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+
+  if (keys.length === 0) {
+    return undefined;
+  }
+
+  return Object.freeze(keys);
+}
+
 export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
   const parsed = parseConfiguration(
     apiEnvironmentSchema,
@@ -281,6 +309,7 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
   const clientMode =
     parsed.DATABASE_CLIENT_MODE ?? (parsed.NODE_ENV === "test" ? "stub" : "live");
   const evidenceRepositoryMode = parsed.EVIDENCE_REPOSITORY_MODE ?? "memory";
+  const sportKeys = parseOddsSportKeys(parsed.ODDS_SPORT_KEYS);
 
   return Object.freeze({
     runtime: Object.freeze({
@@ -294,6 +323,7 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
       mode: parsed.ODDS_PROVIDER_MODE,
       apiKey: apiKey !== undefined && apiKey.length > 0 ? apiKey : undefined,
       baseUrl: parsed.THE_ODDS_API_BASE_URL,
+      sportKeys,
     }),
     calibration: Object.freeze({
       artifactMode: parsed.CALIBRATION_ARTIFACT,

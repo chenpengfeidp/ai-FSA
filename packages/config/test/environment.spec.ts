@@ -32,6 +32,7 @@ describe("@fas/config environment loading", () => {
         mode: "recorded",
         apiKey: undefined,
         baseUrl: "https://api.the-odds-api.com",
+        sportKeys: undefined,
       },
       calibration: {
         artifactMode: "population_demo_v1",
@@ -77,6 +78,7 @@ describe("@fas/config environment loading", () => {
         mode: "fixture",
         apiKey: undefined,
         baseUrl: "https://api.the-odds-api.com",
+        sportKeys: undefined,
       },
       calibration: {
         artifactMode: "population_demo_v1",
@@ -119,6 +121,7 @@ describe("@fas/config environment loading", () => {
         mode: "live",
         apiKey: "test-key",
         baseUrl: "https://odds.example.test",
+        sportKeys: undefined,
       },
       calibration: {
         artifactMode: "identity",
@@ -131,6 +134,14 @@ describe("@fas/config environment loading", () => {
         mode: "memory",
       },
     });
+  });
+
+  it("parses ODDS_SPORT_KEYS into a frozen list", () => {
+    expect(
+      loadApiConfig({
+        ODDS_SPORT_KEYS: " soccer_korea_kleague1, soccer_japan_j_league , ",
+      }).oddsProvider.sportKeys,
+    ).toEqual(["soccer_korea_kleague1", "soccer_japan_j_league"]);
   });
 
   it("loads postgres evidence repository mode with live database", () => {

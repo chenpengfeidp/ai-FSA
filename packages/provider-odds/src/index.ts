@@ -4,6 +4,7 @@ export {
   findDemoOddsCatalogEntryByEventId,
 } from "./catalog/demo-odds-catalog.js";
 export type { DemoOddsCatalogEntry } from "./catalog/demo-odds-catalog.js";
+export { DEFAULT_MATCH_CENTER_SPORT_KEYS } from "./catalog/match-center-sport-keys.js";
 export { CompositeMatchProvider } from "./composite/composite-match-provider.js";
 export type { MatchLookup } from "./composite/composite-match-provider.js";
 export { EnrichedMatchProvider } from "./composite/enriched-match-provider.js";
@@ -41,6 +42,7 @@ export { LiveTheOddsApiScoresSource } from "./live/live-the-odds-api-scores-sour
 export type { LiveTheOddsApiScoresSourceOptions } from "./live/live-the-odds-api-scores-source.js";
 export { LiveTheOddsApiUpcomingFixturesSource } from "./live/live-the-odds-api-upcoming-fixtures-source.js";
 export type { LiveTheOddsApiUpcomingFixturesSourceOptions } from "./live/live-the-odds-api-upcoming-fixtures-source.js";
+export { mapPool } from "./live/map-pool.js";
 export { mapTheOddsApiH2h } from "./mapper/map-the-odds-api-h2h.js";
 export type {
   MapTheOddsApiH2hOptions,

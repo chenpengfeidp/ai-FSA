@@ -1,3 +1,4 @@
+import { loadApiConfig } from "@fas/config";
 import { Controller, Get } from "@nestjs/common";
 import {
   ApiExtraModels,
@@ -41,10 +42,16 @@ export class MatchesController {
     UpcomingMatchesSuccessResponseDto | UpcomingMatchesErrorResponseDto
   > {
     try {
-      const value = await this.upcomingBoard.listUpcoming();
+      const board = await this.upcomingBoard.listUpcoming();
+      const oddsProviderMode = loadApiConfig().oddsProvider.mode;
+
       return Object.freeze({
         ok: true as const,
-        value,
+        value: board.rows,
+        meta: Object.freeze({
+          oddsProviderMode,
+          usedRecordedFallback: board.usedRecordedFallback,
+        }),
       });
     } catch (error: unknown) {
       const message =

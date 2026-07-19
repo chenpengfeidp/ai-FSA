@@ -265,6 +265,10 @@ describe("HTTP import and Evidence query workflow", () => {
     expect(response.status).toBe(200);
     expect(body.ok).toBe(true);
     expect(Array.isArray(value)).toBe(true);
+    expect(body.meta).toEqual({
+      oddsProviderMode: "recorded",
+      usedRecordedFallback: false,
+    });
     expect(value).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

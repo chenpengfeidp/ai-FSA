@@ -34,7 +34,12 @@ vi.mock("next/link", () => ({
 vi.mock("../src/services/api", () => ({
   analyzeMatch: vi.fn(),
   getEvidenceByMatch: vi.fn(),
-  getUpcomingMatches: vi.fn(async () => []),
+  getUpcomingMatches: vi.fn(async () =>
+    Object.freeze({
+      matches: Object.freeze([]),
+      meta: Object.freeze({ oddsProviderMode: "recorded" as const }),
+    }),
+  ),
 }));
 
 const report: AnalysisReportDto = {
@@ -167,7 +172,7 @@ describe("AnalysisSessionPage", () => {
       screen.getByRole("heading", { name: "Liverpool vs Chelsea" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Premier League")).toBeInTheDocument();
-    expect(screen.getByText("19:30")).toBeInTheDocument();
+    expect(screen.getByText("2026-08-01 19:30")).toBeInTheDocument();
     expect(screen.getByLabelText(zh.session.progressAria)).toBeInTheDocument();
     expect(
       screen.getByText(zh.session.stages.loadingMatch.label),

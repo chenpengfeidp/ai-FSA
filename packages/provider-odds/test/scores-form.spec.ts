@@ -138,6 +138,7 @@ describe("LiveTheOddsApiScoresSource", () => {
     const source = new LiveTheOddsApiScoresSource({
       apiKey: "test-key",
       baseUrl: "https://api.the-odds-api.com",
+      sportKeys: ["soccer_epl"],
       fetchImpl,
     });
 
@@ -145,5 +146,71 @@ describe("LiveTheOddsApiScoresSource", () => {
     expect(source.getCompletedScorelines()).toHaveLength(1);
     expect(String(fetchImpl.mock.calls[0]?.[0])).toContain("/scores");
     expect(String(fetchImpl.mock.calls[0]?.[0])).toContain("daysFrom=3");
+  });
+
+  it("fans out scores across sport keys and merges completed rows", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/soccer_korea_kleague1/")) {
+        return Response.json([
+          {
+            id: "k1",
+            completed: true,
+            commence_time: "2026-07-18T10:00:00Z",
+            home_team: "FC Seoul",
+            away_team: "Ulsan",
+            scores: [
+              { name: "FC Seoul", score: "1" },
+              { name: "Ulsan", score: "0" },
+            ],
+          },
+        ]);
+      }
+
+      if (url.includes("/soccer_sweden_allsvenskan/")) {
+        return Response.json([
+          {
+            id: "s1",
+            completed: true,
+            commence_time: "2026-07-18T17:00:00Z",
+            home_team: "Hammarby IF",
+            away_team: "AIK",
+            scores: [
+              { name: "Hammarby IF", score: "2" },
+              { name: "AIK", score: "2" },
+            ],
+          },
+        ]);
+      }
+
+      return new Response("not found", { status: 404 });
+    });
+
+    const source = new LiveTheOddsApiScoresSource({
+      apiKey: "test-key",
+      baseUrl: "https://api.the-odds-api.com",
+      sportKeys: [
+        "soccer_korea_kleague1",
+        "soccer_sweden_allsvenskan",
+        "soccer_epl",
+      ],
+      fetchImpl,
+    });
+
+    await source.ensureScores();
+    const rows = source.getCompletedScorelines();
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.homeTeam).toBe("Hammarby IF");
+    expect(rows[1]?.homeTeam).toBe("FC Seoul");
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    expect(
+      buildFormAndStatsForMatch({
+        homeTeam: "FC Seoul",
+        awayTeam: "Hammarby IF",
+        scorelines: rows,
+        providerMethod: "http-live",
+      }),
+    ).toBeDefined();
   });
 });

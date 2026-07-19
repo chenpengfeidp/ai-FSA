@@ -7,6 +7,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const envFile = path.join(root, ".env");
 const env = { ...process.env };
 
+/** Same non-secret local default as `@fas/config` / `.env.example` (Prisma generate only). */
+const DEFAULT_DATABASE_URL =
+  "postgresql://fas_local:change_me_local_only@127.0.0.1:5432/fas_local";
+
 if (existsSync(envFile)) {
   for (const line of readFileSync(envFile, "utf8").split("\n")) {
     const trimmed = line.trim();
@@ -41,18 +45,44 @@ if (existsSync(envFile)) {
   );
 }
 
-const child = spawn("pnpm", ["--filter", "@fas/api", "dev"], {
-  cwd: root,
-  env,
-  stdio: "inherit",
-  shell: process.platform === "win32",
-});
+if (env.DATABASE_URL === undefined || env.DATABASE_URL.trim().length === 0) {
+  env.DATABASE_URL = DEFAULT_DATABASE_URL;
+  console.warn(
+    `DATABASE_URL unset; using local default for Prisma generate: ${DEFAULT_DATABASE_URL}`,
+  );
+}
 
-child.on("exit", (code, signal) => {
-  if (signal) {
-    process.kill(process.pid, signal);
-    return;
-  }
+function run(command, args) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: root,
+      env,
+      stdio: "inherit",
+      shell: process.platform === "win32",
+    });
 
-  process.exit(code ?? 0);
-});
+    child.on("error", reject);
+    child.on("exit", (code, signal) => {
+      if (signal) {
+        reject(new Error(`${command} exited via signal ${signal}`));
+        return;
+      }
+
+      if (code !== 0) {
+        reject(new Error(`${command} exited with code ${String(code ?? 1)}`));
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
+
+try {
+  // Build after .env load so @fas/database prisma generate can resolve DATABASE_URL.
+  await run("pnpm", ["exec", "turbo", "run", "build", "--filter=@fas/api..."]);
+  await run("pnpm", ["--filter", "@fas/api", "dev"]);
+} catch (error) {
+  console.error(error instanceof Error ? error.message : error);
+  process.exit(1);
+}

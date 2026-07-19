@@ -1,5 +1,6 @@
 /**
- * ZH-1 Chinese UI copy for chrome, Match Center, and Analysis Session.
+ * ZH-1/ZH-2 Chinese UI copy for chrome, Match Center, Analysis Session,
+ * Workspace, explainable report, and Analysis Library.
  * Team/competition proper nouns stay English at call sites.
  */
 
@@ -29,6 +30,30 @@ export const zh = {
     loadingFixtures: "正在加载赛程…",
     fixturesAvailable: (count: number): string => `${String(count)} 场可用赛程`,
     loadError: "无法加载即将进行的比赛。",
+    modeRecorded: "录制演示",
+    modeLive: "实时赔率",
+    modeFixture: "纯 Fixture",
+    modeUnknown: "模式未知",
+    modeHintRecorded:
+      "当前为 recorded：赛程来自本地 cassette（常为演示日期，不是今天的英超）。",
+    modeHintLive:
+      "当前为 live：赛程来自 The Odds API 多联赛即将开赛列表（五大联赛、韩日、北欧、欧战等）。",
+    modeHintLiveFallback:
+      "配置为 live，但 Odds API 拉取失败，已回退 recorded cassette（多为 8 月演示日期）。请检查额度/限流，或把起始日期调到 cassette 日期。",
+    modeHintFixture: "当前为 fixture：仅演示种子赛程。",
+    modeHintUnknown: "赛程元数据尚未返回；若刚失败过，请刷新或检查 Odds API 额度。",
+    modeLiveFallback: "live→录制回退",
+    filterStart: "起始日期",
+    filterHorizon: "窗口天数",
+    filterHorizonOption: (days: number): string => `${String(days)} 天`,
+    includeDemos: "显示演示赛（fixture）",
+    emptyFiltered:
+      "当前日期窗口内没有比赛。可改起始日期或窗口天数；录制模式可打开演示赛；live 下休赛期联赛可能为空。",
+    emptyFilteredOutsideWindow: (total: number, earliest: string): string =>
+      `板上有 ${String(total)} 场，但不在当前日期窗口内（最早一场约 ${earliest}）。live 额度不足时会回退到 8 月演示 cassette，看起来像「有总数却显示 0」。`,
+    jumpToEarliest: (date: string): string => `跳到 ${date} 查看`,
+    showingRange: (from: string, to: string, shown: number, total: number): string =>
+      `${from} → ${to} · 显示 ${String(shown)} / ${String(total)} 场`,
   },
   matchCard: {
     home: "主队",
@@ -97,6 +122,8 @@ export const zh = {
     matchNotFound: "未找到比赛",
     matchNotFoundDescription: (matchId: string): string =>
       `目录中不存在「${matchId}」。请从今日赛程中选择一场比赛。`,
+    matchUnavailableBoardFailed: (matchId: string): string =>
+      `赛程列表暂时不可用，无法打开「${matchId}」。请返回比赛中心刷新后再试（常见原因：Odds API 额度/限流）。`,
     stages: {
       loadingMatch: {
         label: "加载比赛",
@@ -127,5 +154,258 @@ export const zh = {
         description: "移交至可审查的分析工作区。",
       },
     },
+  },
+  workspace: {
+    eyebrow: "工作区",
+    backToMatchCenter: "返回比赛中心",
+    matchList: "比赛列表",
+    recentAnalyses: "近期分析",
+    recentAnalysesEmpty: "分析一场比赛以填充近期历史。",
+    matchNotFound: "未找到比赛",
+    matchNotFoundDescription: (matchId: string): string =>
+      `目录中不存在「${matchId}」。请从今日赛程中选择一场比赛。`,
+    matchUnavailableBoardFailed: (matchId: string): string =>
+      `赛程列表暂时不可用，无法打开「${matchId}」。请返回比赛中心刷新后再试（常见原因：Odds API 额度/限流）。`,
+    loadErrorTitle: "无法加载比赛分析",
+    loadErrorDescription: "分析流水线未能完成本场比赛。请返回仪表盘并尝试其他赛程。",
+    aiAnalysisWorkspace: "AI 分析工作区",
+    kickoff: (time: string): string => `开球 ${time}`,
+    home: "主队",
+    away: "客队",
+    vs: "vs",
+    sectionsAria: "工作区版块",
+    nav: {
+      prediction: "预测",
+      reasoning: "推理",
+      evidence: "证据",
+      features: "特征",
+      rules: "规则",
+      recommendation: "推荐",
+      developer: "开发者",
+    },
+  },
+  report: {
+    prediction: "预测",
+    winner: "胜者",
+    confidence: "置信度",
+    recommendation: "推荐",
+    scoreLine: (score: string): string => `比分 ${score}`,
+    rangeLine: (range: string): string => `区间 ${range}`,
+    analysisComplete: "确定性分析完成。",
+    winnerPrediction: "胜者预测",
+    winnerPredictionHint: "由确定性规则权重生成的横向概率条",
+    reasoning: "推理",
+    reasoningFlow: "证据 → 特征 → 规则 → 推荐",
+    reasoningStages: {
+      evidence: {
+        title: "证据",
+        description: "收集的比赛证据进入流水线。",
+      },
+      features: {
+        title: "特征",
+        description: "从证据中提取确定性特征。",
+      },
+      rules: {
+        title: "规则",
+        description: "每条确定性规则均按明确权重评估。",
+      },
+      recommendation: {
+        title: "推荐",
+        description: "组装供审查的人类可读推荐。",
+      },
+    },
+    evidence: "证据",
+    evidenceHint: "纵向时间线，含类型图标与视觉层级",
+    noEvidence: "暂无证据",
+    noEvidenceDescription: "本场比赛未返回任何证据记录。",
+    step: (step: number, timestamp: string): string =>
+      `步骤 ${String(step)} · ${timestamp}`,
+    featureImportance: "特征重要性",
+    featureImportanceHint: "贡献条——正向与负向信号以颜色区分",
+    noFeatures: "暂无特征",
+    noFeaturesDescription: "本场比赛未提取任何特征。",
+    positive: "正向",
+    negative: "负向",
+    ruleEvaluation: "规则评估",
+    ruleEvaluationHint: "PASS / FAIL 结果及确定性权重",
+    noRules: "暂无规则",
+    noRulesDescription: "本场比赛未评估任何规则。",
+    weight: (value: number): string =>
+      `权重 ${value >= 0 ? "+" : ""}${String(value)}`,
+    finalRecommendation: "最终推荐",
+    finalRecommendationHint: "由确定性报告输出组装的高级摘要",
+    recommendedWinner: "推荐胜者",
+    recommendedScore: "推荐比分",
+    recommendedGoalRange: "推荐进球区间",
+    inferenceNarrative: "推理叙述",
+    developerDetails: "开发者详情",
+    developerDetailsHint: "原始确定性报告 JSON — 默认隐藏",
+    toggleDeveloperDetails: "切换开发者详情",
+    mostLikelyScore: "最可能比分",
+    goalRange: "进球区间",
+    goalRangeRecommended: "推荐区间已高亮",
+    recommended: "推荐",
+    confidenceGauge: "置信度仪表",
+    confidenceGaugeHint: (passCount: number, ruleCount: number): string =>
+      `由确定性规则通过率计算的可视置信度（${String(passCount)}/${String(ruleCount)}）`,
+    gauge: "仪表",
+    confidenceLabel: (level: string): string => `置信度 ${level}`,
+    confidenceLevel: (level: string): string => {
+      switch (level) {
+        case "Very High":
+          return "极高";
+        case "High":
+          return "高";
+        case "Medium":
+          return "中";
+        case "Low":
+          return "低";
+        default:
+          return level;
+      }
+    },
+  },
+  library: {
+    eyebrow: "分析资料库",
+    heading: "分析资料库",
+    reportsEyebrow: "报告",
+    description: "管理每场已完成的足球分析——搜索、筛选、收藏并随时重新打开报告。",
+    sidebarTitle: "资料库",
+    sidebarHint: "在同一处浏览每场已完成报告。",
+    sectionsAria: "分析资料库版块",
+    sections: {
+      recent: "近期",
+      favorites: "收藏",
+      competitions: "赛事",
+      completed: "已完成",
+      inProgress: "进行中",
+      failed: "失败",
+      settings: "设置",
+    },
+    empty: {
+      favorites: {
+        title: "暂无收藏",
+        description: "使用心形控件标记报告，将最佳阅读保留在一键可达处。",
+      },
+      inProgress: {
+        title: "暂无进行中项",
+        description:
+          "进行中的分析将在实时运行被跟踪时显示于此。已完成历史仍在「已完成」与「近期」中。",
+      },
+      failed: {
+        title: "暂无失败报告",
+        description: "失败运行出现时将显示于此。成功历史仍保留在资料库中。",
+      },
+      settings: {
+        title: "资料库设置",
+        description:
+          "设置为后续产品 sprint 的占位项。报告仍可从「近期」与「已完成」访问。",
+      },
+      competitions: {
+        title: "暂无赛事报告",
+        description: "跨赛事运行分析以按联赛构建可浏览资料库。",
+      },
+      default: {
+        title: "运行你的首次分析",
+        description:
+          "从比赛中心分析一场比赛。已完成报告将显示于此，便于浏览、收藏与随时重新打开。",
+      },
+    },
+    searchPlaceholder: "搜索球队、赛事或预测…",
+    searchSrOnly: "搜索报告",
+    filters: {
+      competition: "赛事",
+      date: "日期",
+      status: "状态",
+      confidence: "置信度",
+      favorite: "收藏",
+      sort: "排序",
+    },
+    filterOptions: {
+      allCompetitions: "全部赛事",
+      allStatuses: "全部状态",
+      allLevels: "全部等级",
+      allReports: "全部报告",
+      favoritesOnly: "仅收藏",
+    },
+    sort: {
+      newest: "最新",
+      oldest: "最早",
+      highestConfidence: "置信度最高",
+      competition: "赛事",
+    },
+    statusLabel: (status: string): string => {
+      switch (status) {
+        case "Completed":
+          return "已完成";
+        case "In Progress":
+          return "进行中";
+        case "Failed":
+          return "失败";
+        default:
+          return status;
+      }
+    },
+    evenSignal: "均衡信号",
+    evidenceItems: (count: number): string =>
+      count === 1 ? "1 条证据" : `${String(count)} 条证据`,
+    noEvidenceSummary: "无证据摘要",
+    openForFullRecommendation: "打开工作区报告查看完整推荐。",
+    reportCard: {
+      winnerPrediction: "胜者预测",
+      confidence: "置信度",
+      kickoffCreated: (kickoff: string, created: string): string =>
+        `${kickoff} 开球 · 创建于 ${created} UTC`,
+      openReport: "打开报告",
+      favorite: "收藏",
+      favorited: "已收藏",
+      unfavorite: "取消收藏",
+      delete: "删除",
+      quickPreview: "快速预览",
+      prediction: "预测",
+      topEvidence: "主要证据",
+      recommendation: "推荐",
+      quickActions: "快捷操作",
+      select: (homeTeam: string, awayTeam: string): string =>
+        `选择 ${homeTeam} vs ${awayTeam}`,
+      favoriteAction: (homeTeam: string, awayTeam: string): string =>
+        `收藏 ${homeTeam} vs ${awayTeam}`,
+      unfavoriteAction: (homeTeam: string, awayTeam: string): string =>
+        `取消收藏 ${homeTeam} vs ${awayTeam}`,
+    },
+    bulkBar: {
+      selected: (count: number): string => `已选 ${String(count)} 项`,
+      clearSelection: "清除选择",
+      favoriteSelected: "收藏所选",
+      deleteSelected: "删除所选",
+      exportSelected: "导出所选",
+      exportComingLater: "导出功能即将推出",
+    },
+    goToMatchCenter: "前往比赛中心",
+  },
+  matchDetail: {
+    homeTeam: "主队",
+    awayTeam: "客队",
+    competition: "赛事",
+    kickoff: "开球",
+    status: "状态",
+    tabsAria: "比赛详情版块",
+    tabs: {
+      overview: "总览",
+      evidence: "证据",
+      features: "特征",
+      rules: "规则",
+      report: "报告",
+      raw: "原始 JSON",
+    },
+    noEvidence: "暂无证据",
+    noEvidenceDescription: "本场比赛未返回任何证据记录。",
+    noFeatures: "暂无特征",
+    noFeaturesDescription: "本场比赛未提取任何特征。",
+    noRules: "暂无规则",
+    noRulesDescription: "本场比赛未评估任何规则。",
+  },
+  breadcrumb: {
+    aria: "面包屑导航",
   },
 } as const;

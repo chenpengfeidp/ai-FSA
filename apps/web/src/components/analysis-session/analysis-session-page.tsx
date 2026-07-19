@@ -7,6 +7,7 @@ import { zh } from "../../copy/zh";
 import { useAnalysisSessionStages } from "../../hooks/use-analysis-session-stages";
 import { useMatchDetail } from "../../hooks/use-match-detail";
 import { useUpcomingMatches } from "../../hooks/use-upcoming-matches";
+import { decodeRouteMatchId } from "../../lib/route-match-id";
 import { findMatchById } from "../../lib/todays-matches";
 import { AppTopNav } from "../app-top-nav";
 import { EmptyState } from "../empty-state";
@@ -19,21 +20,27 @@ export function AnalysisSessionPage({
   matchId,
 }: Readonly<{ matchId: string }>): ReactElement {
   const router = useRouter();
+  const resolvedMatchId = decodeRouteMatchId(matchId);
   const upcoming = useUpcomingMatches();
-  const match = findMatchById(matchId, upcoming.matches);
+  const match = findMatchById(resolvedMatchId, upcoming.matches);
   const matchFound = match !== undefined;
 
   // Prefetch the existing deterministic analysis so Workspace reuses cache.
-  useMatchDetail(matchId, matchFound);
+  useMatchDetail(resolvedMatchId, matchFound);
 
   const handleComplete = useCallback((): void => {
-    router.replace(`/matches/${encodeURIComponent(matchId)}`);
-  }, [matchId, router]);
+    router.replace(`/matches/${encodeURIComponent(resolvedMatchId)}`);
+  }, [resolvedMatchId, router]);
 
   const session = useAnalysisSessionStages({
     enabled: matchFound,
     onComplete: handleComplete,
   });
+
+  const notFoundDescription =
+    upcoming.isError || upcoming.isLoading
+      ? zh.session.matchUnavailableBoardFailed(resolvedMatchId)
+      : zh.session.matchNotFoundDescription(resolvedMatchId);
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,7 +54,7 @@ export function AnalysisSessionPage({
                 <Link href="/">{zh.session.backToMatchCenter}</Link>
               </Button>
             }
-            description={zh.session.matchNotFoundDescription(matchId)}
+            description={notFoundDescription}
             title={zh.session.matchNotFound}
           />
         ) : (

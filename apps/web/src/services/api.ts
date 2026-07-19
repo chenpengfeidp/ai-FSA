@@ -8,6 +8,7 @@ import type { EvidenceByMatchResponseDto, EvidenceDto } from "../types/evidence"
 import type {
   MatchSummary,
   UpcomingMatchDto,
+  UpcomingMatchesMeta,
   UpcomingMatchesResponseDto,
 } from "../types/match-center";
 
@@ -77,14 +78,24 @@ export async function getEvidenceByMatch(
   }
 }
 
-function formatKickoffTime(kickoff: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(kickoff);
+/** Local date + HH:mm for Match Center cards. */
+export function formatKickoffTime(kickoff: string): string {
+  const parsed = new Date(kickoff);
 
-  if (match === null) {
-    return kickoff;
+  if (Number.isNaN(parsed.getTime())) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(kickoff);
+    if (match === null) {
+      return kickoff;
+    }
+    return `${match[1]}-${match[2]}-${match[3]} ${match[4]}:${match[5]}`;
   }
 
-  return `${match[4]}:${match[5]}`;
+  const year = String(parsed.getFullYear());
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  const hours = String(parsed.getHours()).padStart(2, "0");
+  const minutes = String(parsed.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
 export function toMatchSummary(row: UpcomingMatchDto): MatchSummary {
@@ -92,14 +103,21 @@ export function toMatchSummary(row: UpcomingMatchDto): MatchSummary {
     id: row.matchId,
     homeTeam: row.homeTeam,
     awayTeam: row.awayTeam,
+    kickoff: row.kickoff,
     kickoffTime: formatKickoffTime(row.kickoff),
     competition: row.competition,
     status: "SCHEDULED",
     analyzable: row.analyzable,
+    providerSource: row.providerSource,
   });
 }
 
-export async function getUpcomingMatches(): Promise<readonly MatchSummary[]> {
+export interface UpcomingMatchesBoard {
+  readonly matches: readonly MatchSummary[];
+  readonly meta: UpcomingMatchesMeta;
+}
+
+export async function getUpcomingMatches(): Promise<UpcomingMatchesBoard> {
   try {
     const response = await apiClient.get<UpcomingMatchesResponseDto>(
       "/api/matches/upcoming",
@@ -110,7 +128,10 @@ export async function getUpcomingMatches(): Promise<readonly MatchSummary[]> {
       throw new Error(body.error.message);
     }
 
-    return Object.freeze(body.value.map(toMatchSummary));
+    return Object.freeze({
+      matches: Object.freeze(body.value.map(toMatchSummary)),
+      meta: body.meta,
+    });
   } catch (error: unknown) {
     throw new Error(errorMessage(error, "Unable to load upcoming matches."));
   }

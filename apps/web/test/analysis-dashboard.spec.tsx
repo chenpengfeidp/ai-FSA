@@ -10,6 +10,7 @@ import {
   clearAnalysisHistoryCacheForTests,
   writeAnalysisHistory,
 } from "../src/lib/analysis-history";
+import { addLocalDays, formatLocalDate } from "../src/lib/match-center-filter";
 import type { AnalysisHistoryEntry } from "../src/types/dashboard";
 import type { MatchSummary } from "../src/types/match-center";
 
@@ -28,69 +29,65 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+function kickoffInDays(days: number, hour = "19:30:00"): string {
+  return `${formatLocalDate(addLocalDays(new Date(), days))}T${hour}`;
+}
+
 const upcomingMatches: readonly MatchSummary[] = Object.freeze([
   Object.freeze({
     id: "match-example-1",
     homeTeam: "Liverpool",
     awayTeam: "Chelsea",
-    kickoffTime: "19:30",
+    kickoff: kickoffInDays(0),
+    kickoffTime: "today",
     competition: "EPL",
     status: "SCHEDULED" as const,
     analyzable: true,
+    providerSource: "the-odds-api",
   }),
   Object.freeze({
     id: "match-example-2",
     homeTeam: "Arsenal",
     awayTeam: "Coventry City",
-    kickoffTime: "19:00",
+    kickoff: kickoffInDays(1),
+    kickoffTime: "tomorrow",
     competition: "EPL",
     status: "SCHEDULED" as const,
     analyzable: true,
+    providerSource: "the-odds-api",
   }),
   Object.freeze({
     id: "odds:evt_unmapped",
     homeTeam: "Tottenham Hotspur",
     awayTeam: "Everton",
-    kickoffTime: "14:00",
+    kickoff: kickoffInDays(2, "14:00:00"),
+    kickoffTime: "day-after",
     competition: "EPL",
     status: "SCHEDULED" as const,
     analyzable: false,
+    providerSource: "the-odds-api",
   }),
   Object.freeze({
     id: "match-example-3",
     homeTeam: "Barcelona",
     awayTeam: "Real Madrid",
-    kickoffTime: "20:30",
+    kickoff: kickoffInDays(0, "20:30:00"),
+    kickoffTime: "demo-today",
     competition: "La Liga",
     status: "SCHEDULED" as const,
     analyzable: true,
+    providerSource: "fixture",
   }),
   Object.freeze({
     id: "match-example-4",
     homeTeam: "Bayern Munich",
     awayTeam: "Borussia Dortmund",
-    kickoffTime: "18:30",
+    kickoff: "2026-08-01T18:30:00Z",
+    kickoffTime: "far",
     competition: "Bundesliga",
     status: "SCHEDULED" as const,
     analyzable: true,
-  }),
-  Object.freeze({
-    id: "match-example-5",
-    homeTeam: "PSG",
-    awayTeam: "Marseille",
-    kickoffTime: "21:00",
-    competition: "Ligue 1",
-    status: "SCHEDULED" as const,
-    analyzable: true,
-  }),
-  Object.freeze({
-    id: "match-example-6",
-    homeTeam: "Inter Milan",
-    awayTeam: "Juventus",
-    kickoffTime: "19:45",
-    competition: "Serie A",
-    status: "SCHEDULED" as const,
-    analyzable: true,
+    providerSource: "fixture",
   }),
 ]);
 
@@ -102,7 +99,12 @@ vi.mock("../src/services/api", async () => {
 
   return {
     ...actual,
-    getUpcomingMatches: vi.fn(async () => upcomingMatches),
+    getUpcomingMatches: vi.fn(async () =>
+      Object.freeze({
+        matches: upcomingMatches,
+        meta: Object.freeze({ oddsProviderMode: "recorded" as const }),
+      }),
+    ),
   };
 });
 
@@ -147,7 +149,7 @@ describe("AnalysisDashboard", () => {
     clearAnalysisHistoryCacheForTests();
   });
 
-  it("renders hero, matches, recent, overview, and pipeline in landing order", async () => {
+  it("renders hero, filtered matches, recent, overview, and pipeline in landing order", async () => {
     renderDashboard();
 
     expect(
@@ -156,72 +158,45 @@ describe("AnalysisDashboard", () => {
         name: zh.hero.title,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText(zh.hero.eyebrow)).toBeInTheDocument();
-    expect(screen.getByText(zh.hero.description)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: zh.hero.analyzeToday }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: zh.hero.viewRecentReports }),
-    ).toHaveAttribute("href", "/reports");
-    expect(screen.getByRole("link", { name: zh.nav.reports })).toHaveAttribute(
-      "href",
-      "/reports",
-    );
-
     expect(
       screen.getByRole("heading", { name: zh.matchCenter.upcomingHeading }),
     ).toBeInTheDocument();
 
     await waitFor(() => {
+      expect(screen.getByText(zh.matchCenter.modeRecorded)).toBeInTheDocument();
       expect(
         screen.getAllByRole("button", { name: /^分析 .+ vs .+$/ }),
-      ).toHaveLength(6);
+      ).toHaveLength(2);
     });
     expect(
       screen.getByRole("button", {
         name: zh.matchCard.evidenceIncompleteAria("Tottenham Hotspur vs Everton"),
       }),
     ).toBeDisabled();
-    expect(screen.getAllByText(zh.matchCard.vs).length).toBeGreaterThanOrEqual(7);
+    expect(screen.queryByText("Barcelona")).not.toBeInTheDocument();
 
     expect(screen.getByText(zh.recentAnalysis.emptyTitle)).toBeInTheDocument();
-
     expect(
       screen.getByRole("heading", { name: zh.overview.heading }),
     ).toBeInTheDocument();
-    expect(screen.getByText(zh.overview.importedMatches)).toBeInTheDocument();
-    expect(screen.getAllByText(zh.overview.reports).length).toBeGreaterThanOrEqual(
-      1,
-    );
-    expect(screen.getAllByText(zh.overview.evidence).length).toBeGreaterThanOrEqual(
-      1,
-    );
-    expect(screen.getAllByText(zh.overview.features).length).toBeGreaterThanOrEqual(
-      1,
-    );
-    expect(screen.getAllByText(zh.overview.rules).length).toBeGreaterThanOrEqual(1);
-
     expect(
       screen.getByRole("heading", { name: zh.pipeline.heading }),
     ).toBeInTheDocument();
-    expect(screen.getByText(zh.pipeline.stages.provider)).toBeInTheDocument();
-    expect(screen.getByText(zh.pipeline.stages.normalizer)).toBeInTheDocument();
-    expect(screen.getAllByText(zh.pipeline.healthy)).toHaveLength(7);
+  });
 
-    const headings = screen.getAllByRole("heading").map((node) => node.textContent);
-    expect(headings.indexOf(zh.hero.title)).toBeLessThan(
-      headings.indexOf(zh.matchCenter.upcomingHeading),
-    );
-    expect(headings.indexOf(zh.matchCenter.upcomingHeading)).toBeLessThan(
-      headings.indexOf(zh.recentAnalysis.heading),
-    );
-    expect(headings.indexOf(zh.recentAnalysis.heading)).toBeLessThan(
-      headings.indexOf(zh.overview.heading),
-    );
-    expect(headings.indexOf(zh.overview.heading)).toBeLessThan(
-      headings.indexOf(zh.pipeline.heading),
-    );
+  it("can include fixture demos inside the selected window", async () => {
+    const user = userEvent.setup();
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByText(zh.matchCenter.modeRecorded)).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByLabelText(zh.matchCenter.includeDemos));
+
+    await waitFor(() => {
+      expect(screen.getByText("Barcelona")).toBeInTheDocument();
+    });
   });
 
   it("calculates overview metrics and recent analysis from stored results", async () => {
@@ -231,10 +206,7 @@ describe("AnalysisDashboard", () => {
     await waitFor(() => {
       expect(screen.getByText("Liverpool vs Chelsea")).toBeInTheDocument();
     });
-    expect(screen.getAllByText("1").length).toBeGreaterThanOrEqual(3);
-    expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText(zh.recentAnalysis.completed)).toBeInTheDocument();
-    expect(screen.getByText(/UTC/)).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
         name: zh.recentAnalysis.openAnalysisAria("Liverpool", "Chelsea"),

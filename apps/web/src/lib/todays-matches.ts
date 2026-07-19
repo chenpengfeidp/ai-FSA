@@ -5,49 +5,61 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
     id: "match-example-1",
     homeTeam: "Liverpool",
     awayTeam: "Chelsea",
-    kickoffTime: "19:30",
+    kickoff: "2026-08-01T19:30:00Z",
+    kickoffTime: "2026-08-01 19:30",
     competition: "Premier League",
     status: "SCHEDULED",
+    providerSource: "fixture",
   }),
   Object.freeze({
     id: "match-example-2",
     homeTeam: "Arsenal",
     awayTeam: "Coventry City",
-    kickoffTime: "19:00",
+    kickoff: "2026-08-21T19:00:00Z",
+    kickoffTime: "2026-08-21 19:00",
     competition: "Premier League",
     status: "SCHEDULED",
+    providerSource: "fixture",
   }),
   Object.freeze({
     id: "match-example-3",
     homeTeam: "Barcelona",
     awayTeam: "Real Madrid",
-    kickoffTime: "20:30",
+    kickoff: "2026-08-01T20:30:00Z",
+    kickoffTime: "2026-08-01 20:30",
     competition: "La Liga",
     status: "SCHEDULED",
+    providerSource: "fixture",
   }),
   Object.freeze({
     id: "match-example-4",
     homeTeam: "Bayern Munich",
     awayTeam: "Borussia Dortmund",
-    kickoffTime: "18:30",
+    kickoff: "2026-08-01T18:30:00Z",
+    kickoffTime: "2026-08-01 18:30",
     competition: "Bundesliga",
     status: "SCHEDULED",
+    providerSource: "fixture",
   }),
   Object.freeze({
     id: "match-example-5",
     homeTeam: "PSG",
     awayTeam: "Marseille",
-    kickoffTime: "21:00",
+    kickoff: "2026-08-01T21:00:00Z",
+    kickoffTime: "2026-08-01 21:00",
     competition: "Ligue 1",
     status: "SCHEDULED",
+    providerSource: "fixture",
   }),
   Object.freeze({
     id: "match-example-6",
     homeTeam: "Inter Milan",
     awayTeam: "Juventus",
-    kickoffTime: "19:45",
+    kickoff: "2026-08-01T19:45:00Z",
+    kickoffTime: "2026-08-01 19:45",
     competition: "Serie A",
     status: "SCHEDULED",
+    providerSource: "fixture",
   }),
 ]);
 
@@ -55,8 +67,21 @@ export function findMatchById(
   matchId: string,
   extras: readonly MatchSummary[] = [],
 ): MatchSummary | undefined {
+  // Lazy import avoided: callers already normalize via decodeRouteMatchId.
+  const candidates = matchId.includes("%")
+    ? [matchId, safeDecode(matchId)]
+    : [matchId];
+
   return (
-    extras.find((match) => match.id === matchId) ??
-    todaysMatches.find((match) => match.id === matchId)
+    extras.find((match) => candidates.includes(match.id)) ??
+    todaysMatches.find((match) => candidates.includes(match.id))
   );
+}
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }

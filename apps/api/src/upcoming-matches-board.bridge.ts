@@ -1,5 +1,7 @@
-import type { UpcomingFixture } from "@fas/provider-odds";
-import type { UpcomingMatchesBoard } from "./upcoming-matches.factory.js";
+import type {
+  UpcomingBoardResult,
+  UpcomingMatchesBoard,
+} from "./upcoming-matches.factory.js";
 
 /** Nest-injectable value wrapper (avoids parameter decorator / type-only pitfalls). */
 export class UpcomingMatchesBoardBridge {
@@ -9,7 +11,7 @@ export class UpcomingMatchesBoardBridge {
     this.#board = board;
   }
 
-  listUpcoming(): Promise<readonly UpcomingFixture[]> {
+  listUpcoming(): Promise<UpcomingBoardResult> {
     return this.#board.listUpcoming();
   }
 }

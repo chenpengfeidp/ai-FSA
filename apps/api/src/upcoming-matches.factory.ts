@@ -2,6 +2,7 @@ import type { OddsProviderConfig } from "@fas/config";
 import { FixtureProvider } from "@fas/provider-fixture";
 import {
   buildFormAndStatsForMatch,
+  DEFAULT_MATCH_CENTER_SPORT_KEYS,
   LiveTheOddsApiUpcomingFixturesSource,
   mergeUpcomingMatchBoard,
   RecordedUpcomingFixturesSource,
@@ -13,8 +14,13 @@ import {
   type UpcomingFixturesSource,
 } from "@fas/provider-odds";
 
+export interface UpcomingBoardResult {
+  readonly rows: readonly UpcomingFixture[];
+  readonly usedRecordedFallback: boolean;
+}
+
 export interface UpcomingMatchesBoard {
-  listUpcoming(): Promise<readonly UpcomingFixture[]>;
+  listUpcoming(): Promise<UpcomingBoardResult>;
 }
 
 export function createUpcomingMatchesBoard(
@@ -30,10 +36,26 @@ export function createUpcomingMatchesBoard(
   const fixtureSeeds = fixtureProvider.listMatchSummaries();
   const oddsSource = createOddsUpcomingSource(oddsProvider);
 
+  const recordedFallback = new RecordedUpcomingFixturesSource();
+
   return Object.freeze({
-    async listUpcoming(): Promise<readonly UpcomingFixture[]> {
+    async listUpcoming(): Promise<UpcomingBoardResult> {
       await deps.scoresPrimer.ensureScores();
-      const oddsRows = await oddsSource.listUpcoming();
+      let oddsRows: readonly UpcomingFixture[];
+      let usedRecordedFallback = false;
+
+      try {
+        oddsRows = await oddsSource.listUpcoming();
+      } catch (error) {
+        // Live quota / rate-limit storms: keep Match Center usable offline.
+        if (oddsProvider.mode !== "live") {
+          throw error;
+        }
+
+        oddsRows = await recordedFallback.listUpcoming();
+        usedRecordedFallback = true;
+      }
+
       const merged = mergeUpcomingMatchBoard(oddsRows, fixtureSeeds);
 
       deps.eventStore.replaceAll(
@@ -52,23 +74,27 @@ export function createUpcomingMatchesBoard(
       const scorelines = deps.scoresSource.getCompletedScorelines();
       const method = deps.scoresMethod();
 
-      return Object.freeze(
-        merged.map((row) => {
-          const fixtureBacked = fixtureProvider.getMatch(row.matchId) !== undefined;
-          const scoresBacked =
-            buildFormAndStatsForMatch({
-              homeTeam: row.homeTeam,
-              awayTeam: row.awayTeam,
-              scorelines,
-              providerMethod: method,
-            }) !== undefined;
+      return Object.freeze({
+        usedRecordedFallback,
+        rows: Object.freeze(
+          merged.map((row) => {
+            const fixtureBacked =
+              fixtureProvider.getMatch(row.matchId) !== undefined;
+            const scoresBacked =
+              buildFormAndStatsForMatch({
+                homeTeam: row.homeTeam,
+                awayTeam: row.awayTeam,
+                scorelines,
+                providerMethod: method,
+              }) !== undefined;
 
-          return Object.freeze({
-            ...row,
-            analyzable: fixtureBacked || scoresBacked,
-          });
-        }),
-      );
+            return Object.freeze({
+              ...row,
+              analyzable: fixtureBacked || scoresBacked,
+            });
+          }),
+        ),
+      });
     },
   });
 }
@@ -88,6 +114,7 @@ function createOddsUpcomingSource(
     return new LiveTheOddsApiUpcomingFixturesSource({
       apiKey,
       baseUrl: oddsProvider.baseUrl,
+      sportKeys: oddsProvider.sportKeys ?? DEFAULT_MATCH_CENTER_SPORT_KEYS,
     });
   }
 

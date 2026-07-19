@@ -2,23 +2,55 @@
 
 import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { ReactElement } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 import { zh } from "../copy/zh";
 import { useAnalysisHistory } from "../hooks/use-analysis-history";
 import { useUpcomingMatches } from "../hooks/use-upcoming-matches";
+import {
+  DEFAULT_HORIZON_DAYS,
+  earliestMatchLocalDate,
+  filterMatchCenterRows,
+  formatLocalDate,
+  windowEndDate,
+} from "../lib/match-center-filter";
 import type { MatchSummary } from "../types/match-center";
 import { HomeHero } from "./home-hero";
 import { MatchCard } from "./match-card";
+import { MatchCenterFilters } from "./match-center-filters";
 import { OverviewMetrics } from "./overview-metrics";
 import { PageContainer } from "./page-container";
 import { PipelineStatus } from "./pipeline-status";
 import { RecentAnalysis } from "./recent-analysis";
+import { Button } from "./ui/button";
 import { Divider } from "./ui/divider";
 
 export function AnalysisDashboard(): ReactElement {
   const router = useRouter();
   const history = useAnalysisHistory();
   const upcoming = useUpcomingMatches();
+  const [startDate, setStartDate] = useState(() => formatLocalDate(new Date()));
+  const [horizonDays, setHorizonDays] = useState(DEFAULT_HORIZON_DAYS);
+  const [includeDemos, setIncludeDemos] = useState(false);
+
+  const filteredMatches = useMemo(
+    () =>
+      filterMatchCenterRows(upcoming.matches, {
+        startDate,
+        horizonDays,
+        includeDemos,
+      }),
+    [upcoming.matches, startDate, horizonDays, includeDemos],
+  );
+
+  const earliestAvailable = useMemo(
+    () =>
+      earliestMatchLocalDate(upcoming.matches, {
+        includeDemos,
+      }),
+    [upcoming.matches, includeDemos],
+  );
+
+  const rangeEnd = windowEndDate(startDate, horizonDays);
 
   function analyze(match: MatchSummary): void {
     if (match.analyzable === false) {
@@ -54,8 +86,24 @@ export function AnalysisDashboard(): ReactElement {
             <p className="text-body text-muted-foreground">
               {upcoming.isLoading
                 ? zh.matchCenter.loadingFixtures
-                : zh.matchCenter.fixturesAvailable(upcoming.matches.length)}
+                : zh.matchCenter.fixturesAvailable(filteredMatches.length)}
             </p>
+          </div>
+
+          <div className="mb-5">
+            <MatchCenterFilters
+              horizonDays={horizonDays}
+              includeDemos={includeDemos}
+              oddsProviderMode={upcoming.oddsProviderMode}
+              onHorizonDaysChange={setHorizonDays}
+              onIncludeDemosChange={setIncludeDemos}
+              onStartDateChange={setStartDate}
+              rangeEnd={rangeEnd}
+              shownCount={filteredMatches.length}
+              startDate={startDate}
+              totalCount={upcoming.matches.length}
+              usedRecordedFallback={upcoming.usedRecordedFallback}
+            />
           </div>
 
           {upcoming.isError ? (
@@ -64,8 +112,34 @@ export function AnalysisDashboard(): ReactElement {
             </p>
           ) : null}
 
+          {!upcoming.isLoading &&
+          !upcoming.isError &&
+          filteredMatches.length === 0 ? (
+            <div className="space-y-3" role="status">
+              <p className="text-body text-muted-foreground">
+                {upcoming.matches.length > 0 && earliestAvailable !== undefined
+                  ? zh.matchCenter.emptyFilteredOutsideWindow(
+                      upcoming.matches.length,
+                      earliestAvailable,
+                    )
+                  : zh.matchCenter.emptyFiltered}
+              </p>
+              {earliestAvailable !== undefined && earliestAvailable !== startDate ? (
+                <Button
+                  onClick={() => {
+                    setStartDate(earliestAvailable);
+                  }}
+                  type="button"
+                  variant="outline"
+                >
+                  {zh.matchCenter.jumpToEarliest(earliestAvailable)}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-            {upcoming.matches.map((match) => (
+            {filteredMatches.map((match) => (
               <MatchCard
                 isAnalyzing={false}
                 isDisabled={false}

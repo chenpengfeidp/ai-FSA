@@ -58,7 +58,7 @@ export class AnalysisController {
   async analyzeMatch(matchId: string): Promise<GenerateMatchReportResult> {
     await this.scoresPrimer.ensureScores();
     // Populate odds-event shells used by EnrichedMatchProvider for odds:* ids.
-    await this.upcomingBoard.listUpcoming();
+    await this.upcomingBoard.listUpcoming(); // primes event shells for odds:* ids
     await this.oddsPrimer.ensurePreMatch1x2(matchId);
     return await this.generateMatchReport.execute(createMatchId(matchId));
   }

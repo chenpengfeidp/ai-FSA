@@ -1,14 +1,25 @@
 export type MatchStatus = "ANALYZED" | "FAILED" | "LOADING" | "SCHEDULED";
 
+export type OddsProviderModeLabel = "recorded" | "live" | "fixture";
+
 export interface MatchSummary {
   readonly id: string;
   readonly homeTeam: string;
   readonly awayTeam: string;
+  /** Full ISO kickoff from the board (used for date filtering). */
+  readonly kickoff: string;
+  /** Display label: local date + time. */
   readonly kickoffTime: string;
   readonly competition: string;
   readonly status: MatchStatus;
   /** False for Odds-calendar rows without fixture evidence in this slice. */
   readonly analyzable?: boolean;
+  readonly providerSource?: "fixture" | "the-odds-api" | string;
+}
+
+export interface UpcomingMatchesMeta {
+  readonly oddsProviderMode: OddsProviderModeLabel;
+  readonly usedRecordedFallback?: boolean;
 }
 
 export interface UpcomingMatchDto {
@@ -27,6 +38,7 @@ export interface UpcomingMatchDto {
 export interface UpcomingMatchesSuccessResponseDto {
   readonly ok: true;
   readonly value: readonly UpcomingMatchDto[];
+  readonly meta: UpcomingMatchesMeta;
 }
 
 export interface UpcomingMatchesErrorResponseDto {

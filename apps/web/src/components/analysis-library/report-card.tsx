@@ -4,6 +4,7 @@ import { ArrowUpRight, Heart, MoreHorizontal, Sparkles, Trophy } from "lucide-re
 import Link from "next/link";
 import type { ReactElement } from "react";
 import { useId, useState } from "react";
+import { zh } from "../../copy/zh";
 import { cn, formatTimestamp } from "../../lib/utils";
 import type { LibraryReportCardView } from "../../types/analysis-library";
 import { Button } from "../ui/button";
@@ -62,7 +63,10 @@ export function ReportCard({
           <div className="flex items-start justify-between gap-3">
             <label className="inline-flex items-center gap-2 pt-0.5">
               <input
-                aria-label={`Select ${report.homeTeam} vs ${report.awayTeam}`}
+                aria-label={zh.library.reportCard.select(
+                  report.homeTeam,
+                  report.awayTeam,
+                )}
                 checked={selected}
                 className="size-4 rounded border-border-strong text-primary focus:ring-primary"
                 onChange={() => {
@@ -75,13 +79,13 @@ export function ReportCard({
 
             <div className="flex items-center gap-1.5">
               <StatusBadge
-                label={report.status}
+                label={zh.library.statusLabel(report.status)}
                 status={statusBadge(report.status)}
               />
               <Button
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
-                aria-label="Quick actions"
+                aria-label={zh.library.reportCard.quickActions}
                 className="size-8"
                 onClick={() => {
                   setMenuOpen((open) => !open);
@@ -117,7 +121,9 @@ export function ReportCard({
                     report.favorite && "fill-error text-error",
                   )}
                 />
-                {report.favorite ? "Unfavorite" : "Favorite"}
+                {report.favorite
+                  ? zh.library.reportCard.unfavorite
+                  : zh.library.reportCard.favorite}
               </button>
               <button
                 className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-caption font-medium text-error hover:bg-error-muted"
@@ -128,7 +134,7 @@ export function ReportCard({
                 role="menuitem"
                 type="button"
               >
-                Delete
+                {zh.library.reportCard.delete}
               </button>
             </div>
           ) : null}
@@ -138,15 +144,17 @@ export function ReportCard({
               {`${report.homeTeam} vs ${report.awayTeam}`}
             </p>
             <p className="text-caption text-muted-foreground">
-              Kickoff {report.kickoffTime} · Created{" "}
-              {formatTimestamp(report.analyzedAt)} UTC
+              {zh.library.reportCard.kickoffCreated(
+                report.kickoffTime,
+                formatTimestamp(report.analyzedAt),
+              )}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg bg-surface-muted px-3 py-2.5">
               <p className="text-caption font-semibold uppercase tracking-[0.12em] text-subtle">
-                Winner prediction
+                {zh.library.reportCard.winnerPrediction}
               </p>
               <p className="mt-1 inline-flex items-center gap-1.5 text-body font-semibold text-foreground">
                 <Trophy aria-hidden="true" className="size-3.5 text-primary" />
@@ -155,10 +163,10 @@ export function ReportCard({
             </div>
             <div className="rounded-lg bg-surface-muted px-3 py-2.5">
               <p className="text-caption font-semibold uppercase tracking-[0.12em] text-subtle">
-                Confidence
+                {zh.library.reportCard.confidence}
               </p>
               <p className="mt-1 text-body font-semibold text-foreground">
-                {report.confidence}
+                {zh.report.confidenceLevel(report.confidence)}
               </p>
             </div>
           </div>
@@ -167,8 +175,14 @@ export function ReportCard({
             <Button
               aria-label={
                 report.favorite
-                  ? `Remove ${report.homeTeam} vs ${report.awayTeam} from favorites`
-                  : `Favorite ${report.homeTeam} vs ${report.awayTeam}`
+                  ? zh.library.reportCard.unfavoriteAction(
+                      report.homeTeam,
+                      report.awayTeam,
+                    )
+                  : zh.library.reportCard.favoriteAction(
+                      report.homeTeam,
+                      report.awayTeam,
+                    )
               }
               onClick={() => {
                 onToggleFavorite(report.matchId);
@@ -181,12 +195,14 @@ export function ReportCard({
                 aria-hidden="true"
                 className={cn("size-3.5", report.favorite && "fill-current")}
               />
-              {report.favorite ? "Favorited" : "Favorite"}
+              {report.favorite
+                ? zh.library.reportCard.favorited
+                : zh.library.reportCard.favorite}
             </Button>
 
             <Button asChild className="ml-auto" size="sm" variant="primary">
               <Link href={`/matches/${encodeURIComponent(report.matchId)}`}>
-                Open Report
+                {zh.library.reportCard.openReport}
                 <ArrowUpRight aria-hidden="true" className="size-3.5" />
               </Link>
             </Button>
@@ -203,27 +219,37 @@ export function ReportCard({
       >
         <p className="inline-flex items-center gap-1.5 text-caption font-semibold uppercase tracking-[0.12em] text-primary">
           <Sparkles aria-hidden="true" className="size-3.5" />
-          Quick preview
+          {zh.library.reportCard.quickPreview}
         </p>
         <dl className="mt-3 grid gap-2 text-caption">
           <div className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">Prediction</dt>
+            <dt className="text-muted-foreground">
+              {zh.library.reportCard.prediction}
+            </dt>
             <dd className="font-semibold text-foreground">
               {report.winnerPrediction}
             </dd>
           </div>
           <div className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">Confidence</dt>
-            <dd className="font-semibold text-foreground">{report.confidence}</dd>
+            <dt className="text-muted-foreground">
+              {zh.library.reportCard.confidence}
+            </dt>
+            <dd className="font-semibold text-foreground">
+              {zh.report.confidenceLevel(report.confidence)}
+            </dd>
           </div>
           <div className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">Top evidence</dt>
+            <dt className="text-muted-foreground">
+              {zh.library.reportCard.topEvidence}
+            </dt>
             <dd className="font-semibold text-foreground">
               {report.topEvidenceLabel}
             </dd>
           </div>
           <div className="pt-1">
-            <dt className="text-muted-foreground">Recommendation</dt>
+            <dt className="text-muted-foreground">
+              {zh.library.reportCard.recommendation}
+            </dt>
             <dd className="mt-1 font-medium leading-5 text-foreground">
               {report.recommendation}
             </dd>

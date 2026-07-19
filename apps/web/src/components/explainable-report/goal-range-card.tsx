@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { cn } from "../../lib/utils";
 import type { GoalRangeView } from "../../types/explainable-report";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -9,9 +10,9 @@ export function GoalRangeCard({
   return (
     <Card className="animate-fade-in-delay-2 h-full hover:translate-y-0">
       <CardHeader className="border-b-0 pb-0">
-        <CardTitle>Goal Range</CardTitle>
+        <CardTitle>{zh.report.goalRange}</CardTitle>
         <p className="text-caption text-muted-foreground">
-          {goalRange.available ? "Recommended range highlighted" : goalRange.note}
+          {goalRange.available ? zh.report.goalRangeRecommended : goalRange.note}
         </p>
       </CardHeader>
       <CardContent className="pt-4">
@@ -36,7 +37,7 @@ export function GoalRangeCard({
                 </p>
                 {option.recommended ? (
                   <p className="mt-2 text-caption font-semibold text-primary">
-                    Recommended
+                    {zh.report.recommended}
                   </p>
                 ) : null}
               </div>

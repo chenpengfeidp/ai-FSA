@@ -1,5 +1,6 @@
 import { CalendarClock, Sparkles, Trophy } from "lucide-react";
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { cn } from "../../lib/utils";
 import type {
   ConfidenceMeterView,
@@ -36,8 +37,7 @@ export function PredictionHero({
   recommendation: FinalRecommendationView;
 }>): ReactElement {
   const winnerLabel = prediction.recommendedTeam ?? recommendation.recommendedWinner;
-  const summary =
-    recommendation.summaryLines[0] ?? "Deterministic analysis complete.";
+  const summary = recommendation.summaryLines[0] ?? zh.report.analysisComplete;
 
   return (
     <section aria-labelledby="prediction-hero-heading" className="animate-fade-in">
@@ -60,20 +60,23 @@ export function PredictionHero({
               </Tag>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-surface/80 px-2.5 py-1 text-caption font-semibold text-muted-foreground backdrop-blur">
                 <CalendarClock aria-hidden="true" className="size-3.5" />
-                Kickoff {header.kickoffTime}
+                {zh.workspace.kickoff(header.kickoffTime)}
               </span>
-              <StatusBadge label={confidence.level} status="SUCCESS" />
+              <StatusBadge
+                label={zh.report.confidenceLevel(confidence.level)}
+                status="SUCCESS"
+              />
             </div>
 
             <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-end">
               <div className="space-y-5">
                 <p className="inline-flex items-center gap-2 text-caption font-semibold uppercase tracking-[0.16em] text-primary">
                   <Sparkles aria-hidden="true" className="size-3.5" />
-                  Prediction
+                  {zh.report.prediction}
                 </p>
                 <div className="space-y-2">
                   <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
-                    Winner
+                    {zh.report.winner}
                   </p>
                   <h2
                     className="text-[2.25rem] font-bold tracking-tight text-foreground sm:text-[3rem] sm:leading-[3.25rem]"
@@ -83,7 +86,7 @@ export function PredictionHero({
                   </h2>
                   <p className="text-title font-normal text-muted-foreground">
                     {header.homeTeam}
-                    <span className="mx-2 text-subtle">vs</span>
+                    <span className="mx-2 text-subtle">{zh.workspace.vs}</span>
                     {header.awayTeam}
                   </p>
                 </div>
@@ -93,10 +96,10 @@ export function PredictionHero({
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <div className="rounded-2xl border border-border/80 bg-surface/80 px-5 py-4 shadow-sm backdrop-blur">
                   <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
-                    Confidence
+                    {zh.report.confidence}
                   </p>
                   <p className="mt-2 text-heading text-foreground">
-                    {confidence.level}
+                    {zh.report.confidenceLevel(confidence.level)}
                   </p>
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
                     <div
@@ -110,14 +113,14 @@ export function PredictionHero({
                 </div>
                 <div className="rounded-2xl border border-border/80 bg-surface/80 px-5 py-4 shadow-sm backdrop-blur">
                   <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
-                    Recommendation
+                    {zh.report.recommendation}
                   </p>
                   <p className="mt-2 text-title text-foreground">
                     {recommendation.recommendedWinner}
                   </p>
                   <p className="mt-1 text-caption text-muted-foreground">
-                    Score {recommendation.recommendedScore} · Range{" "}
-                    {recommendation.recommendedGoalRange}
+                    {zh.report.scoreLine(recommendation.recommendedScore)} ·{" "}
+                    {zh.report.rangeLine(recommendation.recommendedGoalRange)}
                   </p>
                 </div>
               </div>

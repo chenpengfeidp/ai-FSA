@@ -5,7 +5,9 @@ import { type ReactElement, useEffect } from "react";
 import { useMatchDetail } from "../hooks/use-match-detail";
 import { useUpcomingMatches } from "../hooks/use-upcoming-matches";
 import { recordAnalysisHistoryEntry } from "../lib/analysis-history";
+import { decodeRouteMatchId } from "../lib/route-match-id";
 import { findMatchById } from "../lib/todays-matches";
+import { zh } from "../copy/zh";
 import type { MatchStatus } from "../types/match-center";
 import { EmptyState } from "./empty-state";
 import { ErrorPanel } from "./error-panel";
@@ -17,13 +19,13 @@ import { WorkspaceSectionNav } from "./match-workspace/workspace-section-nav";
 import { Button } from "./ui/button";
 
 const workspaceNav = Object.freeze([
-  Object.freeze({ id: "prediction", label: "Prediction" }),
-  Object.freeze({ id: "reasoning", label: "Reasoning" }),
-  Object.freeze({ id: "evidence", label: "Evidence" }),
-  Object.freeze({ id: "features", label: "Features" }),
-  Object.freeze({ id: "rules", label: "Rules" }),
-  Object.freeze({ id: "recommendation", label: "Recommendation" }),
-  Object.freeze({ id: "developer", label: "Developer" }),
+  Object.freeze({ id: "prediction", label: zh.workspace.nav.prediction }),
+  Object.freeze({ id: "reasoning", label: zh.workspace.nav.reasoning }),
+  Object.freeze({ id: "evidence", label: zh.workspace.nav.evidence }),
+  Object.freeze({ id: "features", label: zh.workspace.nav.features }),
+  Object.freeze({ id: "rules", label: zh.workspace.nav.rules }),
+  Object.freeze({ id: "recommendation", label: zh.workspace.nav.recommendation }),
+  Object.freeze({ id: "developer", label: zh.workspace.nav.developer }),
 ]);
 
 function resolveStatus(
@@ -49,9 +51,10 @@ function resolveStatus(
 export function MatchDetailPage({
   matchId,
 }: Readonly<{ matchId: string }>): ReactElement {
+  const resolvedMatchId = decodeRouteMatchId(matchId);
   const upcoming = useUpcomingMatches();
-  const match = findMatchById(matchId, upcoming.matches);
-  const detail = useMatchDetail(matchId, match !== undefined);
+  const match = findMatchById(resolvedMatchId, upcoming.matches);
+  const detail = useMatchDetail(resolvedMatchId, match !== undefined);
   const status = resolveStatus(
     detail.isError,
     detail.isPending,
@@ -83,11 +86,15 @@ export function MatchDetailPage({
         <EmptyState
           action={
             <Button asChild variant="outline">
-              <Link href="/">Back to Match Center</Link>
+              <Link href="/">{zh.workspace.backToMatchCenter}</Link>
             </Button>
           }
-          description={`No catalog entry exists for "${matchId}". Choose a match from today's fixtures.`}
-          title="Match not found"
+          description={
+            upcoming.isError || upcoming.isLoading
+              ? zh.workspace.matchUnavailableBoardFailed(resolvedMatchId)
+              : zh.workspace.matchNotFoundDescription(resolvedMatchId)
+          }
+          title={zh.workspace.matchNotFound}
         />
       ) : (
         <div className="space-y-6">
@@ -102,11 +109,11 @@ export function MatchDetailPage({
               <EmptyState
                 action={
                   <Button asChild variant="outline">
-                    <Link href="/">Back to Match Center</Link>
+                    <Link href="/">{zh.workspace.backToMatchCenter}</Link>
                   </Button>
                 }
-                description="The analysis pipeline could not complete for this match. Return to the dashboard and try another fixture."
-                title="Unable to load match analysis"
+                description={zh.workspace.loadErrorDescription}
+                title={zh.workspace.loadErrorTitle}
               />
             </div>
           ) : null}

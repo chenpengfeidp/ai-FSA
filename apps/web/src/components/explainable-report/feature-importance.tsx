@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { cn } from "../../lib/utils";
 import type { FeatureImportanceItemView } from "../../types/explainable-report";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -13,17 +14,19 @@ export function FeatureImportance({
     <section aria-labelledby="feature-importance-heading">
       <Card className="animate-fade-in-delay-3 hover:translate-y-0">
         <CardHeader>
-          <CardTitle id="feature-importance-heading">Feature Importance</CardTitle>
+          <CardTitle id="feature-importance-heading">
+            {zh.report.featureImportance}
+          </CardTitle>
           <p className="text-caption text-muted-foreground">
-            Contribution bars — positive and negative signals distinguished by color
+            {zh.report.featureImportanceHint}
           </p>
         </CardHeader>
         <CardContent>
           {features.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center">
-              <p className="text-title text-foreground">No features available</p>
+              <p className="text-title text-foreground">{zh.report.noFeatures}</p>
               <p className="mt-2 text-body text-muted-foreground">
-                No features were extracted for this match.
+                {zh.report.noFeaturesDescription}
               </p>
             </div>
           ) : (
@@ -39,7 +42,7 @@ export function FeatureImportance({
                           {feature.label}
                         </p>
                         <Tag variant={positive ? "primary" : "muted"}>
-                          {positive ? "Positive" : "Negative"}
+                          {positive ? zh.report.positive : zh.report.negative}
                         </Tag>
                       </div>
                       <p

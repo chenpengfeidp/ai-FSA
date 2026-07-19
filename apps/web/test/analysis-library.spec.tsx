@@ -56,11 +56,11 @@ describe("analysis library mapping", () => {
   it("maps history entries into library cards without inventing outcomes", () => {
     const card = toLibraryReportCard(liverpool);
 
-    expect(card.winnerPrediction).toBe("Even signal");
+    expect(card.winnerPrediction).toBe(zh.library.evenSignal);
     expect(card.confidence).toBe("Very High");
     expect(card.status).toBe("Completed");
     expect(card.favorite).toBe(true);
-    expect(card.topEvidenceLabel).toBe("2 evidence items");
+    expect(card.topEvidenceLabel).toBe(zh.library.evidenceItems(2));
   });
 
   it("filters, sorts, and scopes sidebar sections from history", () => {
@@ -118,7 +118,7 @@ describe("AnalysisLibraryPage", () => {
     render(<AnalysisLibraryPage />);
 
     expect(
-      screen.getByRole("heading", { name: "Analysis Library" }),
+      screen.getByRole("heading", { name: zh.library.heading }),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: zh.nav.reports })).toHaveAttribute(
       "href",
@@ -126,9 +126,9 @@ describe("AnalysisLibraryPage", () => {
     );
     expect(screen.getByRole("link", { name: zh.nav.dashboard })).toBeInTheDocument();
     expect(
-      await screen.findByRole("link", { name: "Go to Match Center" }),
+      await screen.findByRole("link", { name: zh.library.goToMatchCenter }),
     ).toHaveAttribute("href", "/#todays-matches");
-    expect(screen.getByText("Run your first analysis")).toBeInTheDocument();
+    expect(screen.getByText(zh.library.empty.default.title)).toBeInTheDocument();
   });
 
   it("lists history reports with open links and favorite bulk actions", async () => {
@@ -138,24 +138,32 @@ describe("AnalysisLibraryPage", () => {
 
     expect(await screen.findByText("Liverpool vs Chelsea")).toBeInTheDocument();
     expect(screen.getByText("Arsenal vs Manchester City")).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: /Open Report/ })).toHaveLength(2);
+    expect(
+      screen.getAllByRole("link", { name: zh.library.reportCard.openReport }),
+    ).toHaveLength(2);
 
-    await user.click(screen.getByRole("button", { name: "Favorites" }));
+    await user.click(
+      screen.getByRole("button", { name: zh.library.sections.favorites }),
+    );
     expect(screen.getByText("Liverpool vs Chelsea")).toBeInTheDocument();
     expect(screen.queryByText("Arsenal vs Manchester City")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Recent" }));
+    await user.click(
+      screen.getByRole("button", { name: zh.library.sections.recent }),
+    );
     await user.click(
       screen.getByRole("checkbox", {
-        name: "Select Arsenal vs Manchester City",
+        name: zh.library.reportCard.select("Arsenal", "Manchester City"),
       }),
     );
-    expect(screen.getByText("1 selected")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Favorite selected" }));
+    expect(screen.getByText(zh.library.bulkBar.selected(1))).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: zh.library.bulkBar.favoriteSelected }),
+    );
 
     expect(
       screen.getByRole("button", {
-        name: "Remove Arsenal vs Manchester City from favorites",
+        name: zh.library.reportCard.unfavoriteAction("Arsenal", "Manchester City"),
       }),
     ).toBeInTheDocument();
   });
@@ -169,11 +177,15 @@ describe("AnalysisLibraryPage", () => {
 
     await user.click(
       screen.getByRole("checkbox", {
-        name: "Select Liverpool vs Chelsea",
+        name: zh.library.reportCard.select("Liverpool", "Chelsea"),
       }),
     );
-    await user.click(screen.getByRole("button", { name: "Delete selected" }));
+    await user.click(
+      screen.getByRole("button", { name: zh.library.bulkBar.deleteSelected }),
+    );
 
-    expect(await screen.findByText("Run your first analysis")).toBeInTheDocument();
+    expect(
+      await screen.findByText(zh.library.empty.default.title),
+    ).toBeInTheDocument();
   });
 });

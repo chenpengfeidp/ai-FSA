@@ -1,6 +1,7 @@
 import { LibraryBig } from "lucide-react";
 import Link from "next/link";
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { Button } from "../ui/button";
 import { EmptyState } from "../ui/empty-state";
 
@@ -15,13 +16,10 @@ export function AnalysisLibraryEmpty({
     <EmptyState
       action={
         <Button asChild size="lg" variant="primary">
-          <Link href="/#todays-matches">Go to Match Center</Link>
+          <Link href="/#todays-matches">{zh.library.goToMatchCenter}</Link>
         </Button>
       }
-      description={
-        description ??
-        "Analyze a match from Match Center. Completed reports will land here so you can browse, favorite, and reopen them anytime."
-      }
+      description={description ?? zh.library.empty.default.description}
       icon={
         <span className="relative flex size-16 items-center justify-center">
           <span
@@ -31,7 +29,7 @@ export function AnalysisLibraryEmpty({
           <LibraryBig aria-hidden="true" className="relative size-7 text-primary" />
         </span>
       }
-      title={title ?? "Run your first analysis"}
+      title={title ?? zh.library.empty.default.title}
     />
   );
 }

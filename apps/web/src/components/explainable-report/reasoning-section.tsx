@@ -1,5 +1,6 @@
 import { ChevronDown, ClipboardList, Layers3, Scale, Sparkles } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
+import { zh } from "../../copy/zh";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface ReasoningStage {
@@ -10,23 +11,23 @@ interface ReasoningStage {
 
 const stages: readonly ReasoningStage[] = Object.freeze([
   Object.freeze({
-    title: "Evidence",
-    description: "Collected match evidence enters the pipeline.",
+    title: zh.report.reasoningStages.evidence.title,
+    description: zh.report.reasoningStages.evidence.description,
     icon: <ClipboardList aria-hidden="true" className="size-4" />,
   }),
   Object.freeze({
-    title: "Features",
-    description: "Deterministic features are extracted from evidence.",
+    title: zh.report.reasoningStages.features.title,
+    description: zh.report.reasoningStages.features.description,
     icon: <Layers3 aria-hidden="true" className="size-4" />,
   }),
   Object.freeze({
-    title: "Rules",
-    description: "Every deterministic rule is evaluated with explicit weight.",
+    title: zh.report.reasoningStages.rules.title,
+    description: zh.report.reasoningStages.rules.description,
     icon: <Scale aria-hidden="true" className="size-4" />,
   }),
   Object.freeze({
-    title: "Recommendation",
-    description: "A human-readable recommendation is composed for review.",
+    title: zh.report.reasoningStages.recommendation.title,
+    description: zh.report.reasoningStages.recommendation.description,
     icon: <Sparkles aria-hidden="true" className="size-4" />,
   }),
 ]);
@@ -40,9 +41,9 @@ export function ReasoningSection(): ReactElement {
     >
       <Card className="animate-fade-in-delay-1 hover:translate-y-0">
         <CardHeader>
-          <CardTitle id="reasoning-heading">Reasoning</CardTitle>
+          <CardTitle id="reasoning-heading">{zh.report.reasoning}</CardTitle>
           <p className="text-caption text-muted-foreground">
-            Evidence → Features → Rules → Recommendation
+            {zh.report.reasoningFlow}
           </p>
         </CardHeader>
         <CardContent>

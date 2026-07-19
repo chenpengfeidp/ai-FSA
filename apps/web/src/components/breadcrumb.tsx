@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 
 export interface BreadcrumbItem {
   readonly href?: string;
@@ -11,7 +12,7 @@ export function Breadcrumb({
   items,
 }: Readonly<{ items: readonly BreadcrumbItem[] }>): ReactElement {
   return (
-    <nav aria-label="Breadcrumb">
+    <nav aria-label={zh.breadcrumb.aria}>
       <ol className="flex flex-wrap items-center gap-1.5 text-body text-muted-foreground">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;

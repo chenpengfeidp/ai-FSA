@@ -3,6 +3,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MatchDetailPage } from "../src/components/match-detail-page";
+import { zh } from "../src/copy/zh";
 import { analyzeMatch, getEvidenceByMatch } from "../src/services/api";
 import type { AnalysisReportDto } from "../src/types/analysis";
 import type { EvidenceDto } from "../src/types/evidence";
@@ -10,7 +11,12 @@ import type { EvidenceDto } from "../src/types/evidence";
 vi.mock("../src/services/api", () => ({
   analyzeMatch: vi.fn(),
   getEvidenceByMatch: vi.fn(),
-  getUpcomingMatches: vi.fn(async () => []),
+  getUpcomingMatches: vi.fn(async () =>
+    Object.freeze({
+      matches: Object.freeze([]),
+      meta: Object.freeze({ oddsProviderMode: "recorded" as const }),
+    }),
+  ),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -193,9 +199,9 @@ describe("MatchDetailPage", () => {
   it("shows an empty state for unknown match identifiers", () => {
     renderPage("match-unknown");
 
-    expect(screen.getByText("Match not found")).toBeInTheDocument();
+    expect(screen.getByText(zh.workspace.matchNotFound)).toBeInTheDocument();
     expect(
-      screen.getAllByRole("link", { name: "Back to Match Center" }).length,
+      screen.getAllByRole("link", { name: zh.workspace.backToMatchCenter }).length,
     ).toBeGreaterThanOrEqual(1);
     expect(analyzeMatch).not.toHaveBeenCalled();
   });
@@ -207,7 +213,7 @@ describe("MatchDetailPage", () => {
 
     expect(screen.getByText("LOADING")).toBeInTheDocument();
     expect(
-      screen.getAllByText("AI Analysis Workspace").length,
+      screen.getAllByText(zh.workspace.aiAnalysisWorkspace).length,
     ).toBeGreaterThanOrEqual(1);
     expect(document.querySelector("[aria-busy='true']")).not.toBeNull();
   });
@@ -217,25 +223,37 @@ describe("MatchDetailPage", () => {
     vi.mocked(getEvidenceByMatch).mockResolvedValue([evidence]);
     renderPage("match-example-1");
 
-    expect(await screen.findByText("AI Analysis Workspace")).toBeInTheDocument();
-    expect(screen.getAllByText("Match List").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Recent Analyses").length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getByRole("navigation", { name: "Workspace sections" }),
+      await screen.findByText(zh.workspace.aiAnalysisWorkspace),
     ).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "Winner Prediction" }),
+      screen.getAllByText(zh.workspace.matchList).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText(zh.workspace.recentAnalyses).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByRole("navigation", { name: zh.workspace.sectionsAria }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: zh.report.winnerPrediction }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("Premier League").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Kickoff 19:30").length).toBeGreaterThan(0);
-    expect(screen.getByRole("heading", { name: "Reasoning" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Evidence" })).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Rule Evaluation" }),
+      screen.getAllByText(zh.workspace.kickoff("2026-08-01 19:30")).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { name: zh.report.reasoning }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: zh.report.evidence }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: zh.report.ruleEvaluation }),
     ).toBeInTheDocument();
     expect(screen.getByText("Home Team Present")).toBeInTheDocument();
-    expect(screen.getByText("Developer Details")).toBeInTheDocument();
-    expect(screen.getByText("Final Recommendation")).toBeInTheDocument();
+    expect(screen.getByText(zh.report.developerDetails)).toBeInTheDocument();
+    expect(screen.getByText(zh.report.finalRecommendation)).toBeInTheDocument();
 
     await waitFor(() => {
       expect(analyzeMatch).toHaveBeenCalledWith("match-example-1");
@@ -249,9 +267,9 @@ describe("MatchDetailPage", () => {
 
     expect(await screen.findByText("FAILED")).toBeInTheDocument();
     expect(screen.getByText("Match import failed.")).toBeInTheDocument();
-    expect(screen.getByText("Unable to load match analysis")).toBeInTheDocument();
+    expect(screen.getByText(zh.workspace.loadErrorTitle)).toBeInTheDocument();
     expect(
-      screen.getAllByRole("link", { name: "Back to Match Center" }).length,
+      screen.getAllByRole("link", { name: zh.workspace.backToMatchCenter }).length,
     ).toBeGreaterThanOrEqual(1);
   });
 });

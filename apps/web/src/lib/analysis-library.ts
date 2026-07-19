@@ -7,6 +7,7 @@ import type {
 } from "../types/analysis-library";
 import type { AnalysisHistoryEntry } from "../types/dashboard";
 import type { ConfidenceLevel } from "../types/explainable-report";
+import { zh } from "../copy/zh";
 import { confidencePercent } from "./explainable-report";
 
 /**
@@ -55,13 +56,13 @@ export function toLibraryReportCard(
     favorite: entry.favorite ?? false,
     status,
     confidence,
-    winnerPrediction: "Even signal",
-    recommendation: "Open the workspace report for the full recommendation.",
+    winnerPrediction: zh.library.evenSignal,
+    recommendation: zh.library.openForFullRecommendation,
     evidenceCount: entry.evidenceCount,
     topEvidenceLabel:
       entry.evidenceCount > 0
-        ? `${entry.evidenceCount} evidence item${entry.evidenceCount === 1 ? "" : "s"}`
-        : "No evidence summary",
+        ? zh.library.evidenceItems(entry.evidenceCount)
+        : zh.library.noEvidenceSummary,
   });
 }
 

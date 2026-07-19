@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import type { WinnerPredictionView } from "../../types/explainable-report";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
@@ -8,9 +9,9 @@ export function WinnerPredictionCard({
   return (
     <Card className="animate-fade-in-delay-1 h-full hover:translate-y-0">
       <CardHeader className="border-b-0 pb-0">
-        <CardTitle>Winner Prediction</CardTitle>
+        <CardTitle>{zh.report.winnerPrediction}</CardTitle>
         <p className="text-caption text-muted-foreground">
-          Horizontal probability bars from deterministic rule weights
+          {zh.report.winnerPredictionHint}
         </p>
       </CardHeader>
       <CardContent className="space-y-6 pt-5">

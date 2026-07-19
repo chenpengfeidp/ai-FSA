@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { ReactElement } from "react";
 import { formatEvidenceTimestamp } from "../../lib/explainable-report";
+import { zh } from "../../copy/zh";
 import type { EvidenceTimelineItemView } from "../../types/explainable-report";
 import type { EvidenceType } from "../../types/evidence";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -61,17 +62,17 @@ export function EvidenceTimeline({
     <section aria-labelledby="evidence-timeline-heading">
       <Card className="animate-fade-in-delay-2 hover:translate-y-0">
         <CardHeader>
-          <CardTitle id="evidence-timeline-heading">Evidence</CardTitle>
+          <CardTitle id="evidence-timeline-heading">{zh.report.evidence}</CardTitle>
           <p className="text-caption text-muted-foreground">
-            Vertical timeline with type icons and visual hierarchy
+            {zh.report.evidenceHint}
           </p>
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border px-4 py-10 text-center">
-              <p className="text-title text-foreground">No evidence available</p>
+              <p className="text-title text-foreground">{zh.report.noEvidence}</p>
               <p className="mt-2 text-body text-muted-foreground">
-                No evidence records were returned for this match.
+                {zh.report.noEvidenceDescription}
               </p>
             </div>
           ) : (
@@ -92,7 +93,10 @@ export function EvidenceTimeline({
                       <StatusBadge label={item.quality} status="INFO" />
                     </div>
                     <p className="mt-2 text-caption font-medium text-subtle">
-                      Step {index + 1} · {formatEvidenceTimestamp(item.timestamp)}
+                      {zh.report.step(
+                        index + 1,
+                        formatEvidenceTimestamp(item.timestamp),
+                      )}
                     </p>
                     <p className="mt-3 text-body leading-6 text-foreground">
                       {item.detail}

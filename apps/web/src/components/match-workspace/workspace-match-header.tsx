@@ -1,5 +1,6 @@
 import { CalendarClock, Trophy } from "lucide-react";
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import type { MatchStatus, MatchSummary } from "../../types/match-center";
 import { Badge } from "../ui/badge";
 import { Card, CardContent } from "../ui/card";
@@ -42,7 +43,7 @@ export function WorkspaceMatchHeader({
             </Tag>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-caption font-semibold text-muted-foreground">
               <CalendarClock aria-hidden="true" className="size-3.5" />
-              Kickoff {match.kickoffTime}
+              {zh.workspace.kickoff(match.kickoffTime)}
             </span>
             <Badge variant={statusVariant(status)}>{status}</Badge>
           </div>
@@ -50,18 +51,18 @@ export function WorkspaceMatchHeader({
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
               <p className="text-caption font-semibold uppercase tracking-[0.16em] text-primary">
-                AI Analysis Workspace
+                {zh.workspace.aiAnalysisWorkspace}
               </p>
               <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground sm:text-[2.25rem] sm:leading-tight">
                 {match.homeTeam}
-                <span className="mx-3 text-subtle">vs</span>
+                <span className="mx-3 text-subtle">{zh.workspace.vs}</span>
                 {match.awayTeam}
               </h1>
             </div>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:text-right">
               <div>
                 <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
-                  Home
+                  {zh.workspace.home}
                 </dt>
                 <dd className="mt-1 text-body font-semibold text-foreground">
                   {match.homeTeam}
@@ -69,7 +70,7 @@ export function WorkspaceMatchHeader({
               </div>
               <div>
                 <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
-                  Away
+                  {zh.workspace.away}
                 </dt>
                 <dd className="mt-1 text-body font-semibold text-foreground">
                   {match.awayTeam}

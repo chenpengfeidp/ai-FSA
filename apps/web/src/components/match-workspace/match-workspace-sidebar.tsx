@@ -7,6 +7,7 @@ import { useAnalysisHistory } from "../../hooks/use-analysis-history";
 import { useUpcomingMatches } from "../../hooks/use-upcoming-matches";
 import { cn } from "../../lib/utils";
 import { todaysMatches } from "../../lib/todays-matches";
+import { zh } from "../../copy/zh";
 import { Button } from "../ui/button";
 import { Divider } from "../ui/divider";
 
@@ -23,14 +24,14 @@ export function MatchWorkspaceSidebar({
         <Button asChild className="w-full justify-start" variant="ghost">
           <Link href="/">
             <ArrowLeft aria-hidden="true" className="size-4" />
-            Back to Match Center
+            {zh.workspace.backToMatchCenter}
           </Link>
         </Button>
       </div>
 
       <div className="space-y-3">
         <p className="px-2 text-caption font-semibold uppercase tracking-[0.14em] text-subtle">
-          Match List
+          {zh.workspace.matchList}
         </p>
         <ul className="space-y-1">
           {matchList.map((match) => {
@@ -69,11 +70,11 @@ export function MatchWorkspaceSidebar({
       <div className="space-y-3">
         <p className="flex items-center gap-2 px-2 text-caption font-semibold uppercase tracking-[0.14em] text-subtle">
           <History aria-hidden="true" className="size-3.5" />
-          Recent Analyses
+          {zh.workspace.recentAnalyses}
         </p>
         {history.recent.length === 0 ? (
           <p className="px-2 text-caption leading-5 text-muted-foreground">
-            Analyze a match to populate recent history.
+            {zh.workspace.recentAnalysesEmpty}
           </p>
         ) : (
           <ul className="space-y-1">

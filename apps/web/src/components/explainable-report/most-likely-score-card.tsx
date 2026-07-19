@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import type { MostLikelyScoreView } from "../../types/explainable-report";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { StatusBadge } from "../ui/status-badge";
@@ -9,7 +10,7 @@ export function MostLikelyScoreCard({
   return (
     <Card className="animate-fade-in-delay-1 h-full hover:translate-y-0">
       <CardHeader className="border-b-0 pb-0">
-        <CardTitle>Most Likely Score</CardTitle>
+        <CardTitle>{zh.report.mostLikelyScore}</CardTitle>
       </CardHeader>
       <CardContent className="flex h-full flex-col items-center justify-center gap-4 pt-4 text-center">
         {score.available && score.homeGoals !== null && score.awayGoals !== null ? (
@@ -28,7 +29,12 @@ export function MostLikelyScoreCard({
             </p>
           </div>
         )}
-        <StatusBadge label={`Confidence ${score.confidence}`} status="INFO" />
+        <StatusBadge
+          label={zh.report.confidenceLabel(
+            zh.report.confidenceLevel(score.confidence),
+          )}
+          status="INFO"
+        />
       </CardContent>
     </Card>
   );

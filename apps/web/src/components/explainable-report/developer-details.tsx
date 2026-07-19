@@ -3,6 +3,7 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { Braces, ChevronDown } from "lucide-react";
 import { type ReactElement, useState } from "react";
+import { zh } from "../../copy/zh";
 import type { AnalysisReportDto } from "../../types/analysis";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -22,15 +23,17 @@ export function DeveloperDetails({
         <Card className="hover:translate-y-0">
           <CardHeader className="flex-row items-center justify-between gap-4">
             <div>
-              <CardTitle id="developer-details-heading">Developer Details</CardTitle>
+              <CardTitle id="developer-details-heading">
+                {zh.report.developerDetails}
+              </CardTitle>
               <p className="mt-1 text-caption text-muted-foreground">
-                Raw deterministic report JSON — hidden by default
+                {zh.report.developerDetailsHint}
               </p>
             </div>
             <Collapsible.Trigger asChild>
               <Button
                 aria-expanded={open}
-                aria-label="Toggle developer details"
+                aria-label={zh.report.toggleDeveloperDetails}
                 size="icon"
                 type="button"
                 variant="outline"

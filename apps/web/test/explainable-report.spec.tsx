@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { ExplainableMatchReport } from "../src/components/explainable-report/explainable-match-report";
+import { zh } from "../src/copy/zh";
 import {
   buildExplainableReportView,
   resolveConfidence,
@@ -13,9 +14,11 @@ const match: MatchSummary = {
   id: "match-example-1",
   homeTeam: "Liverpool",
   awayTeam: "Chelsea",
-  kickoffTime: "19:30",
+  kickoff: "2026-08-01T19:30:00Z",
+  kickoffTime: "2026-08-01 19:30",
   competition: "Premier League",
   status: "SCHEDULED",
+  providerSource: "fixture",
 };
 
 const report: AnalysisReportDto = {
@@ -194,11 +197,13 @@ describe("ExplainableMatchReport", () => {
       <ExplainableMatchReport evidence={evidence} match={match} report={report} />,
     );
 
-    expect(screen.getByText("Prediction")).toBeInTheDocument();
+    expect(screen.getByText(zh.report.prediction)).toBeInTheDocument();
     expect(screen.getAllByText("Premier League").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Kickoff 19:30").length).toBeGreaterThanOrEqual(1);
     expect(
-      screen.getByRole("heading", { name: "Winner Prediction" }),
+      screen.getAllByText(zh.workspace.kickoff("2026-08-01 19:30")).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByRole("heading", { name: zh.report.winnerPrediction }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("48%").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Match information")).toBeInTheDocument();

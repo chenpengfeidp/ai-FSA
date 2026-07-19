@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
+import { zh } from "../../copy/zh";
 import { AppTopNav } from "../app-top-nav";
 import { MatchWorkspaceSidebar } from "./match-workspace-sidebar";
 
@@ -11,7 +12,7 @@ export function MatchWorkspaceShell({
 }>): ReactElement {
   return (
     <div className="min-h-screen bg-background">
-      <AppTopNav eyebrow="Workspace" />
+      <AppTopNav eyebrow={zh.workspace.eyebrow} />
 
       <div className="mx-auto grid max-w-[90rem] gap-0 lg:grid-cols-[17.5rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)]">
         <div className="hidden border-r border-border/80 lg:block">

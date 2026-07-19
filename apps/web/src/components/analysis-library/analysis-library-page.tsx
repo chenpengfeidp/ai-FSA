@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { useAnalysisHistory } from "../../hooks/use-analysis-history";
 import {
   removeAnalysisHistoryEntries,
@@ -32,42 +33,18 @@ function sectionEmptyCopy(section: LibrarySidebarSection): {
 } {
   switch (section) {
     case "favorites":
-      return {
-        title: "No favorites yet",
-        description:
-          "Mark reports with the heart control to keep your strongest reads one click away.",
-      };
+      return zh.library.empty.favorites;
     case "in-progress":
-      return {
-        title: "Nothing in progress",
-        description:
-          "In-progress analyses will appear here when a live run is tracked. Completed history stays under Completed and Recent.",
-      };
+      return zh.library.empty.inProgress;
     case "failed":
-      return {
-        title: "No failed reports",
-        description:
-          "Failed runs will surface here when present. Successful history remains in your library.",
-      };
+      return zh.library.empty.failed;
     case "settings":
-      return {
-        title: "Library settings",
-        description:
-          "Settings is a placeholder for a later product sprint. Your reports remain available from Recent and Completed.",
-      };
+      return zh.library.empty.settings;
     case "competitions":
-      return {
-        title: "No competition reports",
-        description:
-          "Run analyses across competitions to build a browsable library by league.",
-      };
+      return zh.library.empty.competitions;
     case "completed":
     case "recent":
-      return {
-        title: "Run your first analysis",
-        description:
-          "Analyze a match from Match Center. Completed reports will land here so you can browse, favorite, and reopen them anytime.",
-      };
+      return zh.library.empty.default;
   }
 }
 
@@ -113,7 +90,7 @@ export function AnalysisLibraryPage(): ReactElement {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppTopNav eyebrow="Analysis Library" />
+      <AppTopNav eyebrow={zh.library.eyebrow} />
 
       <div className="mx-auto grid max-w-[90rem] gap-0 lg:grid-cols-[17.5rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)]">
         <div className="border-b border-border/80 px-4 py-6 lg:sticky lg:top-[3.25rem] lg:max-h-[calc(100vh-3.25rem)] lg:overflow-y-auto lg:border-b-0 lg:border-r">
@@ -131,14 +108,13 @@ export function AnalysisLibraryPage(): ReactElement {
           <div className="animate-fade-in space-y-8">
             <header className="space-y-3">
               <p className="text-caption font-semibold uppercase tracking-[0.14em] text-primary">
-                Reports
+                {zh.library.reportsEyebrow}
               </p>
               <h1 className="text-display font-semibold tracking-tight text-foreground">
-                Analysis Library
+                {zh.library.heading}
               </h1>
               <p className="max-w-2xl text-body text-muted-foreground">
-                Manage every completed football analysis — search, filter, favorite,
-                and reopen reports without leaving the library.
+                {zh.library.description}
               </p>
             </header>
 

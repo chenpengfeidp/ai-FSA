@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 import type { AnalysisReportDto } from "../types/analysis";
 import type { EvidenceDto } from "../types/evidence";
 import { AnalysisCard } from "./analysis-card";
@@ -21,13 +22,13 @@ export function MatchDetailPanels({
 }>): ReactElement {
   return (
     <Tabs defaultValue="overview">
-      <TabsList aria-label="Match detail sections">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="evidence">Evidence</TabsTrigger>
-        <TabsTrigger value="features">Features</TabsTrigger>
-        <TabsTrigger value="rules">Rules</TabsTrigger>
-        <TabsTrigger value="report">Report</TabsTrigger>
-        <TabsTrigger value="raw">Raw JSON</TabsTrigger>
+      <TabsList aria-label={zh.matchDetail.tabsAria}>
+        <TabsTrigger value="overview">{zh.matchDetail.tabs.overview}</TabsTrigger>
+        <TabsTrigger value="evidence">{zh.matchDetail.tabs.evidence}</TabsTrigger>
+        <TabsTrigger value="features">{zh.matchDetail.tabs.features}</TabsTrigger>
+        <TabsTrigger value="rules">{zh.matchDetail.tabs.rules}</TabsTrigger>
+        <TabsTrigger value="report">{zh.matchDetail.tabs.report}</TabsTrigger>
+        <TabsTrigger value="raw">{zh.matchDetail.tabs.raw}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview">
@@ -43,8 +44,8 @@ export function MatchDetailPanels({
           </div>
         ) : (
           <EmptyState
-            description="No evidence records were returned for this match."
-            title="No evidence available"
+            description={zh.matchDetail.noEvidenceDescription}
+            title={zh.matchDetail.noEvidence}
           />
         )}
       </TabsContent>
@@ -58,8 +59,8 @@ export function MatchDetailPanels({
           </div>
         ) : (
           <EmptyState
-            description="No features were extracted for this match."
-            title="No features available"
+            description={zh.matchDetail.noFeaturesDescription}
+            title={zh.matchDetail.noFeatures}
           />
         )}
       </TabsContent>
@@ -73,8 +74,8 @@ export function MatchDetailPanels({
           </div>
         ) : (
           <EmptyState
-            description="No rules were evaluated for this match."
-            title="No rules available"
+            description={zh.matchDetail.noRulesDescription}
+            title={zh.matchDetail.noRules}
           />
         )}
       </TabsContent>

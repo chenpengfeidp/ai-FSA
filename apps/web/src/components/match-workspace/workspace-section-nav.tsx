@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { cn } from "../../lib/utils";
 
 export interface WorkspaceNavItem {
@@ -21,7 +22,7 @@ export function WorkspaceSectionNav({
 
   return (
     <nav
-      aria-label="Workspace sections"
+      aria-label={zh.workspace.sectionsAria}
       className="sticky top-[3.25rem] z-10 -mx-1 overflow-x-auto border-b border-border/80 bg-background/90 px-1 py-3 backdrop-blur-md"
     >
       <ul className="flex min-w-max items-center gap-2">

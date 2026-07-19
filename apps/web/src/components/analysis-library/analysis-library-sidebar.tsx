@@ -11,6 +11,7 @@ import {
   Trophy,
 } from "lucide-react";
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { cn } from "../../lib/utils";
 import type { LibrarySidebarSection } from "../../types/analysis-library";
 
@@ -19,13 +20,13 @@ const SECTIONS: readonly {
   readonly label: string;
   readonly icon: typeof Sparkles;
 }[] = [
-  { id: "recent", label: "Recent", icon: Sparkles },
-  { id: "favorites", label: "Favorites", icon: Heart },
-  { id: "competitions", label: "Competitions", icon: Trophy },
-  { id: "completed", label: "Completed", icon: CheckCircle2 },
-  { id: "in-progress", label: "In Progress", icon: Clock3 },
-  { id: "failed", label: "Failed", icon: AlertCircle },
-  { id: "settings", label: "Settings", icon: Settings },
+  { id: "recent", label: zh.library.sections.recent, icon: Sparkles },
+  { id: "favorites", label: zh.library.sections.favorites, icon: Heart },
+  { id: "competitions", label: zh.library.sections.competitions, icon: Trophy },
+  { id: "completed", label: zh.library.sections.completed, icon: CheckCircle2 },
+  { id: "in-progress", label: zh.library.sections.inProgress, icon: Clock3 },
+  { id: "failed", label: zh.library.sections.failed, icon: AlertCircle },
+  { id: "settings", label: zh.library.sections.settings, icon: Settings },
 ];
 
 export function AnalysisLibrarySidebar({
@@ -42,14 +43,12 @@ export function AnalysisLibrarySidebar({
       <div className="space-y-1 px-2">
         <p className="flex items-center gap-2 text-caption font-semibold uppercase tracking-[0.14em] text-subtle">
           <Layers3 aria-hidden="true" className="size-3.5" />
-          Library
+          {zh.library.sidebarTitle}
         </p>
-        <p className="text-body text-muted-foreground">
-          Browse every completed report in one place.
-        </p>
+        <p className="text-body text-muted-foreground">{zh.library.sidebarHint}</p>
       </div>
 
-      <nav aria-label="Analysis library sections">
+      <nav aria-label={zh.library.sectionsAria}>
         <ul className="space-y-1">
           {SECTIONS.map((section) => {
             const Icon = section.icon;

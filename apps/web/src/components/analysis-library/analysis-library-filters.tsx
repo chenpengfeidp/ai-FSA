@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChangeEvent, ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import type {
   LibraryFilters,
   LibraryReportStatus,
@@ -28,10 +29,10 @@ const SORT_OPTIONS: readonly {
   readonly value: LibrarySortOption;
   readonly label: string;
 }[] = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "highest-confidence", label: "Highest Confidence" },
-  { value: "competition", label: "Competition" },
+  { value: "newest", label: zh.library.sort.newest },
+  { value: "oldest", label: zh.library.sort.oldest },
+  { value: "highest-confidence", label: zh.library.sort.highestConfidence },
+  { value: "competition", label: zh.library.sort.competition },
 ];
 
 function SelectField({
@@ -82,13 +83,13 @@ export function AnalysisLibraryFilters({
   return (
     <div className="space-y-4">
       <label className="block" htmlFor="library-search">
-        <span className="sr-only">Search reports</span>
+        <span className="sr-only">{zh.library.searchSrOnly}</span>
         <Input
           id="library-search"
           onChange={(event) => {
             onChange({ ...filters, query: event.target.value });
           }}
-          placeholder="Search teams, competitions, or predictions…"
+          placeholder={zh.library.searchPlaceholder}
           type="search"
           value={filters.query}
         />
@@ -97,7 +98,7 @@ export function AnalysisLibraryFilters({
       <div className="flex flex-col gap-3 rounded-xl border border-border/80 bg-surface p-4 shadow-sm lg:flex-row lg:flex-wrap lg:items-end">
         <SelectField
           id="library-competition"
-          label="Competition"
+          label={zh.library.filters.competition}
           onChange={(value) => {
             onChange({
               ...filters,
@@ -105,7 +106,7 @@ export function AnalysisLibraryFilters({
             });
           }}
           options={[
-            { value: "all", label: "All competitions" },
+            { value: "all", label: zh.library.filterOptions.allCompetitions },
             ...competitions.map((competition) => ({
               value: competition,
               label: competition,
@@ -119,7 +120,7 @@ export function AnalysisLibraryFilters({
           htmlFor="library-date"
         >
           <span className="text-caption font-semibold text-muted-foreground">
-            Date
+            {zh.library.filters.date}
           </span>
           <Input
             id="library-date"
@@ -136,7 +137,7 @@ export function AnalysisLibraryFilters({
 
         <SelectField
           id="library-status"
-          label="Status"
+          label={zh.library.filters.status}
           onChange={(value) => {
             onChange({
               ...filters,
@@ -145,14 +146,17 @@ export function AnalysisLibraryFilters({
           }}
           options={STATUS_OPTIONS.map((status) => ({
             value: status,
-            label: status === "all" ? "All statuses" : status,
+            label:
+              status === "all"
+                ? zh.library.filterOptions.allStatuses
+                : zh.library.statusLabel(status),
           }))}
           value={filters.status}
         />
 
         <SelectField
           id="library-confidence"
-          label="Confidence"
+          label={zh.library.filters.confidence}
           onChange={(value) => {
             onChange({
               ...filters,
@@ -161,7 +165,10 @@ export function AnalysisLibraryFilters({
           }}
           options={CONFIDENCE_OPTIONS.map((confidence) => ({
             value: confidence,
-            label: confidence === "all" ? "All levels" : confidence,
+            label:
+              confidence === "all"
+                ? zh.library.filterOptions.allLevels
+                : zh.report.confidenceLevel(confidence),
           }))}
           value={filters.confidence}
         />
@@ -171,7 +178,7 @@ export function AnalysisLibraryFilters({
           htmlFor="library-favorite"
         >
           <span className="text-caption font-semibold text-muted-foreground">
-            Favorite
+            {zh.library.filters.favorite}
           </span>
           <select
             className="h-10 rounded-md border border-border-strong bg-surface px-3 text-body text-foreground shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary-muted"
@@ -184,14 +191,16 @@ export function AnalysisLibraryFilters({
             }}
             value={filters.favoriteOnly ? "favorites" : "all"}
           >
-            <option value="all">All reports</option>
-            <option value="favorites">Favorites only</option>
+            <option value="all">{zh.library.filterOptions.allReports}</option>
+            <option value="favorites">
+              {zh.library.filterOptions.favoritesOnly}
+            </option>
           </select>
         </label>
 
         <SelectField
           id="library-sort"
-          label="Sort"
+          label={zh.library.filters.sort}
           onChange={(value) => {
             onChange({
               ...filters,

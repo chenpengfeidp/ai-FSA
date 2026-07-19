@@ -1,5 +1,6 @@
 import { CalendarClock, Trophy } from "lucide-react";
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 import type { MatchStatus, MatchSummary } from "../types/match-center";
 import { Badge } from "./ui/badge";
 import {
@@ -47,7 +48,7 @@ export function MatchDetailHeader({
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
-              Home Team
+              {zh.matchDetail.homeTeam}
             </dt>
             <dd className="mt-1 text-body font-semibold text-foreground">
               {match.homeTeam}
@@ -55,7 +56,7 @@ export function MatchDetailHeader({
           </div>
           <div>
             <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
-              Away Team
+              {zh.matchDetail.awayTeam}
             </dt>
             <dd className="mt-1 text-body font-semibold text-foreground">
               {match.awayTeam}
@@ -63,7 +64,7 @@ export function MatchDetailHeader({
           </div>
           <div>
             <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
-              Competition
+              {zh.matchDetail.competition}
             </dt>
             <dd className="mt-1 text-body font-semibold text-foreground">
               {match.competition}
@@ -71,7 +72,7 @@ export function MatchDetailHeader({
           </div>
           <div>
             <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
-              Kickoff
+              {zh.matchDetail.kickoff}
             </dt>
             <dd className="mt-1 flex items-center gap-1.5 text-body font-semibold text-foreground">
               <CalendarClock aria-hidden="true" className="size-4 text-subtle" />
@@ -80,7 +81,7 @@ export function MatchDetailHeader({
           </div>
           <div>
             <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
-              Status
+              {zh.matchDetail.status}
             </dt>
             <dd className="mt-1">
               <Badge variant={statusVariant(status)}>{status}</Badge>

@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { cn } from "../../lib/utils";
 import type { ConfidenceMeterView } from "../../types/explainable-report";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -34,15 +35,19 @@ function gaugeTrack(level: ConfidenceMeterView["level"]): string {
 export function ConfidenceMeter({
   confidence,
 }: Readonly<{ confidence: ConfidenceMeterView }>): ReactElement {
+  const levelLabel = zh.report.confidenceLevel(confidence.level);
+
   return (
     <Card className="animate-fade-in-delay-2 hover:translate-y-0">
       <CardHeader className="border-b-0 pb-0">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <CardTitle>Confidence Gauge</CardTitle>
+            <CardTitle>{zh.report.confidenceGauge}</CardTitle>
             <p className="mt-1 text-caption text-muted-foreground">
-              Visual confidence from deterministic rule pass rate (
-              {confidence.passCount}/{confidence.ruleCount})
+              {zh.report.confidenceGaugeHint(
+                confidence.passCount,
+                confidence.ruleCount,
+              )}
             </p>
           </div>
           <p
@@ -56,7 +61,7 @@ export function ConfidenceMeter({
               confidence.level === "Low" && "bg-error-muted text-error-foreground",
             )}
           >
-            {confidence.level}
+            {levelLabel}
           </p>
         </div>
       </CardHeader>
@@ -69,7 +74,7 @@ export function ConfidenceMeter({
         >
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
-              Gauge
+              {zh.report.gauge}
             </p>
             <p className="text-title font-bold tabular-nums text-foreground">
               {confidence.percent}%
@@ -77,11 +82,11 @@ export function ConfidenceMeter({
           </div>
           <div className="relative h-5 overflow-hidden rounded-full bg-surface/80 shadow-inner">
             <div
-              aria-label={`Confidence ${confidence.level}`}
+              aria-label={zh.report.confidenceLabel(levelLabel)}
               aria-valuemax={100}
               aria-valuemin={0}
               aria-valuenow={confidence.percent}
-              aria-valuetext={confidence.level}
+              aria-valuetext={levelLabel}
               className={cn(
                 "h-full rounded-full shadow-sm transition-[width] duration-500",
                 gaugeColor(confidence.level),
@@ -106,7 +111,7 @@ export function ConfidenceMeter({
                 )}
                 key={level}
               >
-                {level}
+                {zh.report.confidenceLevel(level)}
               </li>
             );
           })}

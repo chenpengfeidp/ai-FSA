@@ -1,5 +1,6 @@
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import type { FinalRecommendationView } from "../../types/explainable-report";
 import { Card, CardContent } from "../ui/card";
 import { Divider } from "../ui/divider";
@@ -9,13 +10,16 @@ export function FinalRecommendation({
   recommendation,
 }: Readonly<{ recommendation: FinalRecommendationView }>): ReactElement {
   const rows = [
-    { label: "Recommended Winner", value: recommendation.recommendedWinner },
-    { label: "Recommended Score", value: recommendation.recommendedScore },
+    { label: zh.report.recommendedWinner, value: recommendation.recommendedWinner },
+    { label: zh.report.recommendedScore, value: recommendation.recommendedScore },
     {
-      label: "Recommended Goal Range",
+      label: zh.report.recommendedGoalRange,
       value: recommendation.recommendedGoalRange,
     },
-    { label: "Confidence", value: recommendation.confidence },
+    {
+      label: zh.report.confidence,
+      value: zh.report.confidenceLevel(recommendation.confidence),
+    },
   ] as const;
 
   return (
@@ -26,7 +30,7 @@ export function FinalRecommendation({
             <div className="space-y-2">
               <p className="inline-flex items-center gap-2 text-caption font-semibold uppercase tracking-[0.16em] text-secondary-foreground/80">
                 <ShieldCheck aria-hidden="true" className="size-3.5" />
-                Final Recommendation
+                {zh.report.finalRecommendation}
               </p>
               <h2
                 className="text-heading text-secondary-foreground"
@@ -35,12 +39,12 @@ export function FinalRecommendation({
                 {recommendation.recommendedWinner}
               </h2>
               <p className="max-w-xl text-body text-secondary-foreground/80">
-                Premium summary composed from deterministic report outputs.
+                {zh.report.finalRecommendationHint}
               </p>
             </div>
             <StatusBadge
               className="border-white/20 bg-white/15 text-white"
-              label={recommendation.confidence}
+              label={zh.report.confidenceLevel(recommendation.confidence)}
               status="SUCCESS"
             />
           </div>
@@ -88,7 +92,7 @@ export function FinalRecommendation({
               <Divider className="my-0" />
               <div className="space-y-4">
                 <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
-                  Inference narrative
+                  {zh.report.inferenceNarrative}
                 </p>
                 {recommendation.narrativeSections.map((section) => (
                   <div className="space-y-1" key={section.title}>

@@ -233,6 +233,9 @@ importers:
       '@fas/rule':
         specifier: workspace:*
         version: link:../rule
+      '@fas/statistics':
+        specifier: workspace:*
+        version: link:../statistics
     devDependencies:
       '@fas/evidence-import':
         specifier: workspace:*
@@ -456,6 +459,15 @@ importers:
       '@fas/match':
         specifier: workspace:*
         version: link:../match
+    devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/statistics:
     devDependencies:
       '@fas/tsconfig':
         specifier: workspace:*

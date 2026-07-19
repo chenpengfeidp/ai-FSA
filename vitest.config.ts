@@ -105,6 +105,13 @@ export default defineConfig({
           include: ["packages/report/test/**/*.spec.ts"],
         },
       },
+      {
+        test: {
+          name: "statistics",
+          environment: "node",
+          include: ["packages/statistics/test/**/*.spec.ts"],
+        },
+      },
     ],
   },
 });

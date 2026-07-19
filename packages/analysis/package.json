@@ -24,7 +24,8 @@
     "@fas/evidence-query": "workspace:*",
     "@fas/feature": "workspace:*",
     "@fas/match": "workspace:*",
-    "@fas/rule": "workspace:*"
+    "@fas/rule": "workspace:*",
+    "@fas/statistics": "workspace:*"
   },
   "devDependencies": {
     "@fas/evidence-import": "workspace:*",

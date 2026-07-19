@@ -93,6 +93,11 @@ export interface DeterministicProjectionDto {
   readonly confidence: number;
   readonly recommendation: RecommendationCode;
   readonly limitations: readonly string[];
+  readonly calibrationArtifactId: string;
+  readonly calibrationModelVersion: string;
+  readonly calibrationStatus: string;
+  readonly calibrationChecksum: string;
+  readonly calibrationQualified: boolean;
   readonly status: "blocked" | "completed_nonempty" | "failed";
   readonly checksum: string;
 }

@@ -1,5 +1,6 @@
 import type { Feature, FeatureBundle, FeatureName } from "@fas/feature";
 import type { RuleResult } from "@fas/rule";
+import { applyCalibration, IDENTITY_CALIBRATION_ARTIFACT } from "@fas/statistics";
 import {
   createDeterministicMatchProjection,
   type DeterministicMatchProjection,
@@ -140,8 +141,14 @@ export function computeDeterministicMatchProjection(input: {
       limitations: Object.freeze([
         "Required TEAM_FORM/STATISTICS evidence is missing for deterministic projection.",
         "Uncalibrated independent Poisson baseline; not validated for real-world decision making.",
+        `Pinned calibration artifact ${IDENTITY_CALIBRATION_ARTIFACT.artifactId} (${IDENTITY_CALIBRATION_ARTIFACT.status}).`,
       ]),
       truncationMass: 0,
+      calibrationArtifactId: IDENTITY_CALIBRATION_ARTIFACT.artifactId,
+      calibrationModelVersion: IDENTITY_CALIBRATION_ARTIFACT.calibrationModelVersion,
+      calibrationStatus: IDENTITY_CALIBRATION_ARTIFACT.status,
+      calibrationChecksum: IDENTITY_CALIBRATION_ARTIFACT.checksum,
+      calibrationQualified: IDENTITY_CALIBRATION_ARTIFACT.qualified,
       featureBundleChecksum: input.featureBundle.checksum,
       ruleEvaluationRefs: input.ruleResults.map((rule) => rule.ruleId),
       checksum: "blocked",
@@ -231,10 +238,19 @@ export function computeDeterministicMatchProjection(input: {
   const marketLeanAway = marketRules.some(
     (rule) => rule.ruleName === "MARKET_LEAN_AWAY" && rule.status === "PASS",
   );
+  const calibrationArtifact = IDENTITY_CALIBRATION_ARTIFACT;
+  const calibrated = applyCalibration(
+    {
+      pHome: adjusted.pHome,
+      pDraw: adjusted.pDraw,
+      pAway: adjusted.pAway,
+    },
+    calibrationArtifact,
+  );
   const footballRecommendation = directionalRecommendation({
-    pHome: adjusted.pHome,
-    pDraw: adjusted.pDraw,
-    pAway: adjusted.pAway,
+    pHome: calibrated.pHome,
+    pDraw: calibrated.pDraw,
+    pAway: calibrated.pAway,
   });
   const marketConflict = marketConflictsWithFootball({
     footballRecommendation,
@@ -246,15 +262,17 @@ export function computeDeterministicMatchProjection(input: {
     confidence,
     A,
     X,
-    pHome: adjusted.pHome,
-    pDraw: adjusted.pDraw,
-    pAway: adjusted.pAway,
+    pHome: calibrated.pHome,
+    pDraw: calibrated.pDraw,
+    pAway: calibrated.pAway,
     marketConflict,
   });
   const limitations = [
     "Uncalibrated independent Poisson baseline; not validated for real-world decision making.",
-    "Scorelines use pre-rule-adjustment matrix; 1X2 uses post-rule-adjustment probabilities.",
+    "Scorelines use pre-rule-adjustment matrix; 1X2 uses post-rule-and-calibration probabilities.",
     "Market odds are signals of market state, not ground truth; they do not blend into 1X2 in this slice.",
+    `Pinned calibration artifact ${calibrationArtifact.artifactId} (${calibrationArtifact.status}); Analysis does not train or select maps during a run.`,
+    ...calibrationArtifact.limitations,
   ];
 
   if (marketConflict) {
@@ -267,9 +285,9 @@ export function computeDeterministicMatchProjection(input: {
     matchId: input.featureBundle.matchId,
     lambdaHome: roundProbability(lambdas.lambdaHome),
     lambdaAway: roundProbability(lambdas.lambdaAway),
-    pHome: roundProbability(adjusted.pHome),
-    pDraw: roundProbability(adjusted.pDraw),
-    pAway: roundProbability(adjusted.pAway),
+    pHome: roundProbability(calibrated.pHome),
+    pDraw: roundProbability(calibrated.pDraw),
+    pAway: roundProbability(calibrated.pAway),
     topScorelines: poisson.topScorelines.map((scoreline) =>
       Object.freeze({
         homeGoals: scoreline.homeGoals,
@@ -292,6 +310,11 @@ export function computeDeterministicMatchProjection(input: {
     recommendation,
     limitations: Object.freeze(limitations),
     truncationMass: roundProbability(poisson.truncationMass),
+    calibrationArtifactId: calibrationArtifact.artifactId,
+    calibrationModelVersion: calibrationArtifact.calibrationModelVersion,
+    calibrationStatus: calibrationArtifact.status,
+    calibrationChecksum: calibrationArtifact.checksum,
+    calibrationQualified: calibrationArtifact.qualified,
     featureBundleChecksum: input.featureBundle.checksum,
     ruleEvaluationRefs: [
       ...footballRules.map((rule) => rule.ruleId),

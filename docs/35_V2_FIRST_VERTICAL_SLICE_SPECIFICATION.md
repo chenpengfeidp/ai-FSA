@@ -503,7 +503,23 @@ Slice 1 does not emit `high_scoring` / `low_scoring` codes.
 
 Slice 1.2 does not blend market-implied probabilities into model `pHome`/`pDraw`/`pAway`.
 
-### 8.7 Projection bundle
+### 8.7 Calibration consumption (slice 1.3)
+
+Statistics owns calibration artifacts. Analysis consumes an **exact pinned** artifact reference and must not train, refresh, or approve a map during a match run.
+
+Slice 1.3 ships only:
+
+| Field | Value |
+|---|---|
+| `calibrationArtifactId` | `calibration:identity:v1` |
+| `calibrationModelVersion` | `calibration.v1.identity` |
+| `map` | identity (probabilities unchanged after renormalization) |
+| `status` | `uncalibrated_baseline` |
+| `qualified` | `false` |
+
+Projection records artifact id/version/status/checksum/qualified and applies `applyCalibration` after rule adjustment. Identity maps do not claim predictive calibration.
+
+### 8.8 Projection bundle
 
 ```text
 DeterministicMatchProjection {
@@ -519,6 +535,7 @@ DeterministicMatchProjection {
   goalRange
   confidence + components
   recommendation + limitations
+  calibrationArtifactId + calibrationModelVersion + calibrationStatus + calibrationChecksum + calibrationQualified
   ruleEvaluationRefs
   featureBundleRef
   checksum
@@ -679,7 +696,7 @@ No parallel speculative packages.
 | Governed engine count remains seven | Pass — no new engine packages |
 | Dependency direction | Pass — Evidence → `@fas/feature` → `@fas/rule` → `@fas/analysis` (projection) → `@fas/report` (assembly) → API → Web |
 | Duplicate computation | Pass — projection owned by Analysis; Report assembles only; Web maps only; Rule emits findings, not 1X2 |
-| Statistics boundary | Pass — no calibration/population metrics in this slice |
+| Statistics boundary | Pass for slice-1 projection math; slice 1.3 adds pinned identity calibration artifact consumption only |
 | ADR required | Pass — no system-shape change; canonical amendments already applied |
 | Package placement | Pass — reuse `@fas/feature`, `@fas/rule`, `@fas/report`, `@fas/analysis` |
 

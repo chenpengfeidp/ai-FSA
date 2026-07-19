@@ -138,6 +138,9 @@ describe("HTTP import and Evidence query workflow", () => {
     );
     expect(report.deterministic).toMatchObject({
       status: "completed_nonempty",
+      calibrationArtifactId: "calibration:identity:v1",
+      calibrationStatus: "uncalibrated_baseline",
+      calibrationQualified: false,
     });
     expect(report.features).toEqual(
       expect.arrayContaining([

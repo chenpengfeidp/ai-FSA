@@ -54,7 +54,12 @@ export interface DeterministicMatchProjection {
   readonly limitations: readonly string[];
   readonly truncationMass: number;
   readonly scorelinesBasis: "pre_rule_adjustment";
-  readonly oneXTwoBasis: "post_rule_adjustment";
+  readonly oneXTwoBasis: "post_rule_and_calibration";
+  readonly calibrationArtifactId: string;
+  readonly calibrationModelVersion: string;
+  readonly calibrationStatus: string;
+  readonly calibrationChecksum: string;
+  readonly calibrationQualified: boolean;
   readonly featureBundleChecksum: string;
   readonly ruleEvaluationRefs: readonly string[];
   readonly checksum: string;
@@ -75,6 +80,11 @@ export interface CreateDeterministicMatchProjectionInput {
   readonly recommendation: RecommendationCode;
   readonly limitations: readonly string[];
   readonly truncationMass: number;
+  readonly calibrationArtifactId: string;
+  readonly calibrationModelVersion: string;
+  readonly calibrationStatus: string;
+  readonly calibrationChecksum: string;
+  readonly calibrationQualified: boolean;
   readonly featureBundleChecksum: string;
   readonly ruleEvaluationRefs: readonly string[];
   readonly checksum: string;
@@ -104,7 +114,12 @@ export function createDeterministicMatchProjection(
     limitations: Object.freeze([...input.limitations]),
     truncationMass: input.truncationMass,
     scorelinesBasis: "pre_rule_adjustment",
-    oneXTwoBasis: "post_rule_adjustment",
+    oneXTwoBasis: "post_rule_and_calibration",
+    calibrationArtifactId: input.calibrationArtifactId,
+    calibrationModelVersion: input.calibrationModelVersion,
+    calibrationStatus: input.calibrationStatus,
+    calibrationChecksum: input.calibrationChecksum,
+    calibrationQualified: input.calibrationQualified,
     featureBundleChecksum: input.featureBundleChecksum,
     ruleEvaluationRefs: Object.freeze([...input.ruleEvaluationRefs]),
     checksum: input.checksum,

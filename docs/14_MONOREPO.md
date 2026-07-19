@@ -217,6 +217,8 @@ Owns versioned assessment definitions, rubrics, qualification and gate policy, i
 
 Owns deterministic metric definitions, populations, formulas, sample/completeness qualification, uncertainty calculations, source watermarks, and rebuildable projections. It does not make quality, release, or approval decisions.
 
+Current repository composition uses `@fas/statistics` as an implementation package for the Statistics calibration-artifact boundary until full engine-package migration. Ownership semantics remain those of the Statistics Engine: Analysis consumes an exact pinned calibration artifact reference and must not train, refresh, or approve maps during a match run.
+
 ### Infrastructure
 
 #### `@fas/database`

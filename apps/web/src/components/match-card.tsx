@@ -1,5 +1,6 @@
 import { Clock3, Search } from "lucide-react";
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 import type { MatchSummary } from "../types/match-center";
 import { LoadingSpinner } from "./loading-spinner";
 import { Button } from "./ui/button";
@@ -46,7 +47,7 @@ export function MatchCard({
             </span>
             <div className="min-w-0 space-y-1">
               <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
-                Home
+                {zh.matchCard.home}
               </p>
               <p className="truncate text-body font-semibold text-foreground">
                 {match.homeTeam}
@@ -56,7 +57,7 @@ export function MatchCard({
 
           <div className="flex shrink-0 flex-col items-center gap-1 px-1">
             <span className="rounded-full border border-border bg-surface-muted px-3 py-1 text-caption font-bold tracking-[0.2em] text-muted-foreground">
-              VS
+              {zh.matchCard.vs}
             </span>
           </div>
 
@@ -69,7 +70,7 @@ export function MatchCard({
             </span>
             <div className="min-w-0 space-y-1">
               <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
-                Away
+                {zh.matchCard.away}
               </p>
               <p className="truncate text-body font-semibold text-foreground">
                 {match.awayTeam}
@@ -80,7 +81,9 @@ export function MatchCard({
 
         <Button
           aria-label={
-            analyzable ? `Analyze ${matchup}` : `Evidence incomplete for ${matchup}`
+            analyzable
+              ? zh.matchCard.analyzeAria(matchup)
+              : zh.matchCard.evidenceIncompleteAria(matchup)
           }
           className="mt-auto w-full transition-transform duration-200 hover:scale-[1.01]"
           disabled={disabled}
@@ -93,7 +96,7 @@ export function MatchCard({
           ) : (
             <>
               <Search aria-hidden="true" className="size-4" />
-              {analyzable ? "Analyze" : "Evidence incomplete"}
+              {analyzable ? zh.matchCard.analyze : zh.matchCard.evidenceIncomplete}
             </>
           )}
         </Button>

@@ -21,16 +21,8 @@ export interface DashboardMetrics {
   readonly reports: number;
 }
 
-export type PipelineStageName =
-  | "Provider"
-  | "Normalizer"
-  | "Evidence"
-  | "Feature"
-  | "Rule"
-  | "Analysis"
-  | "Report";
-
 export interface PipelineStage {
-  readonly name: PipelineStageName;
+  /** Display label (locale-specific; not a protocol enum). */
+  readonly name: string;
   readonly status: "healthy";
 }

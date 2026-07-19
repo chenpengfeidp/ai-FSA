@@ -4,6 +4,7 @@ import { Activity, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 import { formatTimestamp } from "../lib/utils";
 import type { AnalysisHistoryEntry } from "../types/dashboard";
 import { Button } from "./ui/button";
@@ -27,14 +28,16 @@ export function RecentAnalysis({
     >
       <div className="flex items-end justify-between gap-3">
         <h2 className="text-heading text-foreground" id="recent-analysis-heading">
-          Recent Analysis
+          {zh.recentAnalysis.heading}
         </h2>
         <div className="flex items-center gap-3">
           <p className="text-caption text-muted-foreground">
-            {entries.length > 0 ? `${entries.length} completed` : "No reports yet"}
+            {entries.length > 0
+              ? zh.recentAnalysis.completedCount(entries.length)
+              : zh.recentAnalysis.noReportsYet}
           </p>
           <Button asChild size="sm" variant="ghost">
-            <Link href="/reports">Open Library</Link>
+            <Link href="/reports">{zh.recentAnalysis.openLibrary}</Link>
           </Button>
         </div>
       </div>
@@ -47,7 +50,10 @@ export function RecentAnalysis({
                 <CardContent className="flex h-full flex-col gap-4 p-5">
                   <div className="flex items-start justify-between gap-3">
                     <Tag variant="muted">{entry.competition}</Tag>
-                    <StatusBadge label="Completed" status="SUCCESS" />
+                    <StatusBadge
+                      label={zh.recentAnalysis.completed}
+                      status="SUCCESS"
+                    />
                   </div>
 
                   <div className="space-y-1">
@@ -60,7 +66,10 @@ export function RecentAnalysis({
                   </div>
 
                   <Button
-                    aria-label={`Open analysis for ${entry.homeTeam} vs ${entry.awayTeam}`}
+                    aria-label={zh.recentAnalysis.openAnalysisAria(
+                      entry.homeTeam,
+                      entry.awayTeam,
+                    )}
                     className="mt-auto w-full sm:w-auto"
                     onClick={() => {
                       router.push(`/matches/${encodeURIComponent(entry.matchId)}`);
@@ -68,7 +77,7 @@ export function RecentAnalysis({
                     type="button"
                     variant="outline"
                   >
-                    Open Analysis
+                    {zh.recentAnalysis.openAnalysis}
                     <ArrowUpRight aria-hidden="true" className="size-4" />
                   </Button>
                 </CardContent>
@@ -78,9 +87,9 @@ export function RecentAnalysis({
         </ul>
       ) : (
         <EmptyState
-          description="Run Analyze on a match to generate your first explainable report. Results will appear here for quick revisit."
+          description={zh.recentAnalysis.emptyDescription}
           icon={<Activity aria-hidden="true" className="size-5" />}
-          title="No analysis yet"
+          title={zh.recentAnalysis.emptyTitle}
         />
       )}
     </section>

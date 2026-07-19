@@ -3,6 +3,7 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnalysisSessionPage } from "../src/components/analysis-session/analysis-session-page";
+import { zh } from "../src/copy/zh";
 import {
   ANALYSIS_SESSION_STAGES,
   ANALYSIS_SESSION_TOTAL_MS,
@@ -114,13 +115,13 @@ function renderSession(matchId = "match-example-1"): void {
 describe("analysis session mapping", () => {
   it("exposes the seven deterministic pipeline stages", () => {
     expect(ANALYSIS_SESSION_STAGES.map((stage) => stage.label)).toEqual([
-      "Loading Match",
-      "Collecting Evidence",
-      "Extracting Features",
-      "Evaluating Rules",
-      "Building Analysis",
-      "Generating Report",
-      "Opening Workspace",
+      zh.session.stages.loadingMatch.label,
+      zh.session.stages.collectingEvidence.label,
+      zh.session.stages.extractingFeatures.label,
+      zh.session.stages.evaluatingRules.label,
+      zh.session.stages.buildingAnalysis.label,
+      zh.session.stages.generatingReport.label,
+      zh.session.stages.openingWorkspace.label,
     ]);
   });
 
@@ -133,7 +134,7 @@ describe("analysis session mapping", () => {
 
     const progress = buildSessionProgress(2, false);
     expect(progress.completedCount).toBe(2);
-    expect(progress.runningLabel).toBe("Extracting Features");
+    expect(progress.runningLabel).toBe(zh.session.stages.extractingFeatures.label);
     expect(progress.estimatedDurationLabel).toBe(
       formatEstimatedDuration(ANALYSIS_SESSION_TOTAL_MS),
     );
@@ -167,21 +168,29 @@ describe("AnalysisSessionPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Premier League")).toBeInTheDocument();
     expect(screen.getByText("19:30")).toBeInTheDocument();
-    expect(screen.getByLabelText("Analysis session progress")).toBeInTheDocument();
-    expect(screen.getByText("Loading Match")).toBeInTheDocument();
-    expect(screen.getByText("Opening Workspace")).toBeInTheDocument();
+    expect(screen.getByLabelText(zh.session.progressAria)).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.session.stages.loadingMatch.label),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.session.stages.openingWorkspace.label),
+    ).toBeInTheDocument();
 
-    expect(screen.getByText("Running")).toBeInTheDocument();
-    expect(screen.getAllByText("Pending").length).toBeGreaterThanOrEqual(5);
+    expect(screen.getByText(zh.session.statusRunning)).toBeInTheDocument();
+    expect(
+      screen.getAllByText(zh.session.statusPending).length,
+    ).toBeGreaterThanOrEqual(5);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(ANALYSIS_SESSION_STAGES[0]!.durationMs);
     });
 
-    expect(screen.getByText("Collecting Evidence").closest("li")).toHaveTextContent(
-      "Running",
-    );
-    expect(screen.getAllByText("Completed").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByText(zh.session.stages.collectingEvidence.label).closest("li"),
+    ).toHaveTextContent(zh.session.statusRunning);
+    expect(
+      screen.getAllByText(zh.session.statusCompleted).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("navigates to the workspace when every stage completes", async () => {
@@ -197,7 +206,7 @@ describe("AnalysisSessionPage", () => {
   it("shows an empty state for unknown matches", () => {
     renderSession("match-unknown");
 
-    expect(screen.getByText("Match not found")).toBeInTheDocument();
+    expect(screen.getByText(zh.session.matchNotFound)).toBeInTheDocument();
     expect(replace).not.toHaveBeenCalled();
   });
 });

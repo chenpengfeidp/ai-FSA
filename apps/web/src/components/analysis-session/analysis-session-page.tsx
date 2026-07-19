@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, type ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { useAnalysisSessionStages } from "../../hooks/use-analysis-session-stages";
 import { useMatchDetail } from "../../hooks/use-match-detail";
 import { useUpcomingMatches } from "../../hooks/use-upcoming-matches";
@@ -36,18 +37,18 @@ export function AnalysisSessionPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <AppTopNav eyebrow="Analysis Session" />
+      <AppTopNav eyebrow={zh.session.navEyebrow} />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
         {match === undefined ? (
           <EmptyState
             action={
               <Button asChild variant="outline">
-                <Link href="/">Back to Match Center</Link>
+                <Link href="/">{zh.session.backToMatchCenter}</Link>
               </Button>
             }
-            description={`No catalog entry exists for "${matchId}". Choose a match from today's fixtures.`}
-            title="Match not found"
+            description={zh.session.matchNotFoundDescription(matchId)}
+            title={zh.session.matchNotFound}
           />
         ) : (
           <div className="animate-fade-in space-y-6">
@@ -57,11 +58,10 @@ export function AnalysisSessionPage({
               <CardContent className="p-6 sm:p-8">
                 <div className="mb-6 space-y-1">
                   <h2 className="text-title font-semibold text-foreground">
-                    Pipeline timeline
+                    {zh.session.timelineHeading}
                   </h2>
                   <p className="text-body text-muted-foreground">
-                    Each stage represents part of the existing deterministic
-                    workflow. Stages complete in order before the workspace opens.
+                    {zh.session.timelineDescription}
                   </p>
                 </div>
                 <SessionTimeline stages={session.stages} />

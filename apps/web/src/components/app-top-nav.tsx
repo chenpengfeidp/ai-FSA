@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 import { todaysMatches } from "../lib/todays-matches";
 import { cn } from "../lib/utils";
 
@@ -14,22 +15,22 @@ const workspaceHref =
 const NAV_ITEMS = [
   {
     href: "/",
-    label: "Dashboard",
+    label: zh.nav.dashboard,
     match: (path: string) => path === "/",
   },
   {
     href: "/#todays-matches",
-    label: "Match Center",
+    label: zh.nav.matchCenter,
     match: () => false,
   },
   {
     href: workspaceHref,
-    label: "Workspace",
+    label: zh.nav.workspace,
     match: (path: string) => path.startsWith("/matches/"),
   },
   {
     href: "/reports",
-    label: "Reports",
+    label: zh.nav.reports,
     match: (path: string) => path.startsWith("/reports"),
   },
 ] as const;
@@ -51,7 +52,7 @@ export function AppTopNav({
           </span>
           <div>
             <p className="text-body font-semibold tracking-tight text-foreground">
-              AI Football Analysis
+              {zh.nav.brand}
             </p>
             {eyebrow ? (
               <p className="text-caption text-muted-foreground">{eyebrow}</p>
@@ -59,7 +60,10 @@ export function AppTopNav({
           </div>
         </Link>
 
-        <nav aria-label="Primary" className="flex flex-wrap items-center gap-1">
+        <nav
+          aria-label={zh.nav.primaryAria}
+          className="flex flex-wrap items-center gap-1"
+        >
           {NAV_ITEMS.map((item) => {
             const active = item.match(pathname);
 

@@ -1,17 +1,18 @@
 import { ChevronRight } from "lucide-react";
 import { Fragment, type ReactElement } from "react";
+import { zh } from "../copy/zh";
 import type { PipelineStage } from "../types/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { StatusBadge } from "./ui/status-badge";
 
 const pipelineStages: readonly PipelineStage[] = Object.freeze([
-  Object.freeze({ name: "Provider", status: "healthy" }),
-  Object.freeze({ name: "Normalizer", status: "healthy" }),
-  Object.freeze({ name: "Evidence", status: "healthy" }),
-  Object.freeze({ name: "Feature", status: "healthy" }),
-  Object.freeze({ name: "Rule", status: "healthy" }),
-  Object.freeze({ name: "Analysis", status: "healthy" }),
-  Object.freeze({ name: "Report", status: "healthy" }),
+  Object.freeze({ name: zh.pipeline.stages.provider, status: "healthy" }),
+  Object.freeze({ name: zh.pipeline.stages.normalizer, status: "healthy" }),
+  Object.freeze({ name: zh.pipeline.stages.evidence, status: "healthy" }),
+  Object.freeze({ name: zh.pipeline.stages.feature, status: "healthy" }),
+  Object.freeze({ name: zh.pipeline.stages.rule, status: "healthy" }),
+  Object.freeze({ name: zh.pipeline.stages.analysis, status: "healthy" }),
+  Object.freeze({ name: zh.pipeline.stages.report, status: "healthy" }),
 ]);
 
 export function PipelineStatus(): ReactElement {
@@ -19,7 +20,7 @@ export function PipelineStatus(): ReactElement {
     <section aria-labelledby="pipeline-status-heading">
       <Card className="hover:translate-y-0">
         <CardHeader className="border-b-0 pb-0">
-          <CardTitle id="pipeline-status-heading">Pipeline Status</CardTitle>
+          <CardTitle id="pipeline-status-heading">{zh.pipeline.heading}</CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
           <ol className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:gap-y-3">
@@ -30,7 +31,7 @@ export function PipelineStatus(): ReactElement {
                     <span className="text-body font-semibold text-foreground">
                       {stage.name}
                     </span>
-                    <StatusBadge label="Healthy" status="SUCCESS" />
+                    <StatusBadge label={zh.pipeline.healthy} status="SUCCESS" />
                   </div>
                 </li>
                 {index < pipelineStages.length - 1 ? (

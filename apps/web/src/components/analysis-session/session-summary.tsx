@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import type { AnalysisSessionProgress } from "../../types/analysis-session";
 import type { MatchSummary } from "../../types/match-center";
 import { Card, CardContent } from "../ui/card";
@@ -15,20 +16,18 @@ export function SessionSummary({
       <CardContent className="space-y-5 p-6 sm:p-8">
         <div className="space-y-2">
           <p className="text-caption font-semibold uppercase tracking-[0.14em] text-primary">
-            Analysis Session
+            {zh.session.eyebrow}
           </p>
           <h1 className="text-heading font-semibold tracking-tight text-foreground sm:text-display sm:leading-[2.5rem]">
             {match.homeTeam} vs {match.awayTeam}
           </h1>
-          <p className="text-body text-muted-foreground">
-            Watching the deterministic pipeline assemble a reviewable report.
-          </p>
+          <p className="text-body text-muted-foreground">{zh.session.watching}</p>
         </div>
 
         <dl className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl bg-surface-muted px-4 py-3">
             <dt className="text-caption font-semibold uppercase tracking-[0.12em] text-subtle">
-              Match
+              {zh.session.match}
             </dt>
             <dd className="mt-1 text-body font-semibold text-foreground">
               {match.homeTeam} vs {match.awayTeam}
@@ -36,7 +35,7 @@ export function SessionSummary({
           </div>
           <div className="rounded-xl bg-surface-muted px-4 py-3">
             <dt className="text-caption font-semibold uppercase tracking-[0.12em] text-subtle">
-              Competition
+              {zh.session.competition}
             </dt>
             <dd className="mt-1 text-body font-semibold text-foreground">
               {match.competition}
@@ -44,7 +43,7 @@ export function SessionSummary({
           </div>
           <div className="rounded-xl bg-surface-muted px-4 py-3">
             <dt className="text-caption font-semibold uppercase tracking-[0.12em] text-subtle">
-              Kickoff
+              {zh.session.kickoff}
             </dt>
             <dd className="mt-1 text-body font-semibold text-foreground">
               {match.kickoffTime}
@@ -52,7 +51,7 @@ export function SessionSummary({
           </div>
           <div className="rounded-xl bg-surface-muted px-4 py-3">
             <dt className="text-caption font-semibold uppercase tracking-[0.12em] text-subtle">
-              Estimated duration
+              {zh.session.estimatedDuration}
             </dt>
             <dd className="mt-1 text-body font-semibold text-foreground">
               {progress.estimatedDurationLabel}
@@ -63,14 +62,14 @@ export function SessionSummary({
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
             <p className="text-caption font-semibold text-muted-foreground">
-              Progress
+              {zh.session.progress}
             </p>
             <p className="text-caption font-semibold tabular-nums text-foreground">
               {progress.percent}% · {progress.completedCount}/{progress.totalCount}
             </p>
           </div>
           <div
-            aria-label="Analysis session progress"
+            aria-label={zh.session.progressAria}
             aria-valuemax={100}
             aria-valuemin={0}
             aria-valuenow={progress.percent}
@@ -84,11 +83,12 @@ export function SessionSummary({
           </div>
           {progress.runningLabel ? (
             <p className="text-caption text-muted-foreground">
-              Running: {progress.runningLabel}
+              {zh.session.runningPrefix}
+              {progress.runningLabel}
             </p>
           ) : (
             <p className="text-caption text-success-foreground">
-              Session complete — opening workspace
+              {zh.session.sessionComplete}
             </p>
           )}
         </div>

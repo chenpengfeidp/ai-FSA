@@ -3,6 +3,7 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 import { Button } from "./ui/button";
 
 function scrollToSection(id: string): void {
@@ -35,7 +36,7 @@ export function HomeHero(): ReactElement {
       <div className="relative max-w-2xl space-y-6">
         <p className="inline-flex items-center gap-2 text-caption font-semibold uppercase tracking-[0.18em] text-primary">
           <Sparkles aria-hidden="true" className="size-3.5" />
-          Deterministic Football Intelligence
+          {zh.hero.eyebrow}
         </p>
 
         <div className="space-y-4">
@@ -43,10 +44,10 @@ export function HomeHero(): ReactElement {
             className="text-[2rem] font-bold tracking-tight text-foreground sm:text-display sm:leading-[2.75rem] md:text-[3rem] md:leading-[3.25rem]"
             id="home-hero-heading"
           >
-            AI Football Analysis Platform
+            {zh.hero.title}
           </h1>
           <p className="max-w-xl text-title font-normal text-muted-foreground">
-            Explainable football analysis powered by deterministic pipelines.
+            {zh.hero.description}
           </p>
         </div>
 
@@ -59,11 +60,11 @@ export function HomeHero(): ReactElement {
             type="button"
             variant="primary"
           >
-            Analyze Today&apos;s Matches
+            {zh.hero.analyzeToday}
             <ArrowRight aria-hidden="true" className="size-4" />
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link href="/reports">View Recent Reports</Link>
+            <Link href="/reports">{zh.hero.viewRecentReports}</Link>
           </Button>
         </div>
       </div>

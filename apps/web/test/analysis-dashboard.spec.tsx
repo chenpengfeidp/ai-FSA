@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnalysisDashboard } from "../src/components/analysis-dashboard";
+import { zh } from "../src/copy/zh";
 import {
   ANALYSIS_HISTORY_STORAGE_KEY,
   clearAnalysisHistoryCacheForTests,
@@ -152,72 +153,74 @@ describe("AnalysisDashboard", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "AI Football Analysis Platform",
+        name: zh.hero.title,
       }),
     ).toBeInTheDocument();
+    expect(screen.getByText(zh.hero.eyebrow)).toBeInTheDocument();
+    expect(screen.getByText(zh.hero.description)).toBeInTheDocument();
     expect(
-      screen.getByText("Deterministic Football Intelligence"),
+      screen.getByRole("button", { name: zh.hero.analyzeToday }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Explainable football analysis powered by deterministic pipelines.",
-      ),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Analyze Today's Matches" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "View Recent Reports" }),
+      screen.getByRole("link", { name: zh.hero.viewRecentReports }),
     ).toHaveAttribute("href", "/reports");
-    expect(screen.getByRole("link", { name: "Reports" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: zh.nav.reports })).toHaveAttribute(
       "href",
       "/reports",
     );
 
     expect(
-      screen.getByRole("heading", { name: "Upcoming Matches" }),
+      screen.getByRole("heading", { name: zh.matchCenter.upcomingHeading }),
     ).toBeInTheDocument();
 
     await waitFor(() => {
       expect(
-        screen.getAllByRole("button", { name: /^Analyze .+ vs .+$/ }),
+        screen.getAllByRole("button", { name: /^分析 .+ vs .+$/ }),
       ).toHaveLength(6);
     });
     expect(
       screen.getByRole("button", {
-        name: "Evidence incomplete for Tottenham Hotspur vs Everton",
+        name: zh.matchCard.evidenceIncompleteAria("Tottenham Hotspur vs Everton"),
       }),
     ).toBeDisabled();
-    expect(screen.getAllByText("VS").length).toBeGreaterThanOrEqual(7);
+    expect(screen.getAllByText(zh.matchCard.vs).length).toBeGreaterThanOrEqual(7);
 
-    expect(screen.getByText("No analysis yet")).toBeInTheDocument();
-
-    expect(screen.getByRole("heading", { name: "Overview" })).toBeInTheDocument();
-    expect(screen.getByText("Imported Matches")).toBeInTheDocument();
-    expect(screen.getAllByText("Reports").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Evidence").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Features").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Rules").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(zh.recentAnalysis.emptyTitle)).toBeInTheDocument();
 
     expect(
-      screen.getByRole("heading", { name: "Pipeline Status" }),
+      screen.getByRole("heading", { name: zh.overview.heading }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Provider")).toBeInTheDocument();
-    expect(screen.getByText("Normalizer")).toBeInTheDocument();
-    expect(screen.getAllByText("Healthy")).toHaveLength(7);
+    expect(screen.getByText(zh.overview.importedMatches)).toBeInTheDocument();
+    expect(screen.getAllByText(zh.overview.reports).length).toBeGreaterThanOrEqual(
+      1,
+    );
+    expect(screen.getAllByText(zh.overview.evidence).length).toBeGreaterThanOrEqual(
+      1,
+    );
+    expect(screen.getAllByText(zh.overview.features).length).toBeGreaterThanOrEqual(
+      1,
+    );
+    expect(screen.getAllByText(zh.overview.rules).length).toBeGreaterThanOrEqual(1);
+
+    expect(
+      screen.getByRole("heading", { name: zh.pipeline.heading }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(zh.pipeline.stages.provider)).toBeInTheDocument();
+    expect(screen.getByText(zh.pipeline.stages.normalizer)).toBeInTheDocument();
+    expect(screen.getAllByText(zh.pipeline.healthy)).toHaveLength(7);
 
     const headings = screen.getAllByRole("heading").map((node) => node.textContent);
-    expect(headings.indexOf("AI Football Analysis Platform")).toBeLessThan(
-      headings.indexOf("Upcoming Matches"),
+    expect(headings.indexOf(zh.hero.title)).toBeLessThan(
+      headings.indexOf(zh.matchCenter.upcomingHeading),
     );
-    expect(headings.indexOf("Upcoming Matches")).toBeLessThan(
-      headings.indexOf("Recent Analysis"),
+    expect(headings.indexOf(zh.matchCenter.upcomingHeading)).toBeLessThan(
+      headings.indexOf(zh.recentAnalysis.heading),
     );
-    expect(headings.indexOf("Recent Analysis")).toBeLessThan(
-      headings.indexOf("Overview"),
+    expect(headings.indexOf(zh.recentAnalysis.heading)).toBeLessThan(
+      headings.indexOf(zh.overview.heading),
     );
-    expect(headings.indexOf("Overview")).toBeLessThan(
-      headings.indexOf("Pipeline Status"),
+    expect(headings.indexOf(zh.overview.heading)).toBeLessThan(
+      headings.indexOf(zh.pipeline.heading),
     );
   });
 
@@ -230,10 +233,12 @@ describe("AnalysisDashboard", () => {
     });
     expect(screen.getAllByText("1").length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText("Completed")).toBeInTheDocument();
+    expect(screen.getByText(zh.recentAnalysis.completed)).toBeInTheDocument();
     expect(screen.getByText(/UTC/)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Open analysis for Liverpool vs Chelsea" }),
+      screen.getByRole("button", {
+        name: zh.recentAnalysis.openAnalysisAria("Liverpool", "Chelsea"),
+      }),
     ).toBeInTheDocument();
     expect(window.localStorage.getItem(ANALYSIS_HISTORY_STORAGE_KEY)).not.toBeNull();
   });
@@ -246,14 +251,14 @@ describe("AnalysisDashboard", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("button", {
-          name: "Open analysis for Liverpool vs Chelsea",
+          name: zh.recentAnalysis.openAnalysisAria("Liverpool", "Chelsea"),
         }),
       ).toBeInTheDocument();
     });
 
     await user.click(
       screen.getByRole("button", {
-        name: "Open analysis for Liverpool vs Chelsea",
+        name: zh.recentAnalysis.openAnalysisAria("Liverpool", "Chelsea"),
       }),
     );
 
@@ -267,14 +272,14 @@ describe("AnalysisDashboard", () => {
     await waitFor(() => {
       expect(
         screen.getByRole("button", {
-          name: "Analyze Liverpool vs Chelsea",
+          name: zh.matchCard.analyzeAria("Liverpool vs Chelsea"),
         }),
       ).toBeInTheDocument();
     });
 
     await user.click(
       screen.getByRole("button", {
-        name: "Analyze Liverpool vs Chelsea",
+        name: zh.matchCard.analyzeAria("Liverpool vs Chelsea"),
       }),
     );
 

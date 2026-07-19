@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnalysisLibraryPage } from "../src/components/analysis-library/analysis-library-page";
+import { zh } from "../src/copy/zh";
 import {
   clearAnalysisHistoryCacheForTests,
   writeAnalysisHistory,
@@ -119,11 +120,11 @@ describe("AnalysisLibraryPage", () => {
     expect(
       screen.getByRole("heading", { name: "Analysis Library" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Reports" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: zh.nav.reports })).toHaveAttribute(
       "href",
       "/reports",
     );
-    expect(screen.getByRole("link", { name: "Dashboard" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: zh.nav.dashboard })).toBeInTheDocument();
     expect(
       await screen.findByRole("link", { name: "Go to Match Center" }),
     ).toHaveAttribute("href", "/#todays-matches");

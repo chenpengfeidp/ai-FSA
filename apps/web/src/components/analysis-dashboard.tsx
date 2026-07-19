@@ -3,6 +3,7 @@
 import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 import { useAnalysisHistory } from "../hooks/use-analysis-history";
 import { useUpcomingMatches } from "../hooks/use-upcoming-matches";
 import type { MatchSummary } from "../types/match-center";
@@ -41,25 +42,25 @@ export function AnalysisDashboard(): ReactElement {
             <div>
               <p className="flex items-center gap-2 text-caption font-semibold uppercase tracking-[0.14em] text-primary">
                 <CalendarDays aria-hidden="true" className="size-3.5" />
-                Match Center
+                {zh.matchCenter.eyebrow}
               </p>
               <h2
                 className="mt-2 text-heading text-foreground"
                 id="todays-matches-heading"
               >
-                Upcoming Matches
+                {zh.matchCenter.upcomingHeading}
               </h2>
             </div>
             <p className="text-body text-muted-foreground">
               {upcoming.isLoading
-                ? "Loading fixtures…"
-                : `${String(upcoming.matches.length)} fixtures available`}
+                ? zh.matchCenter.loadingFixtures
+                : zh.matchCenter.fixturesAvailable(upcoming.matches.length)}
             </p>
           </div>
 
           {upcoming.isError ? (
             <p className="text-body text-red-700" role="alert">
-              {upcoming.errorMessage ?? "Unable to load upcoming matches."}
+              {upcoming.errorMessage ?? zh.matchCenter.loadError}
             </p>
           ) : null}
 

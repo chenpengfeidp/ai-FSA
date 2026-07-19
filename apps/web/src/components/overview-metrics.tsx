@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { zh } from "../copy/zh";
 import type { DashboardMetrics } from "../types/dashboard";
 import { Card, CardContent } from "./ui/card";
 
@@ -11,11 +12,11 @@ export function OverviewMetrics({
   metrics,
 }: Readonly<{ metrics: DashboardMetrics }>): ReactElement {
   const cards: readonly MetricCardDefinition[] = [
-    { label: "Imported Matches", value: metrics.importedMatches },
-    { label: "Evidence", value: metrics.evidence },
-    { label: "Features", value: metrics.features },
-    { label: "Rules", value: metrics.rules },
-    { label: "Reports", value: metrics.reports },
+    { label: zh.overview.importedMatches, value: metrics.importedMatches },
+    { label: zh.overview.evidence, value: metrics.evidence },
+    { label: zh.overview.features, value: metrics.features },
+    { label: zh.overview.rules, value: metrics.rules },
+    { label: zh.overview.reports, value: metrics.reports },
   ];
 
   return (
@@ -25,9 +26,11 @@ export function OverviewMetrics({
     >
       <div className="flex items-end justify-between gap-3">
         <h2 className="text-heading text-foreground" id="overview-heading">
-          Overview
+          {zh.overview.heading}
         </h2>
-        <p className="text-caption text-muted-foreground">Session metrics</p>
+        <p className="text-caption text-muted-foreground">
+          {zh.overview.sessionMetrics}
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">

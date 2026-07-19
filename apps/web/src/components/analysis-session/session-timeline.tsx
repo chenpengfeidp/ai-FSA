@@ -2,6 +2,7 @@
 
 import { Check, LoaderCircle } from "lucide-react";
 import type { ReactElement } from "react";
+import { zh } from "../../copy/zh";
 import { cn } from "../../lib/utils";
 import type { AnalysisSessionStageView } from "../../types/analysis-session";
 
@@ -31,13 +32,25 @@ function StageMarker({
   );
 }
 
+function statusLabel(status: AnalysisSessionStageView["status"]): string {
+  if (status === "completed") {
+    return zh.session.statusCompleted;
+  }
+
+  if (status === "running") {
+    return zh.session.statusRunning;
+  }
+
+  return zh.session.statusPending;
+}
+
 export function SessionTimeline({
   stages,
 }: Readonly<{
   stages: readonly AnalysisSessionStageView[];
 }>): ReactElement {
   return (
-    <ol aria-label="Analysis session stages" className="relative space-y-0">
+    <ol aria-label={zh.session.stagesAria} className="relative space-y-0">
       {stages.map((stage, index) => {
         const isLast = index === stages.length - 1;
 
@@ -87,11 +100,7 @@ export function SessionTimeline({
                     stage.status === "pending" && "bg-surface-muted text-subtle",
                   )}
                 >
-                  {stage.status === "completed"
-                    ? "Completed"
-                    : stage.status === "running"
-                      ? "Running"
-                      : "Pending"}
+                  {statusLabel(stage.status)}
                 </span>
               </div>
               <p className="mt-1.5 text-caption leading-5 text-muted-foreground">

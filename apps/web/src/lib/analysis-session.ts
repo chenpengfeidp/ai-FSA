@@ -1,3 +1,4 @@
+import { zh } from "../copy/zh";
 import type {
   AnalysisSessionProgress,
   AnalysisSessionStageDefinition,
@@ -14,44 +15,44 @@ export const ANALYSIS_SESSION_STAGES: readonly AnalysisSessionStageDefinition[] 
   Object.freeze([
     Object.freeze({
       id: "loading-match",
-      label: "Loading Match",
-      description: "Resolve fixture identity and kickoff context.",
+      label: zh.session.stages.loadingMatch.label,
+      description: zh.session.stages.loadingMatch.description,
       durationMs: 650,
     }),
     Object.freeze({
       id: "collecting-evidence",
-      label: "Collecting Evidence",
-      description: "Gather normalized evidence for the selected match.",
+      label: zh.session.stages.collectingEvidence.label,
+      description: zh.session.stages.collectingEvidence.description,
       durationMs: 850,
     }),
     Object.freeze({
       id: "extracting-features",
-      label: "Extracting Features",
-      description: "Derive deterministic features from evidence.",
+      label: zh.session.stages.extractingFeatures.label,
+      description: zh.session.stages.extractingFeatures.description,
       durationMs: 750,
     }),
     Object.freeze({
       id: "evaluating-rules",
-      label: "Evaluating Rules",
-      description: "Apply rule engine checks without generative inference.",
+      label: zh.session.stages.evaluatingRules.label,
+      description: zh.session.stages.evaluatingRules.description,
       durationMs: 800,
     }),
     Object.freeze({
       id: "building-analysis",
-      label: "Building Analysis",
-      description: "Compose the analysis result from evaluated findings.",
+      label: zh.session.stages.buildingAnalysis.label,
+      description: zh.session.stages.buildingAnalysis.description,
       durationMs: 700,
     }),
     Object.freeze({
       id: "generating-report",
-      label: "Generating Report",
-      description: "Assemble the explainable match report payload.",
+      label: zh.session.stages.generatingReport.label,
+      description: zh.session.stages.generatingReport.description,
       durationMs: 750,
     }),
     Object.freeze({
       id: "opening-workspace",
-      label: "Opening Workspace",
-      description: "Hand off into the reviewable analysis workspace.",
+      label: zh.session.stages.openingWorkspace.label,
+      description: zh.session.stages.openingWorkspace.description,
       durationMs: 550,
     }),
   ]);
@@ -63,7 +64,7 @@ export const ANALYSIS_SESSION_TOTAL_MS = ANALYSIS_SESSION_STAGES.reduce(
 
 export function formatEstimatedDuration(totalMs: number): string {
   const seconds = Math.max(1, Math.round(totalMs / 1000));
-  return `~${String(seconds)}s`;
+  return `约 ${String(seconds)} 秒`;
 }
 
 export function stageStatusAtIndex(

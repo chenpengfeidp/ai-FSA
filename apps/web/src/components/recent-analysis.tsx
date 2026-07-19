@@ -1,11 +1,15 @@
 "use client";
 
-import { Activity, CalendarClock, ChevronRight } from "lucide-react";
+import { Activity, ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 import { formatTimestamp } from "../lib/utils";
 import type { AnalysisHistoryEntry } from "../types/dashboard";
+import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
+import { EmptyState } from "./ui/empty-state";
+import { StatusBadge } from "./ui/status-badge";
+import { Tag } from "./ui/tag";
 
 export function RecentAnalysis({
   entries,
@@ -15,64 +19,63 @@ export function RecentAnalysis({
   const router = useRouter();
 
   return (
-    <section aria-labelledby="recent-analysis-heading" className="space-y-5">
-      <div>
-        <p className="text-sm font-semibold text-blue-600">Latest results</p>
-        <h2
-          className="mt-1 text-2xl font-bold tracking-tight text-slate-950"
-          id="recent-analysis-heading"
-        >
+    <section
+      aria-labelledby="recent-analysis-heading"
+      className="animate-fade-in-delay-2 space-y-4"
+      id="recent-analysis"
+    >
+      <div className="flex items-end justify-between gap-3">
+        <h2 className="text-heading text-foreground" id="recent-analysis-heading">
           Recent Analysis
         </h2>
+        <p className="text-caption text-muted-foreground">
+          {entries.length > 0 ? `${entries.length} completed` : "No reports yet"}
+        </p>
       </div>
 
       {entries.length > 0 ? (
-        <ul className="space-y-3">
+        <ul className="grid gap-3 sm:grid-cols-2">
           {entries.map((entry) => (
             <li key={entry.matchId}>
-              <button
-                aria-label={`Open analysis for ${entry.homeTeam} vs ${entry.awayTeam}`}
-                className="flex w-full items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4 text-left shadow-sm hover:border-blue-200 hover:bg-blue-50/40"
-                onClick={() => {
-                  router.push(`/matches/${encodeURIComponent(entry.matchId)}`);
-                }}
-                type="button"
-              >
-                <div className="min-w-0 space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    {entry.competition}
-                  </p>
-                  <p className="font-semibold text-slate-950">
-                    {entry.homeTeam} vs {entry.awayTeam}
-                  </p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarClock aria-hidden="true" className="size-3.5" />
-                      Kickoff {entry.kickoffTime}
-                    </span>
-                    <span>Analyzed {formatTimestamp(entry.analyzedAt)} UTC</span>
+              <Card className="h-full">
+                <CardContent className="flex h-full flex-col gap-4 p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <Tag variant="muted">{entry.competition}</Tag>
+                    <StatusBadge label="Completed" status="SUCCESS" />
                   </div>
-                </div>
-                <ChevronRight
-                  aria-hidden="true"
-                  className="size-5 shrink-0 text-slate-400"
-                />
-              </button>
+
+                  <div className="space-y-1">
+                    <p className="text-title text-foreground">
+                      {entry.homeTeam} vs {entry.awayTeam}
+                    </p>
+                    <p className="text-caption text-muted-foreground">
+                      {formatTimestamp(entry.analyzedAt)} UTC
+                    </p>
+                  </div>
+
+                  <Button
+                    aria-label={`Open analysis for ${entry.homeTeam} vs ${entry.awayTeam}`}
+                    className="mt-auto w-full sm:w-auto"
+                    onClick={() => {
+                      router.push(`/matches/${encodeURIComponent(entry.matchId)}`);
+                    }}
+                    type="button"
+                    variant="outline"
+                  >
+                    Open Analysis
+                    <ArrowUpRight aria-hidden="true" className="size-4" />
+                  </Button>
+                </CardContent>
+              </Card>
             </li>
           ))}
         </ul>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center px-6 py-12 text-center">
-            <span className="flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-              <Activity aria-hidden="true" className="size-5" />
-            </span>
-            <p className="mt-4 font-semibold text-slate-900">No analysis yet</p>
-            <p className="mt-1 max-w-md text-sm leading-6 text-slate-500">
-              Analyze a match to populate overview metrics and recent results.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          description="Run Analyze on a match to generate your first explainable report. Results will appear here for quick revisit."
+          icon={<Activity aria-hidden="true" className="size-5" />}
+          title="No analysis yet"
+        />
       )}
     </section>
   );

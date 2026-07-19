@@ -1,14 +1,8 @@
-import { CheckCircle2 } from "lucide-react";
-import type { ReactElement } from "react";
+import { ChevronRight } from "lucide-react";
+import { Fragment, type ReactElement } from "react";
 import type { PipelineStage } from "../types/dashboard";
-import { Badge } from "./ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { StatusBadge } from "./ui/status-badge";
 
 const pipelineStages: readonly PipelineStage[] = Object.freeze([
   Object.freeze({ name: "Provider", status: "healthy" }),
@@ -23,31 +17,34 @@ const pipelineStages: readonly PipelineStage[] = Object.freeze([
 export function PipelineStatus(): ReactElement {
   return (
     <section aria-labelledby="pipeline-status-heading">
-      <Card>
-        <CardHeader>
+      <Card className="hover:translate-y-0">
+        <CardHeader className="border-b-0 pb-0">
           <CardTitle id="pipeline-status-heading">Pipeline Status</CardTitle>
-          <CardDescription>
-            Presentation-only health view of the deterministic analysis pipeline.
-          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {pipelineStages.map((stage) => (
-              <li
-                className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-3"
-                key={stage.name}
-              >
-                <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <CheckCircle2
+        <CardContent className="pt-4">
+          <ol className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:gap-y-3">
+            {pipelineStages.map((stage, index) => (
+              <Fragment key={stage.name}>
+                <li className="min-w-0 md:min-w-[6.5rem] md:flex-1">
+                  <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface-muted/70 px-3 py-2.5 md:flex-col md:items-start md:gap-2">
+                    <span className="text-body font-semibold text-foreground">
+                      {stage.name}
+                    </span>
+                    <StatusBadge label="Healthy" status="SUCCESS" />
+                  </div>
+                </li>
+                {index < pipelineStages.length - 1 ? (
+                  <li
                     aria-hidden="true"
-                    className="size-4 text-emerald-600"
-                  />
-                  {stage.name}
-                </span>
-                <Badge variant="pass">{stage.status}</Badge>
-              </li>
+                    className="flex items-center justify-center text-subtle md:px-0.5"
+                  >
+                    <span className="md:hidden">↓</span>
+                    <ChevronRight className="hidden size-4 md:block" />
+                  </li>
+                ) : null}
+              </Fragment>
             ))}
-          </ul>
+          </ol>
         </CardContent>
       </Card>
     </section>

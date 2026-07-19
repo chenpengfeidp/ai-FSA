@@ -59,7 +59,7 @@ describe("AnalysisDashboard", () => {
     clearAnalysisHistoryCacheForTests();
   });
 
-  it("renders overview metrics, pipeline status, matches, and empty recent state", () => {
+  it("renders hero, matches, recent, overview, and pipeline in landing order", () => {
     renderDashboard();
 
     expect(
@@ -68,23 +68,58 @@ describe("AnalysisDashboard", () => {
         name: "AI Football Analysis Platform",
       }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText("Deterministic Football Intelligence"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Explainable football analysis powered by deterministic pipelines.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Analyze Today's Matches" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "View Recent Reports" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("heading", { name: "Today's Matches" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", { name: /^Analyze .+ vs .+$/ }),
+    ).toHaveLength(6);
+    expect(screen.getAllByText("VS").length).toBeGreaterThanOrEqual(6);
+
+    expect(screen.getByText("No analysis yet")).toBeInTheDocument();
+
     expect(screen.getByRole("heading", { name: "Overview" })).toBeInTheDocument();
     expect(screen.getByText("Imported Matches")).toBeInTheDocument();
     expect(screen.getByText("Reports")).toBeInTheDocument();
     expect(screen.getAllByText("Evidence").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Features").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Rules").length).toBeGreaterThanOrEqual(1);
+
     expect(
       screen.getByRole("heading", { name: "Pipeline Status" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Provider")).toBeInTheDocument();
     expect(screen.getByText("Normalizer")).toBeInTheDocument();
-    expect(screen.getAllByText("healthy")).toHaveLength(7);
-    expect(
-      screen.getByRole("heading", { name: "Today's Matches" }),
-    ).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /^Analyze / })).toHaveLength(6);
-    expect(screen.getByText("No analysis yet")).toBeInTheDocument();
+    expect(screen.getAllByText("Healthy")).toHaveLength(7);
+
+    const headings = screen.getAllByRole("heading").map((node) => node.textContent);
+    expect(headings.indexOf("AI Football Analysis Platform")).toBeLessThan(
+      headings.indexOf("Today's Matches"),
+    );
+    expect(headings.indexOf("Today's Matches")).toBeLessThan(
+      headings.indexOf("Recent Analysis"),
+    );
+    expect(headings.indexOf("Recent Analysis")).toBeLessThan(
+      headings.indexOf("Overview"),
+    );
+    expect(headings.indexOf("Overview")).toBeLessThan(
+      headings.indexOf("Pipeline Status"),
+    );
   });
 
   it("calculates overview metrics and recent analysis from stored results", () => {
@@ -94,8 +129,11 @@ describe("AnalysisDashboard", () => {
     expect(screen.getAllByText("1").length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("Liverpool vs Chelsea")).toBeInTheDocument();
-    expect(screen.getByText("Kickoff 19:30")).toBeInTheDocument();
-    expect(screen.getByText(/Analyzed /)).toBeInTheDocument();
+    expect(screen.getByText("Completed")).toBeInTheDocument();
+    expect(screen.getByText(/UTC/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open analysis for Liverpool vs Chelsea" }),
+    ).toBeInTheDocument();
     expect(window.localStorage.getItem(ANALYSIS_HISTORY_STORAGE_KEY)).not.toBeNull();
   });
 

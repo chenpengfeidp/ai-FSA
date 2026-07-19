@@ -13,7 +13,10 @@ export function Table({
 }: TableHTMLAttributes<HTMLTableElement>): ReactElement {
   return (
     <div className="w-full overflow-x-auto">
-      <table className={cn("w-full caption-bottom text-sm", className)} {...props} />
+      <table
+        className={cn("w-full caption-bottom text-body", className)}
+        {...props}
+      />
     </div>
   );
 }
@@ -24,7 +27,7 @@ export function TableHeader({
 }: HTMLAttributes<HTMLTableSectionElement>): ReactElement {
   return (
     <thead
-      className={cn("border-b border-slate-200 bg-slate-50", className)}
+      className={cn("border-b border-border bg-surface-muted", className)}
       {...props}
     />
   );
@@ -45,7 +48,10 @@ export function TableRow({
 }: HTMLAttributes<HTMLTableRowElement>): ReactElement {
   return (
     <tr
-      className={cn("border-b border-slate-100 align-top", className)}
+      className={cn(
+        "border-b border-border align-top transition-colors hover:bg-surface-muted/70",
+        className,
+      )}
       {...props}
     />
   );
@@ -58,7 +64,7 @@ export function TableHead({
   return (
     <th
       className={cn(
-        "h-11 px-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500",
+        "h-11 px-4 text-left text-caption font-semibold uppercase tracking-wide text-muted-foreground",
         className,
       )}
       {...props}
@@ -71,6 +77,9 @@ export function TableCell({
   ...props
 }: TdHTMLAttributes<HTMLTableCellElement>): ReactElement {
   return (
-    <td className={cn("px-4 py-4 text-sm text-slate-700", className)} {...props} />
+    <td
+      className={cn("px-4 py-4 text-body text-foreground", className)}
+      {...props}
+    />
   );
 }

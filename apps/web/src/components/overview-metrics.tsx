@@ -1,17 +1,8 @@
-import { ClipboardList, FileText, Layers3, Scale, Trophy } from "lucide-react";
 import type { ReactElement } from "react";
 import type { DashboardMetrics } from "../types/dashboard";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 
 interface MetricCardDefinition {
-  readonly description: string;
-  readonly icon: ReactElement;
   readonly label: string;
   readonly value: number;
 }
@@ -20,64 +11,35 @@ export function OverviewMetrics({
   metrics,
 }: Readonly<{ metrics: DashboardMetrics }>): ReactElement {
   const cards: readonly MetricCardDefinition[] = [
-    {
-      label: "Imported Matches",
-      description: "Distinct matches analyzed in this session history.",
-      value: metrics.importedMatches,
-      icon: <Trophy aria-hidden="true" className="size-4" />,
-    },
-    {
-      label: "Evidence",
-      description: "Evidence records produced by successful imports.",
-      value: metrics.evidence,
-      icon: <ClipboardList aria-hidden="true" className="size-4" />,
-    },
-    {
-      label: "Features",
-      description: "Deterministic features extracted from evidence.",
-      value: metrics.features,
-      icon: <Layers3 aria-hidden="true" className="size-4" />,
-    },
-    {
-      label: "Rules",
-      description: "Rule evaluations generated across analyses.",
-      value: metrics.rules,
-      icon: <Scale aria-hidden="true" className="size-4" />,
-    },
-    {
-      label: "Reports",
-      description: "Completed analysis reports available for review.",
-      value: metrics.reports,
-      icon: <FileText aria-hidden="true" className="size-4" />,
-    },
+    { label: "Imported Matches", value: metrics.importedMatches },
+    { label: "Evidence", value: metrics.evidence },
+    { label: "Features", value: metrics.features },
+    { label: "Rules", value: metrics.rules },
+    { label: "Reports", value: metrics.reports },
   ];
 
   return (
-    <section aria-labelledby="overview-heading" className="space-y-5">
-      <div>
-        <p className="text-sm font-semibold text-blue-600">Product overview</p>
-        <h2
-          className="mt-1 text-2xl font-bold tracking-tight text-slate-950"
-          id="overview-heading"
-        >
+    <section
+      aria-labelledby="overview-heading"
+      className="animate-fade-in-delay-3 space-y-4"
+    >
+      <div className="flex items-end justify-between gap-3">
+        <h2 className="text-heading text-foreground" id="overview-heading">
           Overview
         </h2>
+        <p className="text-caption text-muted-foreground">Session metrics</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
         {cards.map((card) => (
-          <Card key={card.label}>
-            <CardHeader className="border-b-0 pb-0">
-              <div className="flex items-center justify-between gap-3">
-                <CardDescription>{card.label}</CardDescription>
-                <span className="flex size-8 items-center justify-center rounded-full bg-blue-50 text-blue-700">
-                  {card.icon}
-                </span>
-              </div>
-              <CardTitle className="text-3xl tabular-nums">{card.value}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm leading-6 text-slate-500">{card.description}</p>
+          <Card className="hover:translate-y-0" key={card.label}>
+            <CardContent className="flex flex-col gap-2 px-4 py-4 sm:px-5 sm:py-5">
+              <p className="text-caption font-medium text-muted-foreground">
+                {card.label}
+              </p>
+              <p className="text-[1.75rem] font-bold tracking-tight text-foreground tabular-nums sm:text-display">
+                {card.value}
+              </p>
             </CardContent>
           </Card>
         ))}

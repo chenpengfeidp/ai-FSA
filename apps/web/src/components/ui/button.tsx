@@ -4,21 +4,32 @@ import type { ButtonHTMLAttributes, ReactElement } from "react";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 rounded-md text-body font-semibold transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       size: {
-        default: "h-11 px-5",
+        default: "h-10 px-4",
+        sm: "h-8 px-3 text-caption",
+        lg: "h-11 px-5",
         icon: "size-10",
       },
       variant: {
-        default: "bg-blue-600 text-white hover:bg-blue-700",
-        outline: "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
+        primary:
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover",
+        secondary:
+          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary-hover",
+        outline:
+          "border border-border-strong bg-surface text-foreground hover:bg-surface-muted",
+        ghost: "bg-transparent text-foreground hover:bg-surface-muted",
+        danger: "bg-error text-primary-foreground shadow-sm hover:bg-error/90",
+        /* Legacy aliases used by existing screens */
+        default:
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover",
       },
     },
     defaultVariants: {
       size: "default",
-      variant: "default",
+      variant: "primary",
     },
   },
 );
@@ -45,3 +56,6 @@ export function Button({
     />
   );
 }
+
+export { buttonVariants };
+export type { ButtonProps };

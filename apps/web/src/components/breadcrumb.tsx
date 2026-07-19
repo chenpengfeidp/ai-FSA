@@ -12,21 +12,18 @@ export function Breadcrumb({
 }: Readonly<{ items: readonly BreadcrumbItem[] }>): ReactElement {
   return (
     <nav aria-label="Breadcrumb">
-      <ol className="flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
+      <ol className="flex flex-wrap items-center gap-1.5 text-body text-muted-foreground">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
 
           return (
             <li className="inline-flex items-center gap-1.5" key={item.label}>
               {index > 0 ? (
-                <ChevronRight
-                  aria-hidden="true"
-                  className="size-3.5 text-slate-400"
-                />
+                <ChevronRight aria-hidden="true" className="size-3.5 text-subtle" />
               ) : null}
               {item.href && !isLast ? (
                 <Link
-                  className="font-medium text-slate-600 hover:text-blue-700"
+                  className="font-medium text-muted-foreground hover:text-primary"
                   href={item.href}
                 >
                   {item.label}
@@ -36,8 +33,8 @@ export function Breadcrumb({
                   aria-current={isLast ? "page" : undefined}
                   className={
                     isLast
-                      ? "font-semibold text-slate-950"
-                      : "font-medium text-slate-600"
+                      ? "font-semibold text-foreground"
+                      : "font-medium text-muted-foreground"
                   }
                 >
                   {item.label}

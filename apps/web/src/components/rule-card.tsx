@@ -20,7 +20,7 @@ export function RuleCard({ rule }: Readonly<{ rule: RuleResultDto }>): ReactElem
             Evaluated {formatTimestamp(rule.evaluatedAt)} UTC
           </CardDescription>
         </div>
-        <Badge variant={rule.status === "PASS" ? "pass" : "fail"}>
+        <Badge variant={rule.status === "PASS" ? "PASS" : "FAIL"}>
           {rule.status}
         </Badge>
       </CardHeader>

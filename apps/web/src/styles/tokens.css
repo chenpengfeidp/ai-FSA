@@ -1,0 +1,212 @@
+/*
+  FAS Design System tokens
+  Light theme is active. Dark theme values are prepared under `.dark`
+  but are not wired to a theme toggle in v0.8.1.
+*/
+
+:root {
+  color-scheme: light;
+
+  /* Color — brand & surfaces */
+  --fas-primary: #2563eb;
+  --fas-primary-hover: #1d4ed8;
+  --fas-primary-foreground: #ffffff;
+  --fas-primary-muted: #eff6ff;
+
+  --fas-secondary: #0f172a;
+  --fas-secondary-hover: #1e293b;
+  --fas-secondary-foreground: #ffffff;
+
+  --fas-background: #f8fafc;
+  --fas-surface: #ffffff;
+  --fas-surface-muted: #f1f5f9;
+  --fas-surface-elevated: #ffffff;
+
+  --fas-border: #e2e8f0;
+  --fas-border-strong: #cbd5e1;
+  --fas-ring: #2563eb;
+
+  --fas-foreground: #020617;
+  --fas-muted: #64748b;
+  --fas-muted-foreground: #64748b;
+  --fas-subtle: #94a3b8;
+
+  /* Color — semantic */
+  --fas-success: #059669;
+  --fas-success-muted: #ecfdf5;
+  --fas-success-foreground: #065f46;
+
+  --fas-warning: #d97706;
+  --fas-warning-muted: #fffbeb;
+  --fas-warning-foreground: #92400e;
+
+  --fas-error: #dc2626;
+  --fas-error-muted: #fef2f2;
+  --fas-error-foreground: #991b1b;
+
+  --fas-info: #2563eb;
+  --fas-info-muted: #eff6ff;
+  --fas-info-foreground: #1e40af;
+
+  /* Elevation */
+  --fas-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.04);
+  --fas-shadow-md: 0 4px 12px rgb(15 23 42 / 0.06);
+  --fas-shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+
+  /* Radius */
+  --fas-radius-sm: 0.375rem;
+  --fas-radius-md: 0.5rem;
+  --fas-radius-lg: 0.75rem;
+  --fas-radius-xl: 1rem;
+
+  /* Typography */
+  --fas-font-sans:
+    "Inter", "SF Pro Text", "SF Pro Display", ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --fas-font-mono:
+    "SF Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
+  --fas-text-display: 2.25rem;
+  --fas-text-display-leading: 2.5rem;
+  --fas-text-heading: 1.5rem;
+  --fas-text-heading-leading: 2rem;
+  --fas-text-title: 1.125rem;
+  --fas-text-title-leading: 1.75rem;
+  --fas-text-body: 0.875rem;
+  --fas-text-body-leading: 1.5rem;
+  --fas-text-caption: 0.75rem;
+  --fas-text-caption-leading: 1.125rem;
+  --fas-text-mono: 0.8125rem;
+  --fas-text-mono-leading: 1.25rem;
+
+  /* Spacing — 8px system (documented scale; use multiples of 8px) */
+  --fas-space-1: 0.5rem; /* 8px */
+  --fas-space-2: 1rem; /* 16px */
+  --fas-space-3: 1.5rem; /* 24px */
+  --fas-space-4: 2rem; /* 32px */
+  --fas-space-5: 2.5rem; /* 40px */
+  --fas-space-6: 3rem; /* 48px */
+  --fas-space-8: 4rem; /* 64px */
+}
+
+.dark {
+  color-scheme: dark;
+
+  --fas-primary: #3b82f6;
+  --fas-primary-hover: #60a5fa;
+  --fas-primary-foreground: #020617;
+  --fas-primary-muted: #172554;
+
+  --fas-secondary: #e2e8f0;
+  --fas-secondary-hover: #f8fafc;
+  --fas-secondary-foreground: #020617;
+
+  --fas-background: #020617;
+  --fas-surface: #0f172a;
+  --fas-surface-muted: #1e293b;
+  --fas-surface-elevated: #1e293b;
+
+  --fas-border: #1e293b;
+  --fas-border-strong: #334155;
+  --fas-ring: #3b82f6;
+
+  --fas-foreground: #f8fafc;
+  --fas-muted: #94a3b8;
+  --fas-muted-foreground: #94a3b8;
+  --fas-subtle: #64748b;
+
+  --fas-success: #34d399;
+  --fas-success-muted: #064e3b;
+  --fas-success-foreground: #a7f3d0;
+
+  --fas-warning: #fbbf24;
+  --fas-warning-muted: #78350f;
+  --fas-warning-foreground: #fde68a;
+
+  --fas-error: #f87171;
+  --fas-error-muted: #7f1d1d;
+  --fas-error-foreground: #fecaca;
+
+  --fas-info: #60a5fa;
+  --fas-info-muted: #1e3a8a;
+  --fas-info-foreground: #bfdbfe;
+
+  --fas-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --fas-shadow-md: 0 8px 24px rgb(0 0 0 / 0.45);
+  --fas-shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 1px 3px rgb(0 0 0 / 0.4);
+}
+
+@theme inline {
+  --color-primary: var(--fas-primary);
+  --color-primary-hover: var(--fas-primary-hover);
+  --color-primary-foreground: var(--fas-primary-foreground);
+  --color-primary-muted: var(--fas-primary-muted);
+
+  --color-secondary: var(--fas-secondary);
+  --color-secondary-hover: var(--fas-secondary-hover);
+  --color-secondary-foreground: var(--fas-secondary-foreground);
+
+  --color-background: var(--fas-background);
+  --color-surface: var(--fas-surface);
+  --color-surface-muted: var(--fas-surface-muted);
+  --color-surface-elevated: var(--fas-surface-elevated);
+
+  --color-border: var(--fas-border);
+  --color-border-strong: var(--fas-border-strong);
+  --color-ring: var(--fas-ring);
+
+  --color-foreground: var(--fas-foreground);
+  --color-muted: var(--fas-muted);
+  --color-muted-foreground: var(--fas-muted-foreground);
+  --color-subtle: var(--fas-subtle);
+
+  --color-success: var(--fas-success);
+  --color-success-muted: var(--fas-success-muted);
+  --color-success-foreground: var(--fas-success-foreground);
+
+  --color-warning: var(--fas-warning);
+  --color-warning-muted: var(--fas-warning-muted);
+  --color-warning-foreground: var(--fas-warning-foreground);
+
+  --color-error: var(--fas-error);
+  --color-error-muted: var(--fas-error-muted);
+  --color-error-foreground: var(--fas-error-foreground);
+
+  --color-info: var(--fas-info);
+  --color-info-muted: var(--fas-info-muted);
+  --color-info-foreground: var(--fas-info-foreground);
+
+  --font-sans: var(--fas-font-sans);
+  --font-mono: var(--fas-font-mono);
+
+  --text-display: var(--fas-text-display);
+  --text-display--line-height: var(--fas-text-display-leading);
+  --text-heading: var(--fas-text-heading);
+  --text-heading--line-height: var(--fas-text-heading-leading);
+  --text-title: var(--fas-text-title);
+  --text-title--line-height: var(--fas-text-title-leading);
+  --text-body: var(--fas-text-body);
+  --text-body--line-height: var(--fas-text-body-leading);
+  --text-caption: var(--fas-text-caption);
+  --text-caption--line-height: var(--fas-text-caption-leading);
+  --text-mono: var(--fas-text-mono);
+  --text-mono--line-height: var(--fas-text-mono-leading);
+
+  --radius-sm: var(--fas-radius-sm);
+  --radius-md: var(--fas-radius-md);
+  --radius-lg: var(--fas-radius-lg);
+  --radius-xl: var(--fas-radius-xl);
+
+  --shadow-sm: var(--fas-shadow-sm);
+  --shadow-md: var(--fas-shadow-md);
+  --shadow-card: var(--fas-shadow-card);
+
+  --spacing-fas-1: var(--fas-space-1);
+  --spacing-fas-2: var(--fas-space-2);
+  --spacing-fas-3: var(--fas-space-3);
+  --spacing-fas-4: var(--fas-space-4);
+  --spacing-fas-5: var(--fas-space-5);
+  --spacing-fas-6: var(--fas-space-6);
+  --spacing-fas-8: var(--fas-space-8);
+}

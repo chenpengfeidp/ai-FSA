@@ -4,6 +4,7 @@ import type { MatchSummary } from "../types/match-center";
 import { LoadingSpinner } from "./loading-spinner";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
+import { Tag } from "./ui/tag";
 
 function teamInitial(team: string): string {
   return team.slice(0, 1).toUpperCase();
@@ -23,56 +24,65 @@ export function MatchCard({
   const matchup = `${match.homeTeam} vs ${match.awayTeam}`;
 
   return (
-    <Card className="flex h-full flex-col">
-      <CardContent className="flex h-full flex-col p-5">
-        <div className="flex items-center justify-between gap-3">
-          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-            {match.competition}
-          </span>
-          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+    <Card className="flex h-full flex-col overflow-hidden">
+      <CardContent className="flex h-full flex-col gap-6 p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <Tag variant="primary">{match.competition}</Tag>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-caption font-semibold text-muted-foreground">
             <Clock3 aria-hidden="true" className="size-3.5" />
             {match.kickoffTime}
           </span>
         </div>
 
-        <div className="my-6 space-y-4">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-1 flex-col items-center gap-3 text-center">
             <span
               aria-hidden="true"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white"
+              className="flex size-14 items-center justify-center rounded-full bg-secondary text-title font-bold text-secondary-foreground shadow-sm"
             >
               {teamInitial(match.homeTeam)}
             </span>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+            <div className="min-w-0 space-y-1">
+              <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
                 Home
               </p>
-              <p className="font-semibold text-slate-950">{match.homeTeam}</p>
+              <p className="truncate text-body font-semibold text-foreground">
+                {match.homeTeam}
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 flex-col items-center gap-1 px-1">
+            <span className="rounded-full border border-border bg-surface-muted px-3 py-1 text-caption font-bold tracking-[0.2em] text-muted-foreground">
+              VS
+            </span>
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col items-center gap-3 text-center">
             <span
               aria-hidden="true"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700"
+              className="flex size-14 items-center justify-center rounded-full bg-surface-muted text-title font-bold text-foreground"
             >
               {teamInitial(match.awayTeam)}
             </span>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+            <div className="min-w-0 space-y-1">
+              <p className="text-caption font-semibold uppercase tracking-wide text-subtle">
                 Away
               </p>
-              <p className="font-semibold text-slate-950">{match.awayTeam}</p>
+              <p className="truncate text-body font-semibold text-foreground">
+                {match.awayTeam}
+              </p>
             </div>
           </div>
         </div>
 
         <Button
           aria-label={`Analyze ${matchup}`}
-          className="mt-auto w-full"
+          className="mt-auto w-full transition-transform duration-200 hover:scale-[1.01]"
           disabled={isDisabled}
           onClick={() => onAnalyze(match)}
           type="button"
+          variant="primary"
         >
           {isAnalyzing ? (
             <LoadingSpinner />

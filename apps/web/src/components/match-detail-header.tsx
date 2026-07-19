@@ -10,14 +10,16 @@ import {
   CardTitle,
 } from "./ui/card";
 
-function statusVariant(status: MatchStatus): "default" | "fail" | "info" | "pass" {
+function statusVariant(
+  status: MatchStatus,
+): "default" | "FAIL" | "INFO" | "SUCCESS" {
   switch (status) {
     case "ANALYZED":
-      return "pass";
+      return "SUCCESS";
     case "FAILED":
-      return "fail";
+      return "FAIL";
     case "LOADING":
-      return "info";
+      return "INFO";
     default:
       return "default";
   }
@@ -34,50 +36,50 @@ export function MatchDetailHeader({
     <Card>
       <CardHeader>
         <CardDescription className="flex items-center gap-2">
-          <Trophy aria-hidden="true" className="size-4 text-blue-600" />
+          <Trophy aria-hidden="true" className="size-4 text-primary" />
           {match.competition}
         </CardDescription>
-        <CardTitle className="text-2xl">
+        <CardTitle className="text-heading">
           {match.homeTeam} vs {match.awayTeam}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
               Home Team
             </dt>
-            <dd className="mt-1 text-sm font-semibold text-slate-950">
+            <dd className="mt-1 text-body font-semibold text-foreground">
               {match.homeTeam}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
               Away Team
             </dt>
-            <dd className="mt-1 text-sm font-semibold text-slate-950">
+            <dd className="mt-1 text-body font-semibold text-foreground">
               {match.awayTeam}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
               Competition
             </dt>
-            <dd className="mt-1 text-sm font-semibold text-slate-950">
+            <dd className="mt-1 text-body font-semibold text-foreground">
               {match.competition}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
               Kickoff
             </dt>
-            <dd className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-950">
-              <CalendarClock aria-hidden="true" className="size-4 text-slate-400" />
+            <dd className="mt-1 flex items-center gap-1.5 text-body font-semibold text-foreground">
+              <CalendarClock aria-hidden="true" className="size-4 text-subtle" />
               {match.kickoffTime}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <dt className="text-caption font-semibold uppercase tracking-wide text-subtle">
               Status
             </dt>
             <dd className="mt-1">

@@ -96,6 +96,38 @@ export class EvidenceImportPipeline {
       );
     }
 
+    return this.#persist(evidence);
+  }
+
+  importEvidenceRecord(evidence: Evidence): EvidenceImportResult {
+    return this.#persist(evidence);
+  }
+
+  importEvidenceRecordIdempotent(evidence: Evidence): EvidenceImportResult {
+    const persisted = this.#persist(evidence);
+
+    if (persisted.ok || persisted.error.code !== "DUPLICATE_EVIDENCE") {
+      return persisted;
+    }
+
+    if (this.#repository === undefined) {
+      return persisted;
+    }
+
+    try {
+      const existing = this.#repository.findById(evidence.id);
+
+      if (existing === undefined) {
+        return persisted;
+      }
+
+      return success(existing);
+    } catch {
+      return failure("REPOSITORY_FAILED", "Evidence repository persistence failed.");
+    }
+  }
+
+  #persist(evidence: Evidence): EvidenceImportResult {
     if (this.#repository === undefined) {
       return success(evidence);
     }

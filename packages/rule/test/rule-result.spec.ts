@@ -21,7 +21,7 @@ describe("RuleResult", () => {
   it("creates an immutable RuleResult", () => {
     const result = createRuleResult(validInput);
 
-    expect(result).toEqual(validInput);
+    expect(result).toEqual({ ...validInput, weight: 1, channel: "none" });
     expect(Object.isFrozen(result)).toBe(true);
     expect(Object.isFrozen(result.sourceFeatureIds)).toBe(true);
   });

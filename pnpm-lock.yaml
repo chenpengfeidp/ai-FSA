@@ -252,16 +252,19 @@ importers:
 
   packages/application:
     dependencies:
+      '@fas/evidence':
+        specifier: workspace:*
+        version: link:../evidence
       '@fas/evidence-import':
         specifier: workspace:*
         version: link:../evidence-import
+      '@fas/evidence-normalizer':
+        specifier: workspace:*
+        version: link:../evidence-normalizer
       '@fas/match':
         specifier: workspace:*
         version: link:../match
     devDependencies:
-      '@fas/evidence':
-        specifier: workspace:*
-        version: link:../evidence
       '@fas/provider-fixture':
         specifier: workspace:*
         version: link:../provider-fixture

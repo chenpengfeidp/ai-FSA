@@ -28,6 +28,11 @@ V1 is pre-match and post-match only. It has no live analysis, users, authenticat
 | Case version | An immutable reviewed account of context, decisive factors, outcome, lessons, scope, and limitations. | A claim that history will repeat. |
 | Case analogy | An analysis claim comparing the current snapshot with an exact case version and stating both similarities and material differences. | A citation-free anecdote. |
 | Analysis | The stable root for one pre-match analytical lineage for a match and requested cutoff. | A single provider response. |
+| Analysis profile | The selected pre-match execution path under Analysis orchestration, such as the canonical AI analysis path or the additive deterministic report path. | A new governed engine. |
+| Analysis feature | A versioned, deterministically derived analysis input computed from cutoff-qualified Evidence for one match lineage. | A governed Rule, Statistic, or AI inference. |
+| Feature bundle | The immutable set of analysis features, model version, evidence references, and checksum for one derivation. | A mutable query of current ratings. |
+| Deterministic match projection | An Analysis-owned, per-match outcome distribution computed from pinned features, rule findings, and projection-model versions (for example xG, 1X2, scorelines, goal ranges, recommendation). | A Statistics Engine population projection, AI inference, or wagering tip. |
+| Deterministic report | An Analysis-owned assembled artifact that presents sealed features, rule evaluations, and match projection without recomputation or AI prose. | A published Analysis Revision or Prompt/LLM output. |
 | Analysis snapshot | A sealed manifest of exact match state, eligible evidence, knowledge versions, case versions, and deterministic evaluations used by an analysis run. | A mutable query of current data. |
 | Analysis run | One auditable execution attempt against a sealed snapshot and model configuration. | A published analytical artifact. |
 | Analysis revision | An immutable structured analytical document accepted from a run and validated under a schema version. | Raw provider output. |
@@ -51,7 +56,7 @@ Epistemic type is part of the domain contract and must never be inferred from pr
 | Inference | AI provider output after validation | Rationale and typed citations to eligible snapshot artifacts | A reasoned interpretation or scenario | Fact, deterministic result, or authoritative decision |
 | Uncertainty | Readiness, validation, or AI analysis | Missing/conflicting/stale evidence, model limitation, scenario spread, or unresolved contradiction | What is unknown, weakly supported, or capable of falsifying an inference | Empty disclaimer or hidden confidence downgrade |
 
-Confidence qualifies an inference, scenario, rule version, or statistical estimate in its own context; equal numeric values do not make those concepts interchangeable. Source quality is not model confidence. Rule confidence is governed metadata, not the AI's confidence. Statistical intervals belong to the Statistics Engine.
+Confidence qualifies an inference, scenario, rule version, statistical estimate, or deterministic match projection in its own context; equal numeric values do not make those concepts interchangeable. Source quality is not model confidence. Rule confidence is governed metadata, not the AI's confidence. Deterministic projection confidence is a versioned completeness/agreement score for a sealed projection, not AI confidence and not a Statistics interval. Statistical intervals belong to the Statistics Engine.
 
 ## 4. Bounded Contexts and Ownership
 
@@ -66,7 +71,7 @@ The modular monolith uses explicit ownership. A context may read another context
 | Rule Engine | Rule roots/versions, lifecycle, deterministic per-snapshot evaluations and findings | Eligible versions and explained findings | Statistical aggregation, LLM calls, or quality gates |
 | Case Engine | Case roots/versions, review eligibility, retrieval rationale, similarities/differences | Exact eligible case selections | Outcome prediction |
 | Prompt Engine | Prompt templates/versions, composition policy, prompt manifests, output schema references | Reproducible provider request manifest | Arbitrary retrieval or domain approval |
-| Analysis | Analysis lineage, snapshots, runs, revisions, claims, validation and publication | Published revision and frozen provenance | Provider-specific domain concepts |
+| Analysis | Analysis lineage, profiles, snapshots, runs, revisions, claims, validation and publication; Analysis-owned feature derivation, deterministic match projection, and deterministic report assembly | Published revision and/or sealed deterministic report with frozen provenance | Provider-specific domain concepts; Statistics population metrics; an eighth governed engine |
 | Review Engine | Reviews, claim/rule/case assessments, learning candidates | Completed assessments and proposals | Rewriting published analyses or activating proposals |
 | Evaluation Engine | Assessment definitions, rubrics, qualification/gate policy, immutable runs and reports | Reproducible quality and release assessments | Metric computation, per-match review, or source mutation |
 | Statistics Engine | Metric definitions and rebuildable projections | Qualified metrics with population, sample, interval, and watermark | Deterministic per-snapshot rule evaluation or causal inference |
@@ -119,7 +124,7 @@ Aggregate names describe consistency boundaries, not table layouts. Cross-aggreg
 | Rule | Ordered rule versions and lifecycle pointer | Activation names one approved version satisfying qualification requirements; historical versions/evaluations remain immutable. |
 | Case | Ordered case versions and lifecycle pointer | Production eligibility requires completed review provenance and an approved, active version. |
 | Prompt template | Ordered prompt versions and lifecycle | A manifest references exact immutable versions and schemas, never “latest” after composition. |
-| Analysis | Requested cutoff, snapshot identity, runs, revisions, publication pointer | Snapshot is sealed before generation; runs share explicit lineage; only a valid revision can be published; publication is immutable. |
+| Analysis | Requested cutoff, profile, snapshot identity, runs, revisions, feature bundles, match projections, deterministic reports, publication pointer | Snapshot/input identity is sealed before generative or deterministic terminal stages; runs share explicit lineage; only a valid revision can be published under the AI profile; a deterministic report is sealed by checksum without implying publication; publication remains immutable. |
 | Review | Published revision/result version, assessments, learning candidates | Completion requires the governed assessment set and a verified result; later corrections do not rewrite the completed review. |
 | Metric definition | Formula version and projections | A projection is reproducible from source watermark and computation version and can be rebuilt without changing source records. |
 | Job | Lease, attempts, checkpoint, terminal result | At most one valid lease holder; retries are bounded and idempotent at the business-command boundary. |
@@ -243,12 +248,15 @@ A retry creates another run and does not silently replace the snapshot. A new sn
 
 1. Standard v1 analysis type is `pre_match`; its requested cutoff is earlier than kickoff.
 2. A snapshot is immutable once sealed and identifies every selected artifact version and relevant checksum.
-3. The Rule Engine evaluates exact active rule versions against exact normalized snapshot inputs.
-4. A run records exact snapshot, prompt component versions, output schema, model configuration, provider attempts, and validator versions.
+3. The Rule Engine evaluates exact active rule versions against exact normalized snapshot inputs, which may include Analysis-derived feature values exposed through the snapshot input contract.
+4. A run records exact snapshot, prompt component versions, output schema, model configuration, provider attempts, and validator versions when the AI analysis profile is used.
 5. A fact claim has valid evidence citations; a rule finding cites its rule evaluation; a case analogy cites its case version and records differences.
 6. Inference and scenario claims declare confidence, rationale, and supporting typed citations; unsupported content cannot be relabeled as fact.
 7. A published analysis references exactly one sealed snapshot and one immutable revision with no unresolved blocking validation.
 8. AI output is always a draft until deterministic validation and an explicit publication command succeed.
+9. Analysis may execute an additive `deterministic_report` profile that derives a FeatureBundle, consumes Rule evaluations, computes a DeterministicMatchProjection, and assembles a Deterministic report without Prompt or provider generation.
+10. A DeterministicMatchProjection and Deterministic report are not Statistics projections, not AI inferences, and not published Analysis Revisions merely by construction.
+11. Feature derivation, match projection, and deterministic report assembly are Analysis-owned capabilities; they are not additional governed engines.
 
 ### 8.4 Review and Statistics
 
@@ -271,7 +279,10 @@ Domain events use past tense, carry event ID, occurred-at time, aggregate identi
 | Rule Governance | `RuleVersionApproved`, `RuleActivated`, `RuleSuspended`, `RuleRetired` | Rule eligibility changes; no historical evaluation is changed. |
 | Rule | `RuleEvaluationCompleted`, `RuleEvaluationFailed` | Exact snapshot/version rule application ended; Analysis consumes result, Statistics later aggregates it. |
 | Case | `CaseVersionApproved`, `CaseActivated`, `CaseRetired` | Future case retrieval eligibility changes. |
-| Analysis | `AnalysisSnapshotSealed` | Cutoff-qualified manifest became immutable; generation can proceed. |
+| Analysis | `AnalysisSnapshotSealed` | Cutoff-qualified manifest became immutable; generation or deterministic terminal stages can proceed. |
+| Analysis | `AnalysisFeatureBundleDerived` | Exact FeatureBundle for a sealed input identity became available to Rule evaluation and/or projection. |
+| Analysis | `AnalysisMatchProjectionComputed` | DeterministicMatchProjection completed for exact feature/rule/model versions. |
+| Analysis | `AnalysisDeterministicReportSealed` | Deterministic report assembly completed with content checksum; does not imply publication. |
 | Analysis | `AnalysisRunStarted`, `AnalysisRunFailed`, `AnalysisRevisionValidated` | Auditable execution/validation milestones occurred. |
 | Analysis | `AnalysisPublished`, `AnalysisSuperseded` | Immutable revision became or ceased to be the current published artifact; Review may begin. |
 | Review | `ReviewCompleted` | All required assessments committed; Statistics refresh is requested atomically. |
@@ -335,6 +346,9 @@ classDiagram
     class CaseVersion
     class Analysis
     class AnalysisSnapshot
+    class FeatureBundle
+    class DeterministicMatchProjection
+    class DeterministicReport
     class AnalysisRun
     class AnalysisRevision
     class Claim
@@ -350,6 +364,9 @@ classDiagram
     AnalysisSnapshot "1" --> "0..*" RuleEvaluation : contains
     RuleVersion "1" --> "0..*" RuleEvaluation : evaluated as
     AnalysisSnapshot "1" --> "0..*" CaseVersion : selects
+    Analysis "1" --> "0..*" FeatureBundle : derives
+    FeatureBundle "1" --> "0..1" DeterministicMatchProjection : projects
+    DeterministicMatchProjection "1" --> "0..1" DeterministicReport : assembles
     Analysis "1" --> "1..*" AnalysisRun : executes
     AnalysisRun "1" --> "0..1" AnalysisRevision : accepts
     AnalysisRevision "1" --> "1..*" Claim : contains

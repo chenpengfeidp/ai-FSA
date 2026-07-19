@@ -1,13 +1,28 @@
 import { createMatchId, type MatchId } from "@fas/match";
 
 export type RuleId =
+  | "rule:away-attack-edge:v1"
   | "rule:away-team-present:v1"
+  | "rule:home-advantage-material:v1"
+  | "rule:home-attack-edge:v1"
   | "rule:home-team-present:v1"
-  | "rule:kickoff-present:v1";
+  | "rule:kickoff-present:v1"
+  | "rule:momentum-away:v1"
+  | "rule:momentum-home:v1";
 
-export type RuleName = "AWAY_TEAM_PRESENT" | "HOME_TEAM_PRESENT" | "KICKOFF_PRESENT";
+export type RuleName =
+  | "AWAY_ATTACK_EDGE"
+  | "AWAY_TEAM_PRESENT"
+  | "HOME_ADVANTAGE_MATERIAL"
+  | "HOME_ATTACK_EDGE"
+  | "HOME_TEAM_PRESENT"
+  | "KICKOFF_PRESENT"
+  | "MOMENTUM_AWAY"
+  | "MOMENTUM_HOME";
 
-export type RuleStatus = "FAIL" | "PASS";
+export type RuleStatus = "FAIL" | "INAPPLICABLE" | "PASS";
+
+export type RuleChannel = "away+" | "home+" | "none";
 
 export interface RuleResult {
   readonly ruleId: RuleId;
@@ -15,6 +30,8 @@ export interface RuleResult {
   readonly ruleName: RuleName;
   readonly status: RuleStatus;
   readonly score: number;
+  readonly weight: number;
+  readonly channel: RuleChannel;
   readonly explanation: string;
   readonly sourceFeatureIds: readonly string[];
   readonly evaluatedAt: string;
@@ -26,6 +43,8 @@ export interface CreateRuleResultInput {
   readonly ruleName: string;
   readonly status: string;
   readonly score: number;
+  readonly weight?: number;
+  readonly channel?: string;
   readonly explanation: string;
   readonly sourceFeatureIds: readonly string[];
   readonly evaluatedAt: string;
@@ -39,16 +58,27 @@ export class RuleResultValidationError extends Error {
 }
 
 const ruleIds: ReadonlySet<string> = new Set([
+  "rule:away-attack-edge:v1",
   "rule:away-team-present:v1",
+  "rule:home-advantage-material:v1",
+  "rule:home-attack-edge:v1",
   "rule:home-team-present:v1",
   "rule:kickoff-present:v1",
+  "rule:momentum-away:v1",
+  "rule:momentum-home:v1",
 ]);
 const ruleNames: ReadonlySet<string> = new Set([
+  "AWAY_ATTACK_EDGE",
   "AWAY_TEAM_PRESENT",
+  "HOME_ADVANTAGE_MATERIAL",
+  "HOME_ATTACK_EDGE",
   "HOME_TEAM_PRESENT",
   "KICKOFF_PRESENT",
+  "MOMENTUM_AWAY",
+  "MOMENTUM_HOME",
 ]);
-const ruleStatuses: ReadonlySet<string> = new Set(["FAIL", "PASS"]);
+const ruleStatuses: ReadonlySet<string> = new Set(["FAIL", "INAPPLICABLE", "PASS"]);
+const ruleChannels: ReadonlySet<string> = new Set(["away+", "home+", "none"]);
 const isoTimestampPattern =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
 
@@ -84,10 +114,20 @@ function requireTimestamp(value: string): string {
   return value;
 }
 
-function requireScore(value: number, status: RuleStatus): number {
-  const expectedScore = status === "PASS" ? 1 : 0;
+function requireWeight(value: number | undefined): number {
+  const weight = value ?? 1;
 
-  if (!Number.isFinite(value) || value !== expectedScore) {
+  if (!Number.isFinite(weight) || weight < 0) {
+    throw new RuleResultValidationError("weight must be a finite number ≥ 0.");
+  }
+
+  return weight;
+}
+
+function requireScore(value: number, status: RuleStatus, weight: number): number {
+  const expectedScore = status === "PASS" ? weight : 0;
+
+  if (!Number.isFinite(value) || Math.abs(value - expectedScore) > 1e-12) {
     throw new RuleResultValidationError(
       `score must be ${expectedScore} when status is ${status}.`,
     );
@@ -116,13 +156,21 @@ export function createRuleResult(input: CreateRuleResultInput): RuleResult {
     ruleStatuses,
     "status",
   );
+  const weight = requireWeight(input.weight);
+  const channel = requireAllowedValue<RuleChannel>(
+    input.channel ?? "none",
+    ruleChannels,
+    "channel",
+  );
 
   return Object.freeze({
     ruleId: requireAllowedValue<RuleId>(input.ruleId, ruleIds, "ruleId"),
     matchId: createMatchId(input.matchId),
     ruleName: requireAllowedValue<RuleName>(input.ruleName, ruleNames, "ruleName"),
     status,
-    score: requireScore(input.score, status),
+    score: requireScore(input.score, status, weight),
+    weight,
+    channel,
     explanation: requireNonEmpty(input.explanation, "explanation"),
     sourceFeatureIds: freezeSourceFeatureIds(input.sourceFeatureIds),
     evaluatedAt: requireTimestamp(input.evaluatedAt),

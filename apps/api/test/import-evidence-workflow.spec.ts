@@ -128,12 +128,17 @@ describe("HTTP import and Evidence query workflow", () => {
       matchId: "match-example",
       generatedAt: "2026-07-17T10:00:00Z",
     });
-    expect(report.summary).toEqual([
-      "Match information is complete.",
-      "Home team: Liverpool.",
-      "Away team: Chelsea.",
-      "Kickoff: 2026-08-01T19:30:00Z.",
-    ]);
+    expect(report.summary).toEqual(
+      expect.arrayContaining([
+        "Match information is complete.",
+        "Home team extracted from MATCH_INFO.",
+        "Away team extracted from MATCH_INFO.",
+        "Kickoff extracted from MATCH_INFO.",
+      ]),
+    );
+    expect(report.deterministic).toMatchObject({
+      status: "completed_nonempty",
+    });
     expect(report.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "homeTeam", value: "Liverpool" }),
@@ -142,6 +147,7 @@ describe("HTTP import and Evidence query workflow", () => {
           name: "kickoff",
           value: "2026-08-01T19:30:00Z",
         }),
+        expect.objectContaining({ name: "attackRatingHome" }),
       ]),
     );
     expect(report.rules).toEqual(
@@ -179,13 +185,15 @@ describe("HTTP import and Evidence query workflow", () => {
       expect(response.status).toBe(200);
       expect(report).toMatchObject({
         matchId: match.matchId,
-        summary: [
-          "Match information is complete.",
-          `Home team: ${match.home}.`,
-          `Away team: ${match.away}.`,
-          `Kickoff: ${match.kickoff}.`,
-        ],
       });
+      expect(report.summary).toEqual(
+        expect.arrayContaining([
+          "Match information is complete.",
+          "Home team extracted from MATCH_INFO.",
+          "Away team extracted from MATCH_INFO.",
+          "Kickoff extracted from MATCH_INFO.",
+        ]),
+      );
       expect(report.features).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -200,6 +208,8 @@ describe("HTTP import and Evidence query workflow", () => {
             name: "kickoff",
             value: match.kickoff,
           }),
+          expect.objectContaining({ name: "attackRatingHome" }),
+          expect.objectContaining({ name: "homeAdvantage" }),
         ]),
       );
       expect(report.rules).toEqual(
@@ -216,8 +226,21 @@ describe("HTTP import and Evidence query workflow", () => {
             ruleName: "KICKOFF_PRESENT",
             status: "PASS",
           }),
+          expect.objectContaining({
+            ruleName: "HOME_ADVANTAGE_MATERIAL",
+          }),
         ]),
       );
+      expect(report.deterministic).toMatchObject({
+        status: "completed_nonempty",
+        projectionModelVersion: "projection.v2.slice1",
+      });
+      const deterministic = requireRecord(report.deterministic);
+      expect(
+        Number(deterministic.pHome) +
+          Number(deterministic.pDraw) +
+          Number(deterministic.pAway),
+      ).toBeCloseTo(1, 9);
     }
   });
 
@@ -238,7 +261,7 @@ describe("HTTP import and Evidence query workflow", () => {
     });
   });
 
-  it("returns a typed failure for a duplicate import", async () => {
+  it("treats repeated imports as idempotent successes", async () => {
     await request(baseUrl, "/api/import/match/match-example", "POST");
 
     const response = await request(
@@ -248,12 +271,13 @@ describe("HTTP import and Evidence query workflow", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      error: {
-        code: "DUPLICATE_EVIDENCE",
-        message: `Evidence "${importedEvidenceId}" already exists.`,
+    expect(response.body).toMatchObject({
+      ok: true,
+      value: {
+        id: importedEvidenceId,
+        matchId: "match-example",
+        type: "MATCH_INFO",
       },
-      ok: false,
     });
   });
 

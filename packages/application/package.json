@@ -19,11 +19,12 @@
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@fas/evidence": "workspace:*",
     "@fas/evidence-import": "workspace:*",
+    "@fas/evidence-normalizer": "workspace:*",
     "@fas/match": "workspace:*"
   },
   "devDependencies": {
-    "@fas/evidence": "workspace:*",
     "@fas/provider-fixture": "workspace:*",
     "@fas/tsconfig": "workspace:*",
     "typescript": "6.0.3"

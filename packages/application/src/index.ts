@@ -1,6 +1,7 @@
 export { ImportMatchUseCase } from "./import-match-use-case.js";
 export type {
   EvidenceImporter,
+  EvidenceRecordImporter,
   ImportMatchError,
   ImportMatchErrorCode,
   ImportMatchResult,

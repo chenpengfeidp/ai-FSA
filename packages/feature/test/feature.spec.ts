@@ -21,7 +21,7 @@ describe("Feature", () => {
   it("creates an immutable Feature", () => {
     const feature = createFeature(validInput);
 
-    expect(feature).toEqual(validInput);
+    expect(feature).toEqual({ ...validInput, explanation: "" });
     expect(Object.isFrozen(feature)).toBe(true);
     expect(Object.isFrozen(feature.value)).toBe(true);
 

@@ -1,3 +1,4 @@
+import type { DeterministicMatchProjection } from "@fas/analysis";
 import type { Feature } from "@fas/feature";
 import { createMatchId, type MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
@@ -9,6 +10,7 @@ export interface AnalysisReport {
   readonly summary: readonly string[];
   readonly features: readonly Feature[];
   readonly rules: readonly RuleResult[];
+  readonly deterministic: DeterministicMatchProjection;
 }
 
 export interface CreateAnalysisReportInput {
@@ -18,6 +20,7 @@ export interface CreateAnalysisReportInput {
   readonly summary: readonly string[];
   readonly features: readonly Feature[];
   readonly rules: readonly RuleResult[];
+  readonly deterministic: DeterministicMatchProjection;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -84,6 +87,18 @@ export function createAnalysisReport(
     );
   }
 
+  if (input.deterministic.matchId !== matchId) {
+    throw new AnalysisReportValidationError(
+      "deterministic must reference the AnalysisReport MatchId.",
+    );
+  }
+
+  if (input.deterministic.status === "blocked") {
+    throw new AnalysisReportValidationError(
+      "deterministic projection is blocked; report cannot be sealed.",
+    );
+  }
+
   return Object.freeze({
     reportId: requireNonEmpty(input.reportId, "reportId"),
     matchId,
@@ -91,5 +106,6 @@ export function createAnalysisReport(
     summary,
     features,
     rules,
+    deterministic: input.deterministic,
   });
 }

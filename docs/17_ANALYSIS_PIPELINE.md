@@ -6,7 +6,7 @@ This document defines the end-to-end orchestration contract that connects source
 
 The [PROJECT BIBLE](./00_PROJECT_BIBLE.md) remains governing. [03_AI_PRINCIPLES](./03_AI_PRINCIPLES.md) defines AI authority and validation, [04_ARCHITECTURE](./04_ARCHITECTURE.md) defines runtime and dependency direction, and [05_PROMPT_ENGINE](./05_PROMPT_ENGINE.md) through [11_STATISTICS_ENGINE](./11_STATISTICS_ENGINE.md) remain authoritative for engine internals. [12_DATABASE](./12_DATABASE.md) is authoritative for persistence and [13_API](./13_API.md) for transport. This document does not redefine their schemas, endpoints, algorithms, or package internals.
 
-V1 is pre-match and post-match only. The pre-match pipeline ends at explicit human publication. Review, Evaluation, Statistics, and Knowledge Update begin only after a verified result and eligible post-match records exist. No outcome evidence may enter a pre-match snapshot, prompt, generation, validation, or publication decision.
+V1 is pre-match and post-match only. The canonical AI pre-match pipeline ends at explicit human publication. An additive `deterministic_report` profile may terminate at a sealed Deterministic report without Prompt/AI generation or publication; that report is not a published Analysis Revision. Review, Evaluation, Statistics, and Knowledge Update begin only after a verified result and eligible post-match records exist. No outcome evidence may enter a pre-match snapshot, prompt, generation, validation, publication decision, or deterministic projection.
 
 ## 2. Conceptual Flow and Temporal Boundary
 
@@ -55,7 +55,7 @@ flowchart LR
     end
 ```
 
-The arrows express the required conceptual flow, not permission for one engine to call the next or read its tables. The Analysis Orchestrator coordinates pre-match stages through public contracts. Post-match application services and durable jobs coordinate Review, Evaluation, Statistics, and governed draft handoff. Dependency direction remains governed by [04_ARCHITECTURE](./04_ARCHITECTURE.md), [14_MONOREPO](./14_MONOREPO.md), and [ADR-001](./decisions/ADR-001-modular-monolith-and-typescript-monorepo.md).
+The arrows express the required conceptual flow for the canonical AI analysis profile, not permission for one engine to call the next or read its tables. The Analysis Orchestrator coordinates pre-match stages through public contracts and may also execute the additive deterministic report profile defined in §3.5 and §4.13. Post-match application services and durable jobs coordinate Review, Evaluation, Statistics, and governed draft handoff. Dependency direction remains governed by [04_ARCHITECTURE](./04_ARCHITECTURE.md), [14_MONOREPO](./14_MONOREPO.md), and [ADR-001](./decisions/ADR-001-modular-monolith-and-typescript-monorepo.md).
 
 The conceptual Evaluation-before-Statistics order means completed reviews and immutable quality subjects become eligible for policy assessment before downstream population projections are refreshed. Evaluation may require an already-existing exact Statistics projection; in that case it reads that projection through the published reader contract and never computes it. A later Statistics refresh may in turn support a new Evaluation run. Neither direction collapses the ownership boundary defined in [10_EVALUATION_ENGINE](./10_EVALUATION_ENGINE.md) and [11_STATISTICS_ENGINE](./11_STATISTICS_ENGINE.md).
 
@@ -101,6 +101,15 @@ Every stage returns a typed status such as `completed_nonempty`, `completed_empt
 Knowledge or Case retrieval may return a successful empty set only when no eligible artifact matched under the exact specification. Rule processing may return a successful complete zero-rule set only when no active qualified rule version was eligible. Continuation requires the pinned analysis and composition policies to permit that empty result and to preserve the resulting material uncertainty.
 
 No stage may silently degrade by omitting an unavailable engine, broadening retrieval, changing cutoff, selecting another version, switching model, or asking the LLM to fill missing inputs.
+
+### 3.5 Analysis Profiles
+
+| Profile | Coordinated by | Required stages | Terminal artifact | Publication |
+|---|---|---|---|---|
+| `ai_analysis` | Analysis Orchestrator | Readiness → Evidence selection → Knowledge → Rules → Cases → Seal → Prompt → LLM → Validate → Publish | Validated/published Analysis Revision | Explicit human publish |
+| `deterministic_report` | Analysis Orchestrator | Readiness → Evidence selection → Feature derivation → Rules → Deterministic match projection → Deterministic report assembly | Sealed Deterministic report | Not implied; report sealing ≠ publication |
+
+Profiles must be selected explicitly. The deterministic profile must not silently omit required feature/projection stages, invent Evidence, call Prompt/AI, or claim calibrated predictive accuracy. A future combined profile may consume a sealed Deterministic report as Prompt context; AI must not modify sealed deterministic values.
 
 ## 4. Stage Contracts
 
@@ -189,7 +198,7 @@ No stage may silently degrade by omitting an unavailable engine, broadening retr
 
 **Owner.** Rule Engine; detailed governance and evaluator semantics are authoritative in [07_RULE_ENGINE](./07_RULE_ENGINE.md).
 
-**Inputs.** Exact active qualified Rule versions eligible at cutoff, sealed snapshot identity/checksum, exact normalized input values and provenance, input/condition/outcome schema versions, and evaluator version.
+**Inputs.** Exact active qualified Rule versions eligible at cutoff, sealed snapshot identity/checksum, exact normalized input values and provenance (including any Analysis-derived feature values exposed by the snapshot input contract), input/condition/outcome schema versions, and evaluator version.
 
 **Outputs.** An immutable complete evaluation set containing `matched`, `not_matched`, `inapplicable`, or `error`, condition-level explanations, exact inputs/checksums, qualification metadata, and findings only for matched rules.
 
@@ -345,6 +354,65 @@ No stage may silently degrade by omitting an unavailable engine, broadening retr
 
 **Failure and empty behavior.** A review may validly produce no learning candidate. Rejected candidates remain auditable. Failed target handoff leaves an accepted candidate visible and retryable; it must not imply that a draft, approved version, or active version exists.
 
+### 4.13 Deterministic Report Profile Stages
+
+These stages apply when the Analysis Orchestrator executes the additive `deterministic_report` profile. They do not replace §4.4–§4.8 for the AI profile and do not authorize an eighth governed engine.
+
+#### Feature derivation
+
+**Why it exists.** Converts cutoff-qualified Evidence into versioned analysis features used as Rule inputs and projection inputs.
+
+**Owner.** Analysis; supporting package `@fas/feature` may implement pure derivation.
+
+**Inputs.** Match identity, cutoff-qualified Evidence selection (at minimum the profile-required types), feature-model version, and correlation identity.
+
+**Outputs.** FeatureBundle with values, explanations, evidence references, model version, checksum, and stage status.
+
+**Invariants.**
+
+- Features are deterministic for identical Evidence selection and feature-model version.
+- Derivation invents no missing Evidence and performs no AI call.
+- Feature values entering Rule evaluation are exposed only through the declared snapshot input contract.
+
+**Failure and empty behavior.** Missing required Evidence for the selected profile blocks or degrades according to the pinned profile policy; silent empty success is forbidden. For the first vertical slice, missing required `TEAM_FORM`/`STATISTICS` blocks projection even if some features can be partially derived.
+
+#### Deterministic match projection
+
+**Why it exists.** Produces a per-match outcome distribution and recommendation from pinned features and Rule findings under explicit projection-model versions.
+
+**Owner.** Analysis; pure projection modules live under `@fas/analysis` ownership.
+
+**Inputs.** FeatureBundle checksum/identity, complete Rule evaluation envelope for the profile, projection/xg/probability/confidence/recommendation policy versions, and optional exact approved calibration artifact reference when policy permits.
+
+**Outputs.** DeterministicMatchProjection containing λ/xG, 1X2, top scorelines, goal ranges, confidence components, recommendation, limitations, upstream refs, checksum, and stage status.
+
+**Invariants.**
+
+- Projection is not a Statistics Engine population metric and does not train or refresh calibration maps during the run.
+- Rule Engine findings may influence bounded channel adjustments only through the pinned projection policy; Rules do not compute the probability matrix.
+- Identical pinned inputs and versions yield identical checksums.
+- Presentation layers must not recompute these values.
+
+**Failure and empty behavior.** Missing required upstream envelopes, non-finite math, or policy/version defects yield `blocked` or `failed`. The profile must not seal a success report when projection is blocked.
+
+#### Deterministic report assembly
+
+**Why it exists.** Assembles sealed upstream artifacts into a reviewable Deterministic report DTO.
+
+**Owner.** Analysis; supporting package `@fas/report` may assemble without owning projection math.
+
+**Inputs.** FeatureBundle, Rule evaluation set, DeterministicMatchProjection, assembler/schema versions, and correlation identity.
+
+**Outputs.** Deterministic report with overview/features/rules/projection/confidence/recommendation/appendix sections, content checksum, and stage status.
+
+**Invariants.**
+
+- Assembly copies and orders; it does not recalculate λ, probabilities, scorelines, confidence, or recommendation.
+- Report sealing is not Analysis Revision publication and does not start Review by itself.
+- No Prompt/LLM prose is required or generated by this stage.
+
+**Failure and empty behavior.** Upstream blocked/failed states block assembly. Assembly defects fail explicitly without fabricating projection fields.
+
 ## 5. Validation and Publication Boundary
 
 Validation is part of generation orchestration, but publication is a separate explicit human command. A provider candidate is never a published analysis.
@@ -369,7 +437,9 @@ Blocking validation covers:
 - prohibited authority, live-analysis, guarantee, wagering, injection, leakage, and unsupported external-source behavior;
 - snapshot, manifest, candidate, revision, and validation checksums.
 
-Publication requires a sealed snapshot, immutable valid revision, exact successful validation execution accepted by publication policy, no unresolved blocker, optimistic concurrency, expected checksum, and explicit human rationale. Publication and its audit event are atomic. A duplicate command returns the prior idempotent result; a conflicting command fails. Publication is the terminal stage of pre-match generation.
+Publication requires a sealed snapshot, immutable valid revision, exact successful validation execution accepted by publication policy, no unresolved blocker, optimistic concurrency, expected checksum, and explicit human rationale. Publication and its audit event are atomic. A duplicate command returns the prior idempotent result; a conflicting command fails. Publication is the terminal stage of the canonical AI pre-match generation profile.
+
+For the additive `deterministic_report` profile, sealing a Deterministic report is the terminal stage. That seal does not publish an Analysis Revision, does not satisfy AI validation/publication gates, and must not be presented as a published analysis.
 
 ## 6. Durable Execution, Checkpoints, Retries, and Idempotency
 
@@ -500,16 +570,18 @@ The post-match sequence begins only after a verified outcome exists. Evaluation 
 
 The pipeline architecture is satisfied when:
 
-1. every pre-match run records one cutoff, readiness-policy version, sealed snapshot, exact retrieval/evaluation manifests, prompt manifest, AI release bundle, provider attempts, validation executions, and immutable revision lineage;
+1. every AI-profile pre-match run records one cutoff, readiness-policy version, sealed snapshot, exact retrieval/evaluation manifests, prompt manifest, AI release bundle, provider attempts, validation executions, and immutable revision lineage;
 2. Evidence owns cutoff-qualified selection while Analysis alone owns final snapshot completeness and sealing;
-3. evidence observed after cutoff and all outcome evidence are excluded from pre-match generation;
+3. evidence observed after cutoff and all outcome evidence are excluded from pre-match generation and deterministic projection;
 4. successful empty results are explicit and policy-governed, while failure, partial execution, and unavailability stop generation;
 5. identical Rule inputs and versions yield identical authoritative evaluations without LLM participation;
 6. provider output cannot publish without inline or explicit exact validation, all blocking gates, and a human publication command;
 7. crash recovery resumes only from checksum-valid durable checkpoints and cannot duplicate provider acceptance, validation, publication, review completion, or learning handoff;
 8. Review, Evaluation, Statistics, and Knowledge Update execute only as post-match feedback after verified outcome prerequisites;
 9. no post-match operation mutates the pre-match snapshot, run, revision, claim, Rule evaluation, Case selection, or prompt manifest;
-10. Knowledge Update creates at most a governed draft after explicit acceptance and never auto-approves or auto-activates it.
+10. Knowledge Update creates at most a governed draft after explicit acceptance and never auto-approves or auto-activates it;
+11. the additive `deterministic_report` profile, when selected, records exact FeatureBundle, Rule evaluation, DeterministicMatchProjection, and Deterministic report identities/checksums, terminates without Prompt/AI when complete, and never equates report sealing with publication;
+12. Web/API presentation never recomputes FeatureBundle or projection fields.
 
 ## 11. Related Documents and Decisions
 

@@ -1,21 +1,28 @@
 import type { Evidence } from "@fas/evidence";
-import type { Feature } from "@fas/feature";
+import type { Feature, FeatureBundle } from "@fas/feature";
 import { createMatchId, type MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
+import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
 
 export interface AnalysisResult {
   readonly matchId: MatchId;
   readonly evidence: Evidence;
+  readonly evidenceSet: readonly Evidence[];
   readonly features: readonly Feature[];
+  readonly featureBundle: FeatureBundle;
   readonly ruleResults: readonly RuleResult[];
+  readonly projection: DeterministicMatchProjection;
   readonly generatedAt: string;
 }
 
 export interface CreateAnalysisResultInput {
   readonly matchId: MatchId;
   readonly evidence: Evidence;
+  readonly evidenceSet: readonly Evidence[];
   readonly features: readonly Feature[];
+  readonly featureBundle: FeatureBundle;
   readonly ruleResults: readonly RuleResult[];
+  readonly projection: DeterministicMatchProjection;
   readonly generatedAt: string;
 }
 
@@ -56,10 +63,17 @@ export function createAnalysisResult(
   const matchId = createMatchId(input.matchId);
   const features = requireNonEmpty(input.features, "features");
   const ruleResults = requireNonEmpty(input.ruleResults, "ruleResults");
+  const evidenceSet = requireNonEmpty(input.evidenceSet, "evidenceSet");
 
   if (input.evidence.matchId !== matchId) {
     throw new AnalysisResultValidationError(
       "evidence must reference the AnalysisResult MatchId.",
+    );
+  }
+
+  if (evidenceSet.some((evidence) => evidence.matchId !== matchId)) {
+    throw new AnalysisResultValidationError(
+      "evidenceSet must reference the AnalysisResult MatchId.",
     );
   }
 
@@ -75,11 +89,26 @@ export function createAnalysisResult(
     );
   }
 
+  if (input.featureBundle.matchId !== matchId) {
+    throw new AnalysisResultValidationError(
+      "featureBundle must reference the AnalysisResult MatchId.",
+    );
+  }
+
+  if (input.projection.matchId !== matchId) {
+    throw new AnalysisResultValidationError(
+      "projection must reference the AnalysisResult MatchId.",
+    );
+  }
+
   return Object.freeze({
     matchId,
     evidence: input.evidence,
+    evidenceSet,
     features,
+    featureBundle: input.featureBundle,
     ruleResults,
+    projection: input.projection,
     generatedAt: requireTimestamp(input.generatedAt),
   });
 }

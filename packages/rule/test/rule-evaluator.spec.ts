@@ -10,17 +10,24 @@ interface FeatureOptions {
 }
 
 function makeFeature(name: FeatureName, options: FeatureOptions = {}): Feature {
-  const values = {
+  const values: Partial<Record<FeatureName, string | number>> = {
     awayTeam: "Chelsea",
     homeTeam: "Liverpool",
     kickoff: "2026-08-01T19:30:00Z",
-  } as const;
+    attackRatingHome: 70,
+    attackRatingAway: 45,
+    defenseRatingHome: 60,
+    defenseRatingAway: 40,
+    momentumHome: 0.5,
+    momentumAway: -0.2,
+    homeAdvantage: 0.35,
+  };
 
   return createFeature({
     featureId: options.featureId ?? `feature:evidence-1:${name}`,
     matchId: createMatchId(options.matchId ?? "match-1"),
     name,
-    value: values[name],
+    value: values[name] ?? 0,
     sourceEvidenceId: "evidence-1",
     generatedAt: options.generatedAt ?? "2026-07-17T10:00:00Z",
   });
@@ -37,14 +44,22 @@ function allFeatures(): readonly Feature[] {
 describe("RuleEvaluator", () => {
   it("passes all presence rules when their Features exist", () => {
     const results = new RuleEvaluator().evaluate(allFeatures());
+    const presence = results.filter((result) =>
+      result.ruleName.endsWith("_PRESENT"),
+    );
+    const football = results.filter(
+      (result) => !result.ruleName.endsWith("_PRESENT"),
+    );
 
-    expect(results).toEqual([
+    expect(presence).toEqual([
       {
         ruleId: "rule:home-team-present:v1",
         matchId: "match-1",
         ruleName: "HOME_TEAM_PRESENT",
         status: "PASS",
         score: 1,
+        weight: 1,
+        channel: "none",
         explanation:
           "HOME_TEAM_PRESENT passed because its source Feature is present.",
         sourceFeatureIds: ["feature:evidence-1:homeTeam"],
@@ -56,6 +71,8 @@ describe("RuleEvaluator", () => {
         ruleName: "AWAY_TEAM_PRESENT",
         status: "PASS",
         score: 1,
+        weight: 1,
+        channel: "none",
         explanation:
           "AWAY_TEAM_PRESENT passed because its source Feature is present.",
         sourceFeatureIds: ["feature:evidence-1:awayTeam"],
@@ -67,23 +84,28 @@ describe("RuleEvaluator", () => {
         ruleName: "KICKOFF_PRESENT",
         status: "PASS",
         score: 1,
+        weight: 1,
+        channel: "none",
         explanation: "KICKOFF_PRESENT passed because its source Feature is present.",
         sourceFeatureIds: ["feature:evidence-1:kickoff"],
         evaluatedAt: "2026-07-17T10:00:00Z",
       },
     ]);
+    expect(football.every((result) => result.status === "INAPPLICABLE")).toBe(true);
   });
 
-  it("fails only rules whose Features are missing", () => {
+  it("fails only presence rules whose Features are missing", () => {
     const results = new RuleEvaluator().evaluate([makeFeature("homeTeam")]);
 
     expect(
-      results.map(({ ruleName, score, status, sourceFeatureIds }) => ({
-        ruleName,
-        score,
-        sourceFeatureIds,
-        status,
-      })),
+      results
+        .filter((result) => result.ruleName.endsWith("_PRESENT"))
+        .map(({ ruleName, score, status, sourceFeatureIds }) => ({
+          ruleName,
+          score,
+          sourceFeatureIds,
+          status,
+        })),
     ).toEqual([
       {
         ruleName: "HOME_TEAM_PRESENT",
@@ -103,6 +125,31 @@ describe("RuleEvaluator", () => {
         sourceFeatureIds: [],
         status: "FAIL",
       },
+    ]);
+  });
+
+  it("matches football rules from numeric Features", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+    ]);
+
+    expect(
+      results
+        .filter((result) => !result.ruleName.endsWith("_PRESENT"))
+        .map(({ ruleName, status, score }) => ({ ruleName, status, score })),
+    ).toEqual([
+      { ruleName: "HOME_ATTACK_EDGE", status: "PASS", score: 0.7 },
+      { ruleName: "AWAY_ATTACK_EDGE", status: "FAIL", score: 0 },
+      { ruleName: "MOMENTUM_HOME", status: "PASS", score: 0.45 },
+      { ruleName: "MOMENTUM_AWAY", status: "FAIL", score: 0 },
+      { ruleName: "HOME_ADVANTAGE_MATERIAL", status: "PASS", score: 0.55 },
     ]);
   });
 

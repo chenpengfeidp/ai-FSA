@@ -4,6 +4,7 @@ export {
 } from "./domain/rule-result.js";
 export type {
   CreateRuleResultInput,
+  RuleChannel,
   RuleId,
   RuleName,
   RuleResult,

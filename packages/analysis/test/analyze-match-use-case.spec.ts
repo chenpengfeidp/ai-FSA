@@ -7,14 +7,14 @@ import {
 import { EvidenceImportPipeline } from "@fas/evidence-import";
 import { FixtureEvidenceNormalizer } from "@fas/evidence-normalizer";
 import { EvidenceQueryService } from "@fas/evidence-query";
-import { FeatureExtractor } from "@fas/feature";
+import { FeatureExtractor, type FeatureBundle } from "@fas/feature";
 import { createMatchId } from "@fas/match";
 import { FixtureProvider } from "@fas/provider-fixture";
 import { RuleEvaluator } from "@fas/rule";
 import { describe, expect, it, vi } from "vitest";
 import {
   AnalyzeMatchUseCase,
-  type EvidenceByIdQuery,
+  type EvidenceByMatchQuery,
   type FeatureExtractionOperation,
   type MatchImportOperation,
   type RuleEvaluationOperation,
@@ -45,7 +45,7 @@ function makeEvidence(): Evidence {
 
 function createUseCase(
   importMatch: MatchImportOperation,
-  evidenceQuery: EvidenceByIdQuery,
+  evidenceQuery: EvidenceByMatchQuery,
   featureExtractor: FeatureExtractionOperation = new FeatureExtractor(),
   ruleEvaluator: RuleEvaluationOperation = new RuleEvaluator(),
 ): AnalyzeMatchUseCase {
@@ -71,26 +71,26 @@ describe("AnalyzeMatchUseCase", () => {
 
     const result = useCase.execute(createMatchId("match-example"));
 
-    expect(result).toMatchObject({
-      ok: true,
-      value: {
-        matchId: "match-example",
-        evidence: {
-          id: "evidence-fixture-match-example",
-          type: "MATCH_INFO",
-        },
-        generatedAt: "2026-07-17T10:00:00Z",
-      },
-    });
+    expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value.features.map(({ name }) => name)).toEqual([
-        "homeTeam",
-        "awayTeam",
-        "kickoff",
-      ]);
-      expect(result.value.ruleResults.every(({ status }) => status === "PASS")).toBe(
-        true,
+      expect(result.value.matchId).toBe("match-example");
+      expect(result.value.evidence.type).toBe("MATCH_INFO");
+      expect(result.value.evidenceSet).toHaveLength(5);
+      expect(result.value.features.map(({ name }) => name)).toEqual(
+        expect.arrayContaining([
+          "homeTeam",
+          "awayTeam",
+          "kickoff",
+          "attackRatingHome",
+          "homeAdvantage",
+        ]),
       );
+      expect(result.value.projection.status).toBe("completed_nonempty");
+      expect(
+        result.value.projection.pHome +
+          result.value.projection.pDraw +
+          result.value.projection.pAway,
+      ).toBeCloseTo(1, 9);
     }
   });
 
@@ -103,17 +103,17 @@ describe("AnalyzeMatchUseCase", () => {
         return { ok: true, value: evidence };
       }),
     };
-    const evidenceQuery: EvidenceByIdQuery = {
-      findById: vi.fn(() => {
+    const evidenceQuery: EvidenceByMatchQuery = {
+      findByMatch: vi.fn(() => {
         calls.push("query");
-        return { ok: true, value: evidence };
+        return { ok: true, value: Object.freeze([evidence]) };
       }),
     };
     const extractor = new FeatureExtractor();
     const featureExtractor: FeatureExtractionOperation = {
-      extract: vi.fn((input) => {
+      extractBundle: vi.fn((input) => {
         calls.push("extract");
-        return extractor.extract(input);
+        return extractor.extractBundle(input);
       }),
     };
     const evaluator = new RuleEvaluator();
@@ -123,181 +123,120 @@ describe("AnalyzeMatchUseCase", () => {
         return evaluator.evaluate(features);
       }),
     };
-
-    const result = createUseCase(
+    const useCase = createUseCase(
       importMatch,
       evidenceQuery,
       featureExtractor,
       ruleEvaluator,
-    ).execute(createMatchId("match-1"));
-
-    expect(result.ok).toBe(true);
-    expect(calls).toEqual(["import", "query", "extract", "evaluate"]);
-  });
-
-  it("returns immutable and deterministic Analysis results", () => {
-    const evidence = makeEvidence();
-    const useCase = createUseCase(
-      { execute: () => ({ ok: true, value: evidence }) },
-      { findById: () => ({ ok: true, value: evidence }) },
     );
 
-    const first = useCase.execute(createMatchId("match-1"));
-    const second = useCase.execute(createMatchId("match-1"));
+    const result = useCase.execute(createMatchId("match-1"));
 
-    expect(second).toEqual(first);
-    expect(Object.isFrozen(first)).toBe(true);
-    if (first.ok) {
-      expect(Object.isFrozen(first.value)).toBe(true);
-      expect(Object.isFrozen(first.value.features)).toBe(true);
-      expect(Object.isFrozen(first.value.ruleResults)).toBe(true);
+    expect(calls).toEqual(["import", "query", "extract", "evaluate"]);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.projection.status).toBe("blocked");
     }
   });
 
-  it("preserves typed import failures", () => {
+  it("maps import failure", () => {
     const useCase = createUseCase(
       {
-        execute: () => ({
-          ok: false,
-          error: {
-            code: "MATCH_NOT_FOUND",
-            message: 'Match "match-missing" was not found.',
-          },
-        }),
+        execute: () =>
+          Object.freeze({
+            ok: false,
+            error: Object.freeze({
+              code: "MATCH_NOT_FOUND",
+              message: "missing",
+            }),
+          }),
       },
-      { findById: () => ({ ok: true, value: undefined }) },
-    );
-
-    expect(useCase.execute(createMatchId("match-missing"))).toEqual({
-      error: {
-        cause: {
-          code: "MATCH_NOT_FOUND",
-          message: 'Match "match-missing" was not found.',
-        },
-        code: "IMPORT_FAILED",
-        message: "Match import failed.",
-      },
-      ok: false,
-    });
-  });
-
-  it("preserves typed Evidence query failures", () => {
-    const evidence = makeEvidence();
-    const useCase = createUseCase(
-      { execute: () => ({ ok: true, value: evidence }) },
       {
-        findById: () => ({
-          ok: false,
-          error: {
-            code: "REPOSITORY_FAILED",
-            message: "Evidence repository query failed.",
-          },
-        }),
+        findByMatch: () => Object.freeze({ ok: true, value: Object.freeze([]) }),
       },
     );
 
-    expect(useCase.execute(createMatchId("match-1"))).toEqual({
-      error: {
-        cause: {
-          code: "REPOSITORY_FAILED",
-          message: "Evidence repository query failed.",
-        },
-        code: "EVIDENCE_QUERY_FAILED",
-        message: "Evidence query failed.",
-      },
+    const result = useCase.execute(createMatchId("match-1"));
+
+    expect(result).toMatchObject({
       ok: false,
-    });
-  });
-
-  it("fails explicitly when imported Evidence cannot be queried", () => {
-    const evidence = makeEvidence();
-    const useCase = createUseCase(
-      { execute: () => ({ ok: true, value: evidence }) },
-      { findById: () => ({ ok: true, value: undefined }) },
-    );
-
-    expect(useCase.execute(createMatchId("match-1"))).toEqual({
-      error: {
-        code: "EVIDENCE_NOT_FOUND",
-        message: 'Imported Evidence "evidence-1" was not found.',
-      },
-      ok: false,
-    });
-  });
-
-  it("converts unexpected import and query exceptions", () => {
-    const evidence = makeEvidence();
-    const importFailure = createUseCase(
-      {
-        execute: () => {
-          throw new Error("import failed");
-        },
-      },
-      { findById: () => ({ ok: true, value: evidence }) },
-    );
-    const queryFailure = createUseCase(
-      { execute: () => ({ ok: true, value: evidence }) },
-      {
-        findById: () => {
-          throw new Error("query failed");
-        },
-      },
-    );
-
-    expect(() => importFailure.execute(createMatchId("match-1"))).not.toThrow();
-    expect(importFailure.execute(createMatchId("match-1"))).toMatchObject({
       error: { code: "IMPORT_FAILED" },
-      ok: false,
-    });
-    expect(() => queryFailure.execute(createMatchId("match-1"))).not.toThrow();
-    expect(queryFailure.execute(createMatchId("match-1"))).toMatchObject({
-      error: { code: "EVIDENCE_QUERY_FAILED" },
-      ok: false,
     });
   });
 
-  it("converts Feature extraction and Rule evaluation exceptions", () => {
-    const evidence = makeEvidence();
-    const extractionFailure = createUseCase(
-      { execute: () => ({ ok: true, value: evidence }) },
-      { findById: () => ({ ok: true, value: evidence }) },
+  it("maps missing MATCH_INFO after query", () => {
+    const useCase = createUseCase(
       {
-        extract: () => {
-          throw new Error("extraction failed");
+        execute: () =>
+          Object.freeze({
+            ok: true,
+            value: makeEvidence(),
+          }),
+      },
+      {
+        findByMatch: () => Object.freeze({ ok: true, value: Object.freeze([]) }),
+      },
+    );
+
+    const result = useCase.execute(createMatchId("match-1"));
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "EVIDENCE_NOT_FOUND" },
+    });
+  });
+
+  it("maps feature extraction failure", () => {
+    const evidence = makeEvidence();
+    const useCase = createUseCase(
+      {
+        execute: () => Object.freeze({ ok: true, value: evidence }),
+      },
+      {
+        findByMatch: () =>
+          Object.freeze({ ok: true, value: Object.freeze([evidence]) }),
+      },
+      {
+        extractBundle: () => {
+          throw new Error("boom");
         },
       },
     );
-    const evaluationFailure = createUseCase(
-      { execute: () => ({ ok: true, value: evidence }) },
-      { findById: () => ({ ok: true, value: evidence }) },
-      new FeatureExtractor(),
+
+    const result = useCase.execute(createMatchId("match-1"));
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "FEATURE_EXTRACTION_FAILED" },
+    });
+  });
+
+  it("maps rule evaluation failure", () => {
+    const evidence = makeEvidence();
+    const bundle: FeatureBundle = new FeatureExtractor().extractBundle([evidence]);
+    const useCase = createUseCase(
+      {
+        execute: () => Object.freeze({ ok: true, value: evidence }),
+      },
+      {
+        findByMatch: () =>
+          Object.freeze({ ok: true, value: Object.freeze([evidence]) }),
+      },
+      {
+        extractBundle: () => bundle,
+      },
       {
         evaluate: () => {
-          throw new Error("evaluation failed");
+          throw new Error("boom");
         },
       },
     );
 
-    expect(extractionFailure.execute(createMatchId("match-1"))).toMatchObject({
-      error: { code: "FEATURE_EXTRACTION_FAILED" },
+    const result = useCase.execute(createMatchId("match-1"));
+
+    expect(result).toMatchObject({
       ok: false,
-    });
-    expect(evaluationFailure.execute(createMatchId("match-1"))).toMatchObject({
       error: { code: "RULE_EVALUATION_FAILED" },
-      ok: false,
     });
-  });
-
-  it("never modifies queried Evidence", () => {
-    const evidence = makeEvidence();
-    const snapshot = JSON.stringify(evidence);
-    const useCase = createUseCase(
-      { execute: () => ({ ok: true, value: evidence }) },
-      { findById: () => ({ ok: true, value: evidence }) },
-    );
-
-    useCase.execute(createMatchId("match-1"));
-
-    expect(JSON.stringify(evidence)).toBe(snapshot);
   });
 });

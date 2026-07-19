@@ -5,6 +5,7 @@ import {
   InMemoryEvidenceRepository,
 } from "@fas/evidence";
 import { EvidenceImportPipeline } from "@fas/evidence-import";
+import { FixtureEvidenceNormalizer } from "@fas/evidence-normalizer";
 import { FixtureProvider } from "@fas/provider-fixture";
 import { describe, expect, it, vi } from "vitest";
 import { ImportMatchUseCase, type ImportMatchResult } from "../src/index.js";
@@ -29,6 +30,24 @@ const evidence = createEvidence({
   },
 });
 
+/** Legacy single-record provider shape used to exercise the non-set import path. */
+const matchInfoOnlyProvider = {
+  getMatch(matchId: string): unknown {
+    const match = new FixtureProvider().getMatch(matchId);
+
+    if (match === undefined) {
+      return undefined;
+    }
+
+    return Object.freeze({
+      matchId: match.matchId,
+      home: match.home,
+      away: match.away,
+      kickoff: match.kickoff,
+    });
+  },
+};
+
 function requireEvidence(result: ImportMatchResult): Evidence {
   expect(result.ok).toBe(true);
 
@@ -46,7 +65,7 @@ describe("ImportMatchUseCase", () => {
       value: evidence,
     }));
     const pipeline = new EvidenceImportPipeline({ normalize });
-    const useCase = new ImportMatchUseCase(new FixtureProvider(), pipeline);
+    const useCase = new ImportMatchUseCase(matchInfoOnlyProvider, pipeline);
 
     const result = useCase.execute("match-example");
 
@@ -57,6 +76,22 @@ describe("ImportMatchUseCase", () => {
       away: "Chelsea",
       kickoff: "2026-08-01T19:30:00Z",
     });
+  });
+
+  it("imports the full fixture evidence set idempotently", () => {
+    const repository = new InMemoryEvidenceRepository();
+    const pipeline = new EvidenceImportPipeline(
+      new FixtureEvidenceNormalizer({ collectedAt: "2026-07-17T10:00:00Z" }),
+      repository,
+    );
+    const useCase = new ImportMatchUseCase(new FixtureProvider(), pipeline);
+
+    const first = useCase.execute("match-example");
+    const second = useCase.execute("match-example");
+
+    expect(requireEvidence(first).type).toBe("MATCH_INFO");
+    expect(requireEvidence(second).id).toBe(requireEvidence(first).id);
+    expect(repository.findAll()).toHaveLength(5);
   });
 
   it("returns a typed failure when the provider has no match", () => {
@@ -87,7 +122,7 @@ describe("ImportMatchUseCase", () => {
         },
       }),
     });
-    const useCase = new ImportMatchUseCase(new FixtureProvider(), pipeline);
+    const useCase = new ImportMatchUseCase(matchInfoOnlyProvider, pipeline);
 
     expect(useCase.execute("match-example")).toEqual({
       ok: false,
@@ -111,7 +146,7 @@ describe("ImportMatchUseCase", () => {
       },
       repository,
     );
-    const useCase = new ImportMatchUseCase(new FixtureProvider(), pipeline);
+    const useCase = new ImportMatchUseCase(matchInfoOnlyProvider, pipeline);
 
     expect(useCase.execute("match-example")).toEqual({
       ok: false,
@@ -136,7 +171,7 @@ describe("ImportMatchUseCase", () => {
       },
       repository,
     );
-    const useCase = new ImportMatchUseCase(new FixtureProvider(), pipeline);
+    const useCase = new ImportMatchUseCase(matchInfoOnlyProvider, pipeline);
 
     expect(useCase.execute("match-example")).toEqual({
       ok: false,
@@ -151,7 +186,7 @@ describe("ImportMatchUseCase", () => {
     const pipeline = new EvidenceImportPipeline({
       normalize: () => ({ ok: true, value: evidence }),
     });
-    const useCase = new ImportMatchUseCase(new FixtureProvider(), pipeline);
+    const useCase = new ImportMatchUseCase(matchInfoOnlyProvider, pipeline);
 
     const result = useCase.execute("match-example");
     const importedEvidence = requireEvidence(result);
@@ -174,7 +209,7 @@ describe("ImportMatchUseCase", () => {
         },
       },
     );
-    const importFailure = new ImportMatchUseCase(new FixtureProvider(), {
+    const importFailure = new ImportMatchUseCase(matchInfoOnlyProvider, {
       importEvidence: () => {
         throw new Error("import unavailable");
       },

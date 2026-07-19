@@ -27,9 +27,12 @@ football-analysis-system/
 │   ├── match/                       # Match/catalog application and domain
 │   ├── evidence/                    # Provenance, normalization, quality, snapshots
 │   ├── analysis/                    # Analysis orchestration and publication lifecycle
+│   ├── feature/                     # Analysis-owned FeatureBundle derivation (supporting)
+│   ├── rule/                        # Thin Rule evaluation package (supporting; not an eighth engine)
+│   ├── report/                      # Deterministic report assembly (supporting)
 │   ├── prompt-engine/               # Prompt composition and manifests
 │   ├── knowledge-engine/            # Knowledge governance and retrieval
-│   ├── rule-engine/                 # Deterministic rule model and evaluator
+│   ├── rule-engine/                 # Deterministic rule model and evaluator (governed engine target)
 │   ├── case-engine/                 # Case governance and retrieval
 │   ├── review-engine/               # Review and learning candidates
 │   ├── evaluation-engine/           # Assessment policy, quality gates, reports
@@ -56,7 +59,7 @@ football-analysis-system/
 └── README.md
 ```
 
-This is the target M1 structure, not a claim that every listed package or deployment artifact is implemented. Shared scripts move under `tooling/` only when multiple applications consume them; application Dockerfiles remain app-local when introduced.
+This is the target M1 structure, not a claim that every listed package or deployment artifact is implemented. Supporting Analysis packages (`feature`, `rule`, `report`) may exist in the workspace without becoming governed engines. Shared scripts move under `tooling/` only when multiple applications consume them; application Dockerfiles remain app-local when introduced.
 
 ## 3. Application Responsibilities
 
@@ -156,9 +159,33 @@ Owns source records, normalized evidence, provenance, freshness, conflicts, cuto
 
 #### `@fas/analysis`
 
-Owns analysis lifecycle, workflow orchestration, immutable snapshots, runs, revisions, claims, citations, validations, and publication.
+Owns analysis lifecycle, analysis-profile selection, workflow orchestration, immutable snapshots, runs, revisions, claims, citations, validations, and publication.
 
-It calls engine ports but does not inspect engine persistence.
+It also owns Analysis deterministic capabilities when composed with the supporting packages below: FeatureBundle derivation coordination, DeterministicMatchProjection computation, and Deterministic report sealing/orchestration. Projection pure functions may live in `@fas/analysis` itself; assembly may delegate to `@fas/report` without transferring domain ownership.
+
+It calls engine ports but does not inspect engine persistence. It does not own Statistics population metrics or calibration map computation.
+
+### Supporting Analysis Packages
+
+These packages support Analysis-owned deterministic capabilities. They are **not** governed engines and must not be named or treated as an eighth engine.
+
+#### `@fas/feature`
+
+Owns pure FeatureBundle derivation from cutoff-qualified Evidence contracts: feature names, model version, extractors, explanations, evidence references, and checksum helpers.
+
+Must not call AI providers, evaluate Rules, compute match-outcome probability distributions, assemble reports, or read engine persistence.
+
+#### `@fas/rule`
+
+Thin deterministic rule evaluation package used by current composition for declared Rule versions against exact normalized inputs (including Analysis-derived features). Target long-term ownership remains the governed Rule Engine package `@fas/rule-engine` below; `@fas/rule` must not invent a parallel rule-governance authority.
+
+Must remain pure with respect to AI providers and must not compute 1X2/scoreline/recommendation distributions.
+
+#### `@fas/report`
+
+Owns Deterministic report assembly from already computed FeatureBundle, Rule evaluation, and DeterministicMatchProjection artifacts: section ordering, DTO shaping, assembler version, and content checksum.
+
+Must not recalculate features, rule truth values, λ/probabilities/scorelines, confidence, or recommendations. Presentation formatting helpers that change display only are allowed; mathematical recomputation is forbidden.
 
 ### Engines
 
@@ -172,7 +199,7 @@ Owns knowledge item/version lifecycle, approval/effective-date rules, source req
 
 #### `@fas/rule-engine`
 
-Owns rule lifecycle, condition schema, deterministic per-snapshot rule application, applicability, explanation, and sample/confidence activation constraints. It must be pure and must not call AI providers.
+Owns rule lifecycle, condition schema, deterministic per-snapshot rule application, applicability, explanation, and sample/confidence activation constraints. It must be pure and must not call AI providers. Current repository composition may use `@fas/rule` as an implementation package for the same Rule boundary until full engine-package migration; ownership semantics remain those of the Rule Engine.
 
 #### `@fas/case-engine`
 
@@ -290,7 +317,9 @@ Allowed principles:
 
 ## 7. Engine Interaction
 
-The analysis package invokes public application contracts:
+The analysis package invokes public application contracts. Profile selection determines which stages run.
+
+Canonical AI analysis profile:
 
 ```text
 Analysis Orchestrator
@@ -303,7 +332,18 @@ Analysis Orchestrator
   -> Analysis validation policies
 ```
 
-The Prompt Engine receives selected immutable data; it does not query Knowledge, Rule, or Case storage itself. This prevents hidden retrieval and makes the manifest reproducible.
+Additive deterministic report profile:
+
+```text
+Analysis Orchestrator
+  -> Evidence snapshot selector
+  -> @fas/feature FeatureBundle derivation
+  -> Rule evaluation service (@fas/rule / Rule Engine contract)
+  -> DeterministicMatchProjection (@fas/analysis)
+  -> Deterministic report assembly (@fas/report)
+```
+
+The Prompt Engine receives selected immutable data; it does not query Knowledge, Rule, or Case storage itself. This prevents hidden retrieval and makes the manifest reproducible. The deterministic report profile does not invoke Prompt or AI generation.
 
 The Review Engine creates learning candidates. Acceptance is handed to the relevant engine through an explicit command that creates a draft version.
 

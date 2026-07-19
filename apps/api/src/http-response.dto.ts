@@ -155,13 +155,27 @@ export class FeatureDto {
   declare readonly matchId: string;
 
   @ApiProperty({
-    enum: ["awayTeam", "homeTeam", "kickoff"],
+    enum: [
+      "attackRatingAway",
+      "attackRatingHome",
+      "awayTeam",
+      "defenseRatingAway",
+      "defenseRatingHome",
+      "homeAdvantage",
+      "homeTeam",
+      "kickoff",
+      "momentumAway",
+      "momentumHome",
+    ],
     example: "homeTeam",
   })
   declare readonly name: string;
 
   @ApiProperty({ example: "Liverpool" })
   declare readonly value: unknown;
+
+  @ApiProperty({ example: "Home team extracted from MATCH_INFO." })
+  declare readonly explanation: string;
 
   @ApiProperty({ example: "evidence-fixture-match-example" })
   declare readonly sourceEvidenceId: string;
@@ -178,16 +192,31 @@ export class RuleResultDto {
   declare readonly matchId: string;
 
   @ApiProperty({
-    enum: ["AWAY_TEAM_PRESENT", "HOME_TEAM_PRESENT", "KICKOFF_PRESENT"],
+    enum: [
+      "AWAY_ATTACK_EDGE",
+      "AWAY_TEAM_PRESENT",
+      "HOME_ADVANTAGE_MATERIAL",
+      "HOME_ATTACK_EDGE",
+      "HOME_TEAM_PRESENT",
+      "KICKOFF_PRESENT",
+      "MOMENTUM_AWAY",
+      "MOMENTUM_HOME",
+    ],
     example: "HOME_TEAM_PRESENT",
   })
   declare readonly ruleName: string;
 
-  @ApiProperty({ enum: ["FAIL", "PASS"], example: "PASS" })
+  @ApiProperty({ enum: ["FAIL", "INAPPLICABLE", "PASS"], example: "PASS" })
   declare readonly status: string;
 
   @ApiProperty({ example: 1 })
   declare readonly score: number;
+
+  @ApiProperty({ example: 1 })
+  declare readonly weight: number;
+
+  @ApiProperty({ enum: ["away+", "home+", "none"], example: "none" })
+  declare readonly channel: string;
 
   @ApiProperty({
     example: "HOME_TEAM_PRESENT passed because its source Feature is present.",
@@ -203,6 +232,50 @@ export class RuleResultDto {
 
   @ApiProperty({ example: "2026-07-17T10:00:00Z", format: "date-time" })
   declare readonly evaluatedAt: string;
+}
+
+export class DeterministicProjectionDto {
+  @ApiProperty({ example: "projection.v2.slice1" })
+  declare readonly projectionModelVersion: string;
+
+  @ApiProperty({ example: "match-example" })
+  declare readonly matchId: string;
+
+  @ApiProperty({ example: 1.8 })
+  declare readonly lambdaHome: number;
+
+  @ApiProperty({ example: 1.1 })
+  declare readonly lambdaAway: number;
+
+  @ApiProperty({ example: 0.45 })
+  declare readonly pHome: number;
+
+  @ApiProperty({ example: 0.27 })
+  declare readonly pDraw: number;
+
+  @ApiProperty({ example: 0.28 })
+  declare readonly pAway: number;
+
+  @ApiProperty({ example: 0.72 })
+  declare readonly confidence: number;
+
+  @ApiProperty({
+    enum: [
+      "cautious",
+      "insufficient_evidence",
+      "lean_away",
+      "lean_draw",
+      "lean_home",
+    ],
+    example: "lean_home",
+  })
+  declare readonly recommendation: string;
+
+  @ApiProperty({ enum: ["blocked", "completed_nonempty", "failed"] })
+  declare readonly status: string;
+
+  @ApiProperty({ example: "abc123" })
+  declare readonly checksum: string;
 }
 
 export class AnalysisReportDto {
@@ -234,6 +307,9 @@ export class AnalysisReportDto {
 
   @ApiProperty({ isArray: true, type: () => RuleResultDto })
   declare readonly rules: readonly RuleResultDto[];
+
+  @ApiProperty({ type: () => DeterministicProjectionDto })
+  declare readonly deterministic: DeterministicProjectionDto;
 }
 
 export class AnalysisErrorCauseDto {

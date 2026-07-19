@@ -1,13 +1,24 @@
 import type { JsonValue } from "@fas/domain";
 import { createMatchId, type MatchId } from "@fas/match";
 
-export type FeatureName = "awayTeam" | "homeTeam" | "kickoff";
+export type FeatureName =
+  | "attackRatingAway"
+  | "attackRatingHome"
+  | "awayTeam"
+  | "defenseRatingAway"
+  | "defenseRatingHome"
+  | "homeAdvantage"
+  | "homeTeam"
+  | "kickoff"
+  | "momentumAway"
+  | "momentumHome";
 
 export interface Feature {
   readonly featureId: string;
   readonly matchId: MatchId;
   readonly name: FeatureName;
   readonly value: JsonValue;
+  readonly explanation: string;
   readonly sourceEvidenceId: string;
   readonly generatedAt: string;
 }
@@ -17,6 +28,7 @@ export interface CreateFeatureInput {
   readonly matchId: MatchId;
   readonly name: string;
   readonly value: JsonValue;
+  readonly explanation?: string;
   readonly sourceEvidenceId: string;
   readonly generatedAt: string;
 }
@@ -29,9 +41,16 @@ export class FeatureValidationError extends Error {
 }
 
 const featureNames: ReadonlySet<string> = new Set([
+  "attackRatingAway",
+  "attackRatingHome",
   "awayTeam",
+  "defenseRatingAway",
+  "defenseRatingHome",
+  "homeAdvantage",
   "homeTeam",
   "kickoff",
+  "momentumAway",
+  "momentumHome",
 ]);
 const isoTimestampPattern =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
@@ -93,6 +112,7 @@ export function createFeature(input: CreateFeatureInput): Feature {
     matchId: createMatchId(input.matchId),
     name: requireFeatureName(input.name),
     value: cloneAndFreezeJson(input.value),
+    explanation: input.explanation?.trim() ?? "",
     sourceEvidenceId: requireNonEmpty(input.sourceEvidenceId, "sourceEvidenceId"),
     generatedAt: requireTimestamp(input.generatedAt),
   });

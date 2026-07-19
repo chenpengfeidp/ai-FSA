@@ -48,7 +48,7 @@ The Rule Engine must not:
 - infer missing inputs or ask AI to fill them;
 - retrieve arbitrary evidence or read another module's tables;
 - treat a market signal as fact;
-- generate probabilistic match predictions unless a future, separately governed rule schema explicitly defines a deterministic output of that type;
+- generate probabilistic match outcome distributions (for example 1X2, scoreline matrices, Poisson λ, goal-range probabilities) or recommendations; DeterministicMatchProjection is Analysis-owned and may consume Rule findings as inputs, while the Rule Engine may emit only governed deterministic findings/channel weights and must not compute or renormalize those distributions;
 - calculate sample count, confidence intervals, calibration, hit rate, or other aggregate statistics;
 - mutate sample/confidence metadata from evaluation outcomes;
 - approve or activate learning candidates automatically;
@@ -125,11 +125,12 @@ The evaluation command contains:
 - exact rule-version ID and content checksum;
 - cutoff;
 - exact normalized input values and their evidence/source references as exposed by the Analysis/Evidence contract;
+- optional Analysis-derived feature values (for example AttackRating, Momentum) when those values are part of the sealed snapshot input contract and input-schema version;
 - input-schema version;
 - evaluator version;
 - correlation and analysis-run identifiers.
 
-The evaluator must not query for additional match data. Input resolution happens through an explicit application port before or as part of the orchestrated evaluation boundary and records the exact values used.
+The evaluator must not query for additional match data and must not recompute Analysis features. Input resolution happens through an explicit application port before or as part of the orchestrated evaluation boundary and records the exact values used. Missing required feature inputs yield `inapplicable` or `error` according to the declared schema; they are never silently treated as zero or false.
 
 ### 5.3 Evaluation Output
 

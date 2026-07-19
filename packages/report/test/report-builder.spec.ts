@@ -1,215 +1,189 @@
-import { createAnalysisResult, type AnalysisResult } from "@fas/analysis";
+import {
+  computeDeterministicMatchProjection,
+  createAnalysisResult,
+  type AnalysisResult,
+} from "@fas/analysis";
 import { createEvidence } from "@fas/evidence";
-import { createFeature, type Feature, type FeatureName } from "@fas/feature";
+import { FeatureExtractor } from "@fas/feature";
 import { createMatchId } from "@fas/match";
-import { createRuleResult, type RuleName, type RuleResult } from "@fas/rule";
+import { RuleEvaluator } from "@fas/rule";
 import { describe, expect, it } from "vitest";
 import { GenerateMatchReportUseCase, ReportBuilder } from "../src/index.js";
 
 const matchId = createMatchId("match-1");
 const generatedAt = "2026-07-17T10:00:00Z";
 
-const featureValues = {
-  awayTeam: "Chelsea",
-  homeTeam: "Liverpool",
-  kickoff: "2026-08-01T19:30:00Z",
-} as const;
-
-const ruleDefinitions = {
-  AWAY_TEAM_PRESENT: {
-    featureName: "awayTeam",
-    ruleId: "rule:away-team-present:v1",
-  },
-  HOME_TEAM_PRESENT: {
-    featureName: "homeTeam",
-    ruleId: "rule:home-team-present:v1",
-  },
-  KICKOFF_PRESENT: {
-    featureName: "kickoff",
-    ruleId: "rule:kickoff-present:v1",
-  },
-} as const;
-
-function makeFeature(name: FeatureName): Feature {
-  return createFeature({
-    featureId: `feature:evidence-1:${name}`,
-    matchId,
-    name,
-    value: featureValues[name],
-    sourceEvidenceId: "evidence-1",
-    generatedAt,
+function makeCompletedAnalysis(): AnalysisResult {
+  const evidenceSet = Object.freeze([
+    createEvidence({
+      id: "evidence-1",
+      source: "fixture",
+      sourceId: "fixture-match-1",
+      type: "MATCH_INFO",
+      matchId,
+      collectedAt: generatedAt,
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        away: "Chelsea",
+        home: "Liverpool",
+        kickoff: "2026-08-01T19:30:00Z",
+      },
+    }),
+    createEvidence({
+      id: "evidence-form-home",
+      source: "fixture",
+      sourceId: "fixture-form-home",
+      type: "TEAM_FORM",
+      matchId,
+      collectedAt: generatedAt,
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "home",
+        window: 5,
+        results: ["W", "W", "D", "W", "L"],
+        goalsFor: [2, 3, 1, 2, 0],
+        goalsAgainst: [0, 1, 1, 1, 1],
+      },
+    }),
+    createEvidence({
+      id: "evidence-form-away",
+      source: "fixture",
+      sourceId: "fixture-form-away",
+      type: "TEAM_FORM",
+      matchId,
+      collectedAt: generatedAt,
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "away",
+        window: 5,
+        results: ["L", "D", "L", "W", "L"],
+        goalsFor: [0, 1, 1, 2, 0],
+        goalsAgainst: [2, 1, 3, 1, 2],
+      },
+    }),
+    createEvidence({
+      id: "evidence-stats-home",
+      source: "fixture",
+      sourceId: "fixture-stats-home",
+      type: "STATISTICS",
+      matchId,
+      collectedAt: generatedAt,
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "home",
+        windowMatches: 5,
+        shotsForPerMatch: 15,
+        shotsAgainstPerMatch: 9,
+        xgForPerMatch: 1.8,
+        xgAgainstPerMatch: 1.0,
+      },
+    }),
+    createEvidence({
+      id: "evidence-stats-away",
+      source: "fixture",
+      sourceId: "fixture-stats-away",
+      type: "STATISTICS",
+      matchId,
+      collectedAt: generatedAt,
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "away",
+        windowMatches: 5,
+        shotsForPerMatch: 10,
+        shotsAgainstPerMatch: 14,
+        xgForPerMatch: 1.0,
+        xgAgainstPerMatch: 1.7,
+      },
+    }),
+  ]);
+  const featureBundle = new FeatureExtractor().extractBundle(evidenceSet);
+  const ruleResults = new RuleEvaluator().evaluate(featureBundle.features);
+  const projection = computeDeterministicMatchProjection({
+    featureBundle,
+    ruleResults,
+    requiredEvidencePresentCount: 5,
   });
-}
 
-function makeRule(ruleName: RuleName, pass = true): RuleResult {
-  const definition = ruleDefinitions[ruleName];
+  const matchInfo = evidenceSet[0];
 
-  return createRuleResult({
-    ruleId: definition.ruleId,
-    matchId,
-    ruleName,
-    status: pass ? "PASS" : "FAIL",
-    score: pass ? 1 : 0,
-    explanation: pass
-      ? `${ruleName} passed because its source Feature is present.`
-      : `${ruleName} failed because its source Feature is missing.`,
-    sourceFeatureIds: pass ? [`feature:evidence-1:${definition.featureName}`] : [],
-    evaluatedAt: generatedAt,
-  });
-}
-
-function makeAnalysis(
-  features: readonly Feature[] = [
-    makeFeature("homeTeam"),
-    makeFeature("awayTeam"),
-    makeFeature("kickoff"),
-  ],
-  rules: readonly RuleResult[] = [
-    makeRule("HOME_TEAM_PRESENT"),
-    makeRule("AWAY_TEAM_PRESENT"),
-    makeRule("KICKOFF_PRESENT"),
-  ],
-): AnalysisResult {
-  const evidence = createEvidence({
-    id: "evidence-1",
-    source: "fixture",
-    sourceId: "fixture-match-1",
-    type: "MATCH_INFO",
-    matchId,
-    collectedAt: generatedAt,
-    eventTime: "2026-08-01T19:30:00Z",
-    freshness: "fresh",
-    quality: "unverified",
-    provenance: {
-      collector: "@fas/evidence-normalizer",
-      method: "fixture",
-    },
-    payload: {
-      away: "Chelsea",
-      home: "Liverpool",
-      kickoff: "2026-08-01T19:30:00Z",
-    },
-  });
+  if (matchInfo === undefined) {
+    throw new Error("Expected MATCH_INFO evidence in test fixture.");
+  }
 
   return createAnalysisResult({
     matchId,
-    evidence,
-    features,
-    ruleResults: rules,
+    evidence: matchInfo,
+    evidenceSet,
+    features: featureBundle.features,
+    featureBundle,
+    ruleResults,
+    projection,
     generatedAt,
   });
 }
 
 describe("ReportBuilder", () => {
-  it("builds a successful deterministic match report", () => {
-    const analysis = makeAnalysis();
-
+  it("builds a successful deterministic match report without recomputing projection", () => {
+    const analysis = makeCompletedAnalysis();
     const report = new ReportBuilder().build(analysis);
 
     expect(report.reportId).toBe(`report:match-1:${generatedAt}`);
-    expect(report.matchId).toBe("match-1");
-    expect(report.generatedAt).toBe(generatedAt);
-    expect(report.summary).toEqual([
-      "Match information is complete.",
-      "Home team: Liverpool.",
-      "Away team: Chelsea.",
-      "Kickoff: 2026-08-01T19:30:00Z.",
-    ]);
+    expect(report.deterministic).toEqual(analysis.projection);
+    expect(report.deterministic.pHome).toBe(analysis.projection.pHome);
+    expect(report.summary.some((line) => line.startsWith("Projection "))).toBe(true);
     expect(report.features).toEqual(analysis.features);
     expect(report.rules).toEqual(analysis.ruleResults);
   });
 
-  it("reports a missing Feature from its failed RuleResult", () => {
-    const analysis = makeAnalysis(
-      [makeFeature("awayTeam"), makeFeature("kickoff")],
-      [
-        makeRule("HOME_TEAM_PRESENT", false),
-        makeRule("AWAY_TEAM_PRESENT"),
-        makeRule("KICKOFF_PRESENT"),
-      ],
-    );
-
-    const report = new ReportBuilder().build(analysis);
-
-    expect(report.summary).toEqual([
-      "Rule HOME_TEAM_PRESENT failed: HOME_TEAM_PRESENT failed because its source Feature is missing.",
-      "Away team: Chelsea.",
-      "Kickoff: 2026-08-01T19:30:00Z.",
-    ]);
-  });
-
-  it("includes deterministic failure text while preserving present Features", () => {
-    const analysis = makeAnalysis(undefined, [
-      makeRule("HOME_TEAM_PRESENT", false),
-      makeRule("AWAY_TEAM_PRESENT"),
-      makeRule("KICKOFF_PRESENT"),
-    ]);
-
-    const report = new ReportBuilder().build(analysis);
-
-    expect(report.summary[0]).toBe(
-      "Rule HOME_TEAM_PRESENT failed: HOME_TEAM_PRESENT failed because its source Feature is missing.",
-    );
-    expect(report.summary).toContain("Home team: Liverpool.");
-    expect(report.features).toHaveLength(3);
-  });
-
-  it("preserves Feature and RuleResult ordering", () => {
-    const features = [
-      makeFeature("kickoff"),
-      makeFeature("homeTeam"),
-      makeFeature("awayTeam"),
-    ] as const;
-    const rules = [
-      makeRule("KICKOFF_PRESENT"),
-      makeRule("HOME_TEAM_PRESENT"),
-      makeRule("AWAY_TEAM_PRESENT"),
-    ] as const;
-
-    const report = new ReportBuilder().build(makeAnalysis(features, rules));
-
-    expect(report.features.map(({ name }) => name)).toEqual([
-      "kickoff",
-      "homeTeam",
-      "awayTeam",
-    ]);
-    expect(report.rules.map(({ ruleName }) => ruleName)).toEqual([
-      "KICKOFF_PRESENT",
-      "HOME_TEAM_PRESENT",
-      "AWAY_TEAM_PRESENT",
-    ]);
-    expect(report.summary.slice(1)).toEqual([
-      "Kickoff: 2026-08-01T19:30:00Z.",
-      "Home team: Liverpool.",
-      "Away team: Chelsea.",
-    ]);
-  });
-
   it("returns a deeply immutable report", () => {
-    const report = new ReportBuilder().build(makeAnalysis());
+    const report = new ReportBuilder().build(makeCompletedAnalysis());
 
     expect(Object.isFrozen(report)).toBe(true);
     expect(Object.isFrozen(report.summary)).toBe(true);
     expect(Object.isFrozen(report.features)).toBe(true);
     expect(Object.isFrozen(report.rules)).toBe(true);
-    expect(report.features.every(Object.isFrozen)).toBe(true);
-    expect(report.rules.every(Object.isFrozen)).toBe(true);
-    expect(
-      report.rules.every(({ sourceFeatureIds }) =>
-        Object.isFrozen(sourceFeatureIds),
-      ),
-    ).toBe(true);
+    expect(Object.isFrozen(report.deterministic)).toBe(true);
   });
 
   it("produces equal output for the same AnalysisResult", () => {
-    const analysis = makeAnalysis();
+    const analysis = makeCompletedAnalysis();
     const builder = new ReportBuilder();
 
     expect(builder.build(analysis)).toEqual(builder.build(analysis));
   });
 
   it("does not modify AnalysisResult", () => {
-    const analysis = makeAnalysis();
+    const analysis = makeCompletedAnalysis();
     const snapshot = JSON.stringify(analysis);
 
     new ReportBuilder().build(analysis);
@@ -220,7 +194,7 @@ describe("ReportBuilder", () => {
 
 describe("GenerateMatchReportUseCase", () => {
   it("returns AnalysisReport JSON directly after successful analysis", () => {
-    const analysis = makeAnalysis();
+    const analysis = makeCompletedAnalysis();
     const useCase = new GenerateMatchReportUseCase(
       { execute: () => ({ ok: true, value: analysis }) },
       new ReportBuilder(),
@@ -265,7 +239,7 @@ describe("GenerateMatchReportUseCase", () => {
       new ReportBuilder(),
     );
     const reportFailure = new GenerateMatchReportUseCase(
-      { execute: () => ({ ok: true, value: makeAnalysis() }) },
+      { execute: () => ({ ok: true, value: makeCompletedAnalysis() }) },
       {
         build: () => {
           throw new Error("report failed");

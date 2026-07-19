@@ -1,13 +1,15 @@
 import type { ImportMatchResult } from "@fas/application";
 import type { Evidence } from "@fas/evidence";
 import type { EvidenceQueryResult } from "@fas/evidence-query";
-import type { Feature } from "@fas/feature";
+import type { Feature, FeatureBundle } from "@fas/feature";
 import type { MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
 import {
   createAnalysisResult,
   type AnalysisResult,
 } from "../domain/analysis-result.js";
+import { computeDeterministicMatchProjection } from "../projection/compute-deterministic-projection.js";
+import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
 
 export type Result<Value, Failure> =
   | Readonly<{ ok: true; value: Value }>
@@ -17,12 +19,12 @@ export interface MatchImportOperation {
   execute(matchId: MatchId): ImportMatchResult;
 }
 
-export interface EvidenceByIdQuery {
-  findById(id: string): EvidenceQueryResult<Evidence | undefined>;
+export interface EvidenceByMatchQuery {
+  findByMatch(matchId: MatchId): EvidenceQueryResult<readonly Evidence[]>;
 }
 
 export interface FeatureExtractionOperation {
-  extract(evidence: Evidence): readonly Feature[];
+  extractBundle(evidences: readonly Evidence[]): FeatureBundle;
 }
 
 export interface RuleEvaluationOperation {
@@ -35,6 +37,7 @@ export type AnalysisErrorCode =
   | "EVIDENCE_QUERY_FAILED"
   | "FEATURE_EXTRACTION_FAILED"
   | "IMPORT_FAILED"
+  | "PROJECTION_FAILED"
   | "RULE_EVALUATION_FAILED";
 
 export interface AnalysisErrorCause {
@@ -90,15 +93,39 @@ function latestEvaluationTime(ruleResults: readonly RuleResult[]): string {
   }, ruleResults[0]?.evaluatedAt ?? "");
 }
 
+function countRequiredEvidence(evidences: readonly Evidence[]): number {
+  const hasMatchInfo = evidences.some((evidence) => evidence.type === "MATCH_INFO");
+  const hasHomeForm = evidences.some(
+    (evidence) =>
+      evidence.type === "TEAM_FORM" && evidence.payload.teamSide === "home",
+  );
+  const hasAwayForm = evidences.some(
+    (evidence) =>
+      evidence.type === "TEAM_FORM" && evidence.payload.teamSide === "away",
+  );
+  const hasHomeStats = evidences.some(
+    (evidence) =>
+      evidence.type === "STATISTICS" && evidence.payload.teamSide === "home",
+  );
+  const hasAwayStats = evidences.some(
+    (evidence) =>
+      evidence.type === "STATISTICS" && evidence.payload.teamSide === "away",
+  );
+
+  return [hasMatchInfo, hasHomeForm, hasAwayForm, hasHomeStats, hasAwayStats].filter(
+    Boolean,
+  ).length;
+}
+
 export class AnalyzeMatchUseCase {
   readonly #importMatch: MatchImportOperation;
-  readonly #evidenceQuery: EvidenceByIdQuery;
+  readonly #evidenceQuery: EvidenceByMatchQuery;
   readonly #featureExtractor: FeatureExtractionOperation;
   readonly #ruleEvaluator: RuleEvaluationOperation;
 
   constructor(
     importMatch: MatchImportOperation,
-    evidenceQuery: EvidenceByIdQuery,
+    evidenceQuery: EvidenceByMatchQuery,
     featureExtractor: FeatureExtractionOperation,
     ruleEvaluator: RuleEvaluationOperation,
   ) {
@@ -121,10 +148,10 @@ export class AnalyzeMatchUseCase {
       return failure("IMPORT_FAILED", "Match import failed.", imported.error);
     }
 
-    let queried: EvidenceQueryResult<Evidence | undefined>;
+    let queried: EvidenceQueryResult<readonly Evidence[]>;
 
     try {
-      queried = this.#evidenceQuery.findById(imported.value.id);
+      queried = this.#evidenceQuery.findByMatch(matchId);
     } catch {
       return failure("EVIDENCE_QUERY_FAILED", "Evidence query failed unexpectedly.");
     }
@@ -137,24 +164,20 @@ export class AnalyzeMatchUseCase {
       );
     }
 
-    if (queried.value === undefined) {
+    const evidenceSet = queried.value;
+    const matchInfo = evidenceSet.find((evidence) => evidence.type === "MATCH_INFO");
+
+    if (matchInfo === undefined) {
       return failure(
         "EVIDENCE_NOT_FOUND",
-        `Imported Evidence "${imported.value.id}" was not found.`,
+        `MATCH_INFO Evidence for "${matchId}" was not found.`,
       );
     }
 
-    if (queried.value.id !== imported.value.id) {
-      return failure(
-        "EVIDENCE_QUERY_FAILED",
-        "Evidence query returned an unexpected identity.",
-      );
-    }
-
-    let features: readonly Feature[];
+    let featureBundle: FeatureBundle;
 
     try {
-      features = Object.freeze([...this.#featureExtractor.extract(queried.value)]);
+      featureBundle = this.#featureExtractor.extractBundle(evidenceSet);
     } catch {
       return failure(
         "FEATURE_EXTRACTION_FAILED",
@@ -162,6 +185,7 @@ export class AnalyzeMatchUseCase {
       );
     }
 
+    const features = featureBundle.features;
     let ruleResults: readonly RuleResult[];
 
     try {
@@ -173,13 +197,31 @@ export class AnalyzeMatchUseCase {
       );
     }
 
+    let projection: DeterministicMatchProjection;
+
+    try {
+      projection = computeDeterministicMatchProjection({
+        featureBundle,
+        ruleResults,
+        requiredEvidencePresentCount: countRequiredEvidence(evidenceSet),
+      });
+    } catch {
+      return failure(
+        "PROJECTION_FAILED",
+        "Deterministic match projection failed unexpectedly.",
+      );
+    }
+
     try {
       return success(
         createAnalysisResult({
           matchId,
-          evidence: queried.value,
+          evidence: matchInfo,
+          evidenceSet,
           features,
+          featureBundle,
           ruleResults,
+          projection,
           generatedAt: latestEvaluationTime(ruleResults),
         }),
       );

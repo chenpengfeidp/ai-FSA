@@ -42,6 +42,22 @@ const report: AnalysisReportDto = {
   summary: ["Match information is complete."],
   features: [],
   rules: [],
+  deterministic: {
+    projectionModelVersion: "projection.v2.slice1",
+    matchId: "match-example-1",
+    lambdaHome: 1.5,
+    lambdaAway: 1.2,
+    pHome: 0.4,
+    pDraw: 0.3,
+    pAway: 0.3,
+    topScorelines: [{ homeGoals: 1, awayGoals: 1, probability: 0.12 }],
+    goalRange: { range01: 0.3, range23: 0.4, range4Plus: 0.3 },
+    confidence: 0.6,
+    recommendation: "cautious",
+    limitations: [],
+    status: "completed_nonempty",
+    checksum: "checksum-session",
+  },
 };
 
 const evidence: EvidenceDto = {

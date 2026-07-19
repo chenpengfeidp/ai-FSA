@@ -12,7 +12,7 @@ The architecture optimizes for:
 - a maintainable full-TypeScript stack;
 - simple local and single-host deployment before measured scale requires distribution.
 
-V1 includes pre-match analysis, post-match review, and seven distinct engines: Prompt, Knowledge, Rule, Case, Review, Evaluation, and Statistics. It excludes live analysis, identity, subscriptions, commercialization, and notifications.
+V1 includes pre-match analysis, post-match review, and seven distinct engines: Prompt, Knowledge, Rule, Case, Review, Evaluation, and Statistics. Feature derivation, deterministic match projection, and deterministic report assembly are Analysis-owned capabilities under the Analysis Orchestrator; they are not additional governed engines. V1 excludes live analysis, identity, subscriptions, commercialization, and notifications.
 
 ## 2. Architecture Decisions
 
@@ -153,6 +153,25 @@ flowchart TB
 
 The Analysis Orchestrator is an application service, not an engine. It coordinates the pre-match engine workflow and records each stage. It may depend on engine application ports; engines never depend on the orchestrator.
 
+Analysis also owns the following deterministic capabilities. They may be implemented in `@fas/analysis` and supporting packages documented in [14_MONOREPO](./14_MONOREPO.md), but naming them “engines” in design notes does not expand the governed engine set:
+
+| Capability | Responsibility | Must not |
+|---|---|---|
+| Feature derivation | Convert cutoff-qualified Evidence into a versioned FeatureBundle for Rule inputs and projection | Retrieve arbitrarily, call AI, or claim Statistics ownership |
+| Deterministic match projection | Compute per-match xG/probability/scoreline/recommendation artifacts from pinned FeatureBundle, Rule findings, and model versions | Replace Statistics population metrics/calibration computation, or invent missing evidence |
+| Deterministic report assembly | Assemble sealed feature, rule, and projection artifacts into a Deterministic report DTO with checksum | Recalculate projection numbers, generate AI prose, or imply publication |
+
+### 5.4 Analysis Profiles
+
+The orchestrator may execute additive analysis profiles. Profiles share Evidence/Match readiness contracts and must not silently substitute for one another.
+
+| Profile | Purpose | Terminal artifact | Requires Prompt/AI |
+|---|---|---|---|
+| `ai_analysis` | Canonical structured AI analysis workflow | Validated/published Analysis Revision | Yes |
+| `deterministic_report` | Additive deterministic football projection path | Sealed Deterministic report | No |
+
+A future combined profile may feed a sealed Deterministic report into Prompt composition. AI may explain sealed deterministic values but must not modify them. Detailed stage contracts live in [17_ANALYSIS_PIPELINE](./17_ANALYSIS_PIPELINE.md).
+
 ## 6. Dependency Rules
 
 ```mermaid
@@ -187,6 +206,8 @@ Rules:
 6. Engines communicate through application contracts, not direct table reads.
 7. Cross-module writes occur through the owning module's command interface.
 8. Provider responses are mapped and validated before entering the domain.
+9. Presentation layers never compute FeatureBundle values, match-projection probabilities, confidence, or recommendations; they render Analysis-owned DTOs only.
+10. Deterministic match projection must not duplicate Statistics Engine population-metric or calibration computation.
 
 ## 7. AI Analysis Workflow
 
@@ -228,6 +249,19 @@ The provider output is structured into:
 - alternative scenarios and falsifiers.
 
 An unsupported claim cannot be relabeled as fact. Validation failure produces a non-publishable run.
+
+### 7.4 Deterministic Report Profile
+
+The additive `deterministic_report` profile is coordinated by the same Analysis Orchestrator:
+
+1. **Readiness and evidence selection:** verify match state and select cutoff-qualified Evidence.
+2. **Derive features:** compute the Analysis-owned FeatureBundle from selected Evidence.
+3. **Apply rules:** evaluate eligible Rule versions against exact normalized inputs (including derived features exposed by the snapshot input contract).
+4. **Project:** compute the Analysis-owned DeterministicMatchProjection from pinned features, rule findings, and projection-model versions.
+5. **Assemble report:** build the Deterministic report from sealed upstream artifacts without recomputation.
+6. **Present:** API/Web render the report DTO; UI must not recalculate projection fields.
+
+This profile does not replace readiness, publication, Review, Evaluation, or Statistics contracts of the AI path. Sealing a Deterministic report is not publication of an Analysis Revision. [17_ANALYSIS_PIPELINE](./17_ANALYSIS_PIPELINE.md) is authoritative for stage envelopes and failure semantics.
 
 ## 8. Pre-match Analysis Sequence
 

@@ -7,6 +7,7 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
     awayTeam: "Chelsea",
     kickoffTime: "19:30",
     competition: "Premier League",
+    status: "SCHEDULED",
   }),
   Object.freeze({
     id: "match-example-2",
@@ -14,6 +15,7 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
     awayTeam: "Manchester City",
     kickoffTime: "20:00",
     competition: "Premier League",
+    status: "SCHEDULED",
   }),
   Object.freeze({
     id: "match-example-3",
@@ -21,6 +23,7 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
     awayTeam: "Real Madrid",
     kickoffTime: "20:30",
     competition: "La Liga",
+    status: "SCHEDULED",
   }),
   Object.freeze({
     id: "match-example-4",
@@ -28,6 +31,7 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
     awayTeam: "Borussia Dortmund",
     kickoffTime: "18:30",
     competition: "Bundesliga",
+    status: "SCHEDULED",
   }),
   Object.freeze({
     id: "match-example-5",
@@ -35,6 +39,7 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
     awayTeam: "Marseille",
     kickoffTime: "21:00",
     competition: "Ligue 1",
+    status: "SCHEDULED",
   }),
   Object.freeze({
     id: "match-example-6",
@@ -42,5 +47,10 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
     awayTeam: "Juventus",
     kickoffTime: "19:45",
     competition: "Serie A",
+    status: "SCHEDULED",
   }),
 ]);
+
+export function findMatchById(matchId: string): MatchSummary | undefined {
+  return todaysMatches.find((match) => match.id === matchId);
+}

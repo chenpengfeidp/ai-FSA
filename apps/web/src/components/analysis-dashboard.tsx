@@ -1,41 +1,31 @@
 "use client";
 
 import { CalendarDays } from "lucide-react";
-import { type ReactElement, useState } from "react";
-import { useAnalyzeMatch } from "../hooks/use-analyze-match";
+import { useRouter } from "next/navigation";
+import type { ReactElement } from "react";
+import { useAnalysisHistory } from "../hooks/use-analysis-history";
 import { todaysMatches } from "../lib/todays-matches";
-import type { AnalysisReportDto } from "../types/analysis";
 import type { MatchSummary } from "../types/match-center";
 import { MatchCard } from "./match-card";
+import { OverviewMetrics } from "./overview-metrics";
 import { PageContainer } from "./page-container";
+import { PipelineStatus } from "./pipeline-status";
 import { RecentAnalysis } from "./recent-analysis";
 
-interface RecentAnalysisState {
-  readonly match: MatchSummary;
-  readonly report: AnalysisReportDto;
-}
-
 export function AnalysisDashboard(): ReactElement {
-  const analysis = useAnalyzeMatch();
-  const [activeMatchId, setActiveMatchId] = useState<string>();
-  const [recentAnalysis, setRecentAnalysis] = useState<RecentAnalysisState>();
+  const router = useRouter();
+  const history = useAnalysisHistory();
 
   function analyze(match: MatchSummary): void {
-    analysis.reset();
-    setActiveMatchId(match.id);
-    analysis.mutate(match.id, {
-      onSettled: () => {
-        setActiveMatchId(undefined);
-      },
-      onSuccess: (report) => {
-        setRecentAnalysis({ match, report });
-      },
-    });
+    router.push(`/matches/${encodeURIComponent(match.id)}`);
   }
 
   return (
     <PageContainer>
       <div className="space-y-12">
+        <OverviewMetrics metrics={history.metrics} />
+        <PipelineStatus />
+
         <section aria-labelledby="todays-matches-heading">
           <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
@@ -58,8 +48,8 @@ export function AnalysisDashboard(): ReactElement {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {todaysMatches.map((match) => (
               <MatchCard
-                isAnalyzing={analysis.isPending && activeMatchId === match.id}
-                isDisabled={analysis.isPending}
+                isAnalyzing={false}
+                isDisabled={false}
                 key={match.id}
                 match={match}
                 onAnalyze={analyze}
@@ -68,11 +58,7 @@ export function AnalysisDashboard(): ReactElement {
           </div>
         </section>
 
-        <RecentAnalysis
-          errorMessage={analysis.isError ? analysis.error.message : undefined}
-          match={recentAnalysis?.match}
-          report={recentAnalysis?.report}
-        />
+        <RecentAnalysis entries={history.recent} />
       </div>
     </PageContainer>
   );

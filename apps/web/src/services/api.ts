@@ -4,6 +4,7 @@ import type {
   AnalyzeMatchResponseDto,
   BackendErrorResponseDto,
 } from "../types/analysis";
+import type { EvidenceByMatchResponseDto, EvidenceDto } from "../types/evidence";
 
 const apiClient = axios.create({
   headers: {
@@ -12,7 +13,7 @@ const apiClient = axios.create({
 });
 
 function isBackendErrorResponse(
-  value: AnalyzeMatchResponseDto | unknown,
+  value: AnalyzeMatchResponseDto | EvidenceByMatchResponseDto | unknown,
 ): value is BackendErrorResponseDto {
   if (typeof value !== "object" || value === null || !("ok" in value)) {
     return false;
@@ -21,7 +22,7 @@ function isBackendErrorResponse(
   return value.ok === false;
 }
 
-function errorMessage(error: unknown): string {
+function errorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
     const responseData = error.response?.data as unknown;
 
@@ -34,7 +35,7 @@ function errorMessage(error: unknown): string {
     }
   }
 
-  return error instanceof Error ? error.message : "Unable to analyze the match.";
+  return error instanceof Error ? error.message : fallback;
 }
 
 export async function analyzeMatch(matchId: string): Promise<AnalysisReportDto> {
@@ -49,6 +50,24 @@ export async function analyzeMatch(matchId: string): Promise<AnalysisReportDto> 
 
     return response.data;
   } catch (error: unknown) {
-    throw new Error(errorMessage(error));
+    throw new Error(errorMessage(error, "Unable to analyze the match."));
+  }
+}
+
+export async function getEvidenceByMatch(
+  matchId: string,
+): Promise<readonly EvidenceDto[]> {
+  try {
+    const response = await apiClient.get<EvidenceByMatchResponseDto>(
+      `/api/evidence/match/${encodeURIComponent(matchId)}`,
+    );
+
+    if (isBackendErrorResponse(response.data)) {
+      throw new Error(response.data.error.message);
+    }
+
+    return response.data.value;
+  } catch (error: unknown) {
+    throw new Error(errorMessage(error, "Unable to load match evidence."));
   }
 }

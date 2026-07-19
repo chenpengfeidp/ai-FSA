@@ -254,6 +254,38 @@ describe("HTTP import and Evidence query workflow", () => {
     const openApi = requireRecord(openApiResponse.body);
     const paths = requireRecord(openApi.paths);
     expect(paths).toHaveProperty("/api/analyze/match/{matchId}");
+    expect(paths).toHaveProperty("/api/matches/upcoming");
+  });
+
+  it("lists upcoming Match Center fixtures from the recorded odds board", async () => {
+    const response = await request(baseUrl, "/api/matches/upcoming");
+    const body = requireRecord(response.body);
+    const value = body.value;
+
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(Array.isArray(value)).toBe(true);
+    expect(value).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          matchId: "match-example-2",
+          homeTeam: "Arsenal",
+          awayTeam: "Coventry City",
+          analyzable: true,
+          providerSource: "the-odds-api",
+        }),
+        expect.objectContaining({
+          matchId: "odds:evt_epl_unmapped_tottenham_everton",
+          analyzable: false,
+          providerSource: "the-odds-api",
+        }),
+        expect.objectContaining({
+          matchId: "match-example-3",
+          analyzable: true,
+          providerSource: "fixture",
+        }),
+      ]),
+    );
   });
 
   it("analyzes every demo fixture through the complete pipeline", async () => {

@@ -407,3 +407,66 @@ export class AnalysisEndpointErrorResponseDto {
   @ApiProperty({ type: () => AnalysisEndpointErrorDto })
   declare readonly error: AnalysisEndpointErrorDto;
 }
+
+export class UpcomingMatchDto {
+  @ApiProperty({ example: "match-example-2" })
+  declare readonly matchId: string;
+
+  @ApiProperty({ example: "eb2553d10d63dc912b99f8fd0d675721" })
+  declare readonly eventId: string;
+
+  @ApiProperty({ example: "soccer_epl" })
+  declare readonly sportKey: string;
+
+  @ApiProperty({ example: "EPL" })
+  declare readonly competition: string;
+
+  @ApiProperty({ example: "Arsenal" })
+  declare readonly homeTeam: string;
+
+  @ApiProperty({ example: "Coventry City" })
+  declare readonly awayTeam: string;
+
+  @ApiProperty({ example: "2026-08-21T19:00:00Z", format: "date-time" })
+  declare readonly kickoff: string;
+
+  @ApiProperty({
+    description:
+      "True when full fixture evidence exists for analyze/import in this slice.",
+    example: true,
+  })
+  declare readonly analyzable: boolean;
+
+  @ApiProperty({ enum: ["fixture", "the-odds-api"], example: "the-odds-api" })
+  declare readonly providerSource: string;
+
+  @ApiProperty({
+    enum: ["fixture", "http-live", "recorded-snapshot"],
+    example: "recorded-snapshot",
+  })
+  declare readonly providerMethod: string;
+}
+
+export class UpcomingMatchesSuccessResponseDto {
+  @ApiProperty({ enum: [true], example: true })
+  declare readonly ok: true;
+
+  @ApiProperty({ isArray: true, type: () => UpcomingMatchDto })
+  declare readonly value: readonly UpcomingMatchDto[];
+}
+
+export class UpcomingMatchesErrorDto {
+  @ApiProperty({ example: "UPCOMING_MATCHES_FAILED" })
+  declare readonly code: string;
+
+  @ApiProperty({ example: "Unable to load upcoming matches." })
+  declare readonly message: string;
+}
+
+export class UpcomingMatchesErrorResponseDto {
+  @ApiProperty({ enum: [false], example: false })
+  declare readonly ok: false;
+
+  @ApiProperty({ type: () => UpcomingMatchesErrorDto })
+  declare readonly error: UpcomingMatchesErrorDto;
+}

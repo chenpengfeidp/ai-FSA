@@ -46,6 +46,17 @@ describe("FixtureProvider", () => {
     expect(provider.getMatch("match-unknown")).toBeUndefined();
   });
 
+  it("lists demo match summaries for Match Center merge", () => {
+    const provider = new providerPackage.FixtureProvider();
+    const summaries = provider.listMatchSummaries();
+
+    expect(summaries.some((row) => row.matchId === "match-example")).toBe(false);
+    expect(summaries.some((row) => row.matchId === "match-example-3")).toBe(true);
+    expect(
+      summaries.find((row) => row.matchId === "match-example-3")?.competition,
+    ).toBe("La Liga");
+  });
+
   it("exposes only the provider export", () => {
     expect(Object.keys(providerPackage)).toEqual(["FixtureProvider"]);
   });

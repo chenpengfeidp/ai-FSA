@@ -33,3 +33,9 @@ export function findDemoOddsCatalogEntry(
 ): DemoOddsCatalogEntry | undefined {
   return DEMO_ODDS_CATALOG.find((entry) => entry.matchId === matchId);
 }
+
+export function findDemoOddsCatalogEntryByEventId(
+  eventId: string,
+): DemoOddsCatalogEntry | undefined {
+  return DEMO_ODDS_CATALOG.find((entry) => entry.eventId === eventId);
+}

@@ -4,7 +4,7 @@ import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 import { useAnalysisHistory } from "../hooks/use-analysis-history";
-import { todaysMatches } from "../lib/todays-matches";
+import { useUpcomingMatches } from "../hooks/use-upcoming-matches";
 import type { MatchSummary } from "../types/match-center";
 import { HomeHero } from "./home-hero";
 import { MatchCard } from "./match-card";
@@ -17,8 +17,13 @@ import { Divider } from "./ui/divider";
 export function AnalysisDashboard(): ReactElement {
   const router = useRouter();
   const history = useAnalysisHistory();
+  const upcoming = useUpcomingMatches();
 
   function analyze(match: MatchSummary): void {
+    if (match.analyzable === false) {
+      return;
+    }
+
     router.push(`/matches/${encodeURIComponent(match.id)}/session`);
   }
 
@@ -42,16 +47,24 @@ export function AnalysisDashboard(): ReactElement {
                 className="mt-2 text-heading text-foreground"
                 id="todays-matches-heading"
               >
-                Today&apos;s Matches
+                Upcoming Matches
               </h2>
             </div>
             <p className="text-body text-muted-foreground">
-              {todaysMatches.length} fixtures available
+              {upcoming.isLoading
+                ? "Loading fixtures…"
+                : `${String(upcoming.matches.length)} fixtures available`}
             </p>
           </div>
 
+          {upcoming.isError ? (
+            <p className="text-body text-red-700" role="alert">
+              {upcoming.errorMessage ?? "Unable to load upcoming matches."}
+            </p>
+          ) : null}
+
           <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-            {todaysMatches.map((match) => (
+            {upcoming.matches.map((match) => (
               <MatchCard
                 isAnalyzing={false}
                 isDisabled={false}

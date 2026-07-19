@@ -5,10 +5,10 @@
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: B.2 international 1X2 + Asian handicap market signals implemented (recorded default)
+- Current task status: C.1 Match Center upcoming fixtures board implemented (recorded default; live optional)
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Vertical slice B.2 — ODDS carries 1X2 + primary Asian handicap via `@fas/provider-odds`
-- Next authorized work: Verify live odds on `match-example-2` (Arsenal vs Coventry) with local `.env`; then Match Center calendar or mainline A calibration
+- Last completed delivery: Vertical slice C.1 — `GET /api/matches/upcoming` + Web Match Center board
+- Next authorized work: Step 2 real TEAM_FORM/STATISTICS evidence; platform persistence can interleave
 - Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -65,6 +65,7 @@ Domain (private demo):
 
 - `POST /api/import/match/:matchId`
 - `POST /api/analyze/match/:matchId`
+- `GET /api/matches/upcoming`
 - `GET /api/evidence/example`
 - `GET /api/evidence/match/:matchId`
 - `GET /api/evidence/:id`
@@ -138,8 +139,9 @@ Not a numbered Sprint 11 authorization; delivered as bounded implementation agai
 | 1.4 | `@fas/prompt` + local `@fas/ai-provider` inference narrative | commit `39b55b2` |
 | B.1 | Real-shaped pre-match 1X2 ODDS ingest (`@fas/provider-odds`, recorded default) | `docs/sprints/VERTICAL_SLICE_B1_ODDS_INGEST_SPEC.md` |
 | B.2 | International 1X2 + Asian handicap on ODDS; AH features/rules; AH conflict limitation | `docs/sprints/VERTICAL_SLICE_B2_AH_MARKET_SPEC.md` |
+| C.1 | Match Center upcoming fixtures from Odds-shaped feed + fixture demos | `docs/sprints/VERTICAL_SLICE_C1_MATCH_CENTER_FIXTURES_SPEC.md` |
 
-Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2 specs above.
+Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1 specs above.
 
 ## Architecture Status
 
@@ -211,13 +213,14 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. B.1/B.2 international market path is implemented with default offline recorded mode (1X2 + primary Asian handicap).
+No numbered sprint is active. B.1/B.2/C.1 path is implemented with default offline recorded mode.
 
-Recommended follow-ons:
+Recommended follow-ons (ordered):
 
-1. Add a free The Odds API key and map one live event id for a real upcoming match, or
-2. **A — true calibration population** (Statistics metrics over sealed projection vs verified results), or
-3. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
+1. **Step 2 — real TEAM_FORM / STATISTICS evidence** for upcoming international matches;
+2. **Step 3 — true calibration population**;
+3. Interleave Milestone 3A platform persistence / jobs / CI gates;
+4. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

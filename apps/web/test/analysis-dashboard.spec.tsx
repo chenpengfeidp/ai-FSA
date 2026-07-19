@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,6 +10,7 @@ import {
   writeAnalysisHistory,
 } from "../src/lib/analysis-history";
 import type { AnalysisHistoryEntry } from "../src/types/dashboard";
+import type { MatchSummary } from "../src/types/match-center";
 
 const push = vi.fn();
 
@@ -25,6 +26,84 @@ vi.mock("next/link", () => ({
     <a href={href}>{children}</a>
   ),
 }));
+
+const upcomingMatches: readonly MatchSummary[] = Object.freeze([
+  Object.freeze({
+    id: "match-example-1",
+    homeTeam: "Liverpool",
+    awayTeam: "Chelsea",
+    kickoffTime: "19:30",
+    competition: "EPL",
+    status: "SCHEDULED" as const,
+    analyzable: true,
+  }),
+  Object.freeze({
+    id: "match-example-2",
+    homeTeam: "Arsenal",
+    awayTeam: "Coventry City",
+    kickoffTime: "19:00",
+    competition: "EPL",
+    status: "SCHEDULED" as const,
+    analyzable: true,
+  }),
+  Object.freeze({
+    id: "odds:evt_unmapped",
+    homeTeam: "Tottenham Hotspur",
+    awayTeam: "Everton",
+    kickoffTime: "14:00",
+    competition: "EPL",
+    status: "SCHEDULED" as const,
+    analyzable: false,
+  }),
+  Object.freeze({
+    id: "match-example-3",
+    homeTeam: "Barcelona",
+    awayTeam: "Real Madrid",
+    kickoffTime: "20:30",
+    competition: "La Liga",
+    status: "SCHEDULED" as const,
+    analyzable: true,
+  }),
+  Object.freeze({
+    id: "match-example-4",
+    homeTeam: "Bayern Munich",
+    awayTeam: "Borussia Dortmund",
+    kickoffTime: "18:30",
+    competition: "Bundesliga",
+    status: "SCHEDULED" as const,
+    analyzable: true,
+  }),
+  Object.freeze({
+    id: "match-example-5",
+    homeTeam: "PSG",
+    awayTeam: "Marseille",
+    kickoffTime: "21:00",
+    competition: "Ligue 1",
+    status: "SCHEDULED" as const,
+    analyzable: true,
+  }),
+  Object.freeze({
+    id: "match-example-6",
+    homeTeam: "Inter Milan",
+    awayTeam: "Juventus",
+    kickoffTime: "19:45",
+    competition: "Serie A",
+    status: "SCHEDULED" as const,
+    analyzable: true,
+  }),
+]);
+
+vi.mock("../src/services/api", async () => {
+  const actual =
+    await vi.importActual<typeof import("../src/services/api")>(
+      "../src/services/api",
+    );
+
+  return {
+    ...actual,
+    getUpcomingMatches: vi.fn(async () => upcomingMatches),
+  };
+});
 
 const historyEntry: AnalysisHistoryEntry = {
   matchId: "match-example-1",
@@ -67,7 +146,7 @@ describe("AnalysisDashboard", () => {
     clearAnalysisHistoryCacheForTests();
   });
 
-  it("renders hero, matches, recent, overview, and pipeline in landing order", () => {
+  it("renders hero, matches, recent, overview, and pipeline in landing order", async () => {
     renderDashboard();
 
     expect(
@@ -96,12 +175,20 @@ describe("AnalysisDashboard", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Today's Matches" }),
+      screen.getByRole("heading", { name: "Upcoming Matches" }),
     ).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getAllByRole("button", { name: /^Analyze .+ vs .+$/ }),
+      ).toHaveLength(6);
+    });
     expect(
-      screen.getAllByRole("button", { name: /^Analyze .+ vs .+$/ }),
-    ).toHaveLength(6);
-    expect(screen.getAllByText("VS").length).toBeGreaterThanOrEqual(6);
+      screen.getByRole("button", {
+        name: "Evidence incomplete for Tottenham Hotspur vs Everton",
+      }),
+    ).toBeDisabled();
+    expect(screen.getAllByText("VS").length).toBeGreaterThanOrEqual(7);
 
     expect(screen.getByText("No analysis yet")).toBeInTheDocument();
 
@@ -121,9 +208,9 @@ describe("AnalysisDashboard", () => {
 
     const headings = screen.getAllByRole("heading").map((node) => node.textContent);
     expect(headings.indexOf("AI Football Analysis Platform")).toBeLessThan(
-      headings.indexOf("Today's Matches"),
+      headings.indexOf("Upcoming Matches"),
     );
-    expect(headings.indexOf("Today's Matches")).toBeLessThan(
+    expect(headings.indexOf("Upcoming Matches")).toBeLessThan(
       headings.indexOf("Recent Analysis"),
     );
     expect(headings.indexOf("Recent Analysis")).toBeLessThan(
@@ -134,13 +221,15 @@ describe("AnalysisDashboard", () => {
     );
   });
 
-  it("calculates overview metrics and recent analysis from stored results", () => {
+  it("calculates overview metrics and recent analysis from stored results", async () => {
     writeAnalysisHistory([historyEntry]);
     renderDashboard();
 
+    await waitFor(() => {
+      expect(screen.getByText("Liverpool vs Chelsea")).toBeInTheDocument();
+    });
     expect(screen.getAllByText("1").length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText("Liverpool vs Chelsea")).toBeInTheDocument();
     expect(screen.getByText("Completed")).toBeInTheDocument();
     expect(screen.getByText(/UTC/)).toBeInTheDocument();
     expect(
@@ -154,6 +243,14 @@ describe("AnalysisDashboard", () => {
     const user = userEvent.setup();
     renderDashboard();
 
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", {
+          name: "Open analysis for Liverpool vs Chelsea",
+        }),
+      ).toBeInTheDocument();
+    });
+
     await user.click(
       screen.getByRole("button", {
         name: "Open analysis for Liverpool vs Chelsea",
@@ -166,6 +263,14 @@ describe("AnalysisDashboard", () => {
   it("navigates to the Analysis Session route when Analyze is clicked", async () => {
     const user = userEvent.setup();
     renderDashboard();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", {
+          name: "Analyze Liverpool vs Chelsea",
+        }),
+      ).toBeInTheDocument();
+    });
 
     await user.click(
       screen.getByRole("button", {

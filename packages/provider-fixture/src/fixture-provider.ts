@@ -272,8 +272,42 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
   ),
 });
 
+export interface FixtureMatchSummary {
+  readonly matchId: string;
+  readonly homeTeam: string;
+  readonly awayTeam: string;
+  readonly kickoff: string;
+  readonly competition: string;
+}
+
+const fixtureCompetitions: Readonly<Record<string, string>> = Object.freeze({
+  "match-example": "Premier League",
+  "match-example-1": "Premier League",
+  "match-example-2": "Premier League",
+  "match-example-3": "La Liga",
+  "match-example-4": "Bundesliga",
+  "match-example-5": "Ligue 1",
+  "match-example-6": "Serie A",
+});
+
 export class FixtureProvider {
   getMatch(matchId: string): FixtureMatch | undefined {
     return fixtureMatches[matchId];
+  }
+
+  listMatchSummaries(): readonly FixtureMatchSummary[] {
+    return Object.freeze(
+      Object.values(fixtureMatches)
+        .filter((match) => match.matchId !== "match-example")
+        .map((match) =>
+          Object.freeze({
+            matchId: match.matchId,
+            homeTeam: match.home,
+            awayTeam: match.away,
+            kickoff: match.kickoff,
+            competition: fixtureCompetitions[match.matchId] ?? "Fixture",
+          }),
+        ),
+    );
   }
 }

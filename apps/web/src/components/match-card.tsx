@@ -22,6 +22,8 @@ export function MatchCard({
   onAnalyze: (match: MatchSummary) => void;
 }>): ReactElement {
   const matchup = `${match.homeTeam} vs ${match.awayTeam}`;
+  const analyzable = match.analyzable !== false;
+  const disabled = isDisabled || !analyzable;
 
   return (
     <Card className="flex h-full flex-col overflow-hidden">
@@ -77,9 +79,11 @@ export function MatchCard({
         </div>
 
         <Button
-          aria-label={`Analyze ${matchup}`}
+          aria-label={
+            analyzable ? `Analyze ${matchup}` : `Evidence incomplete for ${matchup}`
+          }
           className="mt-auto w-full transition-transform duration-200 hover:scale-[1.01]"
-          disabled={isDisabled}
+          disabled={disabled}
           onClick={() => onAnalyze(match)}
           type="button"
           variant="primary"
@@ -89,7 +93,7 @@ export function MatchCard({
           ) : (
             <>
               <Search aria-hidden="true" className="size-4" />
-              Analyze
+              {analyzable ? "Analyze" : "Evidence incomplete"}
             </>
           )}
         </Button>

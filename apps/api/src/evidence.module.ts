@@ -22,16 +22,25 @@ import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
 import { matchProviderToken } from "./evidence.tokens.js";
 import { ImportController } from "./import.controller.js";
+import { MatchesController } from "./matches.controller.js";
 import { createMatchProviderWiring } from "./match-provider.factory.js";
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
+import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
+import { createUpcomingMatchesBoard } from "./upcoming-matches.factory.js";
 
 const evidenceRepositoryToken = Symbol("EvidenceRepository");
 
 const apiConfig = loadApiConfig();
 const matchProviderWiring = createMatchProviderWiring(apiConfig.oddsProvider);
+const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider);
 
 @Module({
-  controllers: [AnalysisController, EvidenceController, ImportController],
+  controllers: [
+    AnalysisController,
+    EvidenceController,
+    ImportController,
+    MatchesController,
+  ],
   providers: [
     InMemoryEvidenceRepository,
     {
@@ -64,6 +73,10 @@ const matchProviderWiring = createMatchProviderWiring(apiConfig.oddsProvider);
     {
       provide: OddsSnapshotPrimerBridge,
       useValue: new OddsSnapshotPrimerBridge(matchProviderWiring.oddsPrimer),
+    },
+    {
+      provide: UpcomingMatchesBoardBridge,
+      useValue: new UpcomingMatchesBoardBridge(upcomingMatchesBoard),
     },
     {
       provide: EvidenceImportPipeline,

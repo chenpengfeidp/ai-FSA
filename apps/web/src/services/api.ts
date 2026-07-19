@@ -5,6 +5,11 @@ import type {
   BackendErrorResponseDto,
 } from "../types/analysis";
 import type { EvidenceByMatchResponseDto, EvidenceDto } from "../types/evidence";
+import type {
+  MatchSummary,
+  UpcomingMatchDto,
+  UpcomingMatchesResponseDto,
+} from "../types/match-center";
 
 const apiClient = axios.create({
   headers: {
@@ -69,5 +74,44 @@ export async function getEvidenceByMatch(
     return response.data.value;
   } catch (error: unknown) {
     throw new Error(errorMessage(error, "Unable to load match evidence."));
+  }
+}
+
+function formatKickoffTime(kickoff: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(kickoff);
+
+  if (match === null) {
+    return kickoff;
+  }
+
+  return `${match[4]}:${match[5]}`;
+}
+
+export function toMatchSummary(row: UpcomingMatchDto): MatchSummary {
+  return Object.freeze({
+    id: row.matchId,
+    homeTeam: row.homeTeam,
+    awayTeam: row.awayTeam,
+    kickoffTime: formatKickoffTime(row.kickoff),
+    competition: row.competition,
+    status: "SCHEDULED",
+    analyzable: row.analyzable,
+  });
+}
+
+export async function getUpcomingMatches(): Promise<readonly MatchSummary[]> {
+  try {
+    const response = await apiClient.get<UpcomingMatchesResponseDto>(
+      "/api/matches/upcoming",
+    );
+    const body = response.data;
+
+    if (body.ok === false) {
+      throw new Error(body.error.message);
+    }
+
+    return Object.freeze(body.value.map(toMatchSummary));
+  } catch (error: unknown) {
+    throw new Error(errorMessage(error, "Unable to load upcoming matches."));
   }
 }

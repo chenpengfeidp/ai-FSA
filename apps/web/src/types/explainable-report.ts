@@ -59,11 +59,15 @@ export interface EvidenceTimelineItemView {
   readonly detail: string;
 }
 
+export type FeaturePolarity = "negative" | "positive";
+
 export interface FeatureImportanceItemView {
   readonly featureId: string;
   readonly label: string;
   readonly percent: number;
   readonly valueLabel: string;
+  /** Presentation polarity for contribution bars (rule outcome + feature side). */
+  readonly polarity: FeaturePolarity;
 }
 
 export interface RuleEvaluationItemView {

@@ -165,12 +165,15 @@ describe("MatchDetailPage", () => {
     expect(screen.getByText("Matches")).toBeInTheDocument();
     expect(screen.getAllByText("Premier League").length).toBeGreaterThan(0);
     expect(screen.getByText("Kickoff 19:30")).toBeInTheDocument();
+    expect(screen.getByText("Final Recommendation")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Final Recommendation" }),
+      screen.getByRole("heading", { name: "Explainable Pipeline" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Home Team Present")).toBeInTheDocument();
     expect(screen.getByText("Match information")).toBeInTheDocument();
-    expect(screen.getByText("Match information is complete.")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Match information is complete.").length,
+    ).toBeGreaterThanOrEqual(1);
 
     await waitFor(() => {
       expect(analyzeMatch).toHaveBeenCalledWith("match-example-1");

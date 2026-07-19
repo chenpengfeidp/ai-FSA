@@ -7,7 +7,7 @@ export function MostLikelyScoreCard({
   score,
 }: Readonly<{ score: MostLikelyScoreView }>): ReactElement {
   return (
-    <Card className="animate-fade-in-delay-1 h-full">
+    <Card className="animate-fade-in-delay-1 h-full hover:translate-y-0">
       <CardHeader className="border-b-0 pb-0">
         <CardTitle>Most Likely Score</CardTitle>
       </CardHeader>

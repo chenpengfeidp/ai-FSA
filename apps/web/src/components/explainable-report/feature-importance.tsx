@@ -1,6 +1,8 @@
 import type { ReactElement } from "react";
+import { cn } from "../../lib/utils";
 import type { FeatureImportanceItemView } from "../../types/explainable-report";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Tag } from "../ui/tag";
 
 export function FeatureImportance({
   features,
@@ -13,7 +15,7 @@ export function FeatureImportance({
         <CardHeader>
           <CardTitle id="feature-importance-heading">Feature Importance</CardTitle>
           <p className="text-caption text-muted-foreground">
-            Deterministic features weighted by linked rule scores
+            Contribution bars — positive and negative signals distinguished by color
           </p>
         </CardHeader>
         <CardContent>
@@ -26,29 +28,45 @@ export function FeatureImportance({
             </div>
           ) : (
             <ul className="space-y-5">
-              {features.map((feature) => (
-                <li className="space-y-2" key={feature.featureId}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-body font-semibold text-foreground">
-                        {feature.label}
-                      </p>
-                      <p className="truncate text-caption text-muted-foreground">
-                        {feature.valueLabel}
+              {features.map((feature) => {
+                const positive = feature.polarity === "positive";
+
+                return (
+                  <li className="space-y-2" key={feature.featureId}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <p className="text-body font-semibold text-foreground">
+                          {feature.label}
+                        </p>
+                        <Tag variant={positive ? "primary" : "muted"}>
+                          {positive ? "Positive" : "Negative"}
+                        </Tag>
+                      </div>
+                      <p
+                        className={cn(
+                          "text-caption font-semibold tabular-nums",
+                          positive ? "text-success" : "text-error",
+                        )}
+                      >
+                        {positive ? "+" : "−"}
+                        {feature.percent}%
                       </p>
                     </div>
-                    <p className="text-caption font-semibold tabular-nums text-muted-foreground">
-                      {feature.percent}%
+                    <p className="truncate text-caption text-muted-foreground">
+                      {feature.valueLabel}
                     </p>
-                  </div>
-                  <div className="h-2.5 overflow-hidden rounded-full bg-surface-muted">
-                    <div
-                      className="h-full rounded-full bg-primary transition-[width] duration-500"
-                      style={{ width: `${feature.percent}%` }}
-                    />
-                  </div>
-                </li>
-              ))}
+                    <div className="relative h-3 overflow-hidden rounded-full bg-surface-muted">
+                      <div
+                        className={cn(
+                          "absolute inset-y-0 rounded-full transition-[width] duration-500",
+                          positive ? "left-0 bg-success" : "right-0 bg-error",
+                        )}
+                        style={{ width: `${feature.percent}%` }}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>

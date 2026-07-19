@@ -4,17 +4,20 @@ import { Skeleton } from "./ui/skeleton";
 
 export function ExplainableReportSkeleton(): ReactElement {
   return (
-    <div aria-busy="true" aria-live="polite" className="space-y-6 sm:space-y-8">
+    <div aria-busy="true" aria-live="polite" className="space-y-8 sm:space-y-10">
       <Card className="hover:translate-y-0">
-        <CardContent className="space-y-5 px-6 py-6 sm:px-8 sm:py-8">
+        <CardContent className="space-y-6 px-6 py-8 sm:px-10 sm:py-12">
           <div className="flex gap-2">
             <Skeleton className="h-7 w-32 rounded-full" />
             <Skeleton className="h-7 w-28 rounded-full" />
+            <Skeleton className="h-7 w-24 rounded-full" />
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <Skeleton className="h-10 w-40" />
-            <Skeleton className="h-8 w-14 rounded-full" />
-            <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-4 w-36" />
+          <Skeleton className="h-12 w-64" />
+          <Skeleton className="h-5 w-80" />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Skeleton className="h-24 w-full rounded-2xl" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
           </div>
         </CardContent>
       </Card>
@@ -23,8 +26,8 @@ export function ExplainableReportSkeleton(): ReactElement {
         <Card className="hover:translate-y-0">
           <CardHeader className="space-y-3">
             <Skeleton className="h-5 w-40" />
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-5/6" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
           </CardHeader>
         </Card>
         <Card className="hover:translate-y-0">
@@ -36,9 +39,9 @@ export function ExplainableReportSkeleton(): ReactElement {
       </div>
 
       <Skeleton className="h-36 w-full rounded-xl" />
-      <Skeleton className="h-28 w-full rounded-xl" />
-      <Skeleton className="h-48 w-full rounded-xl" />
       <Skeleton className="h-40 w-full rounded-xl" />
+      <Skeleton className="h-56 w-full rounded-xl" />
+      <Skeleton className="h-48 w-full rounded-xl" />
     </div>
   );
 }

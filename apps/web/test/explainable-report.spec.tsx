@@ -132,6 +132,12 @@ describe("buildExplainableReportView", () => {
     expect(view.evidenceTimeline).toHaveLength(1);
     expect(view.evidenceTimeline[0]?.title).toBe("Match information");
     expect(view.featureImportance).toHaveLength(3);
+    expect(
+      view.featureImportance.find((item) => item.label === "Home Team")?.polarity,
+    ).toBe("positive");
+    expect(
+      view.featureImportance.find((item) => item.label === "Away Team")?.polarity,
+    ).toBe("negative");
     expect(view.ruleEvaluations).toHaveLength(3);
     expect(view.finalRecommendation.recommendedWinner).toBe("Even signal");
     expect(view.finalRecommendation.recommendedScore).toBe("Unavailable");
@@ -147,13 +153,15 @@ describe("buildExplainableReportView", () => {
 });
 
 describe("ExplainableMatchReport", () => {
-  it("renders the product report sections from analysis output", () => {
+  it("renders the premium report sections from analysis output", () => {
     render(
       <ExplainableMatchReport evidence={evidence} match={match} report={report} />,
     );
 
+    expect(screen.getByText("Prediction Hero")).toBeInTheDocument();
     expect(screen.getByText("Premier League")).toBeInTheDocument();
     expect(screen.getByText("Kickoff 19:30")).toBeInTheDocument();
+    expect(screen.getAllByText("Even signal").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Liverpool").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Chelsea").length).toBeGreaterThanOrEqual(1);
     expect(
@@ -168,27 +176,34 @@ describe("ExplainableMatchReport", () => {
     expect(screen.getByText("2-3 Goals")).toBeInTheDocument();
     expect(screen.getByText("4+ Goals")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Confidence Meter" }),
+      screen.getByRole("heading", { name: "Confidence Gauge" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
     expect(
-      screen.getByRole("heading", { name: "Evidence Timeline" }),
+      screen.getByRole("heading", { name: "Explainable Pipeline" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Match information")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Feature Importance" }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Home Team")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Rule Evaluation" }),
+      screen.getByText("Evidence → Features → Rules → Recommendation"),
     ).toBeInTheDocument();
     expect(screen.getByText("Home Team Present")).toBeInTheDocument();
     expect(screen.getAllByText("PASS").length).toBeGreaterThanOrEqual(3);
     expect(screen.getAllByText("Weight +1").length).toBeGreaterThanOrEqual(3);
     expect(
-      screen.getByRole("heading", { name: "Final Recommendation" }),
+      screen.getByRole("heading", { name: "Feature Importance" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Even signal")).toBeInTheDocument();
-    expect(screen.getByText("Match information is complete.")).toBeInTheDocument();
+    expect(screen.getByText("Home Team")).toBeInTheDocument();
+    expect(screen.getAllByText("Positive").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Negative").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByRole("heading", { name: "Evidence Timeline" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Match information")).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("heading", { name: "Even signal" }).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Final Recommendation")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Match information is complete.").length,
+    ).toBeGreaterThanOrEqual(1);
   });
 });

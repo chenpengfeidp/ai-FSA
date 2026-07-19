@@ -1,7 +1,17 @@
-import { CircleDot } from "lucide-react";
+import {
+  Activity,
+  CloudSun,
+  Newspaper,
+  Scale,
+  Shirt,
+  Trophy,
+  Users,
+  Workflow,
+} from "lucide-react";
 import type { ReactElement } from "react";
 import { formatEvidenceTimestamp } from "../../lib/explainable-report";
 import type { EvidenceTimelineItemView } from "../../types/explainable-report";
+import type { EvidenceType } from "../../types/evidence";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { StatusBadge } from "../ui/status-badge";
 import { Tag } from "../ui/tag";
@@ -19,6 +29,31 @@ function freshnessStatus(
   }
 }
 
+function evidenceIcon(type: EvidenceType): ReactElement {
+  const className = "size-4";
+
+  switch (type) {
+    case "INJURY":
+      return <Activity aria-hidden="true" className={className} />;
+    case "TEAM_FORM":
+      return <Workflow aria-hidden="true" className={className} />;
+    case "HEAD_TO_HEAD":
+      return <Users aria-hidden="true" className={className} />;
+    case "WEATHER":
+      return <CloudSun aria-hidden="true" className={className} />;
+    case "LINEUP":
+      return <Shirt aria-hidden="true" className={className} />;
+    case "NEWS":
+      return <Newspaper aria-hidden="true" className={className} />;
+    case "ODDS":
+    case "RANKING":
+    case "STATISTICS":
+      return <Scale aria-hidden="true" className={className} />;
+    default:
+      return <Trophy aria-hidden="true" className={className} />;
+  }
+}
+
 export function EvidenceTimeline({
   items,
 }: Readonly<{ items: readonly EvidenceTimelineItemView[] }>): ReactElement {
@@ -28,7 +63,7 @@ export function EvidenceTimeline({
         <CardHeader>
           <CardTitle id="evidence-timeline-heading">Evidence Timeline</CardTitle>
           <p className="text-caption text-muted-foreground">
-            Chronological evidence used by the deterministic pipeline
+            Vertical timeline with type icons and visual hierarchy
           </p>
         </CardHeader>
         <CardContent>
@@ -40,13 +75,13 @@ export function EvidenceTimeline({
               </p>
             </div>
           ) : (
-            <ol className="relative space-y-0 border-l border-border pl-6">
-              {items.map((item) => (
+            <ol className="relative space-y-0 border-l-2 border-primary/20 pl-8">
+              {items.map((item, index) => (
                 <li className="relative pb-8 last:pb-0" key={item.id}>
-                  <span className="absolute -left-[1.9rem] top-1 flex size-6 items-center justify-center rounded-full border border-border bg-surface text-primary shadow-sm">
-                    <CircleDot aria-hidden="true" className="size-3.5" />
+                  <span className="absolute -left-[2.35rem] top-0 flex size-9 items-center justify-center rounded-full border border-primary/20 bg-primary-muted text-primary shadow-sm">
+                    {evidenceIcon(item.type)}
                   </span>
-                  <div className="rounded-xl border border-border bg-surface-muted/40 px-4 py-4 transition-colors duration-200 hover:bg-surface-muted/70">
+                  <article className="rounded-2xl border border-border bg-gradient-to-br from-surface to-surface-muted/40 px-5 py-4 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-border-strong hover:shadow-md">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-title text-foreground">{item.title}</p>
                       <Tag variant="muted">{item.type}</Tag>
@@ -56,11 +91,13 @@ export function EvidenceTimeline({
                       />
                       <StatusBadge label={item.quality} status="INFO" />
                     </div>
-                    <p className="mt-2 text-caption text-muted-foreground">
-                      {formatEvidenceTimestamp(item.timestamp)}
+                    <p className="mt-2 text-caption font-medium text-subtle">
+                      Step {index + 1} · {formatEvidenceTimestamp(item.timestamp)}
                     </p>
-                    <p className="mt-2 text-body text-foreground">{item.detail}</p>
-                  </div>
+                    <p className="mt-3 text-body leading-6 text-foreground">
+                      {item.detail}
+                    </p>
+                  </article>
                 </li>
               ))}
             </ol>

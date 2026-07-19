@@ -196,6 +196,26 @@ function featureWeight(
   return linked.reduce((total, rule) => total + Math.max(0, rule.score), 0);
 }
 
+function featurePolarity(
+  feature: FeatureDto,
+  rules: readonly RuleResultDto[],
+): "negative" | "positive" {
+  const linked = rules.filter((rule) =>
+    rule.sourceFeatureIds.includes(feature.featureId),
+  );
+
+  if (linked.some((rule) => rule.status === "FAIL")) {
+    return "negative";
+  }
+
+  // Away-side features render as opposing contribution bars for visual contrast.
+  if (feature.name === "awayTeam") {
+    return "negative";
+  }
+
+  return "positive";
+}
+
 function buildFeatureImportance(
   features: readonly FeatureDto[],
   rules: readonly RuleResultDto[],
@@ -210,6 +230,7 @@ function buildFeatureImportance(
         label: FEATURE_LABELS[feature.name] ?? feature.name,
         percent: roundPercent(((weights[index] ?? 0) / maxWeight) * 100),
         valueLabel: formatJsonValue(feature.value),
+        polarity: featurePolarity(feature, rules),
       }),
     ),
   );

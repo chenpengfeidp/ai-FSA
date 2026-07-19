@@ -7,7 +7,7 @@ export function GoalRangeCard({
   goalRange,
 }: Readonly<{ goalRange: GoalRangeView }>): ReactElement {
   return (
-    <Card className="animate-fade-in-delay-2 h-full">
+    <Card className="animate-fade-in-delay-2 h-full hover:translate-y-0">
       <CardHeader className="border-b-0 pb-0">
         <CardTitle>Goal Range</CardTitle>
         <p className="text-caption text-muted-foreground">

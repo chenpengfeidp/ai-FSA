@@ -1,5 +1,6 @@
 import { AnalyzeMatchUseCase } from "@fas/analysis";
 import { ImportMatchUseCase } from "@fas/application";
+import { loadApiConfig } from "@fas/config";
 import {
   type EvidenceRepository,
   EvidenceService,
@@ -12,16 +13,22 @@ import {
 import { FixtureEvidenceNormalizer } from "@fas/evidence-normalizer";
 import { EvidenceQueryService } from "@fas/evidence-query";
 import { FeatureExtractor } from "@fas/feature";
-import { FixtureProvider } from "@fas/provider-fixture";
+import type { MatchLookup } from "@fas/provider-odds";
 import { GenerateMatchReportUseCase, ReportBuilder } from "@fas/report";
 import { RuleEvaluator } from "@fas/rule";
 import { Module } from "@nestjs/common";
 import { AnalysisController } from "./analysis.controller.js";
 import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
+import { matchProviderToken } from "./evidence.tokens.js";
 import { ImportController } from "./import.controller.js";
+import { createMatchProviderWiring } from "./match-provider.factory.js";
+import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 
 const evidenceRepositoryToken = Symbol("EvidenceRepository");
+
+const apiConfig = loadApiConfig();
+const matchProviderWiring = createMatchProviderWiring(apiConfig.oddsProvider);
 
 @Module({
   controllers: [AnalysisController, EvidenceController, ImportController],
@@ -50,7 +57,14 @@ const evidenceRepositoryToken = Symbol("EvidenceRepository");
           collectedAt: "2026-07-17T10:00:00Z",
         }),
     },
-    FixtureProvider,
+    {
+      provide: matchProviderToken,
+      useValue: matchProviderWiring.matchProvider,
+    },
+    {
+      provide: OddsSnapshotPrimerBridge,
+      useValue: new OddsSnapshotPrimerBridge(matchProviderWiring.oddsPrimer),
+    },
     {
       provide: EvidenceImportPipeline,
       inject: [FixtureEvidenceNormalizer, evidenceRepositoryToken],
@@ -62,9 +76,9 @@ const evidenceRepositoryToken = Symbol("EvidenceRepository");
     },
     {
       provide: ImportMatchUseCase,
-      inject: [FixtureProvider, EvidenceImportPipeline],
+      inject: [matchProviderToken, EvidenceImportPipeline],
       useFactory: (
-        provider: FixtureProvider,
+        provider: MatchLookup,
         importer: EvidenceImportPipeline,
       ): ImportMatchUseCase => new ImportMatchUseCase(provider, importer),
     },

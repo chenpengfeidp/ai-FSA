@@ -107,6 +107,13 @@ export default defineConfig({
       },
       {
         test: {
+          name: "provider-odds",
+          environment: "node",
+          include: ["packages/provider-odds/test/**/*.spec.ts"],
+        },
+      },
+      {
+        test: {
           name: "rule",
           environment: "node",
           include: ["packages/rule/test/**/*.spec.ts"],

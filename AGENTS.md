@@ -258,7 +258,8 @@ For current vertical-slice and post-bootstrap delivery work, also read:
 
 - `docs/34_V2_ARCHITECTURE_ALIGNMENT.md`;
 - `docs/35_V2_FIRST_VERTICAL_SLICE_SPECIFICATION.md`;
-- `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md`.
+- `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md`;
+- `docs/sprints/VERTICAL_SLICE_B1_ODDS_INGEST_SPEC.md`.
 
 For historical Milestone 3A / Sprint 8 bootstrap evidence, also read:
 

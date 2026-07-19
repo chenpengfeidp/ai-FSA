@@ -65,6 +65,9 @@ importers:
       '@fas/provider-fixture':
         specifier: workspace:*
         version: link:../../packages/provider-fixture
+      '@fas/provider-odds':
+        specifier: workspace:*
+        version: link:../../packages/provider-odds
       '@fas/report':
         specifier: workspace:*
         version: link:../../packages/report
@@ -284,6 +287,9 @@ importers:
       '@fas/provider-fixture':
         specifier: workspace:*
         version: link:../provider-fixture
+      '@fas/provider-odds':
+        specifier: workspace:*
+        version: link:../provider-odds
       '@fas/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
@@ -444,6 +450,18 @@ importers:
       '@fas/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+
+  packages/provider-odds:
+    devDependencies:
+      '@fas/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@types/node':
+        specifier: 24.13.3
+        version: 24.13.3
       typescript:
         specifier: 6.0.3
         version: 6.0.3

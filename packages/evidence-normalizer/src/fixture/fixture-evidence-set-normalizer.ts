@@ -439,6 +439,73 @@ function requireDecimalOdds(
   return success(value);
 }
 
+interface OddsProvenanceOverlay {
+  readonly source: string;
+  readonly sourceId: string;
+  readonly method: string;
+}
+
+function parseOddsProvenanceOverlay(
+  value: Record<string, unknown>,
+): Result<OddsProvenanceOverlay | undefined, EvidenceNormalizationError> {
+  const hasSource = "providerSource" in value;
+  const hasSourceId = "providerSourceId" in value;
+  const hasMethod = "providerMethod" in value;
+
+  if (!hasSource && !hasSourceId && !hasMethod) {
+    return success(undefined);
+  }
+
+  if (!hasSource || !hasSourceId || !hasMethod) {
+    return failure(
+      "INVALID_FIELD",
+      "providerSource, providerSourceId, and providerMethod must be provided together.",
+      "providerSource",
+    );
+  }
+
+  if (
+    typeof value.providerSource !== "string" ||
+    value.providerSource.trim().length === 0
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "providerSource must be a non-empty string.",
+      "providerSource",
+    );
+  }
+
+  if (
+    typeof value.providerSourceId !== "string" ||
+    value.providerSourceId.trim().length === 0
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "providerSourceId must be a non-empty string.",
+      "providerSourceId",
+    );
+  }
+
+  if (
+    typeof value.providerMethod !== "string" ||
+    value.providerMethod.trim().length === 0
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "providerMethod must be a non-empty string.",
+      "providerMethod",
+    );
+  }
+
+  return success(
+    Object.freeze({
+      source: value.providerSource.trim(),
+      sourceId: value.providerSourceId.trim(),
+      method: value.providerMethod.trim(),
+    }),
+  );
+}
+
 function parseOdds(
   value: unknown,
   matchId: string,
@@ -479,12 +546,26 @@ function parseOdds(
     );
   }
 
+  const provenanceOverlay = parseOddsProvenanceOverlay(value);
+
+  if (!provenanceOverlay.ok) {
+    return provenanceOverlay;
+  }
+
+  const source = provenanceOverlay.value?.source ?? "fixture";
+  const sourceId = provenanceOverlay.value?.sourceId ?? `fixture-${matchId}-odds`;
+  const method = provenanceOverlay.value?.method ?? "fixture";
+  const evidenceId =
+    provenanceOverlay.value === undefined
+      ? `evidence-fixture-${matchId}-odds`
+      : `evidence-${source}-${matchId}-odds`;
+
   try {
     return success(
       createEvidence({
-        id: `evidence-fixture-${matchId}-odds`,
-        source: "fixture",
-        sourceId: `fixture-${matchId}-odds`,
+        id: evidenceId,
+        source,
+        sourceId,
         type: "ODDS",
         matchId: createMatchId(matchId),
         collectedAt,
@@ -493,7 +574,7 @@ function parseOdds(
         quality: "unverified",
         provenance: {
           collector: "@fas/evidence-normalizer",
-          method: "fixture",
+          method,
         },
         payload: {
           homeOdds: homeOdds.value,

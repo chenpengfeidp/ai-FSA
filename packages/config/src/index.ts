@@ -9,6 +9,8 @@ export type {
   ConfigurationIssue,
   EnvironmentSource,
   HttpConfig,
+  OddsProviderConfig,
+  OddsProviderMode,
   RuntimeConfig,
   RuntimeEnvironment,
   WorkerConfig,

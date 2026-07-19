@@ -7,6 +7,10 @@ import {
 import { EvidenceImportPipeline } from "@fas/evidence-import";
 import { FixtureEvidenceNormalizer } from "@fas/evidence-normalizer";
 import { FixtureProvider } from "@fas/provider-fixture";
+import {
+  CompositeMatchProvider,
+  RecordedOddsSnapshotSource,
+} from "@fas/provider-odds";
 import { describe, expect, it, vi } from "vitest";
 import { ImportMatchUseCase, type ImportMatchResult } from "../src/index.js";
 
@@ -98,6 +102,30 @@ describe("ImportMatchUseCase", () => {
     expect(repository.findAll().some((evidence) => evidence.type === "ODDS")).toBe(
       true,
     );
+  });
+
+  it("imports ODDS with non-fixture provenance from a recorded odds overlay", () => {
+    const repository = new InMemoryEvidenceRepository();
+    const pipeline = new EvidenceImportPipeline(
+      new FixtureEvidenceNormalizer({ collectedAt: "2026-07-17T10:00:00Z" }),
+      repository,
+    );
+    const useCase = new ImportMatchUseCase(
+      new CompositeMatchProvider(
+        new FixtureProvider(),
+        new RecordedOddsSnapshotSource(),
+      ),
+      pipeline,
+    );
+
+    const result = useCase.execute("match-example");
+
+    expect(result.ok).toBe(true);
+    const odds = repository.findAll().find((item) => item.type === "ODDS");
+
+    expect(odds?.source).toBe("the-odds-api");
+    expect(odds?.provenance.method).toBe("recorded-snapshot");
+    expect(odds?.source).not.toBe("fixture");
   });
 
   it("returns a typed failure when the provider has no match", () => {

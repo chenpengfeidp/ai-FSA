@@ -1,0 +1,25 @@
+{
+  "id": "evt_match_example_liverpool_chelsea",
+  "sport_key": "soccer_epl",
+  "commence_time": "2026-08-01T19:30:00Z",
+  "home_team": "Liverpool",
+  "away_team": "Chelsea",
+  "bookmakers": [
+    {
+      "key": "pinnacle",
+      "title": "Pinnacle",
+      "last_update": "2026-07-18T12:00:00Z",
+      "markets": [
+        {
+          "key": "h2h",
+          "last_update": "2026-07-18T12:00:00Z",
+          "outcomes": [
+            { "name": "Liverpool", "price": 1.55 },
+            { "name": "Draw", "price": 4.2 },
+            { "name": "Chelsea", "price": 5.8 }
+          ]
+        }
+      ]
+    }
+  ]
+}

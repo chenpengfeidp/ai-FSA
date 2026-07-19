@@ -21,6 +21,7 @@
     "@fas/feature": "workspace:*",
     "@fas/match": "workspace:*",
     "@fas/provider-fixture": "workspace:*",
+    "@fas/provider-odds": "workspace:*",
     "@fas/report": "workspace:*",
     "@fas/rule": "workspace:*",
     "@nestjs/common": "11.1.28",

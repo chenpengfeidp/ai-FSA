@@ -1,11 +1,12 @@
 {
-  "name": "@fas/application",
+  "name": "@fas/provider-odds",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "fixtures"
   ],
   "exports": {
     ".": {
@@ -15,19 +16,12 @@
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "test": "vitest run --root ../.. --config vitest.config.ts --project application",
+    "test": "vitest run --root ../.. --config vitest.config.ts --project provider-odds",
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
-  "dependencies": {
-    "@fas/evidence": "workspace:*",
-    "@fas/evidence-import": "workspace:*",
-    "@fas/evidence-normalizer": "workspace:*",
-    "@fas/match": "workspace:*"
-  },
   "devDependencies": {
-    "@fas/provider-fixture": "workspace:*",
-    "@fas/provider-odds": "workspace:*",
     "@fas/tsconfig": "workspace:*",
+    "@types/node": "24.13.3",
     "typescript": "6.0.3"
   }
 }

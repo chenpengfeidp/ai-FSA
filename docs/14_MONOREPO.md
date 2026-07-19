@@ -246,6 +246,10 @@ Only this package imports `@prisma/client`. It implements repository ports decla
 
 Provider DTOs do not escape the adapter. Mock/fake providers support tests.
 
+#### `@fas/provider-odds` (interim external odds adapter)
+
+Owns The Odds API–shaped pre-match 1X2 mapping, recorded snapshot cassettes, optional live `fetch`, and `CompositeMatchProvider` overlay onto fixture match payloads. Provider DTOs do not escape the adapter. Default runtime mode is offline `recorded`; Asian handicap / 水位 remain out of scope until a later slice.
+
 #### `@fas/jobs`
 
 - job command and handler contracts;

@@ -17,12 +17,17 @@ import {
   AnalysisEndpointErrorResponseDto,
   AnalysisReportDto,
 } from "./http-response.dto.js";
+// biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
+import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 
 @ApiTags("Analysis")
 @ApiExtraModels(AnalysisReportDto, AnalysisEndpointErrorResponseDto)
 @Controller("api/analyze")
 export class AnalysisController {
-  constructor(private readonly generateMatchReport: GenerateMatchReportUseCase) {}
+  constructor(
+    private readonly generateMatchReport: GenerateMatchReportUseCase,
+    private readonly oddsPrimer: OddsSnapshotPrimerBridge,
+  ) {}
 
   @Post("match/:matchId")
   @HttpCode(HttpStatus.OK)
@@ -44,7 +49,8 @@ export class AnalysisController {
       ],
     },
   })
-  analyzeMatch(matchId: string): GenerateMatchReportResult {
+  async analyzeMatch(matchId: string): Promise<GenerateMatchReportResult> {
+    await this.oddsPrimer.ensurePreMatch1x2(matchId);
     return this.generateMatchReport.execute(createMatchId(matchId));
   }
 }

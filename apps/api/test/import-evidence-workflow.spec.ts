@@ -114,6 +114,30 @@ describe("HTTP import and Evidence query workflow", () => {
     });
   });
 
+  it("overlays recorded external ODDS provenance for mapped demo matches", async () => {
+    await request(baseUrl, "/api/import/match/match-example", "POST");
+    const response = await request(baseUrl, "/api/evidence/match/match-example");
+    const body = requireRecord(response.body);
+    const evidences = body.value;
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(evidences)).toBe(true);
+
+    if (!Array.isArray(evidences)) {
+      throw new Error("Expected evidence array.");
+    }
+
+    const odds = evidences.find((item) => requireRecord(item).type === "ODDS");
+
+    expect(odds).toMatchObject({
+      type: "ODDS",
+      source: "the-odds-api",
+      provenance: {
+        method: "recorded-snapshot",
+      },
+    });
+  });
+
   it("runs the complete deterministic analysis and returns AnalysisReport JSON", async () => {
     const response = await request(
       baseUrl,

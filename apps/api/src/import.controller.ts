@@ -13,17 +13,25 @@ import {
   ImportErrorResponseDto,
   ImportSuccessResponseDto,
 } from "./http-response.dto.js";
+// biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
+import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 
 @ApiTags("Evidence import")
 @ApiExtraModels(ImportSuccessResponseDto, ImportErrorResponseDto)
 @Controller("api/import")
 export class ImportController {
-  constructor(private readonly importMatch: ImportMatchUseCase) {}
+  constructor(
+    private readonly importMatch: ImportMatchUseCase,
+    private readonly oddsPrimer: OddsSnapshotPrimerBridge,
+  ) {}
 
   @Post("match/:matchId")
   @HttpCode(HttpStatus.OK)
   @Bind(Param("matchId"))
-  @ApiOperation({ summary: "Import match Evidence from the fixture provider" })
+  @ApiOperation({
+    summary:
+      "Import match Evidence from the fixture provider with optional external odds overlay",
+  })
   @ApiParam({
     description: "Provider match identifier to import.",
     example: "match-example",
@@ -39,7 +47,8 @@ export class ImportController {
       ],
     },
   })
-  importMatchById(matchId: string): ImportMatchResult {
+  async importMatchById(matchId: string): Promise<ImportMatchResult> {
+    await this.oddsPrimer.ensurePreMatch1x2(matchId);
     return this.importMatch.execute(matchId);
   }
 }

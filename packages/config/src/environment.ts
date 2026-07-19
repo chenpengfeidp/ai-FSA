@@ -13,9 +13,18 @@ export interface HttpConfig {
   readonly port: number;
 }
 
+export type OddsProviderMode = "fixture" | "live" | "recorded";
+
+export interface OddsProviderConfig {
+  readonly mode: OddsProviderMode;
+  readonly apiKey: string | undefined;
+  readonly baseUrl: string;
+}
+
 export interface ApiConfig {
   readonly runtime: RuntimeConfig;
   readonly http: HttpConfig;
+  readonly oddsProvider: OddsProviderConfig;
 }
 
 export interface WorkerConfig {
@@ -47,11 +56,42 @@ const portSchema = z
   .transform(Number)
   .pipe(z.number().int().min(1).max(65535));
 
-const apiEnvironmentSchema = z.object({
-  NODE_ENV: runtimeEnvironmentSchema,
-  HOST: hostSchema,
-  PORT: portSchema,
-});
+const oddsProviderModeSchema = z
+  .enum(["fixture", "live", "recorded"])
+  .default("recorded");
+
+const oddsApiKeySchema = z.string().optional();
+
+const oddsApiBaseUrlSchema = z
+  .string()
+  .trim()
+  .url({ error: "THE_ODDS_API_BASE_URL must be a valid URL." })
+  .default("https://api.the-odds-api.com");
+
+const apiEnvironmentSchema = z
+  .object({
+    NODE_ENV: runtimeEnvironmentSchema,
+    HOST: hostSchema,
+    PORT: portSchema,
+    ODDS_PROVIDER_MODE: oddsProviderModeSchema,
+    THE_ODDS_API_KEY: oddsApiKeySchema,
+    THE_ODDS_API_BASE_URL: oddsApiBaseUrlSchema,
+  })
+  .superRefine((value, context) => {
+    if (value.ODDS_PROVIDER_MODE !== "live") {
+      return;
+    }
+
+    const apiKey = value.THE_ODDS_API_KEY?.trim() ?? "";
+
+    if (apiKey.length === 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["THE_ODDS_API_KEY"],
+        message: "THE_ODDS_API_KEY is required when ODDS_PROVIDER_MODE is live.",
+      });
+    }
+  });
 
 const workerEnvironmentSchema = z.object({
   NODE_ENV: runtimeEnvironmentSchema,
@@ -92,6 +132,21 @@ function issueDetails(variable: string): Readonly<{
       return {
         code: "INVALID_PORT",
         message: "PORT must be a base-10 integer from 1 through 65535.",
+      };
+    case "ODDS_PROVIDER_MODE":
+      return {
+        code: "INVALID_ODDS_PROVIDER_MODE",
+        message: "ODDS_PROVIDER_MODE must be recorded, live, or fixture.",
+      };
+    case "THE_ODDS_API_KEY":
+      return {
+        code: "MISSING_ODDS_API_KEY",
+        message: "THE_ODDS_API_KEY is required when ODDS_PROVIDER_MODE is live.",
+      };
+    case "THE_ODDS_API_BASE_URL":
+      return {
+        code: "INVALID_ODDS_API_BASE_URL",
+        message: "THE_ODDS_API_BASE_URL must be a valid URL.",
       };
     default:
       return {
@@ -145,6 +200,8 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
     source ?? currentEnvironmentSource(),
   );
 
+  const apiKey = parsed.THE_ODDS_API_KEY?.trim();
+
   return Object.freeze({
     runtime: Object.freeze({
       environment: parsed.NODE_ENV,
@@ -152,6 +209,11 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
     http: Object.freeze({
       host: parsed.HOST,
       port: parsed.PORT,
+    }),
+    oddsProvider: Object.freeze({
+      mode: parsed.ODDS_PROVIDER_MODE,
+      apiKey: apiKey !== undefined && apiKey.length > 0 ? apiKey : undefined,
+      baseUrl: parsed.THE_ODDS_API_BASE_URL,
     }),
   });
 }

@@ -28,6 +28,11 @@ describe("@fas/config environment loading", () => {
         host: "127.0.0.1",
         port: 3001,
       },
+      oddsProvider: {
+        mode: "recorded",
+        apiKey: undefined,
+        baseUrl: "https://api.the-odds-api.com",
+      },
     });
   });
 
@@ -45,6 +50,7 @@ describe("@fas/config environment loading", () => {
         NODE_ENV: "production",
         HOST: "0.0.0.0",
         PORT: "4100",
+        ODDS_PROVIDER_MODE: "fixture",
       }),
     ).toEqual({
       runtime: {
@@ -54,7 +60,49 @@ describe("@fas/config environment loading", () => {
         host: "0.0.0.0",
         port: 4100,
       },
+      oddsProvider: {
+        mode: "fixture",
+        apiKey: undefined,
+        baseUrl: "https://api.the-odds-api.com",
+      },
     });
+  });
+
+  it("loads live odds mode when an API key is provided", () => {
+    expect(
+      loadApiConfig({
+        ODDS_PROVIDER_MODE: "live",
+        THE_ODDS_API_KEY: "test-key",
+        THE_ODDS_API_BASE_URL: "https://odds.example.test",
+      }),
+    ).toEqual({
+      runtime: {
+        environment: "development",
+      },
+      http: {
+        host: "127.0.0.1",
+        port: 3001,
+      },
+      oddsProvider: {
+        mode: "live",
+        apiKey: "test-key",
+        baseUrl: "https://odds.example.test",
+      },
+    });
+  });
+
+  it("rejects live odds mode without an API key", () => {
+    const error = captureConfigurationError(() =>
+      loadApiConfig({ ODDS_PROVIDER_MODE: "live" }),
+    );
+
+    expect(error.issues).toEqual([
+      {
+        variable: "THE_ODDS_API_KEY",
+        code: "MISSING_ODDS_API_KEY",
+        message: "THE_ODDS_API_KEY is required when ODDS_PROVIDER_MODE is live.",
+      },
+    ]);
   });
 
   it("loads valid worker overrides without requiring API variables", () => {
@@ -151,6 +199,7 @@ describe("@fas/config environment loading", () => {
     expect(Object.isFrozen(apiConfig)).toBe(true);
     expect(Object.isFrozen(apiConfig.runtime)).toBe(true);
     expect(Object.isFrozen(apiConfig.http)).toBe(true);
+    expect(Object.isFrozen(apiConfig.oddsProvider)).toBe(true);
     expect(Object.isFrozen(workerConfig)).toBe(true);
     expect(Object.isFrozen(workerConfig.runtime)).toBe(true);
   });

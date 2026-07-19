@@ -7,6 +7,7 @@ import {
 } from "../domain/feature-bundle.js";
 import { createFeature, type Feature, type FeatureName } from "../domain/feature.js";
 import {
+  computeAsianHandicapLean,
   computeAttackRating,
   computeDefenseRating,
   computeH2hLean,
@@ -438,6 +439,52 @@ export class FeatureExtractor {
             generatedAt,
           }),
         );
+
+        const asianHandicapLine = asFiniteNumber(
+          oddsEvidence.payload.asianHandicapLine,
+        );
+        const asianHandicapHomeOdds = asFiniteNumber(
+          oddsEvidence.payload.asianHandicapHomeOdds,
+        );
+        const asianHandicapAwayOdds = asFiniteNumber(
+          oddsEvidence.payload.asianHandicapAwayOdds,
+        );
+
+        if (
+          asianHandicapLine !== undefined &&
+          asianHandicapHomeOdds !== undefined &&
+          asianHandicapAwayOdds !== undefined &&
+          asianHandicapHomeOdds > 1 &&
+          asianHandicapAwayOdds > 1
+        ) {
+          const ahLean = roundFeature(
+            computeAsianHandicapLean({
+              asianHandicapHomeOdds,
+              asianHandicapAwayOdds,
+            }),
+          );
+          features.push(
+            createFeature({
+              featureId: featureId(oddsEvidence.id, "asianHandicapLine"),
+              matchId,
+              name: "asianHandicapLine",
+              value: asianHandicapLine,
+              explanation:
+                "Primary Asian handicap line for the home side (market signal).",
+              sourceEvidenceId: oddsEvidence.id,
+              generatedAt,
+            }),
+            createFeature({
+              featureId: featureId(oddsEvidence.id, "asianHandicapLean"),
+              matchId,
+              name: "asianHandicapLean",
+              value: ahLean,
+              explanation: `Asian handicap lean ${ahLean} from two-way de-vigged prices on line ${asianHandicapLine} (not an outcome forecast).`,
+              sourceEvidenceId: oddsEvidence.id,
+              generatedAt,
+            }),
+          );
+        }
       }
     }
 

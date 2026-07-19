@@ -196,6 +196,48 @@ describe("FeatureExtractor", () => {
     expect(Number(lean?.value)).toBeLessThan(0);
   });
 
+  it("extracts Asian handicap features when AH fields are present on ODDS", () => {
+    const matchInfo = makeEvidence();
+    const odds = createEvidence({
+      id: "evidence-odds-ah",
+      source: "the-odds-api",
+      sourceId: "evt:pinnacle:h2h+spreads",
+      type: "ODDS",
+      matchId: createMatchId("match-1"),
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "recorded-snapshot",
+      },
+      payload: {
+        homeOdds: 1.55,
+        drawOdds: 4.2,
+        awayOdds: 5.8,
+        observedAt: "2026-07-18T12:00:00Z",
+        asianHandicapLine: -0.75,
+        asianHandicapHomeOdds: 1.75,
+        asianHandicapAwayOdds: 2.2,
+      },
+    });
+    const bundle = new FeatureExtractor().extractBundle([matchInfo, odds]);
+
+    expect(bundle.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "asianHandicapLine",
+          value: -0.75,
+        }),
+        expect.objectContaining({
+          name: "asianHandicapLean",
+          sourceEvidenceId: "evidence-odds-ah",
+        }),
+      ]),
+    );
+  });
+
   it("extracts h2hLean and h2hSampleSize from HEAD_TO_HEAD evidence", () => {
     const matchInfo = makeEvidence();
     const headToHead = createEvidence({

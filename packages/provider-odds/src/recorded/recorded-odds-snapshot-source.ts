@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import { findDemoOddsCatalogEntry } from "../catalog/demo-odds-catalog.js";
 import type {
   OddsSnapshotSource,
-  PreMatch1x2OddsOverlay,
-} from "../domain/pre-match-1x2.js";
+  PreMatchOddsOverlay,
+} from "../domain/pre-match-odds.js";
 import { mapTheOddsApiH2h } from "../mapper/map-the-odds-api-h2h.js";
 
 function fixturesDirectory(): string {
@@ -18,9 +18,9 @@ function loadCassetteJson(cassetteFile: string): unknown {
 }
 
 export class RecordedOddsSnapshotSource implements OddsSnapshotSource {
-  readonly #cache = new Map<string, PreMatch1x2OddsOverlay | undefined>();
+  readonly #cache = new Map<string, PreMatchOddsOverlay | undefined>();
 
-  getPreMatch1x2(matchId: string): PreMatch1x2OddsOverlay | undefined {
+  getPreMatch1x2(matchId: string): PreMatchOddsOverlay | undefined {
     if (this.#cache.has(matchId)) {
       return this.#cache.get(matchId);
     }

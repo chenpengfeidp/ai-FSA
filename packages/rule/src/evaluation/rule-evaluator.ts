@@ -234,6 +234,36 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
       return lean !== undefined && lean <= -TAU_MARKET;
     },
   }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:market-ah-lean-home:v1",
+    ruleName: "MARKET_AH_LEAN_HOME",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "asianHandicapLean",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const lean = numericValue(features.get("asianHandicapLean"));
+
+      return lean !== undefined && lean >= TAU_MARKET;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:market-ah-lean-away:v1",
+    ruleName: "MARKET_AH_LEAN_AWAY",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "asianHandicapLean",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const lean = numericValue(features.get("asianHandicapLean"));
+
+      return lean !== undefined && lean <= -TAU_MARKET;
+    },
+  }) satisfies FootballRuleDefinition,
 ]);
 
 function numericValue(feature: Feature | undefined): number | undefined {

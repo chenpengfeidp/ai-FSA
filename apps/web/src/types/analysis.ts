@@ -7,6 +7,8 @@ export type JsonValue =
   | Readonly<{ [key: string]: JsonValue }>;
 
 export type FeatureName =
+  | "asianHandicapLean"
+  | "asianHandicapLine"
   | "attackRatingAway"
   | "attackRatingHome"
   | "awayTeam"
@@ -43,6 +45,8 @@ export type RuleName =
   | "HOME_ATTACK_EDGE"
   | "HOME_TEAM_PRESENT"
   | "KICKOFF_PRESENT"
+  | "MARKET_AH_LEAN_AWAY"
+  | "MARKET_AH_LEAN_HOME"
   | "MARKET_LEAN_AWAY"
   | "MARKET_LEAN_HOME"
   | "MOMENTUM_AWAY"

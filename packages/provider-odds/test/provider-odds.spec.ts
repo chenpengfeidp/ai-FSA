@@ -46,12 +46,20 @@ describe("CompositeMatchProvider", () => {
         homeOdds: number;
         providerSource: string;
         providerMethod: string;
+        asianHandicapLine: number;
+        asianHandicapHomeOdds: number;
+        asianHandicapAwayOdds: number;
       };
     };
 
     expect(match.odds.homeOdds).toBe(1.55);
     expect(match.odds.providerSource).toBe("the-odds-api");
     expect(match.odds.providerMethod).toBe("recorded-snapshot");
+    expect(match.odds).toMatchObject({
+      asianHandicapLine: -0.75,
+      asianHandicapHomeOdds: 1.75,
+      asianHandicapAwayOdds: 2.2,
+    });
   });
 
   it("keeps the inner match when no odds overlay exists", () => {

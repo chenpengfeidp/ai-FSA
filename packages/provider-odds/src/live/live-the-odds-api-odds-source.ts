@@ -2,8 +2,8 @@ import { findDemoOddsCatalogEntry } from "../catalog/demo-odds-catalog.js";
 import type {
   OddsSnapshotPrimer,
   OddsSnapshotSource,
-  PreMatch1x2OddsOverlay,
-} from "../domain/pre-match-1x2.js";
+  PreMatchOddsOverlay,
+} from "../domain/pre-match-odds.js";
 import { mapTheOddsApiH2h } from "../mapper/map-the-odds-api-h2h.js";
 
 export type OddsHttpFetch = (input: string, init?: RequestInit) => Promise<Response>;
@@ -22,7 +22,7 @@ export class LiveTheOddsApiOddsSource
   readonly #baseUrl: string;
   readonly #fetchImpl: OddsHttpFetch;
   readonly #preferredBookmakerKey: string | undefined;
-  readonly #cache = new Map<string, PreMatch1x2OddsOverlay | undefined>();
+  readonly #cache = new Map<string, PreMatchOddsOverlay | undefined>();
 
   constructor(options: LiveTheOddsApiOddsSourceOptions) {
     this.#apiKey = options.apiKey;
@@ -31,7 +31,7 @@ export class LiveTheOddsApiOddsSource
     this.#preferredBookmakerKey = options.preferredBookmakerKey;
   }
 
-  getPreMatch1x2(matchId: string): PreMatch1x2OddsOverlay | undefined {
+  getPreMatch1x2(matchId: string): PreMatchOddsOverlay | undefined {
     return this.#cache.get(matchId);
   }
 
@@ -52,7 +52,7 @@ export class LiveTheOddsApiOddsSource
     );
     url.searchParams.set("apiKey", this.#apiKey);
     url.searchParams.set("regions", "uk");
-    url.searchParams.set("markets", "h2h");
+    url.searchParams.set("markets", "h2h,spreads");
     url.searchParams.set("oddsFormat", "decimal");
 
     const response = await this.#fetchImpl(url.toString(), {

@@ -160,6 +160,55 @@ describe("RuleEvaluator", () => {
       { ruleName: "H2H_SUPPORTS_AWAY", status: "FAIL", score: 0 },
       { ruleName: "MARKET_LEAN_HOME", status: "PASS", score: 1 },
       { ruleName: "MARKET_LEAN_AWAY", status: "FAIL", score: 0 },
+      { ruleName: "MARKET_AH_LEAN_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "MARKET_AH_LEAN_AWAY", status: "INAPPLICABLE", score: 0 },
+    ]);
+  });
+
+  it("evaluates Asian handicap market rules when AH lean is present", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      makeFeature("marketLean"),
+      createFeature({
+        featureId: "feature:evidence-1:asianHandicapLean",
+        matchId: createMatchId("match-1"),
+        name: "asianHandicapLean",
+        value: 0.12,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+    ]);
+
+    expect(
+      results
+        .filter(
+          (result) =>
+            result.ruleName === "MARKET_AH_LEAN_HOME" ||
+            result.ruleName === "MARKET_AH_LEAN_AWAY",
+        )
+        .map(({ ruleName, status, channel }) => ({
+          ruleName,
+          status,
+          channel,
+        })),
+    ).toEqual([
+      {
+        ruleName: "MARKET_AH_LEAN_HOME",
+        status: "PASS",
+        channel: "none",
+      },
+      {
+        ruleName: "MARKET_AH_LEAN_AWAY",
+        status: "FAIL",
+        channel: "none",
+      },
     ]);
   });
 

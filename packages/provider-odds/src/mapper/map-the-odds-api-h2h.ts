@@ -1,11 +1,12 @@
 import type {
   OddsProviderMethod,
-  PreMatch1x2OddsOverlay,
-} from "../domain/pre-match-1x2.js";
+  PreMatchOddsOverlay,
+} from "../domain/pre-match-odds.js";
 
 export interface TheOddsApiOutcome {
   readonly name: string;
   readonly price: number;
+  readonly point?: number;
 }
 
 export interface TheOddsApiMarket {
@@ -21,7 +22,7 @@ export interface TheOddsApiBookmaker {
   readonly markets: readonly TheOddsApiMarket[];
 }
 
-/** Real-shaped The Odds API event payload (subset used for pre-match h2h). */
+/** Real-shaped The Odds API event payload (subset used for pre-match h2h + spreads). */
 export interface TheOddsApiEventOdds {
   readonly id: string;
   readonly home_team: string;
@@ -45,14 +46,73 @@ function asFiniteOdds(value: unknown): number | undefined {
     : undefined;
 }
 
+function asFiniteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+interface AsianHandicapSlice {
+  readonly asianHandicapLine: number;
+  readonly asianHandicapHomeOdds: number;
+  readonly asianHandicapAwayOdds: number;
+  readonly lastUpdate?: string;
+}
+
+function parseSpreadsMarket(
+  market: Record<string, unknown>,
+  homeTeam: string,
+  awayTeam: string,
+): AsianHandicapSlice | undefined {
+  if (!Array.isArray(market.outcomes)) {
+    return undefined;
+  }
+
+  let homeOdds: number | undefined;
+  let awayOdds: number | undefined;
+  let homeLine: number | undefined;
+
+  for (const outcome of market.outcomes) {
+    if (!isRecord(outcome) || typeof outcome.name !== "string") {
+      continue;
+    }
+
+    const price = asFiniteOdds(outcome.price);
+    const point = asFiniteNumber(outcome.point);
+
+    if (price === undefined || point === undefined) {
+      continue;
+    }
+
+    if (outcome.name === homeTeam) {
+      homeOdds = price;
+      homeLine = point;
+    } else if (outcome.name === awayTeam) {
+      awayOdds = price;
+    }
+  }
+
+  if (homeOdds === undefined || awayOdds === undefined || homeLine === undefined) {
+    return undefined;
+  }
+
+  const lastUpdate =
+    typeof market.last_update === "string" ? market.last_update : undefined;
+
+  return Object.freeze({
+    asianHandicapLine: homeLine,
+    asianHandicapHomeOdds: homeOdds,
+    asianHandicapAwayOdds: awayOdds,
+    ...(lastUpdate === undefined ? {} : { lastUpdate }),
+  });
+}
+
 /**
- * Maps a The Odds API–shaped event odds document to a FAS 1X2 overlay.
- * Picks the preferred bookmaker when present; otherwise the first bookmaker with h2h.
+ * Maps a The Odds API–shaped event odds document to a FAS pre-match overlay.
+ * Prefers a bookmaker with h2h; attaches spreads AH when present on that bookmaker.
  */
 export function mapTheOddsApiH2h(
   input: unknown,
   options: MapTheOddsApiH2hOptions,
-): PreMatch1x2OddsOverlay | undefined {
+): PreMatchOddsOverlay | undefined {
   if (!isRecord(input)) {
     return undefined;
   }
@@ -87,9 +147,8 @@ export function mapTheOddsApiH2h(
       continue;
     }
 
-    const h2h = bookmaker.markets
-      .filter(isRecord)
-      .find((market) => market.key === "h2h");
+    const markets = bookmaker.markets.filter(isRecord);
+    const h2h = markets.find((market) => market.key === "h2h");
 
     if (h2h === undefined || !Array.isArray(h2h.outcomes)) {
       continue;
@@ -123,8 +182,15 @@ export function mapTheOddsApiH2h(
       continue;
     }
 
+    const spreads = markets.find((market) => market.key === "spreads");
+    const asian =
+      spreads === undefined
+        ? undefined
+        : parseSpreadsMarket(spreads, homeTeam, awayTeam);
+
     const observedAtCandidate =
       (typeof h2h.last_update === "string" && h2h.last_update) ||
+      asian?.lastUpdate ||
       (typeof bookmaker.last_update === "string" && bookmaker.last_update) ||
       (typeof input.commence_time === "string" && input.commence_time) ||
       undefined;
@@ -136,14 +202,23 @@ export function mapTheOddsApiH2h(
       continue;
     }
 
+    const marketSuffix = asian === undefined ? "h2h" : "h2h+spreads";
+
     return Object.freeze({
       homeOdds,
       drawOdds,
       awayOdds,
       observedAt: observedAtCandidate,
       providerSource: "the-odds-api",
-      providerSourceId: `${eventId}:${bookmakerKey}:h2h`,
+      providerSourceId: `${eventId}:${bookmakerKey}:${marketSuffix}`,
       providerMethod: options.providerMethod,
+      ...(asian === undefined
+        ? {}
+        : {
+            asianHandicapLine: asian.asianHandicapLine,
+            asianHandicapHomeOdds: asian.asianHandicapHomeOdds,
+            asianHandicapAwayOdds: asian.asianHandicapAwayOdds,
+          }),
     });
   }
 

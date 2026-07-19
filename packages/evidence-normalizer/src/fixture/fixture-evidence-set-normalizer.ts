@@ -445,6 +445,69 @@ interface OddsProvenanceOverlay {
   readonly method: string;
 }
 
+interface AsianHandicapFields {
+  readonly asianHandicapLine: number;
+  readonly asianHandicapHomeOdds: number;
+  readonly asianHandicapAwayOdds: number;
+}
+
+function parseAsianHandicapFields(
+  value: Record<string, unknown>,
+): Result<AsianHandicapFields | undefined, EvidenceNormalizationError> {
+  const hasLine = "asianHandicapLine" in value;
+  const hasHome = "asianHandicapHomeOdds" in value;
+  const hasAway = "asianHandicapAwayOdds" in value;
+
+  if (!hasLine && !hasHome && !hasAway) {
+    return success(undefined);
+  }
+
+  if (!hasLine || !hasHome || !hasAway) {
+    return failure(
+      "INVALID_FIELD",
+      "asianHandicapLine, asianHandicapHomeOdds, and asianHandicapAwayOdds must be provided together.",
+      "asianHandicapLine",
+    );
+  }
+
+  if (
+    typeof value.asianHandicapLine !== "number" ||
+    !Number.isFinite(value.asianHandicapLine)
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "asianHandicapLine must be a finite number.",
+      "asianHandicapLine",
+    );
+  }
+
+  const homeOdds = requireDecimalOdds(
+    value.asianHandicapHomeOdds,
+    "asianHandicapHomeOdds",
+  );
+
+  if (!homeOdds.ok) {
+    return homeOdds;
+  }
+
+  const awayOdds = requireDecimalOdds(
+    value.asianHandicapAwayOdds,
+    "asianHandicapAwayOdds",
+  );
+
+  if (!awayOdds.ok) {
+    return awayOdds;
+  }
+
+  return success(
+    Object.freeze({
+      asianHandicapLine: value.asianHandicapLine,
+      asianHandicapHomeOdds: homeOdds.value,
+      asianHandicapAwayOdds: awayOdds.value,
+    }),
+  );
+}
+
 function parseOddsProvenanceOverlay(
   value: Record<string, unknown>,
 ): Result<OddsProvenanceOverlay | undefined, EvidenceNormalizationError> {
@@ -552,6 +615,12 @@ function parseOdds(
     return provenanceOverlay;
   }
 
+  const asianHandicap = parseAsianHandicapFields(value);
+
+  if (!asianHandicap.ok) {
+    return asianHandicap;
+  }
+
   const source = provenanceOverlay.value?.source ?? "fixture";
   const sourceId = provenanceOverlay.value?.sourceId ?? `fixture-${matchId}-odds`;
   const method = provenanceOverlay.value?.method ?? "fixture";
@@ -581,6 +650,13 @@ function parseOdds(
           drawOdds: drawOdds.value,
           awayOdds: awayOdds.value,
           observedAt: value.observedAt,
+          ...(asianHandicap.value === undefined
+            ? {}
+            : {
+                asianHandicapLine: asianHandicap.value.asianHandicapLine,
+                asianHandicapHomeOdds: asianHandicap.value.asianHandicapHomeOdds,
+                asianHandicapAwayOdds: asianHandicap.value.asianHandicapAwayOdds,
+              }),
         },
       }),
     );

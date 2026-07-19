@@ -257,6 +257,22 @@ export function computeDeterministicMatchProjection(input: {
     marketLeanHome,
     marketLeanAway,
   });
+  const asianHandicapRules = input.ruleResults.filter(
+    (rule) =>
+      rule.ruleName === "MARKET_AH_LEAN_HOME" ||
+      rule.ruleName === "MARKET_AH_LEAN_AWAY",
+  );
+  const asianHandicapLeanHome = asianHandicapRules.some(
+    (rule) => rule.ruleName === "MARKET_AH_LEAN_HOME" && rule.status === "PASS",
+  );
+  const asianHandicapLeanAway = asianHandicapRules.some(
+    (rule) => rule.ruleName === "MARKET_AH_LEAN_AWAY" && rule.status === "PASS",
+  );
+  const asianHandicapConflict = marketConflictsWithFootball({
+    footballRecommendation,
+    marketLeanHome: asianHandicapLeanHome,
+    marketLeanAway: asianHandicapLeanAway,
+  });
   const recommendation = recommendationFor({
     requiredEvidenceMissing: false,
     confidence,
@@ -278,6 +294,12 @@ export function computeDeterministicMatchProjection(input: {
   if (marketConflict) {
     limitations.push(
       "Market lean conflicts with football-model directional lean; recommendation forced to cautious.",
+    );
+  }
+
+  if (asianHandicapConflict) {
+    limitations.push(
+      "Asian handicap lean conflicts with football-model directional lean; recorded as a market-signal limitation only.",
     );
   }
 

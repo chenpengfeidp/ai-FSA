@@ -4,11 +4,11 @@
 
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
-- Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) is implemented through slice 1.4; mainline B.1 odds ingest landed
-- Current task status: B.1 real pre-match 1X2 odds ingestion implemented (recorded default)
+- Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
+- Current task status: B.2 international 1X2 + Asian handicap market signals implemented (recorded default)
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Vertical slice B.1 — real-shaped ODDS ingest via `@fas/provider-odds` (recorded cassettes; optional live)
-- Next authorized work: B.2 Asian handicap / 水位, or mainline A true calibration population
+- Last completed delivery: Vertical slice B.2 — ODDS carries 1X2 + primary Asian handicap via `@fas/provider-odds`
+- Next authorized work: Live The Odds API key for a real event, or mainline A true calibration population, or volume/战意 evidence later
 - Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -41,7 +41,7 @@ Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
   → Web Match Center / Session / Workspace / Library
 ```
 
-Default API odds mode is `ODDS_PROVIDER_MODE=recorded`: fixture form/stats/h2h remain, while mapped demo matches overlay The Odds API–shaped recorded 1X2 cassettes (`source=the-odds-api`). Live fetch is optional and requires `THE_ODDS_API_KEY`.
+Default API odds mode is `ODDS_PROVIDER_MODE=recorded`: fixture form/stats/h2h remain, while mapped demo matches overlay The Odds API–shaped recorded **1X2 + spreads (Asian handicap)** cassettes (`source=the-odds-api`). Live fetch requests `markets=h2h,spreads` and requires `THE_ODDS_API_KEY`. Match Center list remains demo fixtures.
 
 Implemented packages used by the slice (non-exhaustive):
 
@@ -137,8 +137,9 @@ Not a numbered Sprint 11 authorization; delivered as bounded implementation agai
 | 1.3 | `@fas/statistics` identity calibration artifact consumption | commit `690c988` |
 | 1.4 | `@fas/prompt` + local `@fas/ai-provider` inference narrative | commit `39b55b2` |
 | B.1 | Real-shaped pre-match 1X2 ODDS ingest (`@fas/provider-odds`, recorded default) | `docs/sprints/VERTICAL_SLICE_B1_ODDS_INGEST_SPEC.md` |
+| B.2 | International 1X2 + Asian handicap on ODDS; AH features/rules; AH conflict limitation | `docs/sprints/VERTICAL_SLICE_B2_AH_MARKET_SPEC.md` |
 
-Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1 spec above.
+Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2 specs above.
 
 ## Architecture Status
 
@@ -210,12 +211,13 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. B.1 (real-shaped pre-match 1X2 ODDS ingest) is implemented with default offline recorded mode.
+No numbered sprint is active. B.1/B.2 international market path is implemented with default offline recorded mode (1X2 + primary Asian handicap).
 
 Recommended follow-ons:
 
-1. **B.2 — Asian handicap / 水位** (Evidence schema extension; still market signal only), or
-2. **A — true calibration population** (Statistics metrics over sealed projection vs verified results).
+1. Add a free The Odds API key and map one live event id for a real upcoming match, or
+2. **A — true calibration population** (Statistics metrics over sealed projection vs verified results), or
+3. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

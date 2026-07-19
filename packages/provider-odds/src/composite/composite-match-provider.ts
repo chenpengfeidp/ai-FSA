@@ -1,4 +1,4 @@
-import type { OddsSnapshotSource } from "../domain/pre-match-1x2.js";
+import type { OddsSnapshotSource } from "../domain/pre-match-odds.js";
 
 export interface MatchLookup {
   getMatch(matchId: string): unknown;
@@ -9,7 +9,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Wraps a fixture (or other) match provider and overlays external pre-match 1X2 odds
+ * Wraps a fixture (or other) match provider and overlays external pre-match odds
  * when the odds source has a snapshot for the match id.
  */
 export class CompositeMatchProvider implements MatchLookup {
@@ -44,6 +44,15 @@ export class CompositeMatchProvider implements MatchLookup {
         providerSource: overlay.providerSource,
         providerSourceId: overlay.providerSourceId,
         providerMethod: overlay.providerMethod,
+        ...(overlay.asianHandicapLine === undefined ||
+        overlay.asianHandicapHomeOdds === undefined ||
+        overlay.asianHandicapAwayOdds === undefined
+          ? {}
+          : {
+              asianHandicapLine: overlay.asianHandicapLine,
+              asianHandicapHomeOdds: overlay.asianHandicapHomeOdds,
+              asianHandicapAwayOdds: overlay.asianHandicapAwayOdds,
+            }),
       }),
     });
   }

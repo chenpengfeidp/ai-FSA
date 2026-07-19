@@ -4,7 +4,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Slice 1.0–1.4 implemented; B.1 recorded/live-capable 1X2 ODDS overlay landed — see `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md`, `docs/sprints/VERTICAL_SLICE_B1_ODDS_INGEST_SPEC.md`, and `docs/PROJECT_STATE.md` |
+| Status | Slice 1.0–1.4 + B.1/B.2 international market path (1X2 + Asian handicap) — see completion/B1/B2 sprint notes and `docs/PROJECT_STATE.md` |
 | Kind | First delivery specification for deterministic football projection |
 | Authority | Non-authoritative relative to Project Bible, ADRs, and owning numbered contracts; proceeds under planning acceptance recorded in [34_V2_ARCHITECTURE_ALIGNMENT](./34_V2_ARCHITECTURE_ALIGNMENT.md) |
 | Depends on | Documents [30](./30_RULE_ENGINE_V2.md), [31](./31_PREDICTION_ENGINE_V2.md), [32](./32_REPORT_ENGINE_V2.md), [33](./33_ANALYSIS_PIPELINE_V2.md), [34](./34_V2_ARCHITECTURE_ALIGNMENT.md) |
@@ -196,7 +196,7 @@ Meetings are oriented to the **current** fixture sides (`homeGoals` / `awayGoals
 | `meetings[].homeGoals` | non-negative integer | Goals by current home side |
 | `meetings[].awayGoals` | non-negative integer | Goals by current away side |
 
-### 5.5 `ODDS` optional payload fields (slice 1.2)
+### 5.5 `ODDS` optional payload fields (slice 1.2 + B.2)
 
 | Field | Type | Meaning |
 |---|---|---|
@@ -204,6 +204,11 @@ Meetings are oriented to the **current** fixture sides (`homeGoals` / `awayGoals
 | `drawOdds` | finite number `> 1` | Decimal odds for draw |
 | `awayOdds` | finite number `> 1` | Decimal odds for away win |
 | `observedAt` | ISO 8601 timestamp | Observation time of the market snapshot |
+| `asianHandicapLine` | finite number (optional, B.2) | Home Asian handicap line (e.g. `-0.5`) |
+| `asianHandicapHomeOdds` | finite number `> 1` (optional, B.2) | Decimal odds for home side on that line |
+| `asianHandicapAwayOdds` | finite number `> 1` (optional, B.2) | Decimal odds for away side on that line |
+
+When any AH field is present, all three AH fields are required. AH absence leaves 1X2-only ODDS valid. See `docs/sprints/VERTICAL_SLICE_B2_AH_MARKET_SPEC.md`.
 
 ### 5.6 Quality / freshness for the slice
 

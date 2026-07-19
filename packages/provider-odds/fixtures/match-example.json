@@ -18,6 +18,14 @@
             { "name": "Draw", "price": 4.2 },
             { "name": "Chelsea", "price": 5.8 }
           ]
+        },
+        {
+          "key": "spreads",
+          "last_update": "2026-07-18T12:00:00Z",
+          "outcomes": [
+            { "name": "Liverpool", "price": 1.75, "point": -0.75 },
+            { "name": "Chelsea", "price": 2.2, "point": 0.75 }
+          ]
         }
       ]
     }

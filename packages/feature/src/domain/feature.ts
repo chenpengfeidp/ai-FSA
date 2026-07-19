@@ -2,6 +2,8 @@ import type { JsonValue } from "@fas/domain";
 import { createMatchId, type MatchId } from "@fas/match";
 
 export type FeatureName =
+  | "asianHandicapLean"
+  | "asianHandicapLine"
   | "attackRatingAway"
   | "attackRatingHome"
   | "awayTeam"
@@ -47,6 +49,8 @@ export class FeatureValidationError extends Error {
 }
 
 const featureNames: ReadonlySet<string> = new Set([
+  "asianHandicapLean",
+  "asianHandicapLine",
   "attackRatingAway",
   "attackRatingHome",
   "awayTeam",

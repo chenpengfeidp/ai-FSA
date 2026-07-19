@@ -142,3 +142,18 @@ export function computeMarketLean(input: {
 
   return clamp(implied.home - implied.away, -1, 1);
 }
+
+/**
+ * Two-way de-vigged lean from Asian handicap prices.
+ * Positive favors the home side on the given line (market signal only).
+ */
+export function computeAsianHandicapLean(input: {
+  readonly asianHandicapHomeOdds: number;
+  readonly asianHandicapAwayOdds: number;
+}): number {
+  const rawHome = 1 / input.asianHandicapHomeOdds;
+  const rawAway = 1 / input.asianHandicapAwayOdds;
+  const sum = rawHome + rawAway;
+
+  return clamp(rawHome / sum - rawAway / sum, -1, 1);
+}

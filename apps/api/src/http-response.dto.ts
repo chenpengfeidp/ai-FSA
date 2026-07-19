@@ -156,6 +156,8 @@ export class FeatureDto {
 
   @ApiProperty({
     enum: [
+      "asianHandicapLean",
+      "asianHandicapLine",
       "attackRatingAway",
       "attackRatingHome",
       "awayTeam",
@@ -207,6 +209,8 @@ export class RuleResultDto {
       "HOME_ATTACK_EDGE",
       "HOME_TEAM_PRESENT",
       "KICKOFF_PRESENT",
+      "MARKET_AH_LEAN_AWAY",
+      "MARKET_AH_LEAN_HOME",
       "MARKET_LEAN_AWAY",
       "MARKET_LEAN_HOME",
       "MOMENTUM_AWAY",

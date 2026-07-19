@@ -5,13 +5,14 @@ export {
 export type { DemoOddsCatalogEntry } from "./catalog/demo-odds-catalog.js";
 export { CompositeMatchProvider } from "./composite/composite-match-provider.js";
 export type { MatchLookup } from "./composite/composite-match-provider.js";
-export { NoopOddsSnapshotPrimer } from "./domain/pre-match-1x2.js";
+export { NoopOddsSnapshotPrimer } from "./domain/pre-match-odds.js";
 export type {
   OddsProviderMethod,
   OddsSnapshotPrimer,
   OddsSnapshotSource,
   PreMatch1x2OddsOverlay,
-} from "./domain/pre-match-1x2.js";
+  PreMatchOddsOverlay,
+} from "./domain/pre-match-odds.js";
 export { LiveTheOddsApiOddsSource } from "./live/live-the-odds-api-odds-source.js";
 export type {
   LiveTheOddsApiOddsSourceOptions,

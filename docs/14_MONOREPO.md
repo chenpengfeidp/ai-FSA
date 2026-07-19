@@ -248,7 +248,7 @@ Provider DTOs do not escape the adapter. Mock/fake providers support tests.
 
 #### `@fas/provider-odds` (interim external odds adapter)
 
-Owns The Odds API–shaped pre-match 1X2 mapping, recorded snapshot cassettes, optional live `fetch`, and `CompositeMatchProvider` overlay onto fixture match payloads. Provider DTOs do not escape the adapter. Default runtime mode is offline `recorded`; Asian handicap / 水位 remain out of scope until a later slice.
+Owns The Odds API–shaped pre-match 1X2 + spreads (Asian handicap) mapping, recorded snapshot cassettes, optional live `fetch` (`markets=h2h,spreads`), and `CompositeMatchProvider` overlay onto fixture match payloads. Provider DTOs do not escape the adapter. Default runtime mode is offline `recorded`.
 
 #### `@fas/jobs`
 

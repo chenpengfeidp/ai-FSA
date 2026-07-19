@@ -135,7 +135,38 @@ describe("HTTP import and Evidence query workflow", () => {
       provenance: {
         method: "recorded-snapshot",
       },
+      payload: {
+        asianHandicapLine: -0.75,
+        asianHandicapHomeOdds: 1.75,
+        asianHandicapAwayOdds: 2.2,
+      },
     });
+  });
+
+  it("surfaces Asian handicap features for recorded overlay matches", async () => {
+    const response = await request(
+      baseUrl,
+      "/api/analyze/match/match-example",
+      "POST",
+    );
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "asianHandicapLine", value: -0.75 }),
+        expect.objectContaining({ name: "asianHandicapLean" }),
+      ]),
+    );
+    expect(report.rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleName: "MARKET_AH_LEAN_HOME",
+          status: "PASS",
+          channel: "none",
+        }),
+      ]),
+    );
   });
 
   it("runs the complete deterministic analysis and returns AnalysisReport JSON", async () => {

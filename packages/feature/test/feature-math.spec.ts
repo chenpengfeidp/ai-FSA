@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  computeAsianHandicapLean,
   computeH2hLean,
   computeImpliedProbabilities,
   computeMarketLean,
@@ -57,5 +58,14 @@ describe("market odds features", () => {
         awayOdds: 2.05,
       }),
     ).toBeLessThan(-0.08);
+  });
+
+  it("leans positive when Asian handicap home price is shorter", () => {
+    expect(
+      computeAsianHandicapLean({
+        asianHandicapHomeOdds: 1.85,
+        asianHandicapAwayOdds: 2.05,
+      }),
+    ).toBeGreaterThan(0);
   });
 });

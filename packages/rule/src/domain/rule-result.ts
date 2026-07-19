@@ -9,6 +9,8 @@ export type RuleId =
   | "rule:home-attack-edge:v1"
   | "rule:home-team-present:v1"
   | "rule:kickoff-present:v1"
+  | "rule:market-ah-lean-away:v1"
+  | "rule:market-ah-lean-home:v1"
   | "rule:market-lean-away:v1"
   | "rule:market-lean-home:v1"
   | "rule:momentum-away:v1"
@@ -23,6 +25,8 @@ export type RuleName =
   | "HOME_ATTACK_EDGE"
   | "HOME_TEAM_PRESENT"
   | "KICKOFF_PRESENT"
+  | "MARKET_AH_LEAN_AWAY"
+  | "MARKET_AH_LEAN_HOME"
   | "MARKET_LEAN_AWAY"
   | "MARKET_LEAN_HOME"
   | "MOMENTUM_AWAY"
@@ -74,6 +78,8 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:home-attack-edge:v1",
   "rule:home-team-present:v1",
   "rule:kickoff-present:v1",
+  "rule:market-ah-lean-away:v1",
+  "rule:market-ah-lean-home:v1",
   "rule:market-lean-away:v1",
   "rule:market-lean-home:v1",
   "rule:momentum-away:v1",
@@ -88,6 +94,8 @@ const ruleNames: ReadonlySet<string> = new Set([
   "HOME_ATTACK_EDGE",
   "HOME_TEAM_PRESENT",
   "KICKOFF_PRESENT",
+  "MARKET_AH_LEAN_AWAY",
+  "MARKET_AH_LEAN_HOME",
   "MARKET_LEAN_AWAY",
   "MARKET_LEAN_HOME",
   "MOMENTUM_AWAY",

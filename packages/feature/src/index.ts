@@ -33,6 +33,7 @@ export {
   computeAttackRating,
   computeDefenseRating,
   computeH2hLean,
+  computeAsianHandicapLean,
   computeImpliedProbabilities,
   computeMarketLean,
   computeMomentum,

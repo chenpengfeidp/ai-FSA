@@ -21,6 +21,8 @@ import type { MatchSummary } from "../types/match-center";
 import { formatJsonValue, formatTimestamp } from "./utils";
 
 const FEATURE_LABELS: Readonly<Record<FeatureName, string>> = Object.freeze({
+  asianHandicapLean: "Asian Handicap Lean",
+  asianHandicapLine: "Asian Handicap Line",
   attackRatingAway: "Away Attack Rating",
   attackRatingHome: "Home Attack Rating",
   awayTeam: "Away Team",
@@ -48,6 +50,8 @@ const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
   HOME_ATTACK_EDGE: "Home Attack Edge",
   HOME_TEAM_PRESENT: "Home Team Present",
   KICKOFF_PRESENT: "Kickoff Present",
+  MARKET_AH_LEAN_AWAY: "Asian Handicap Lean Away",
+  MARKET_AH_LEAN_HOME: "Asian Handicap Lean Home",
   MARKET_LEAN_AWAY: "Market Lean Away",
   MARKET_LEAN_HOME: "Market Lean Home",
   MOMENTUM_AWAY: "Away Momentum Edge",

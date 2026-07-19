@@ -4,7 +4,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Implementation specification — design only until the remaining gate in §14 is closed |
+| Status | Slice 1.0–1.4 implemented in the private fixture environment; see `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and `docs/PROJECT_STATE.md` |
 | Kind | First delivery specification for deterministic football projection |
 | Authority | Non-authoritative relative to Project Bible, ADRs, and owning numbered contracts; proceeds under planning acceptance recorded in [34_V2_ARCHITECTURE_ALIGNMENT](./34_V2_ARCHITECTURE_ALIGNMENT.md) |
 | Depends on | Documents [30](./30_RULE_ENGINE_V2.md), [31](./31_PREDICTION_ENGINE_V2.md), [32](./32_REPORT_ENGINE_V2.md), [33](./33_ANALYSIS_PIPELINE_V2.md), [34](./34_V2_ARCHITECTURE_ALIGNMENT.md) |

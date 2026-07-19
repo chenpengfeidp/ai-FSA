@@ -254,7 +254,13 @@ Then read by change type:
 - repository or delivery work: `04`, `14` through `16`, `18`, `20` through `23`, and the applicable current milestone governance listed below;
 - architecture decisions: all affected canonical documents and records in `docs/decisions/`.
 
-For current Milestone 3A and Sprint 8 delivery work, also read:
+For current vertical-slice and post-bootstrap delivery work, also read:
+
+- `docs/34_V2_ARCHITECTURE_ALIGNMENT.md`;
+- `docs/35_V2_FIRST_VERTICAL_SLICE_SPECIFICATION.md`;
+- `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md`.
+
+For historical Milestone 3A / Sprint 8 bootstrap evidence, also read:
 
 - `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`;
 - `docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md`;

@@ -2,62 +2,79 @@
 
 ## Snapshot
 
-- Last updated: 2026-07-16
-- Current delivery milestone: Milestone 3A — Repository Bootstrap
-- Canonical roadmap alignment: v0.1 / M1 Foundation bootstrap
-- Current task status: Sprint 10 complete; no implementation sprint active
-- Current sprint: No implementation sprint active
-- Last completed sprint: Sprint 10 — Local Compose Topology Foundation
-- Next sprint: Not specified or authorized
-- Release status: Pre-release; canonical v0.1 is not complete
+- Last updated: 2026-07-19
+- Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
+- Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) is implemented through slice 1.4
+- Current task status: Vertical-slice wrap-up / hygiene; no new implementation sprint active
+- Current sprint: No numbered implementation sprint active
+- Last completed delivery: Vertical slice 1.0–1.4 (deterministic projection + H2H + ODDS conflict + identity calibration + local inference narrative)
+- Next authorized work: Not specified; recommended follow-on is true calibration population (mainline A) or real evidence ingestion (mainline B), after this wrap-up
+- Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.
 
 ## Current Repository Status
 
-The repository contains:
+The repository contains the Milestone 3A bootstrap platform **and** a working private-environment deterministic analysis vertical slice.
 
-- a pnpm and Turborepo workspace;
-- the reusable `@fas/tsconfig` TypeScript configuration package;
-- the reusable `@fas/config` typed runtime configuration package;
-- the reusable `@fas/database` no-model Prisma bootstrap package;
-- exact runtime and package-manager pins;
-- a minimal NestJS API application;
-- a minimal Next.js web application;
-- a minimal standalone NestJS worker;
-- Biome formatting and source linting;
-- dependency-cruiser boundary enforcement with controlled application and Prisma-ownership negative tests;
-- guarded Husky and lint-staged pre-commit checks;
-- focused Vitest configuration and database-bootstrap contract tests;
-- pnpm-native exact Node.js and package-manager rejection;
-- repository-owned toolchain diagnostics and 15 controlled enforcement tests;
-- explicit TypeScript `6.0.3` ownership for every implemented workspace that invokes `tsc`;
-- Prisma `7.8.0` default no-model generation with controlled `--require-models` negative evidence;
-- exact pnpm lifecycle-build approval for Prisma packages;
-- separately approved Turbo-prune container packaging for API, web, and worker targets;
-- exact `node:24.18.0-slim` multi-stage images with production-only or standalone runtime artifacts;
-- explicit non-root container execution and deterministic build-only runtime evidence;
-- Next.js standalone server output for the web image;
-- one root-owned local Compose topology for PostgreSQL, API, web, and the profiled worker;
-- PostgreSQL `17-alpine` health, named-volume, private-network, and no-host-publication evidence;
-- loopback-only Compose publication for API and web;
-- explicit non-default `worker` profile with preserved one-shot startup and clean exit;
-- deterministic default/profiled Compose configuration and runtime cleanup evidence;
-- unified toolchain, workspace, Prisma, quality, typecheck, test, and build validation commands;
+### Platform / bootstrap (still true)
+
+- pnpm and Turborepo workspace with exact Node.js `24.18.0` and pnpm `11.13.0` pins;
+- `@fas/tsconfig`, `@fas/config`, `@fas/database` (Prisma no-model bootstrap);
+- NestJS API, Next.js web, standalone NestJS worker;
+- Biome, dependency-cruiser, Husky/lint-staged, Vitest, toolchain enforcement;
+- container images and local Compose topology for PostgreSQL, API, web, and profiled worker;
 - architecture documents, ADRs, sprint reports, and AI-agent governance.
 
-The API currently exposes only:
+### Football domain vertical slice (now implemented)
+
+Fixture-driven, in-memory evidence path (not durable PostgreSQL domain models):
+
+```text
+Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
+  (+ optional HEAD_TO_HEAD, + optional ODDS)
+  → FeatureBundle
+  → Rule findings (football + market; market does not enter softmax)
+  → DeterministicMatchProjection (independent Poisson + rule adjust
+     + identity calibration artifact reference + market-conflict gate)
+  → AnalysisReport (+ local inference narrative draft)
+  → Web Match Center / Session / Workspace / Library
+```
+
+Implemented packages used by the slice (non-exhaustive):
+
+- `@fas/match`, `@fas/evidence`, `@fas/evidence-normalizer`, `@fas/evidence-import`, `@fas/evidence-query`
+- `@fas/provider-fixture`, `@fas/application`
+- `@fas/feature`, `@fas/rule`, `@fas/analysis`, `@fas/report`
+- `@fas/statistics` (pinned identity calibration artifact; no population training)
+- `@fas/prompt` (sealed-context composition; no retrieval / no network)
+- `@fas/ai-provider` (`LocalDeterministicNarrativeAdapter` only; no provider SDK)
+
+### API surface (current)
+
+Operational:
 
 - `GET /`
 - `GET /health/live`
 - `GET /health/ready`
 - `GET /version`
 
-The web application contains only the repository-bootstrap homepage.
+Domain (private demo):
 
-The worker initializes, logs `Worker started.`, and closes without a queue or artificial idle loop.
+- `POST /api/import/match/:matchId`
+- `POST /api/analyze/match/:matchId`
+- `GET /api/evidence/example`
+- `GET /api/evidence/match/:matchId`
+- `GET /api/evidence/:id`
 
-No football-domain, AI-engine, database model, migration, runtime database integration, authentication, durable-job, or business behavior exists.
+### Web surface (current)
+
+- Match Center, analysis session pacing UI, explainable workspace, analysis library (`/reports`)
+- Workspace maps sealed projection / narrative; does not recompute λ, 1X2, confidence, or recommendations
+
+### Worker
+
+Still initializes, logs startup, and exits without a durable job queue.
 
 ## Current Toolchain
 
@@ -98,124 +115,46 @@ TypeScript 6.0.3 is the approved compiler baseline. TypeScript 7.0.2 failed beca
 - Milestone 3A Sprint 8 — Prisma No-model Bootstrap: complete.
 - Milestone 3A Sprint 9 — Container Image Packaging Foundation: complete.
 - Milestone 3A Sprint 10 — Local Compose Topology Foundation: complete.
+- V2 architecture alignment (doc 34) and first vertical slice specification (doc 35): accepted for planning; slice 1.0–1.4 implemented in code.
 
-Milestone 3A and canonical v0.1 are not complete. Later bootstrap and foundation work remains.
+Milestone 3A and canonical v0.1 Foundation are **not** fully closed (persistence models, durable jobs, CI/ops gates remain). The deterministic vertical slice is a **parallel product capability** on top of the bootstrap platform, not a claim that v0.1 is complete.
 
 ## Completed Sprints
 
-### Sprint 1 — Repository Foundation
+Historical Sprint 1–10 reports remain the evidence record for Milestone 3A bootstrap. See `docs/sprints/SPRINT1_REPORT.md` through `docs/sprints/SPRINT10_REPORT.md`.
 
-- Created root workspace configuration and tracked foundation directories.
-- Added workspace validation.
-- Introduced no application code.
-- Evidence: `docs/sprints/SPRINT1_REPORT.md`.
+### Vertical slice delivery (2026-07)
 
-### Sprint 2 — Application Skeleton
+Not a numbered Sprint 11 authorization; delivered as bounded implementation against docs 34–35 and follow-on A→B→C:
 
-- Created independently runnable API, web, and worker shells.
-- Added required operational API endpoints.
-- Added root development commands and production builds.
-- Introduced no domain, AI, database, authentication, or queue behavior.
-- Evidence: `docs/sprints/SPRINT2_REPORT.md`.
+| Slice | Delivery | Evidence |
+|---|---|---|
+| 1.0 | Deterministic Feature → Rule → Projection → Report → Workspace | commit `ab0446b` and successors |
+| 1.1 | Optional `HEAD_TO_HEAD` | commit `007d595` |
+| 1.2 | Optional `ODDS` + market conflict → `cautious` | commit `e370299` |
+| 1.3 | `@fas/statistics` identity calibration artifact consumption | commit `690c988` |
+| 1.4 | `@fas/prompt` + local `@fas/ai-provider` inference narrative | commit `39b55b2` |
 
-### Sprint 3 — Platform Foundation
-
-- Created the private `@fas/tsconfig` workspace package.
-- Centralized strict base, Node.js, NestJS, and Next.js compiler policy.
-- Connected the root, API, web, and worker as immediate consumers through explicit export paths and `workspace:*` dependencies.
-- Added no executable package code or application-source changes.
-- Evidence: `docs/sprints/SPRINT3_REPORT.md`.
-
-### Sprint 4 — Engineering Quality Foundation
-
-- Added Biome as the single formatter and source linter.
-- Added dependency-cruiser rules for cycles, package-to-app, and cross-application imports.
-- Added an executable controlled boundary-failure proof.
-- Added guarded Husky and staged-only lint-staged checks.
-- Unified workspace, quality, typecheck, and build validation.
-- Added no application-source or runtime behavior changes.
-- Evidence: `docs/sprints/SPRINT4_REPORT.md`.
-
-### Sprint 5 — Configuration Foundation
-
-- Created private workspace package `@fas/config`.
-- Added immutable API and worker configuration contracts.
-- Added strict validation for `NODE_ENV`, `HOST`, and `PORT`.
-- Replaced direct API environment parsing and added worker startup validation.
-- Added one explicit Vitest project with 17 configuration contract tests.
-- Added no endpoint, response, web, domain, AI, persistence, queue, or observability behavior.
-- Evidence: `docs/sprints/SPRINT5_REPORT.md`.
-
-### Sprint 6 — Toolchain Enforcement
-
-- Added pnpm-native exact Node.js and package-manager rejection.
-- Added a repository-owned metadata and active-toolchain diagnostic.
-- Added 15 controlled positive, policy-negative, metadata, and native-install enforcement tests.
-- Integrated toolchain checks before existing root validation evidence.
-- Added no dependency, lockfile, application, shared-package, architecture, ADR, or Sprint 7 change.
-- Evidence: `docs/sprints/SPRINT6_REPORT.md`.
-
-### Sprint 7 — TypeScript Compiler Baseline Alignment
-
-- Added explicit TypeScript `6.0.3` development ownership to API, worker, and configuration manifests.
-- Aligned all root and workspace-owned compiler entry points on TypeScript `6.0.3`.
-- Preserved the NestJS CLI's internal transitive TypeScript `5.9.3` without an override.
-- Added no source, script, compiler-policy, application-behavior, architecture, ADR, or Sprint 8 change.
-- Evidence: `docs/sprints/SPRINT7_REPORT.md`.
-
-### Sprint 8 — Prisma No-model Bootstrap
-
-- Created private workspace package `@fas/database`.
-- Added explicit Prisma `7.8.0` configuration and a PostgreSQL zero-model schema.
-- Proved default no-model generation and controlled `--require-models` rejection from root and package contexts.
-- Added a side-effect-free PostgreSQL driver-adapter lifecycle boundary.
-- Integrated generation into root and package validation, build, typecheck, and test gates.
-- Added 4 database-bootstrap tests and executable Prisma-ownership enforcement.
-- Added no model, migration, runtime connection, application integration, domain behavior, architecture change, ADR, or Sprint 9 work.
-- Evidence: `docs/sprints/SPRINT8_REPORT.md`.
-
-### Sprint 9 — Container Image Packaging Foundation
-
-- Applied the separately approved Turbo-prune strategy to target-specific API, worker, and web images.
-- Added exact Node.js `24.18.0` multi-stage builds with frozen pruned-lockfile installation.
-- Added production-only API/worker dependency stages and Next.js standalone web output.
-- Proved all existing API responses, web bootstrap content, and worker startup/exit behavior without PostgreSQL or Compose.
-- Proved all runtime stages execute as UID 1000 rather than root.
-- Preserved application source, shared packages, manifests, lockfile, architecture documents, and ADRs unchanged.
-- Left Compose acceptance, worker profile, database-aware readiness, deterministic runtime smoke, CI, and security scanning open.
-- Evidence: `docs/sprints/SPRINT9_REPORT.md`.
-
-### Sprint 10 — Local Compose Topology Foundation
-
-- Added the exact PostgreSQL, API, web, and profiled-worker Compose topology.
-- Added bounded PostgreSQL `pg_isready` health and one named local data volume.
-- Proved the default topology excludes worker and the explicit `worker` profile preserves its one-shot behavior.
-- Proved API and web publish only to loopback and PostgreSQL publishes no host port.
-- Preserved application commands, responses, non-root execution, and the no-database-consumer boundary.
-- Added no model, migration, schema command, application database integration, or Sprint 11 work.
-- Evidence: `docs/sprints/SPRINT10_REPORT.md`.
+Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md`.
 
 ## Architecture Status
 
-Architecture direction is **approved with conditions**.
+Architecture direction remains **approved with conditions**.
 
-The governing implementation gate is `docs/21_ARCHITECTURE_SIGNOFF.md`. The requested path `docs/21_IMPLEMENTATION_GATE.md` does not exist; the architecture sign-off is the accepted gate authority for this governance milestone.
+Binding principles still include: evidence before assumption; facts / market signals / findings / inference separation; deterministic policy outside generative AI; Analysis-owned match projection; Statistics-owned calibration maps; Prompt does not retrieve or call providers; UI does not recompute projections.
 
-`docs/22_MILESTONE_3A_GATE.md` records the post-Sprint 5 recommendation `READY FOR SPRINT 6`. Sprint 6 subsequently received separate authorization, completed MF-05, and did not close Milestone 3A. The Architecture Board has also aligned MF-02 with verified Prisma `7.8.0` default no-model generation and controlled `--require-models` evidence.
+Open Milestone 3A / v0.1 items (unchanged in spirit):
 
-The following principles remain binding:
+- durable PostgreSQL domain models and application DB integration;
+- durable jobs, audit/idempotency baselines;
+- remaining container/CI/security/runtime-smoke gates.
 
-- evidence before assumption;
-- minimal V1 infrastructure;
-- immediate consumers before packages or abstractions;
-- modular-monolith boundaries;
-- deterministic policy outside generative AI;
-- provider-neutral AI ports;
-- PostgreSQL durable jobs before any Redis/BullMQ adoption;
-- append-only match-result versions;
-- executable acceptance evidence.
+Vertical-slice deferrals (intentional):
 
-Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager rejection evidence. Sprint 7 aligned workspace-owned compiler resolution with the approved TypeScript `6.0.3` baseline. Sprint 8 closed the no-model Prisma bootstrap and generation dependency-graph conditions. Sprint 9 closed the MF-08 packaging-strategy decision and demonstrated target-specific build-only container acceptance. Sprint 10 completed the local Compose topology, satisfied MF-14 host-binding acceptance, and satisfied only the Compose-profile portion of MF-10. Open Milestone 3A conditions include automated application tests beyond configuration and database-bootstrap contracts, remaining MF-09 container acceptance, the MF-10 worker bootstrap signal-handling test, database-aware readiness, deterministic runtime smoke testing, broader Turbo environment/cache policy, security gates, and CI.
+- trained / population calibration maps (only identity baseline);
+- network AI provider SDKs;
+- Redis, BullMQ, pgvector;
+- authentication, public deployment, wagering advice.
 
 ## Approved Documents
 
@@ -223,58 +162,24 @@ Sprint 6 closed MF-05 with executable unsupported-runtime and package-manager re
 
 - `docs/00_PROJECT_BIBLE.md`
 - `docs/01_PRODUCT.md` through `docs/19_DATABASE_ERD.md`
-- `docs/decisions/ADR-001-modular-monolith-and-typescript-monorepo.md`
-- `docs/decisions/ADR-002-postgresql-durable-jobs-for-v1.md`
-- `docs/decisions/ADR-003-provider-neutral-ai-and-staged-retrieval.md`
-- `docs/decisions/ADR-004-append-only-match-result-versions.md`
+- `docs/30_RULE_ENGINE_V2.md` through `docs/33_ANALYSIS_PIPELINE_V2.md` (design; non-authoritative where they conflict with canonical docs)
+- `docs/34_V2_ARCHITECTURE_ALIGNMENT.md`
+- `docs/35_V2_FIRST_VERTICAL_SLICE_SPECIFICATION.md`
+- `docs/decisions/ADR-001` through `ADR-004`
 
 ### Implementation Authority
 
 - `docs/20_IMPLEMENTATION_PLAN.md`
 - `docs/21_ARCHITECTURE_SIGNOFF.md`
-- `docs/sprints/SPRINT3_SPECIFICATION.md`
-- `docs/sprints/SPRINT4_SPECIFICATION.md`
-- `docs/sprints/SPRINT5_SPECIFICATION.md`
-- `docs/sprints/SPRINT6_SPECIFICATION.md`
-- `docs/sprints/SPRINT7_SPECIFICATION.md`
-- `docs/sprints/SPRINT8_SPECIFICATION.md`
-- `docs/sprints/SPRINT8_SPECIFICATION_REVISION.md`
-- `docs/sprints/SPRINT9_SPECIFICATION.md`
-- `docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT_APPROVAL.md`
-- `docs/sprints/SPRINT9_IMPLEMENTATION_AUTHORIZATION.md`
-- `docs/sprints/SPRINT10_SPECIFICATION.md`
-
-The sign-off narrows and conditions the implementation plan where they differ.
+- Sprint 3–10 specifications and alignment approvals under `docs/sprints/`
 
 ### Governance and Evidence
 
 - `AGENTS.md`
 - `docs/DEVELOPMENT_WORKFLOW.md`
 - `docs/PROJECT_STATE.md`
-- `docs/sprints/SPRINT1_REPORT.md`
-- `docs/sprints/SPRINT2_REPORT.md`
-- `docs/sprints/SPRINT3_REPORT.md`
-- `docs/sprints/SPRINT3_ALIGNMENT_REPORT.md`
-- `docs/sprints/SPRINT4_REPORT.md`
-- `docs/sprints/SPRINT5_REPORT.md`
-- `docs/sprints/SPRINT6_REPORT.md`
-- `docs/sprints/SPRINT7_REPORT.md`
-- `docs/sprints/SPRINT8_REPORT.md`
-- `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT.md`
-- `docs/sprints/SPRINT8_ARCHITECTURE_ALIGNMENT_APPROVAL.md`
-- `docs/sprints/SPRINT8_PRE_IMPLEMENTATION_AUDIT.md`
-- `docs/sprints/SPRINT9_REPORT.md`
-- `docs/sprints/SPRINT9_ARCHITECTURE_ALIGNMENT.md`
-- `docs/sprints/SPRINT9_FINAL_REVIEW.md`
-- `docs/sprints/SPRINT10_PLANNING.md`
-- `docs/sprints/SPRINT10_ARCHITECTURE_REVIEW.md`
-- `docs/sprints/SPRINT10_REPORT.md`
-- `docs/22_MILESTONE_3A_GATE.md`
-- `docs/23_RELEASE_BASELINE.md`
-- `docs/sprints/MILESTONE_3A_GATE_REVIEW.md`
-- `docs/sprints/FINAL_REPOSITORY_HEALTH_REPORT.md`
-- `docs/sprints/GOVERNANCE_FOUNDATION_REPORT.md`
-- `docs/sprints/REPOSITORY_AUDIT_REPORT.md`
+- Sprint 1–10 reports and Milestone 3A gate/health reports under `docs/sprints/`
+- `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md`
 
 Sprint reports are evidence records, not replacements for canonical architecture.
 
@@ -284,60 +189,51 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Public exposure is prohibited until authentication and authorization are designed and implemented.
 - Live or in-play analysis is out of scope.
 - AI cannot make authoritative deterministic, lifecycle, publication, or governance decisions.
-- No AI provider or engine implementation is currently authorized.
-- The Prisma schema intentionally contains no models, enums, composite types, migrations, or seeds.
-- No application PostgreSQL runtime integration, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
-- Current images prove independent build and bootstrap runtime behavior, and the local Compose topology proves PostgreSQL health, private networking, worker-profile behavior, loopback-only application publication, and PostgreSQL non-publication. Database-aware readiness, full deterministic runtime smoke, image publication, and public deployment are not implemented.
-- No speculative engine or shared business packages may be created.
-- `@fas/tsconfig`, `@fas/config`, and `@fas/database` are the only shared platform packages currently implemented.
-- `@fas/config` validates only `NODE_ENV`, API `HOST`, and API `PORT`.
-- No browser-safe, secret, database, provider, queue, storage, feature-flag, or observability configuration is implemented.
+- Narrative output is labeled `inference` and must not alter sealed projection numbers.
+- Market odds are market signals, not ground truth; slice 1.2 does not blend them into 1X2.
+- Calibration is the pinned identity artifact (`calibration:identity:v1`); not Evaluation-qualified; not trained from populations.
+- Demo evidence is fixture-backed and may be `unverified`.
+- The Prisma schema intentionally contains no football domain models, migrations, or seeds.
+- No application PostgreSQL runtime integration for domain persistence, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
+- No OpenAI or other network provider SDK is installed for narrative generation.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
-- Runtime and package-manager metadata are exact-pinned and enforced through pnpm-native installation rejection plus repository-owned checks.
-- Workspace-owned compiler entry points resolve explicit TypeScript `6.0.3`; the NestJS CLI retains an internal transitive TypeScript `5.9.3` that is not an approved workspace compiler entry point.
-- Generated Next.js type files are reproducible and uncommitted.
-- The worker must not use a fake persistence loop before durable work exists.
-- The API and web shell copy “Repository Bootstrap Completed” refers only to shell creation; Milestone 3A and canonical v0.1 remain incomplete.
-- Sprint boundaries require separate approval.
+- Speculative empty engine directories must not be treated as implemented packages.
 
 ## Known Documentation Drift
 
-No known broken Markdown links, obsolete sprint locations, active documentation-index omissions, or active obsolete Prisma commands remain. Historical proposal and approval evidence retains the superseded MF-02 command text so the decision change remains auditable.
+- Before 2026-07-19, this file still claimed “no football-domain behavior” and API-only health endpoints; that drift is corrected here.
+- Doc 35 header status text may still read as pre-implementation; treat implemented slice 1.0–1.4 behavior in code and `VERTICAL_SLICE_1_COMPLETION_REPORT.md` as delivery evidence.
+- Canonical v0.1 roadmap package naming (`@fas/*-engine`) vs interim packages (`@fas/rule`, `@fas/prompt`, `@fas/statistics`) remains an intentional migration gap documented in `docs/14_MONOREPO.md`.
 
-## Next Sprint
+## Next Work
 
-Sprint 10 is complete. No later sprint specification or implementation is active or authorized.
+No numbered sprint is active. Recommended order after this wrap-up:
 
-Before any later implementation sprint:
+1. Choose one mainline:
+   - **A — true calibration population** (Statistics metrics over sealed projection vs verified results; Evaluation qualifies; Analysis consumes exact artifact), or
+   - **B — real evidence ingestion** (one external source behind existing Evidence types; keep projection ownership unchanged).
+2. Write a short bounded slice scope (allowlist, exclusions, acceptance commands).
+3. Obtain explicit authorization if the work crosses planning triggers (new infrastructure, breaking architecture, cross-module refactor).
+4. Implement with `pnpm validate` evidence.
 
-1. review the Sprint 10 report and current repository state;
-2. create and approve a separate Sprint specification;
-3. obtain explicit implementation authorization;
-4. start from a reviewable worktree;
-5. follow the new allowlist, validation commands, acceptance criteria, and stop boundary.
+Do not start Redis/BullMQ/pgvector, public auth, or network provider SDKs without a separate approved milestone.
 
 ## Future Roadmap
 
-- Complete Milestone 3A repository-bootstrap quality, persistence, container, CI, and operational gates.
-- Complete the remaining v0.1 Foundation work: durable PostgreSQL jobs, audit/idempotency, approved persistence, and operational baselines.
-- v0.2: Prompt, provider, structured-output, and validation foundation.
-- v0.3: Knowledge Engine.
-- v0.4: Rule Engine.
-- v0.5: Case and pre-match analysis.
-- v0.6: Review and governed learning.
-- v0.7: Evaluation.
-- v0.8: Statistics.
-- v0.9: hardening.
+- Complete remaining Milestone 3A / v0.1 Foundation gates (persistence, jobs, CI/ops).
+- Grow calibration from identity baseline to reviewed population artifacts.
+- Optionally attach a network AI provider behind `@fas/ai-provider` without allowing it to mutate sealed numbers.
+- Continue governed engines (Knowledge, Case, Review, Evaluation) per canonical roadmap when authorized.
 - v1.0: controlled private production acceptance.
 
 ## Update Checklist
 
-After each sprint:
+After each sprint or material delivery:
 
-- update snapshot date, current milestone, sprint, and next sprint;
+- update snapshot date, current milestone, sprint, and next work;
 - move completed work into the completed sections;
 - reconcile repository status with actual code and commands;
 - add or remove known constraints;
 - record architecture or implementation-gate changes;
-- link the new sprint report;
+- link new evidence reports;
 - keep release claims narrower than demonstrated evidence.

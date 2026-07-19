@@ -22,8 +22,8 @@ export interface EvidenceNormalizationError {
 }
 
 export interface FixtureEvidenceContext {
-  readonly evidenceId: string;
-  readonly sourceId: string;
+  readonly evidenceId?: string;
+  readonly sourceId?: string;
   readonly collectedAt: string;
 }
 
@@ -105,9 +105,9 @@ export function normalizeFixtureEvidence(
 
     const raw = parsed.value;
     const evidence = createEvidence({
-      id: context.evidenceId,
+      id: context.evidenceId ?? `evidence-fixture-${raw.matchId}`,
       source: "fixture",
-      sourceId: context.sourceId,
+      sourceId: context.sourceId ?? `fixture-${raw.matchId}`,
       type: "MATCH_INFO",
       matchId: createMatchId(raw.matchId),
       collectedAt: context.collectedAt,

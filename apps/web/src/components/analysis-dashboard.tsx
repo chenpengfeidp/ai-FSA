@@ -1,108 +1,78 @@
 "use client";
 
-import { Search } from "lucide-react";
-import type { ReactElement } from "react";
-import { useForm } from "react-hook-form";
+import { CalendarDays } from "lucide-react";
+import { type ReactElement, useState } from "react";
 import { useAnalyzeMatch } from "../hooks/use-analyze-match";
-import { AnalysisCard } from "./analysis-card";
-import { ErrorPanel } from "./error-panel";
-import { LoadingSpinner } from "./loading-spinner";
+import { todaysMatches } from "../lib/todays-matches";
+import type { AnalysisReportDto } from "../types/analysis";
+import type { MatchSummary } from "../types/match-center";
+import { MatchCard } from "./match-card";
 import { PageContainer } from "./page-container";
-import { Button } from "./ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
-import { Input } from "./ui/input";
+import { RecentAnalysis } from "./recent-analysis";
 
-interface AnalysisFormValues {
-  readonly matchId: string;
+interface RecentAnalysisState {
+  readonly match: MatchSummary;
+  readonly report: AnalysisReportDto;
 }
 
 export function AnalysisDashboard(): ReactElement {
   const analysis = useAnalyzeMatch();
-  const {
-    formState: { errors },
-    handleSubmit,
-    register,
-  } = useForm<AnalysisFormValues>({
-    defaultValues: {
-      matchId: "match-example",
-    },
-  });
+  const [activeMatchId, setActiveMatchId] = useState<string>();
+  const [recentAnalysis, setRecentAnalysis] = useState<RecentAnalysisState>();
 
-  const submit = handleSubmit(({ matchId }) => {
-    analysis.mutate(matchId.trim());
-  });
+  function analyze(match: MatchSummary): void {
+    analysis.reset();
+    setActiveMatchId(match.id);
+    analysis.mutate(match.id, {
+      onSettled: () => {
+        setActiveMatchId(undefined);
+      },
+      onSuccess: (report) => {
+        setRecentAnalysis({ match, report });
+      },
+    });
+  }
 
   return (
     <PageContainer>
-      <div className="space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Analyze a match</CardTitle>
-            <CardDescription>
-              Enter a provider match identifier to run the complete deterministic
-              analysis workflow.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="flex flex-col gap-4 sm:flex-row sm:items-end"
-              onSubmit={submit}
-            >
-              <div className="flex-1">
-                <label
-                  className="mb-2 block text-sm font-semibold text-slate-800"
-                  htmlFor="match-id"
-                >
-                  Match ID
-                </label>
-                <Input
-                  aria-describedby={errors.matchId ? "match-id-error" : undefined}
-                  aria-invalid={errors.matchId ? "true" : "false"}
-                  autoComplete="off"
-                  disabled={analysis.isPending}
-                  id="match-id"
-                  placeholder="match-example"
-                  {...register("matchId", {
-                    validate: (value) =>
-                      value.trim().length > 0 || "Match ID is required.",
-                  })}
-                />
-                {errors.matchId ? (
-                  <p
-                    className="mt-2 text-sm font-medium text-red-700"
-                    id="match-id-error"
-                  >
-                    {errors.matchId.message}
-                  </p>
-                ) : null}
-              </div>
-              <Button
-                className="sm:min-w-36"
-                disabled={analysis.isPending}
-                type="submit"
+      <div className="space-y-12">
+        <section aria-labelledby="todays-matches-heading">
+          <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-semibold text-blue-600">
+                <CalendarDays aria-hidden="true" className="size-4" />
+                Match Center
+              </p>
+              <h2
+                className="mt-1 text-2xl font-bold tracking-tight text-slate-950"
+                id="todays-matches-heading"
               >
-                {analysis.isPending ? (
-                  <LoadingSpinner />
-                ) : (
-                  <>
-                    <Search aria-hidden="true" className="size-4" />
-                    Analyze
-                  </>
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                Today&apos;s Matches
+              </h2>
+            </div>
+            <p className="text-sm text-slate-500">
+              {todaysMatches.length} fixtures available
+            </p>
+          </div>
 
-        {analysis.isError ? <ErrorPanel message={analysis.error.message} /> : null}
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {todaysMatches.map((match) => (
+              <MatchCard
+                isAnalyzing={analysis.isPending && activeMatchId === match.id}
+                isDisabled={analysis.isPending}
+                key={match.id}
+                match={match}
+                onAnalyze={analyze}
+              />
+            ))}
+          </div>
+        </section>
 
-        {analysis.data ? <AnalysisCard report={analysis.data} /> : null}
+        <RecentAnalysis
+          errorMessage={analysis.isError ? analysis.error.message : undefined}
+          match={recentAnalysis?.match}
+          report={recentAnalysis?.report}
+        />
       </div>
     </PageContainer>
   );

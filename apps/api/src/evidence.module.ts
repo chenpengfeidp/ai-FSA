@@ -47,8 +47,6 @@ const evidenceRepositoryToken = Symbol("EvidenceRepository");
       provide: FixtureEvidenceNormalizer,
       useFactory: (): FixtureEvidenceNormalizer =>
         new FixtureEvidenceNormalizer({
-          evidenceId: "evidence-fixture-match-example",
-          sourceId: "fixture-match-example",
           collectedAt: "2026-07-17T10:00:00Z",
         }),
     },

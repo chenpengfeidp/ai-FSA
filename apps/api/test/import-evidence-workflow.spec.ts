@@ -6,6 +6,44 @@ import { AppModule } from "../src/app.module.js";
 import { configureOpenApi } from "../src/openapi.js";
 
 const importedEvidenceId = "evidence-fixture-match-example";
+const demoMatches = [
+  {
+    matchId: "match-example-1",
+    home: "Liverpool",
+    away: "Chelsea",
+    kickoff: "2026-08-01T19:30:00Z",
+  },
+  {
+    matchId: "match-example-2",
+    home: "Arsenal",
+    away: "Manchester City",
+    kickoff: "2026-08-01T20:00:00Z",
+  },
+  {
+    matchId: "match-example-3",
+    home: "Barcelona",
+    away: "Real Madrid",
+    kickoff: "2026-08-01T20:30:00Z",
+  },
+  {
+    matchId: "match-example-4",
+    home: "Bayern Munich",
+    away: "Borussia Dortmund",
+    kickoff: "2026-08-01T18:30:00Z",
+  },
+  {
+    matchId: "match-example-5",
+    home: "PSG",
+    away: "Marseille",
+    kickoff: "2026-08-01T21:00:00Z",
+  },
+  {
+    matchId: "match-example-6",
+    home: "Inter Milan",
+    away: "Juventus",
+    kickoff: "2026-08-01T19:45:00Z",
+  },
+] as const;
 
 interface HttpResponse {
   readonly body: unknown;
@@ -127,6 +165,60 @@ describe("HTTP import and Evidence query workflow", () => {
     const openApi = requireRecord(openApiResponse.body);
     const paths = requireRecord(openApi.paths);
     expect(paths).toHaveProperty("/api/analyze/match/{matchId}");
+  });
+
+  it("analyzes every demo fixture through the complete pipeline", async () => {
+    for (const match of demoMatches) {
+      const response = await request(
+        baseUrl,
+        `/api/analyze/match/${match.matchId}`,
+        "POST",
+      );
+      const report = requireRecord(response.body);
+
+      expect(response.status).toBe(200);
+      expect(report).toMatchObject({
+        matchId: match.matchId,
+        summary: [
+          "Match information is complete.",
+          `Home team: ${match.home}.`,
+          `Away team: ${match.away}.`,
+          `Kickoff: ${match.kickoff}.`,
+        ],
+      });
+      expect(report.features).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "homeTeam",
+            value: match.home,
+          }),
+          expect.objectContaining({
+            name: "awayTeam",
+            value: match.away,
+          }),
+          expect.objectContaining({
+            name: "kickoff",
+            value: match.kickoff,
+          }),
+        ]),
+      );
+      expect(report.rules).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            ruleName: "HOME_TEAM_PRESENT",
+            status: "PASS",
+          }),
+          expect.objectContaining({
+            ruleName: "AWAY_TEAM_PRESENT",
+            status: "PASS",
+          }),
+          expect.objectContaining({
+            ruleName: "KICKOFF_PRESENT",
+            status: "PASS",
+          }),
+        ]),
+      );
+    }
   });
 
   it("returns a typed failure for an unknown Match", async () => {

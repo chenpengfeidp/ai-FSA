@@ -11,8 +11,8 @@ vi.mock("../src/services/api", () => ({
 }));
 
 const report: AnalysisReportDto = {
-  reportId: "report-match-example",
-  matchId: "match-example",
+  reportId: "report-match-example-1",
+  matchId: "match-example-1",
   generatedAt: "2026-08-01T19:30:00.000Z",
   summary: [
     "Match information is complete.",
@@ -23,9 +23,9 @@ const report: AnalysisReportDto = {
     {
       featureId: "feature-home",
       generatedAt: "2026-08-01T19:30:00.000Z",
-      matchId: "match-example",
+      matchId: "match-example-1",
       name: "homeTeam",
-      sourceEvidenceId: "evidence-match-example",
+      sourceEvidenceId: "evidence-match-example-1",
       value: "Liverpool",
     },
   ],
@@ -33,7 +33,7 @@ const report: AnalysisReportDto = {
     {
       evaluatedAt: "2026-08-01T19:30:00.000Z",
       explanation: "Home team is present.",
-      matchId: "match-example",
+      matchId: "match-example-1",
       ruleId: "rule-home",
       ruleName: "HOME_TEAM_PRESENT",
       score: 1,
@@ -67,7 +67,7 @@ describe("AnalysisDashboard", () => {
     cleanup();
   });
 
-  it("renders the dashboard with the default match identifier", () => {
+  it("renders six responsive match choices and the empty recent state", () => {
     renderDashboard();
 
     expect(
@@ -76,28 +76,40 @@ describe("AnalysisDashboard", () => {
         name: "AI Football Analysis Platform",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText("Match ID")).toHaveValue("match-example");
-    expect(screen.getByRole("button", { name: "Analyze" })).toBeEnabled();
+    expect(
+      screen.getByRole("heading", { name: "Today's Matches" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /^Analyze / })).toHaveLength(6);
+    expect(screen.getByText("Arsenal")).toBeInTheDocument();
+    expect(screen.getByText("Manchester City")).toBeInTheDocument();
+    expect(screen.getByText("Barcelona")).toBeInTheDocument();
+    expect(screen.getByText("Real Madrid")).toBeInTheDocument();
+    expect(screen.getByText("No analysis yet")).toBeInTheDocument();
   });
 
-  it("submits the match and renders the returned report", async () => {
+  it("analyzes a selected match and renders it as the latest result", async () => {
     vi.mocked(analyzeMatch).mockResolvedValue(report);
     const user = userEvent.setup();
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Analyze" }));
+    await user.click(
+      screen.getByRole("button", {
+        name: "Analyze Liverpool vs Chelsea",
+      }),
+    );
 
     await waitFor(() => {
-      expect(analyzeMatch).toHaveBeenCalledWith("match-example");
+      expect(analyzeMatch).toHaveBeenCalledWith("match-example-1");
     });
     expect(await screen.findByText("Analysis complete")).toBeInTheDocument();
     expect(screen.getByText("Home team: Liverpool.")).toBeInTheDocument();
     expect(screen.getByText("homeTeam")).toBeInTheDocument();
     expect(screen.getByText("HOME_TEAM_PRESENT")).toBeInTheDocument();
     expect(screen.getByText("PASS")).toBeInTheDocument();
+    expect(screen.getAllByText("Liverpool vs Chelsea")).toHaveLength(1);
 
     await user.click(screen.getByRole("button", { name: "Toggle raw report" }));
-    expect(screen.getByText(/"report-match-example"/)).toBeInTheDocument();
+    expect(screen.getByText(/"report-match-example-1"/)).toBeInTheDocument();
   });
 
   it("shows loading state and disables submission", async () => {
@@ -110,10 +122,16 @@ describe("AnalysisDashboard", () => {
     const user = userEvent.setup();
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Analyze" }));
+    await user.click(
+      screen.getByRole("button", {
+        name: "Analyze Liverpool vs Chelsea",
+      }),
+    );
 
     expect(await screen.findByRole("status")).toHaveTextContent("Analyzing match");
-    expect(screen.getByRole("button")).toBeDisabled();
+    for (const button of screen.getAllByRole("button", { name: /^Analyze / })) {
+      expect(button).toBeDisabled();
+    }
 
     resolveRequest(report);
     expect(await screen.findByText("Analysis complete")).toBeInTheDocument();
@@ -124,9 +142,18 @@ describe("AnalysisDashboard", () => {
     const user = userEvent.setup();
     renderDashboard();
 
-    await user.click(screen.getByRole("button", { name: "Analyze" }));
+    await user.click(
+      screen.getByRole("button", {
+        name: "Analyze Arsenal vs Manchester City",
+      }),
+    );
 
+    expect(analyzeMatch).toHaveBeenCalledWith("match-example-2");
     expect(await screen.findByText("The match was not found.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Analyze" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", {
+        name: "Analyze Arsenal vs Manchester City",
+      }),
+    ).toBeEnabled();
   });
 });

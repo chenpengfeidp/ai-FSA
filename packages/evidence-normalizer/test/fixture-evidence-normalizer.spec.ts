@@ -40,6 +40,17 @@ describe("normalizeFixtureEvidence", () => {
     expect(evidence.collectedAt).toBe(context.collectedAt);
   });
 
+  it("derives stable source identities from the provider match id", () => {
+    const evidence = requireEvidence(
+      normalizeFixtureEvidence(rawInput, {
+        collectedAt: context.collectedAt,
+      }),
+    );
+
+    expect(evidence.id).toBe("evidence-fixture-match-example");
+    expect(evidence.sourceId).toBe("fixture-match-example");
+  });
+
   it("normalizes fixture match information into Evidence", () => {
     const result = normalizeFixtureEvidence(rawInput, context);
     const evidence = requireEvidence(result);

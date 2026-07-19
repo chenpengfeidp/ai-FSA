@@ -3,7 +3,9 @@ import {
   calculateDashboardMetrics,
   clearAnalysisHistoryCacheForTests,
   recordAnalysisHistoryEntry,
+  removeAnalysisHistoryEntries,
   sortRecentAnalysis,
+  toggleAnalysisHistoryFavorite,
 } from "../src/lib/analysis-history";
 import type { AnalysisHistoryEntry } from "../src/types/dashboard";
 
@@ -74,5 +76,22 @@ describe("analysis history metrics", () => {
     expect(updated).toHaveLength(1);
     expect(updated[0]?.featureCount).toBe(4);
     expect(updated[0]?.analyzedAt).toBe("2026-08-01T21:00:00.000Z");
+  });
+
+  it("preserves favorites across re-record and supports remove", () => {
+    window.localStorage.clear();
+    clearAnalysisHistoryCacheForTests();
+
+    recordAnalysisHistoryEntry(first);
+    toggleAnalysisHistoryFavorite(first.matchId);
+    const rerecorded = recordAnalysisHistoryEntry({
+      ...first,
+      analyzedAt: "2026-08-01T22:00:00.000Z",
+    });
+
+    expect(rerecorded[0]?.favorite).toBe(true);
+
+    const removed = removeAnalysisHistoryEntries([first.matchId]);
+    expect(removed).toHaveLength(0);
   });
 });

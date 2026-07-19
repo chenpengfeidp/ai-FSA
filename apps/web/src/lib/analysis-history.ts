@@ -29,6 +29,9 @@ function isHistoryEntry(value: unknown): value is AnalysisHistoryEntry {
     return false;
   }
 
+  const favoriteOk =
+    value.favorite === undefined || typeof value.favorite === "boolean";
+
   return (
     typeof value.matchId === "string" &&
     typeof value.homeTeam === "string" &&
@@ -39,7 +42,8 @@ function isHistoryEntry(value: unknown): value is AnalysisHistoryEntry {
     typeof value.reportId === "string" &&
     typeof value.evidenceCount === "number" &&
     typeof value.featureCount === "number" &&
-    typeof value.ruleCount === "number"
+    typeof value.ruleCount === "number" &&
+    favoriteOk
   );
 }
 
@@ -105,10 +109,59 @@ export function writeAnalysisHistory(
 export function recordAnalysisHistoryEntry(
   entry: AnalysisHistoryEntry,
 ): readonly AnalysisHistoryEntry[] {
+  const previous = readAnalysisHistory().find(
+    (item) => item.matchId === entry.matchId,
+  );
   const existing = readAnalysisHistory().filter(
     (item) => item.matchId !== entry.matchId,
   );
-  const next = Object.freeze([entry, ...existing]);
+  const nextEntry = Object.freeze({
+    ...entry,
+    favorite: entry.favorite ?? previous?.favorite ?? false,
+  });
+  const next = Object.freeze([nextEntry, ...existing]);
+
+  writeAnalysisHistory(next);
+  return next;
+}
+
+export function toggleAnalysisHistoryFavorite(
+  matchId: string,
+): readonly AnalysisHistoryEntry[] {
+  const next = Object.freeze(
+    readAnalysisHistory().map((entry) =>
+      entry.matchId === matchId
+        ? Object.freeze({ ...entry, favorite: !(entry.favorite ?? false) })
+        : entry,
+    ),
+  );
+
+  writeAnalysisHistory(next);
+  return next;
+}
+
+export function setAnalysisHistoryFavorites(
+  matchIds: readonly string[],
+  favorite: boolean,
+): readonly AnalysisHistoryEntry[] {
+  const selected = new Set(matchIds);
+  const next = Object.freeze(
+    readAnalysisHistory().map((entry) =>
+      selected.has(entry.matchId) ? Object.freeze({ ...entry, favorite }) : entry,
+    ),
+  );
+
+  writeAnalysisHistory(next);
+  return next;
+}
+
+export function removeAnalysisHistoryEntries(
+  matchIds: readonly string[],
+): readonly AnalysisHistoryEntry[] {
+  const selected = new Set(matchIds);
+  const next = Object.freeze(
+    readAnalysisHistory().filter((entry) => !selected.has(entry.matchId)),
+  );
 
   writeAnalysisHistory(next);
   return next;

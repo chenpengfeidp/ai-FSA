@@ -9,6 +9,8 @@ export interface AnalysisHistoryEntry {
   readonly evidenceCount: number;
   readonly featureCount: number;
   readonly ruleCount: number;
+  /** Presentation-only library flag stored with local history. */
+  readonly favorite?: boolean;
 }
 
 export interface DashboardMetrics {

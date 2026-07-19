@@ -12,6 +12,10 @@ vi.mock("../src/services/api", () => ({
   getEvidenceByMatch: vi.fn(),
 }));
 
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/matches/match-example-1",
+}));
+
 vi.mock("next/link", () => ({
   default: ({ children, href }: { children: ReactNode; href: string }) => (
     <a href={href}>{children}</a>

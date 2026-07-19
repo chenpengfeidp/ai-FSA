@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AnalysisDashboard } from "../src/components/analysis-dashboard";
 import {
@@ -13,9 +14,16 @@ import type { AnalysisHistoryEntry } from "../src/types/dashboard";
 const push = vi.fn();
 
 vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
   useRouter: () => ({
     push,
   }),
+}));
+
+vi.mock("next/link", () => ({
+  default: ({ children, href }: { children: ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  ),
 }));
 
 const historyEntry: AnalysisHistoryEntry = {
@@ -80,8 +88,12 @@ describe("AnalysisDashboard", () => {
       screen.getByRole("button", { name: "Analyze Today's Matches" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "View Recent Reports" }),
-    ).toBeInTheDocument();
+      screen.getByRole("link", { name: "View Recent Reports" }),
+    ).toHaveAttribute("href", "/reports");
+    expect(screen.getByRole("link", { name: "Reports" })).toHaveAttribute(
+      "href",
+      "/reports",
+    );
 
     expect(
       screen.getByRole("heading", { name: "Today's Matches" }),
@@ -95,7 +107,7 @@ describe("AnalysisDashboard", () => {
 
     expect(screen.getByRole("heading", { name: "Overview" })).toBeInTheDocument();
     expect(screen.getByText("Imported Matches")).toBeInTheDocument();
-    expect(screen.getByText("Reports")).toBeInTheDocument();
+    expect(screen.getAllByText("Reports").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Evidence").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Features").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Rules").length).toBeGreaterThanOrEqual(1);

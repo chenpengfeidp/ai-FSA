@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 import { formatTimestamp } from "../lib/utils";
@@ -28,9 +29,14 @@ export function RecentAnalysis({
         <h2 className="text-heading text-foreground" id="recent-analysis-heading">
           Recent Analysis
         </h2>
-        <p className="text-caption text-muted-foreground">
-          {entries.length > 0 ? `${entries.length} completed` : "No reports yet"}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-caption text-muted-foreground">
+            {entries.length > 0 ? `${entries.length} completed` : "No reports yet"}
+          </p>
+          <Button asChild size="sm" variant="ghost">
+            <Link href="/reports">Open Library</Link>
+          </Button>
+        </div>
       </div>
 
       {entries.length > 0 ? (

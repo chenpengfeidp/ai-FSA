@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, Sparkles } from "lucide-react";
+import Link from "next/link";
 import type { ReactElement } from "react";
 import { Button } from "./ui/button";
 
@@ -61,15 +62,8 @@ export function HomeHero(): ReactElement {
             Analyze Today&apos;s Matches
             <ArrowRight aria-hidden="true" className="size-4" />
           </Button>
-          <Button
-            onClick={() => {
-              scrollToSection("recent-analysis");
-            }}
-            size="lg"
-            type="button"
-            variant="outline"
-          >
-            View Recent Reports
+          <Button asChild size="lg" variant="outline">
+            <Link href="/reports">View Recent Reports</Link>
           </Button>
         </div>
       </div>

@@ -9,6 +9,8 @@ export type {
   CalibrationArtifactMode,
   CalibrationConfig,
   ConfigurationIssue,
+  DatabaseClientMode,
+  DatabaseConfig,
   EnvironmentSource,
   HttpConfig,
   OddsProviderConfig,

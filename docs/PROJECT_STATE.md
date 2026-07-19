@@ -5,10 +5,10 @@
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: A.1 population frequency-ratio calibration artifact pinned (default)
+- Current task status: P.1 database-aware `/health/ready` (MF-11) implemented; no Prisma domain models yet
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Vertical slice A.1 — Statistics-owned `calibration:population-demo:v1`
-- Next authorized work: Platform persistence interleave; true shots/xG; Chinese UI parallel; Evaluation-qualified calibration later
+- Last completed delivery: Platform slice P.1 — API readiness pings PostgreSQL via `@fas/database`
+- Next authorized work: Durable Evidence/Match persistence (planning gate); true shots/xG; Chinese UI parallel; Evaluation-qualified calibration later
 - Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -58,7 +58,7 @@ Operational:
 
 - `GET /`
 - `GET /health/live`
-- `GET /health/ready`
+- `GET /health/ready` (live `SELECT 1` ping when `DATABASE_CLIENT_MODE=live`; stub in tests)
 - `GET /version`
 
 Domain (private demo):
@@ -142,8 +142,9 @@ Not a numbered Sprint 11 authorization; delivered as bounded implementation agai
 | C.1 | Match Center upcoming fixtures from Odds-shaped feed + fixture demos | `docs/sprints/VERTICAL_SLICE_C1_MATCH_CENTER_FIXTURES_SPEC.md` |
 | C.2 | Scores-backed TEAM_FORM + goals-proxy STATISTICS; `odds:*` analyzable when both sides have results | `docs/sprints/VERTICAL_SLICE_C2_SCORES_FORM_STATS_SPEC.md` |
 | A.1 | Population frequency-ratio 1X2 calibration artifact (`calibration:population-demo:v1`) | `docs/sprints/VERTICAL_SLICE_A1_CALIBRATION_POPULATION_SPEC.md` |
+| P.1 | Database-aware `/health/ready` via `@fas/database` ping (no domain models) | `docs/sprints/VERTICAL_SLICE_P1_DATABASE_READY_SPEC.md` |
 
-Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2/A.1 specs above.
+Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2/A.1/P.1 specs above.
 
 ## Architecture Status
 
@@ -153,9 +154,11 @@ Binding principles still include: evidence before assumption; facts / market sig
 
 Open Milestone 3A / v0.1 items (unchanged in spirit):
 
-- durable PostgreSQL domain models and application DB integration;
+- durable PostgreSQL domain models and Evidence/Match repositories;
 - durable jobs, audit/idempotency baselines;
 - remaining container/CI/security/runtime-smoke gates.
+
+Closed relative to MF-11: API Compose wiring supplies `DATABASE_URL` + live client mode; `/health/ready` fails closed when PostgreSQL is unreachable.
 
 Vertical-slice deferrals (intentional):
 
@@ -202,7 +205,7 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Default calibration is pinned `calibration:population-demo:v1` (frequency-ratio over a recorded demo population); still not Evaluation-qualified; match runs do not retrain.
 - Demo evidence is fixture-backed and may be `unverified`.
 - The Prisma schema intentionally contains no football domain models, migrations, or seeds.
-- No application PostgreSQL runtime integration for domain persistence, durable jobs, Redis, BullMQ, pgvector, or object storage is implemented.
+- API readiness can ping PostgreSQL through `@fas/database`; domain persistence, durable jobs, Redis, BullMQ, pgvector, and object storage are not implemented.
 - No OpenAI or other network provider SDK is installed for narrative generation.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
 - Speculative empty engine directories must not be treated as implemented packages.
@@ -215,11 +218,11 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. B.1/B.2/C.1/C.2/A.1 path is implemented with default offline recorded mode.
+No numbered sprint is active. B.1/B.2/C.1/C.2/A.1/P.1 path is implemented with default offline recorded mode.
 
 Recommended follow-ons (ordered):
 
-1. Interleave Milestone 3A platform persistence / jobs / CI gates;
+1. Durable Evidence/Match PostgreSQL persistence (planning gate — first Prisma models);
 2. True shots/xG STATISTICS provider (replace goals-proxy);
 3. Chinese UI (parallel);
 4. Evaluation-qualified calibration / larger reviewed populations;

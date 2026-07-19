@@ -27,11 +27,19 @@ export interface CalibrationConfig {
   readonly artifactMode: CalibrationArtifactMode;
 }
 
+export type DatabaseClientMode = "live" | "stub";
+
+export interface DatabaseConfig {
+  readonly url: string;
+  readonly clientMode: DatabaseClientMode;
+}
+
 export interface ApiConfig {
   readonly runtime: RuntimeConfig;
   readonly http: HttpConfig;
   readonly oddsProvider: OddsProviderConfig;
   readonly calibration: CalibrationConfig;
+  readonly database: DatabaseConfig;
 }
 
 export interface WorkerConfig {
@@ -79,6 +87,19 @@ const calibrationArtifactModeSchema = z
   .enum(["identity", "population_demo_v1"])
   .default("population_demo_v1");
 
+const databaseUrlSchema = z
+  .string()
+  .trim()
+  .default("postgresql://fas_local:change_me_local_only@127.0.0.1:5432/fas_local")
+  .refine(
+    (value) => value.startsWith("postgresql://") || value.startsWith("postgres://"),
+    {
+      error: "DATABASE_URL must be a PostgreSQL connection string.",
+    },
+  );
+
+const databaseClientModeSchema = z.enum(["live", "stub"]).optional();
+
 const apiEnvironmentSchema = z
   .object({
     NODE_ENV: runtimeEnvironmentSchema,
@@ -88,6 +109,8 @@ const apiEnvironmentSchema = z
     THE_ODDS_API_KEY: oddsApiKeySchema,
     THE_ODDS_API_BASE_URL: oddsApiBaseUrlSchema,
     CALIBRATION_ARTIFACT: calibrationArtifactModeSchema,
+    DATABASE_URL: databaseUrlSchema,
+    DATABASE_CLIENT_MODE: databaseClientModeSchema,
   })
   .superRefine((value, context) => {
     if (value.ODDS_PROVIDER_MODE !== "live") {
@@ -165,6 +188,16 @@ function issueDetails(variable: string): Readonly<{
         code: "INVALID_CALIBRATION_ARTIFACT",
         message: "CALIBRATION_ARTIFACT must be identity or population_demo_v1.",
       };
+    case "DATABASE_URL":
+      return {
+        code: "INVALID_DATABASE_URL",
+        message: "DATABASE_URL must be a PostgreSQL connection string.",
+      };
+    case "DATABASE_CLIENT_MODE":
+      return {
+        code: "INVALID_DATABASE_CLIENT_MODE",
+        message: "DATABASE_CLIENT_MODE must be live or stub.",
+      };
     default:
       return {
         code: "INVALID_CONFIGURATION",
@@ -218,6 +251,8 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
   );
 
   const apiKey = parsed.THE_ODDS_API_KEY?.trim();
+  const clientMode =
+    parsed.DATABASE_CLIENT_MODE ?? (parsed.NODE_ENV === "test" ? "stub" : "live");
 
   return Object.freeze({
     runtime: Object.freeze({
@@ -234,6 +269,10 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
     }),
     calibration: Object.freeze({
       artifactMode: parsed.CALIBRATION_ARTIFACT,
+    }),
+    database: Object.freeze({
+      url: parsed.DATABASE_URL,
+      clientMode,
     }),
   });
 }

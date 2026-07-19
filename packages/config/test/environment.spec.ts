@@ -36,6 +36,10 @@ describe("@fas/config environment loading", () => {
       calibration: {
         artifactMode: "population_demo_v1",
       },
+      database: {
+        url: "postgresql://fas_local:change_me_local_only@127.0.0.1:5432/fas_local",
+        clientMode: "live",
+      },
     });
   });
 
@@ -54,6 +58,9 @@ describe("@fas/config environment loading", () => {
         HOST: "0.0.0.0",
         PORT: "4100",
         ODDS_PROVIDER_MODE: "fixture",
+        DATABASE_URL:
+          "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
+        DATABASE_CLIENT_MODE: "stub",
       }),
     ).toEqual({
       runtime: {
@@ -71,7 +78,19 @@ describe("@fas/config environment loading", () => {
       calibration: {
         artifactMode: "population_demo_v1",
       },
+      database: {
+        url: "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
+        clientMode: "stub",
+      },
     });
+  });
+
+  it("defaults database client mode to stub in test", () => {
+    expect(
+      loadApiConfig({
+        NODE_ENV: "test",
+      }).database.clientMode,
+    ).toBe("stub");
   });
 
   it("loads live odds mode when an API key is provided", () => {
@@ -98,7 +117,25 @@ describe("@fas/config environment loading", () => {
       calibration: {
         artifactMode: "identity",
       },
+      database: {
+        url: "postgresql://fas_local:change_me_local_only@127.0.0.1:5432/fas_local",
+        clientMode: "live",
+      },
     });
+  });
+
+  it("rejects a non-PostgreSQL DATABASE_URL", () => {
+    const error = captureConfigurationError(() =>
+      loadApiConfig({ DATABASE_URL: "mysql://localhost/fas" }),
+    );
+
+    expect(error.issues).toEqual([
+      {
+        variable: "DATABASE_URL",
+        code: "INVALID_DATABASE_URL",
+        message: "DATABASE_URL must be a PostgreSQL connection string.",
+      },
+    ]);
   });
 
   it("rejects live odds mode without an API key", () => {
@@ -210,6 +247,7 @@ describe("@fas/config environment loading", () => {
     expect(Object.isFrozen(apiConfig.runtime)).toBe(true);
     expect(Object.isFrozen(apiConfig.http)).toBe(true);
     expect(Object.isFrozen(apiConfig.oddsProvider)).toBe(true);
+    expect(Object.isFrozen(apiConfig.database)).toBe(true);
     expect(Object.isFrozen(workerConfig)).toBe(true);
     expect(Object.isFrozen(workerConfig.runtime)).toBe(true);
   });

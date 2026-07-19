@@ -14,6 +14,7 @@
     "@fas/analysis": "workspace:*",
     "@fas/application": "workspace:*",
     "@fas/config": "workspace:*",
+    "@fas/database": "workspace:*",
     "@fas/evidence": "workspace:*",
     "@fas/evidence-import": "workspace:*",
     "@fas/evidence-normalizer": "workspace:*",

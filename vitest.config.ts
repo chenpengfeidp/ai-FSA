@@ -21,6 +21,11 @@ export default defineConfig({
         test: {
           name: "api",
           environment: "node",
+          env: {
+            DATABASE_CLIENT_MODE: "stub",
+            DATABASE_URL:
+              "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
+          },
           include: ["apps/api/test/**/*.spec.ts"],
         },
       },

@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { createDatabaseClient } from "../src/index.js";
+import { createDatabaseClient, createStubDatabaseClient } from "../src/index.js";
 
 const schemaPath = fileURLToPath(
   new URL("../prisma/schema.prisma", import.meta.url),
@@ -31,7 +31,15 @@ describe("@fas/database bootstrap contract", () => {
       "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
     );
 
-    expect(Object.keys(lifecycle).sort()).toEqual(["connect", "disconnect"]);
+    expect(Object.keys(lifecycle).sort()).toEqual(["connect", "disconnect", "ping"]);
+    await expect(lifecycle.disconnect()).resolves.toBeUndefined();
+  });
+
+  it("provides a stub lifecycle that pings without a network", async () => {
+    const lifecycle = createStubDatabaseClient();
+
+    await expect(lifecycle.connect()).resolves.toBeUndefined();
+    await expect(lifecycle.ping()).resolves.toBeUndefined();
     await expect(lifecycle.disconnect()).resolves.toBeUndefined();
   });
 

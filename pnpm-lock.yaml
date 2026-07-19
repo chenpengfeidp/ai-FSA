@@ -44,6 +44,9 @@ importers:
       '@fas/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@fas/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@fas/evidence':
         specifier: workspace:*
         version: link:../../packages/evidence

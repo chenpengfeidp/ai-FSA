@@ -25,6 +25,7 @@ import { ImportController } from "./import.controller.js";
 import { MatchesController } from "./matches.controller.js";
 import { createMatchProviderWiring } from "./match-provider.factory.js";
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
+import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
 import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
 import { createUpcomingMatchesBoard } from "./upcoming-matches.factory.js";
 
@@ -32,7 +33,12 @@ const evidenceRepositoryToken = Symbol("EvidenceRepository");
 
 const apiConfig = loadApiConfig();
 const matchProviderWiring = createMatchProviderWiring(apiConfig.oddsProvider);
-const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider);
+const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider, {
+  eventStore: matchProviderWiring.eventStore,
+  scoresSource: matchProviderWiring.scoresSource,
+  scoresPrimer: matchProviderWiring.scoresPrimer,
+  scoresMethod: () => matchProviderWiring.scoresSource.providerMethod(),
+});
 
 @Module({
   controllers: [
@@ -77,6 +83,10 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider);
     {
       provide: UpcomingMatchesBoardBridge,
       useValue: new UpcomingMatchesBoardBridge(upcomingMatchesBoard),
+    },
+    {
+      provide: ScoresSnapshotPrimerBridge,
+      useValue: new ScoresSnapshotPrimerBridge(matchProviderWiring.scoresPrimer),
     },
     {
       provide: EvidenceImportPipeline,

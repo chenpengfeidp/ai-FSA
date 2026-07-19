@@ -173,12 +173,23 @@ function parseTeamForm(
     return goalsAgainst;
   }
 
+  const provenanceOverlay = parseProviderProvenanceOverlay(value);
+
+  if (!provenanceOverlay.ok) {
+    return provenanceOverlay;
+  }
+
+  const provenance = provenanceOverlay.value;
+  const source = provenance?.source ?? "fixture";
+  const sourceId = provenance?.sourceId ?? `fixture-${matchId}-form-${teamSide}`;
+  const method = provenance?.method ?? "fixture";
+
   try {
     return success(
       createEvidence({
-        id: `evidence-fixture-${matchId}-form-${teamSide}`,
-        source: "fixture",
-        sourceId: `fixture-${matchId}-form-${teamSide}`,
+        id: `evidence-${source}-${matchId}-form-${teamSide}`,
+        source,
+        sourceId,
         type: "TEAM_FORM",
         matchId: createMatchId(matchId),
         collectedAt,
@@ -187,7 +198,7 @@ function parseTeamForm(
         quality: "unverified",
         provenance: {
           collector: "@fas/evidence-normalizer",
-          method: "fixture",
+          method,
         },
         payload: {
           teamSide,
@@ -269,12 +280,27 @@ function parseStatistics(
     numbers[field] = parsed.value;
   }
 
+  const provenanceOverlay = parseProviderProvenanceOverlay(value);
+
+  if (!provenanceOverlay.ok) {
+    return provenanceOverlay;
+  }
+
+  const provenance = provenanceOverlay.value;
+  const source = provenance?.source ?? "fixture";
+  const sourceId = provenance?.sourceId ?? `fixture-${matchId}-stats-${teamSide}`;
+  const method = provenance?.method ?? "fixture";
+  const statsIdSuffix =
+    method === "scores-goals-proxy"
+      ? `stats-goals-proxy-${teamSide}`
+      : `stats-${teamSide}`;
+
   try {
     return success(
       createEvidence({
-        id: `evidence-fixture-${matchId}-stats-${teamSide}`,
-        source: "fixture",
-        sourceId: `fixture-${matchId}-stats-${teamSide}`,
+        id: `evidence-${source}-${matchId}-${statsIdSuffix}`,
+        source,
+        sourceId,
         type: "STATISTICS",
         matchId: createMatchId(matchId),
         collectedAt,
@@ -283,7 +309,7 @@ function parseStatistics(
         quality: "unverified",
         provenance: {
           collector: "@fas/evidence-normalizer",
-          method: "fixture",
+          method,
         },
         payload: {
           teamSide,
@@ -508,7 +534,7 @@ function parseAsianHandicapFields(
   );
 }
 
-function parseOddsProvenanceOverlay(
+function parseProviderProvenanceOverlay(
   value: Record<string, unknown>,
 ): Result<OddsProvenanceOverlay | undefined, EvidenceNormalizationError> {
   const hasSource = "providerSource" in value;
@@ -567,6 +593,12 @@ function parseOddsProvenanceOverlay(
       method: value.providerMethod.trim(),
     }),
   );
+}
+
+function parseOddsProvenanceOverlay(
+  value: Record<string, unknown>,
+): Result<OddsProvenanceOverlay | undefined, EvidenceNormalizationError> {
+  return parseProviderProvenanceOverlay(value);
 }
 
 function parseOdds(

@@ -1,9 +1,14 @@
 import type { OddsProviderConfig } from "@fas/config";
 import { FixtureProvider } from "@fas/provider-fixture";
 import {
+  buildFormAndStatsForMatch,
   LiveTheOddsApiUpcomingFixturesSource,
   mergeUpcomingMatchBoard,
   RecordedUpcomingFixturesSource,
+  type ScoresProviderMethod,
+  type ScoresSnapshotPrimer,
+  type ScoresSnapshotSource,
+  type UpcomingEventStore,
   type UpcomingFixture,
   type UpcomingFixturesSource,
 } from "@fas/provider-odds";
@@ -14,6 +19,12 @@ export interface UpcomingMatchesBoard {
 
 export function createUpcomingMatchesBoard(
   oddsProvider: OddsProviderConfig,
+  deps: {
+    readonly eventStore: UpcomingEventStore;
+    readonly scoresSource: ScoresSnapshotSource;
+    readonly scoresPrimer: ScoresSnapshotPrimer;
+    readonly scoresMethod: () => ScoresProviderMethod;
+  },
 ): UpcomingMatchesBoard {
   const fixtureProvider = new FixtureProvider();
   const fixtureSeeds = fixtureProvider.listMatchSummaries();
@@ -21,8 +32,43 @@ export function createUpcomingMatchesBoard(
 
   return Object.freeze({
     async listUpcoming(): Promise<readonly UpcomingFixture[]> {
+      await deps.scoresPrimer.ensureScores();
       const oddsRows = await oddsSource.listUpcoming();
-      return mergeUpcomingMatchBoard(oddsRows, fixtureSeeds);
+      const merged = mergeUpcomingMatchBoard(oddsRows, fixtureSeeds);
+
+      deps.eventStore.replaceAll(
+        merged.map((row) =>
+          Object.freeze({
+            matchId: row.matchId,
+            eventId: row.eventId,
+            homeTeam: row.homeTeam,
+            awayTeam: row.awayTeam,
+            kickoff: row.kickoff,
+            competition: row.competition,
+          }),
+        ),
+      );
+
+      const scorelines = deps.scoresSource.getCompletedScorelines();
+      const method = deps.scoresMethod();
+
+      return Object.freeze(
+        merged.map((row) => {
+          const fixtureBacked = fixtureProvider.getMatch(row.matchId) !== undefined;
+          const scoresBacked =
+            buildFormAndStatsForMatch({
+              homeTeam: row.homeTeam,
+              awayTeam: row.awayTeam,
+              scorelines,
+              providerMethod: method,
+            }) !== undefined;
+
+          return Object.freeze({
+            ...row,
+            analyzable: fixtureBacked || scoresBacked,
+          });
+        }),
+      );
     },
   });
 }
@@ -45,6 +91,5 @@ function createOddsUpcomingSource(
     });
   }
 
-  // recorded and fixture modes both use the offline cassette for the calendar.
   return new RecordedUpcomingFixturesSource();
 }

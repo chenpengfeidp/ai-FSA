@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type ReactElement, useEffect } from "react";
 import { useMatchDetail } from "../hooks/use-match-detail";
+import { useUpcomingMatches } from "../hooks/use-upcoming-matches";
 import { recordAnalysisHistoryEntry } from "../lib/analysis-history";
 import { findMatchById } from "../lib/todays-matches";
 import type { MatchStatus } from "../types/match-center";
@@ -48,7 +49,8 @@ function resolveStatus(
 export function MatchDetailPage({
   matchId,
 }: Readonly<{ matchId: string }>): ReactElement {
-  const match = findMatchById(matchId);
+  const upcoming = useUpcomingMatches();
+  const match = findMatchById(matchId, upcoming.matches);
   const detail = useMatchDetail(matchId, match !== undefined);
   const status = resolveStatus(
     detail.isError,

@@ -1,0 +1,142 @@
+[
+  {
+    "id": "score_arsenal_brighton",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-18T14:00:00Z",
+    "completed": true,
+    "home_team": "Arsenal",
+    "away_team": "Brighton and Hove Albion",
+    "scores": [
+      { "name": "Arsenal", "score": "2" },
+      { "name": "Brighton and Hove Albion", "score": "0" }
+    ],
+    "last_update": "2026-07-18T16:05:00Z"
+  },
+  {
+    "id": "score_coventry_leeds",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-18T14:00:00Z",
+    "completed": true,
+    "home_team": "Coventry City",
+    "away_team": "Leeds United",
+    "scores": [
+      { "name": "Coventry City", "score": "1" },
+      { "name": "Leeds United", "score": "1" }
+    ],
+    "last_update": "2026-07-18T16:05:00Z"
+  },
+  {
+    "id": "score_tottenham_brentford",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-17T19:00:00Z",
+    "completed": true,
+    "home_team": "Tottenham Hotspur",
+    "away_team": "Brentford",
+    "scores": [
+      { "name": "Tottenham Hotspur", "score": "3" },
+      { "name": "Brentford", "score": "1" }
+    ],
+    "last_update": "2026-07-17T21:00:00Z"
+  },
+  {
+    "id": "score_everton_wolves",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-17T14:00:00Z",
+    "completed": true,
+    "home_team": "Everton",
+    "away_team": "Wolverhampton Wanderers",
+    "scores": [
+      { "name": "Everton", "score": "0" },
+      { "name": "Wolverhampton Wanderers", "score": "2" }
+    ],
+    "last_update": "2026-07-17T16:00:00Z"
+  },
+  {
+    "id": "score_liverpool_fulham",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-16T19:00:00Z",
+    "completed": true,
+    "home_team": "Liverpool",
+    "away_team": "Fulham",
+    "scores": [
+      { "name": "Liverpool", "score": "2" },
+      { "name": "Fulham", "score": "1" }
+    ],
+    "last_update": "2026-07-16T21:00:00Z"
+  },
+  {
+    "id": "score_chelsea_bournemouth",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-16T14:00:00Z",
+    "completed": true,
+    "home_team": "Chelsea",
+    "away_team": "Bournemouth",
+    "scores": [
+      { "name": "Chelsea", "score": "1" },
+      { "name": "Bournemouth", "score": "0" }
+    ],
+    "last_update": "2026-07-16T16:00:00Z"
+  },
+  {
+    "id": "score_arsenal_west_ham",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-15T19:00:00Z",
+    "completed": true,
+    "home_team": "West Ham United",
+    "away_team": "Arsenal",
+    "scores": [
+      { "name": "West Ham United", "score": "1" },
+      { "name": "Arsenal", "score": "2" }
+    ],
+    "last_update": "2026-07-15T21:00:00Z"
+  },
+  {
+    "id": "score_tottenham_newcastle",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-15T14:00:00Z",
+    "completed": true,
+    "home_team": "Newcastle United",
+    "away_team": "Tottenham Hotspur",
+    "scores": [
+      { "name": "Newcastle United", "score": "2" },
+      { "name": "Tottenham Hotspur", "score": "2" }
+    ],
+    "last_update": "2026-07-15T16:00:00Z"
+  },
+  {
+    "id": "score_everton_nottingham",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-14T19:00:00Z",
+    "completed": true,
+    "home_team": "Nottingham Forest",
+    "away_team": "Everton",
+    "scores": [
+      { "name": "Nottingham Forest", "score": "1" },
+      { "name": "Everton", "score": "1" }
+    ],
+    "last_update": "2026-07-14T21:00:00Z"
+  },
+  {
+    "id": "score_coventry_sheffield",
+    "sport_key": "soccer_epl",
+    "sport_title": "EPL",
+    "commence_time": "2026-07-14T14:00:00Z",
+    "completed": true,
+    "home_team": "Sheffield United",
+    "away_team": "Coventry City",
+    "scores": [
+      { "name": "Sheffield United", "score": "0" },
+      { "name": "Coventry City", "score": "0" }
+    ],
+    "last_update": "2026-07-14T16:00:00Z"
+  }
+]

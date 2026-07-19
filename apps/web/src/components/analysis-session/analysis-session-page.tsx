@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, type ReactElement } from "react";
 import { useAnalysisSessionStages } from "../../hooks/use-analysis-session-stages";
 import { useMatchDetail } from "../../hooks/use-match-detail";
+import { useUpcomingMatches } from "../../hooks/use-upcoming-matches";
 import { findMatchById } from "../../lib/todays-matches";
 import { AppTopNav } from "../app-top-nav";
 import { EmptyState } from "../empty-state";
@@ -17,7 +18,8 @@ export function AnalysisSessionPage({
   matchId,
 }: Readonly<{ matchId: string }>): ReactElement {
   const router = useRouter();
-  const match = findMatchById(matchId);
+  const upcoming = useUpcomingMatches();
+  const match = findMatchById(matchId, upcoming.matches);
   const matchFound = match !== undefined;
 
   // Prefetch the existing deterministic analysis so Workspace reuses cache.

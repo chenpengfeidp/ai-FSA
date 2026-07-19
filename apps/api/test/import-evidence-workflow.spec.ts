@@ -276,7 +276,7 @@ describe("HTTP import and Evidence query workflow", () => {
         }),
         expect.objectContaining({
           matchId: "odds:evt_epl_unmapped_tottenham_everton",
-          analyzable: false,
+          analyzable: true,
           providerSource: "the-odds-api",
         }),
         expect.objectContaining({
@@ -284,6 +284,35 @@ describe("HTTP import and Evidence query workflow", () => {
           analyzable: true,
           providerSource: "fixture",
         }),
+      ]),
+    );
+  });
+
+  it("analyzes an odds-event match using scores-backed form and goals-proxy stats", async () => {
+    await request(baseUrl, "/api/matches/upcoming");
+    const response = await request(
+      baseUrl,
+      "/api/analyze/match/odds:evt_epl_unmapped_tottenham_everton",
+      "POST",
+    );
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      matchId: "odds:evt_epl_unmapped_tottenham_everton",
+    });
+    expect(report.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "homeTeam", value: "Tottenham Hotspur" }),
+        expect.objectContaining({ name: "awayTeam", value: "Everton" }),
+        expect.objectContaining({ name: "momentumHome" }),
+        expect.objectContaining({ name: "attackRatingHome" }),
+      ]),
+    );
+    const deterministic = requireRecord(report.deterministic);
+    expect(deterministic.limitations).toEqual(
+      expect.arrayContaining([
+        "STATISTICS shots/xG fields are goals-implied proxies from Odds API scores; not provider shot/xG measurements.",
       ]),
     );
   });

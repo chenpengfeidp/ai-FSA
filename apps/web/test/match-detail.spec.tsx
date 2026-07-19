@@ -10,6 +10,7 @@ import type { EvidenceDto } from "../src/types/evidence";
 vi.mock("../src/services/api", () => ({
   analyzeMatch: vi.fn(),
   getEvidenceByMatch: vi.fn(),
+  getUpcomingMatches: vi.fn(async () => []),
 }));
 
 vi.mock("next/navigation", () => ({

@@ -5,10 +5,10 @@
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: C.1 Match Center upcoming fixtures board implemented (recorded default; live optional)
+- Current task status: C.2 scores-backed TEAM_FORM + goals-proxy STATISTICS implemented (recorded default; live optional)
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Vertical slice C.1 — `GET /api/matches/upcoming` + Web Match Center board
-- Next authorized work: Step 2 real TEAM_FORM/STATISTICS evidence; platform persistence can interleave
+- Last completed delivery: Vertical slice C.2 — Odds scores → form/stats for analyzable `odds:*` rows
+- Next authorized work: Step 3 true calibration population; interleave platform persistence
 - Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -140,8 +140,9 @@ Not a numbered Sprint 11 authorization; delivered as bounded implementation agai
 | B.1 | Real-shaped pre-match 1X2 ODDS ingest (`@fas/provider-odds`, recorded default) | `docs/sprints/VERTICAL_SLICE_B1_ODDS_INGEST_SPEC.md` |
 | B.2 | International 1X2 + Asian handicap on ODDS; AH features/rules; AH conflict limitation | `docs/sprints/VERTICAL_SLICE_B2_AH_MARKET_SPEC.md` |
 | C.1 | Match Center upcoming fixtures from Odds-shaped feed + fixture demos | `docs/sprints/VERTICAL_SLICE_C1_MATCH_CENTER_FIXTURES_SPEC.md` |
+| C.2 | Scores-backed TEAM_FORM + goals-proxy STATISTICS; `odds:*` analyzable when both sides have results | `docs/sprints/VERTICAL_SLICE_C2_SCORES_FORM_STATS_SPEC.md` |
 
-Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1 specs above.
+Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2 specs above.
 
 ## Architecture Status
 
@@ -213,13 +214,13 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. B.1/B.2/C.1 path is implemented with default offline recorded mode.
+No numbered sprint is active. B.1/B.2/C.1/C.2 path is implemented with default offline recorded mode.
 
 Recommended follow-ons (ordered):
 
-1. **Step 2 — real TEAM_FORM / STATISTICS evidence** for upcoming international matches;
-2. **Step 3 — true calibration population**;
-3. Interleave Milestone 3A platform persistence / jobs / CI gates;
+1. **Step 3 — true calibration population**;
+2. Interleave Milestone 3A platform persistence / jobs / CI gates;
+3. True shots/xG STATISTICS provider (replace goals-proxy);
 4. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.

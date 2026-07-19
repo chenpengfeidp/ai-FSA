@@ -51,6 +51,12 @@ export const todaysMatches: readonly MatchSummary[] = Object.freeze([
   }),
 ]);
 
-export function findMatchById(matchId: string): MatchSummary | undefined {
-  return todaysMatches.find((match) => match.id === matchId);
+export function findMatchById(
+  matchId: string,
+  extras: readonly MatchSummary[] = [],
+): MatchSummary | undefined {
+  return (
+    extras.find((match) => match.id === matchId) ??
+    todaysMatches.find((match) => match.id === matchId)
+  );
 }

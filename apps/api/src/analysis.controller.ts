@@ -19,6 +19,10 @@ import {
 } from "./http-response.dto.js";
 // biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
+// biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
+import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
+// biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
+import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
 
 @ApiTags("Analysis")
 @ApiExtraModels(AnalysisReportDto, AnalysisEndpointErrorResponseDto)
@@ -27,6 +31,8 @@ export class AnalysisController {
   constructor(
     private readonly generateMatchReport: GenerateMatchReportUseCase,
     private readonly oddsPrimer: OddsSnapshotPrimerBridge,
+    private readonly scoresPrimer: ScoresSnapshotPrimerBridge,
+    private readonly upcomingBoard: UpcomingMatchesBoardBridge,
   ) {}
 
   @Post("match/:matchId")
@@ -50,6 +56,9 @@ export class AnalysisController {
     },
   })
   async analyzeMatch(matchId: string): Promise<GenerateMatchReportResult> {
+    await this.scoresPrimer.ensureScores();
+    // Populate odds-event shells used by EnrichedMatchProvider for odds:* ids.
+    await this.upcomingBoard.listUpcoming();
     await this.oddsPrimer.ensurePreMatch1x2(matchId);
     return this.generateMatchReport.execute(createMatchId(matchId));
   }

@@ -4,6 +4,7 @@ import { ArrowLeft, Clock3, History } from "lucide-react";
 import Link from "next/link";
 import type { ReactElement } from "react";
 import { useAnalysisHistory } from "../../hooks/use-analysis-history";
+import { useUpcomingMatches } from "../../hooks/use-upcoming-matches";
 import { cn } from "../../lib/utils";
 import { todaysMatches } from "../../lib/todays-matches";
 import { Button } from "../ui/button";
@@ -13,6 +14,8 @@ export function MatchWorkspaceSidebar({
   activeMatchId,
 }: Readonly<{ activeMatchId?: string | undefined }>): ReactElement {
   const history = useAnalysisHistory();
+  const upcoming = useUpcomingMatches();
+  const matchList = upcoming.matches.length > 0 ? upcoming.matches : todaysMatches;
 
   return (
     <aside className="flex h-full flex-col gap-6">
@@ -30,7 +33,7 @@ export function MatchWorkspaceSidebar({
           Match List
         </p>
         <ul className="space-y-1">
-          {todaysMatches.map((match) => {
+          {matchList.map((match) => {
             const active = match.id === activeMatchId;
 
             return (

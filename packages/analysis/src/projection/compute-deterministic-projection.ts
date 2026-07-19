@@ -303,6 +303,16 @@ export function computeDeterministicMatchProjection(input: {
     );
   }
 
+  const usesGoalsProxyStatistics = [...input.featureBundle.features.values()].some(
+    (feature) => feature.sourceEvidenceId.includes("stats-goals-proxy"),
+  );
+
+  if (usesGoalsProxyStatistics) {
+    limitations.push(
+      "STATISTICS shots/xG fields are goals-implied proxies from Odds API scores; not provider shot/xG measurements.",
+    );
+  }
+
   const projectionBody = {
     matchId: input.featureBundle.matchId,
     lambdaHome: roundProbability(lambdas.lambdaHome),

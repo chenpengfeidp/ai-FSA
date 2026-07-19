@@ -33,6 +33,7 @@ vi.mock("next/link", () => ({
 vi.mock("../src/services/api", () => ({
   analyzeMatch: vi.fn(),
   getEvidenceByMatch: vi.fn(),
+  getUpcomingMatches: vi.fn(async () => []),
 }));
 
 const report: AnalysisReportDto = {

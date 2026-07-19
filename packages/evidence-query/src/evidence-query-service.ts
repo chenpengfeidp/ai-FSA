@@ -37,31 +37,31 @@ export class EvidenceQueryService {
     this.#repository = repository;
   }
 
-  findById(id: string): EvidenceQueryResult<Evidence | undefined> {
+  async findById(id: string): Promise<EvidenceQueryResult<Evidence | undefined>> {
     try {
-      return success(this.#repository.findById(id));
+      return success(await this.#repository.findById(id));
     } catch {
       return repositoryFailure();
     }
   }
 
-  findByMatch(matchId: MatchId): EvidenceQueryResult<readonly Evidence[]> {
+  findByMatch(matchId: MatchId): Promise<EvidenceQueryResult<readonly Evidence[]>> {
     return this.#queryAll((evidence) => evidence.matchId === matchId);
   }
 
-  findByType(type: EvidenceType): EvidenceQueryResult<readonly Evidence[]> {
+  findByType(type: EvidenceType): Promise<EvidenceQueryResult<readonly Evidence[]>> {
     return this.#queryAll((evidence) => evidence.type === type);
   }
 
-  findAll(): EvidenceQueryResult<readonly Evidence[]> {
+  findAll(): Promise<EvidenceQueryResult<readonly Evidence[]>> {
     return this.#queryAll();
   }
 
-  #queryAll(
+  async #queryAll(
     predicate?: (evidence: Evidence) => boolean,
-  ): EvidenceQueryResult<readonly Evidence[]> {
+  ): Promise<EvidenceQueryResult<readonly Evidence[]>> {
     try {
-      const evidence = this.#repository.findAll();
+      const evidence = await this.#repository.findAll();
       const matches =
         predicate === undefined ? [...evidence] : evidence.filter(predicate);
 

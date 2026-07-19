@@ -43,7 +43,7 @@ function requireImportedEvidence(result: EvidenceImportResult): Evidence {
 }
 
 describe("EvidenceImportPipeline", () => {
-  it("imports fixture data through a bound normalizer without provider coupling", () => {
+  it("imports fixture data through a bound normalizer without provider coupling", async () => {
     const repository = new InMemoryEvidenceRepository();
     const pipeline = new EvidenceImportPipeline(
       {
@@ -57,7 +57,7 @@ describe("EvidenceImportPipeline", () => {
       repository,
     );
 
-    const result = pipeline.importEvidence({
+    const result = await pipeline.importEvidence({
       matchId: "match-example",
       home: "Liverpool",
       away: "Chelsea",
@@ -67,10 +67,12 @@ describe("EvidenceImportPipeline", () => {
 
     expect(importedEvidence.type).toBe("MATCH_INFO");
     expect(importedEvidence.matchId).toBe("match-example");
-    expect(repository.findById(importedEvidence.id)).toBe(importedEvidence);
+    await expect(repository.findById(importedEvidence.id)).resolves.toBe(
+      importedEvidence,
+    );
   });
 
-  it("delegates unknown input to the normalizer and persists its Evidence", () => {
+  it("delegates unknown input to the normalizer and persists its Evidence", async () => {
     const input: unknown = {
       providerSpecific: true,
     };
@@ -81,15 +83,15 @@ describe("EvidenceImportPipeline", () => {
     const repository = new InMemoryEvidenceRepository();
     const pipeline = new EvidenceImportPipeline({ normalize }, repository);
 
-    const result = pipeline.importEvidence(input);
+    const result = await pipeline.importEvidence(input);
 
     expect(requireImportedEvidence(result)).toBe(evidence);
     expect(normalize).toHaveBeenCalledOnce();
     expect(normalize).toHaveBeenCalledWith(input);
-    expect(repository.findById(evidence.id)).toBe(evidence);
+    await expect(repository.findById(evidence.id)).resolves.toBe(evidence);
   });
 
-  it("returns a typed failure for malformed provider payload", () => {
+  it("returns a typed failure for malformed provider payload", async () => {
     const normalizer: EvidenceNormalizer = {
       normalize: () => ({
         ok: false,
@@ -101,7 +103,7 @@ describe("EvidenceImportPipeline", () => {
     };
     const pipeline = new EvidenceImportPipeline(normalizer);
 
-    expect(pipeline.importEvidence(null)).toEqual({
+    await expect(pipeline.importEvidence(null)).resolves.toEqual({
       ok: false,
       error: {
         code: "NORMALIZATION_FAILED",
@@ -114,7 +116,7 @@ describe("EvidenceImportPipeline", () => {
     });
   });
 
-  it("preserves typed normalizer failure details", () => {
+  it("preserves typed normalizer failure details", async () => {
     const normalizer: EvidenceNormalizer = {
       normalize: () => ({
         ok: false,
@@ -126,7 +128,7 @@ describe("EvidenceImportPipeline", () => {
       }),
     };
     const pipeline = new EvidenceImportPipeline(normalizer);
-    const result = pipeline.importEvidence({});
+    const result = await pipeline.importEvidence({});
 
     expect(result).toEqual({
       ok: false,
@@ -143,9 +145,9 @@ describe("EvidenceImportPipeline", () => {
     expect(!result.ok && Object.isFrozen(result.error.normalizerError)).toBe(true);
   });
 
-  it("returns a duplicate failure without overwriting repository state", () => {
+  it("returns a duplicate failure without overwriting repository state", async () => {
     const repository = new InMemoryEvidenceRepository();
-    repository.save(evidence);
+    await repository.save(evidence);
     const pipeline = new EvidenceImportPipeline(
       {
         normalize: () => ({ ok: true, value: evidence }),
@@ -153,23 +155,21 @@ describe("EvidenceImportPipeline", () => {
       repository,
     );
 
-    expect(pipeline.importEvidence({})).toEqual({
+    await expect(pipeline.importEvidence({})).resolves.toEqual({
       ok: false,
       error: {
         code: "DUPLICATE_EVIDENCE",
         message: `Evidence "${evidence.id}" already exists.`,
       },
     });
-    expect(repository.findById(evidence.id)).toBe(evidence);
+    await expect(repository.findById(evidence.id)).resolves.toBe(evidence);
   });
 
-  it("converts repository runtime exceptions into typed failures", () => {
+  it("converts repository runtime exceptions into typed failures", async () => {
     const repository: EvidenceRepository = {
-      findAll: () => [],
-      findById: () => undefined,
-      save: () => {
-        throw new Error("repository unavailable");
-      },
+      findAll: () => Promise.resolve([]),
+      findById: () => Promise.resolve(undefined),
+      save: () => Promise.reject(new Error("repository unavailable")),
     };
     const pipeline = new EvidenceImportPipeline(
       {
@@ -178,8 +178,7 @@ describe("EvidenceImportPipeline", () => {
       repository,
     );
 
-    expect(() => pipeline.importEvidence({})).not.toThrow();
-    expect(pipeline.importEvidence({})).toEqual({
+    await expect(pipeline.importEvidence({})).resolves.toEqual({
       ok: false,
       error: {
         code: "REPOSITORY_FAILED",
@@ -188,15 +187,17 @@ describe("EvidenceImportPipeline", () => {
     });
   });
 
-  it("imports successfully when the repository is omitted", () => {
+  it("imports successfully when the repository is omitted", async () => {
     const pipeline = new EvidenceImportPipeline({
       normalize: () => ({ ok: true, value: evidence }),
     });
 
-    expect(requireImportedEvidence(pipeline.importEvidence({}))).toBe(evidence);
+    expect(requireImportedEvidence(await pipeline.importEvidence({}))).toBe(
+      evidence,
+    );
   });
 
-  it("does not mutate input and returns immutable results", () => {
+  it("does not mutate input and returns immutable results", async () => {
     const input = {
       nested: {
         providerValue: "unchanged",
@@ -207,7 +208,7 @@ describe("EvidenceImportPipeline", () => {
       normalize: () => ({ ok: true, value: evidence }),
     });
 
-    const result = pipeline.importEvidence(input);
+    const result = await pipeline.importEvidence(input);
     const importedEvidence = requireImportedEvidence(result);
 
     expect(input).toEqual(snapshot);
@@ -218,15 +219,14 @@ describe("EvidenceImportPipeline", () => {
     expect(Object.isFrozen(importedEvidence.payload)).toBe(true);
   });
 
-  it("converts unexpected normalizer exceptions into typed failures", () => {
+  it("converts unexpected normalizer exceptions into typed failures", async () => {
     const pipeline = new EvidenceImportPipeline({
       normalize: () => {
         throw new Error("unexpected normalizer failure");
       },
     });
 
-    expect(() => pipeline.importEvidence({})).not.toThrow();
-    expect(pipeline.importEvidence({})).toEqual({
+    await expect(pipeline.importEvidence({})).resolves.toEqual({
       ok: false,
       error: {
         code: "UNEXPECTED_ERROR",

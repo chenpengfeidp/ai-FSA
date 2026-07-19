@@ -5,10 +5,10 @@
 - Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: P.1 database-aware `/health/ready` (MF-11) implemented; no Prisma domain models yet
+- Current task status: P.2 durable Evidence persistence + ZH-1 Chinese UI delivered
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Platform slice P.1 — API readiness pings PostgreSQL via `@fas/database`
-- Next authorized work: Durable Evidence/Match persistence (planning gate); true shots/xG; Chinese UI parallel; Evaluation-qualified calibration later
+- Last completed delivery: Platform slice P.2 — Prisma Evidence/Match models + ZH-1 Chinese Match Center/Session
+- Next authorized work: ZH-2 report/workspace copy; true shots/xG; Evaluation-qualified calibration later
 - Release status: Pre-release; private trusted environment only; not production
 
 Update this document after every sprint, implementation gate, or material governance change.
@@ -143,8 +143,10 @@ Not a numbered Sprint 11 authorization; delivered as bounded implementation agai
 | C.2 | Scores-backed TEAM_FORM + goals-proxy STATISTICS; `odds:*` analyzable when both sides have results | `docs/sprints/VERTICAL_SLICE_C2_SCORES_FORM_STATS_SPEC.md` |
 | A.1 | Population frequency-ratio 1X2 calibration artifact (`calibration:population-demo:v1`) | `docs/sprints/VERTICAL_SLICE_A1_CALIBRATION_POPULATION_SPEC.md` |
 | P.1 | Database-aware `/health/ready` via `@fas/database` ping (no domain models) | `docs/sprints/VERTICAL_SLICE_P1_DATABASE_READY_SPEC.md` |
+| P.2 | First Prisma Evidence/Match models + `EVIDENCE_REPOSITORY_MODE` adapter | `docs/sprints/VERTICAL_SLICE_P2_EVIDENCE_PERSISTENCE_SPEC.md` |
+| ZH-1 | Chinese UI chrome for Match Center + Analysis Session | `apps/web/src/copy/zh.ts` |
 
-Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2/A.1/P.1 specs above.
+Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2/A.1/P.1/P.2 specs above.
 
 ## Architecture Status
 
@@ -204,8 +206,9 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Market odds are market signals, not ground truth; slice 1.2 does not blend them into 1X2.
 - Default calibration is pinned `calibration:population-demo:v1` (frequency-ratio over a recorded demo population); still not Evaluation-qualified; match runs do not retrain.
 - Demo evidence is fixture-backed and may be `unverified`.
-- The Prisma schema intentionally contains no football domain models, migrations, or seeds.
-- API readiness can ping PostgreSQL through `@fas/database`; domain persistence, durable jobs, Redis, BullMQ, pgvector, and object storage are not implemented.
+- Prisma now includes the first Evidence/Match catalog models (P.2); default API mode remains in-memory Evidence unless `EVIDENCE_REPOSITORY_MODE=postgres` after migrate.
+- Durable jobs, Redis, BullMQ, pgvector, analysis snapshots, and object storage are not implemented.
+- Web ZH-1 Chinese copy covers Match Center/Session chrome; Workspace/Library/report labels remain English until ZH-2.
 - No OpenAI or other network provider SDK is installed for narrative generation.
 - Direct dependencies are exact-pinned and the root lockfile is authoritative.
 - Speculative empty engine directories must not be treated as implemented packages.
@@ -218,13 +221,13 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. B.1/B.2/C.1/C.2/A.1/P.1 path is implemented with default offline recorded mode.
+No numbered sprint is active. B.1/B.2/C.1/C.2/A.1/P.1/P.2/ZH-1 path is implemented with default offline recorded + memory Evidence.
 
 Recommended follow-ons (ordered):
 
-1. Durable Evidence/Match PostgreSQL persistence (planning gate — first Prisma models);
+1. ZH-2 Chinese copy for Workspace / explainable report / Library;
 2. True shots/xG STATISTICS provider (replace goals-proxy);
-3. Chinese UI (parallel);
+3. Compose migrate automation / postgres-mode smoke evidence;
 4. Evaluation-qualified calibration / larger reviewed populations;
 5. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
 

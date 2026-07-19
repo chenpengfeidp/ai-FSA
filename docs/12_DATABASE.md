@@ -153,6 +153,7 @@ Unique `(competition_id, name)`.
 |---|---|---|
 | `id` | uuid | PK |
 | `season_id` | uuid | FK seasons |
+| `external_key` | text | Nullable stable import/demo key (e.g. vertical-slice `MatchId`) |
 | `stage` | text | Nullable round/group/stage |
 | `kickoff_at` | timestamptz | Scheduled kickoff |
 | `source_timezone` | text | IANA timezone used by source |
@@ -161,7 +162,7 @@ Unique `(competition_id, name)`.
 | `data_cutoff_at` | timestamptz | Nullable operator-defined cutoff |
 | common mutable columns | — | Timestamps and row version |
 
-Index `(season_id, kickoff_at)` and `(status, kickoff_at)`.
+Unique `external_key` where present. Index `(season_id, kickoff_at)` and `(status, kickoff_at)`.
 
 ### `match_participants`
 

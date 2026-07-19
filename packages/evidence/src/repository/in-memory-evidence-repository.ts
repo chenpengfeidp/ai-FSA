@@ -7,20 +7,20 @@ import {
 export class InMemoryEvidenceRepository implements EvidenceRepository {
   readonly #evidenceById = new Map<string, Evidence>();
 
-  findAll(): readonly Evidence[] {
-    return Object.freeze([...this.#evidenceById.values()]);
+  findAll(): Promise<readonly Evidence[]> {
+    return Promise.resolve(Object.freeze([...this.#evidenceById.values()]));
   }
 
-  findById(id: string): Evidence | undefined {
-    return this.#evidenceById.get(id);
+  findById(id: string): Promise<Evidence | undefined> {
+    return Promise.resolve(this.#evidenceById.get(id));
   }
 
-  save(evidence: Evidence): Evidence {
+  save(evidence: Evidence): Promise<Evidence> {
     if (this.#evidenceById.has(evidence.id)) {
-      throw new DuplicateEvidenceError(evidence.id);
+      return Promise.reject(new DuplicateEvidenceError(evidence.id));
     }
 
     this.#evidenceById.set(evidence.id, evidence);
-    return evidence;
+    return Promise.resolve(evidence);
   }
 }

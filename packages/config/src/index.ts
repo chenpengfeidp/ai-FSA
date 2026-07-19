@@ -12,6 +12,8 @@ export type {
   DatabaseClientMode,
   DatabaseConfig,
   EnvironmentSource,
+  EvidenceRepositoryConfig,
+  EvidenceRepositoryMode,
   HttpConfig,
   OddsProviderConfig,
   OddsProviderMode,

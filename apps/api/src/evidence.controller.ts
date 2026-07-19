@@ -39,8 +39,8 @@ export class EvidenceController {
     description: "Bootstrap example Evidence.",
     type: EvidenceDto,
   })
-  getExample(): Evidence {
-    const evidence = this.evidenceService.findById(exampleEvidenceId);
+  async getExample(): Promise<Evidence> {
+    const evidence = await this.evidenceService.findById(exampleEvidenceId);
 
     if (evidence === undefined) {
       throw new Error("Example evidence was not initialized.");
@@ -66,7 +66,7 @@ export class EvidenceController {
       ],
     },
   })
-  findByMatch(matchId: string): EvidenceQueryResult<readonly Evidence[]> {
+  findByMatch(matchId: string): Promise<EvidenceQueryResult<readonly Evidence[]>> {
     return this.evidenceQuery.findByMatch(createMatchId(matchId));
   }
 
@@ -88,7 +88,7 @@ export class EvidenceController {
       ],
     },
   })
-  findById(id: string): EvidenceQueryResult<Evidence | undefined> {
+  findById(id: string): Promise<EvidenceQueryResult<Evidence | undefined>> {
     return this.evidenceQuery.findById(id);
   }
 }

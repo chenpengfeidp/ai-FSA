@@ -29,7 +29,7 @@ const exampleEvidenceInput = {
 export class EvidenceExampleInitializer implements OnModuleInit {
   constructor(private readonly evidenceService: EvidenceService) {}
 
-  onModuleInit(): void {
-    this.evidenceService.record(exampleEvidenceInput);
+  async onModuleInit(): Promise<void> {
+    await this.evidenceService.record(exampleEvidenceInput);
   }
 }

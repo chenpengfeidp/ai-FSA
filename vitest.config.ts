@@ -23,6 +23,7 @@ export default defineConfig({
           environment: "node",
           env: {
             DATABASE_CLIENT_MODE: "stub",
+            EVIDENCE_REPOSITORY_MODE: "memory",
             DATABASE_URL:
               "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
           },

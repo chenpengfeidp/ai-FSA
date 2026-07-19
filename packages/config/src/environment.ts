@@ -29,9 +29,15 @@ export interface CalibrationConfig {
 
 export type DatabaseClientMode = "live" | "stub";
 
+export type EvidenceRepositoryMode = "memory" | "postgres";
+
 export interface DatabaseConfig {
   readonly url: string;
   readonly clientMode: DatabaseClientMode;
+}
+
+export interface EvidenceRepositoryConfig {
+  readonly mode: EvidenceRepositoryMode;
 }
 
 export interface ApiConfig {
@@ -40,6 +46,7 @@ export interface ApiConfig {
   readonly oddsProvider: OddsProviderConfig;
   readonly calibration: CalibrationConfig;
   readonly database: DatabaseConfig;
+  readonly evidenceRepository: EvidenceRepositoryConfig;
 }
 
 export interface WorkerConfig {
@@ -100,6 +107,8 @@ const databaseUrlSchema = z
 
 const databaseClientModeSchema = z.enum(["live", "stub"]).optional();
 
+const evidenceRepositoryModeSchema = z.enum(["memory", "postgres"]).optional();
+
 const apiEnvironmentSchema = z
   .object({
     NODE_ENV: runtimeEnvironmentSchema,
@@ -111,19 +120,31 @@ const apiEnvironmentSchema = z
     CALIBRATION_ARTIFACT: calibrationArtifactModeSchema,
     DATABASE_URL: databaseUrlSchema,
     DATABASE_CLIENT_MODE: databaseClientModeSchema,
+    EVIDENCE_REPOSITORY_MODE: evidenceRepositoryModeSchema,
   })
   .superRefine((value, context) => {
-    if (value.ODDS_PROVIDER_MODE !== "live") {
-      return;
+    if (value.ODDS_PROVIDER_MODE === "live") {
+      const apiKey = value.THE_ODDS_API_KEY?.trim() ?? "";
+
+      if (apiKey.length === 0) {
+        context.addIssue({
+          code: "custom",
+          path: ["THE_ODDS_API_KEY"],
+          message: "THE_ODDS_API_KEY is required when ODDS_PROVIDER_MODE is live.",
+        });
+      }
     }
 
-    const apiKey = value.THE_ODDS_API_KEY?.trim() ?? "";
+    const evidenceMode = value.EVIDENCE_REPOSITORY_MODE ?? "memory";
+    const databaseMode =
+      value.DATABASE_CLIENT_MODE ?? (value.NODE_ENV === "test" ? "stub" : "live");
 
-    if (apiKey.length === 0) {
+    if (evidenceMode === "postgres" && databaseMode === "stub") {
       context.addIssue({
         code: "custom",
-        path: ["THE_ODDS_API_KEY"],
-        message: "THE_ODDS_API_KEY is required when ODDS_PROVIDER_MODE is live.",
+        path: ["EVIDENCE_REPOSITORY_MODE"],
+        message:
+          "EVIDENCE_REPOSITORY_MODE=postgres requires DATABASE_CLIENT_MODE=live.",
       });
     }
   });
@@ -198,6 +219,12 @@ function issueDetails(variable: string): Readonly<{
         code: "INVALID_DATABASE_CLIENT_MODE",
         message: "DATABASE_CLIENT_MODE must be live or stub.",
       };
+    case "EVIDENCE_REPOSITORY_MODE":
+      return {
+        code: "INVALID_EVIDENCE_REPOSITORY_MODE",
+        message:
+          "EVIDENCE_REPOSITORY_MODE must be memory or postgres, and postgres requires DATABASE_CLIENT_MODE=live.",
+      };
     default:
       return {
         code: "INVALID_CONFIGURATION",
@@ -253,6 +280,7 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
   const apiKey = parsed.THE_ODDS_API_KEY?.trim();
   const clientMode =
     parsed.DATABASE_CLIENT_MODE ?? (parsed.NODE_ENV === "test" ? "stub" : "live");
+  const evidenceRepositoryMode = parsed.EVIDENCE_REPOSITORY_MODE ?? "memory";
 
   return Object.freeze({
     runtime: Object.freeze({
@@ -273,6 +301,9 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
     database: Object.freeze({
       url: parsed.DATABASE_URL,
       clientMode,
+    }),
+    evidenceRepository: Object.freeze({
+      mode: evidenceRepositoryMode,
     }),
   });
 }

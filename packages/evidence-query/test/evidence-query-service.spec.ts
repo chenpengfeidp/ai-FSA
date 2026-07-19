@@ -30,10 +30,10 @@ function makeEvidence(id: string, type: EvidenceType, matchId?: MatchId): Eviden
   });
 }
 
-function createSeededRepository(): {
+async function createSeededRepository(): Promise<{
   readonly evidence: readonly Evidence[];
   readonly repository: InMemoryEvidenceRepository;
-} {
+}> {
   const matchOne = createMatchId("match-1");
   const evidence = Object.freeze([
     makeEvidence("evidence-1", "MATCH_INFO", matchOne),
@@ -44,32 +44,32 @@ function createSeededRepository(): {
   const repository = new InMemoryEvidenceRepository();
 
   for (const item of evidence) {
-    repository.save(item);
+    await repository.save(item);
   }
 
   return { evidence, repository };
 }
 
 describe("EvidenceQueryService", () => {
-  it("finds Evidence by id and reports a missing id", () => {
-    const { evidence, repository } = createSeededRepository();
+  it("finds Evidence by id and reports a missing id", async () => {
+    const { evidence, repository } = await createSeededRepository();
     const service = new EvidenceQueryService(repository);
 
-    expect(service.findById("evidence-2")).toEqual({
+    await expect(service.findById("evidence-2")).resolves.toEqual({
       ok: true,
       value: evidence[1],
     });
-    expect(service.findById("missing")).toEqual({
+    await expect(service.findById("missing")).resolves.toEqual({
       ok: true,
       value: undefined,
     });
   });
 
-  it("finds all Evidence for a MatchId in repository order", () => {
-    const { evidence, repository } = createSeededRepository();
+  it("finds all Evidence for a MatchId in repository order", async () => {
+    const { evidence, repository } = await createSeededRepository();
     const service = new EvidenceQueryService(repository);
 
-    const result = service.findByMatch(createMatchId("match-1"));
+    const result = await service.findByMatch(createMatchId("match-1"));
 
     expect(result).toEqual({
       ok: true,
@@ -80,11 +80,11 @@ describe("EvidenceQueryService", () => {
     }
   });
 
-  it("returns an immutable empty array for a MatchId without Evidence", () => {
-    const { repository } = createSeededRepository();
+  it("returns an immutable empty array for a MatchId without Evidence", async () => {
+    const { repository } = await createSeededRepository();
     const service = new EvidenceQueryService(repository);
 
-    const result = service.findByMatch(createMatchId("match-missing"));
+    const result = await service.findByMatch(createMatchId("match-missing"));
 
     expect(result).toEqual({ ok: true, value: [] });
     if (result.ok) {
@@ -92,11 +92,11 @@ describe("EvidenceQueryService", () => {
     }
   });
 
-  it("finds all Evidence of a type in repository order", () => {
-    const { evidence, repository } = createSeededRepository();
+  it("finds all Evidence of a type in repository order", async () => {
+    const { evidence, repository } = await createSeededRepository();
     const service = new EvidenceQueryService(repository);
 
-    const result = service.findByType("MATCH_INFO");
+    const result = await service.findByType("MATCH_INFO");
 
     expect(result).toEqual({
       ok: true,
@@ -107,30 +107,26 @@ describe("EvidenceQueryService", () => {
     }
   });
 
-  it("returns an immutable findAll snapshot", () => {
-    const { evidence, repository } = createSeededRepository();
+  it("returns an immutable findAll snapshot", async () => {
+    const { evidence, repository } = await createSeededRepository();
     const service = new EvidenceQueryService(repository);
 
-    const result = service.findAll();
+    const result = await service.findAll();
 
     expect(result).toEqual({ ok: true, value: evidence });
     expect(Object.isFrozen(result)).toBe(true);
     if (result.ok) {
       expect(Object.isFrozen(result.value)).toBe(true);
-      repository.save(makeEvidence("evidence-5", "WEATHER"));
+      await repository.save(makeEvidence("evidence-5", "WEATHER"));
       expect(result.value).toEqual(evidence);
     }
   });
 
-  it("converts unknown repository failures into typed Result failures", () => {
+  it("converts unknown repository failures into typed Result failures", async () => {
     const repository: EvidenceRepository = {
-      findAll: () => {
-        throw new Error("repository unavailable");
-      },
-      findById: () => {
-        throw new Error("repository unavailable");
-      },
-      save: (evidence) => evidence,
+      findAll: () => Promise.reject(new Error("repository unavailable")),
+      findById: () => Promise.reject(new Error("repository unavailable")),
+      save: (item) => Promise.resolve(item),
     };
     const service = new EvidenceQueryService(repository);
     const expectedFailure = {
@@ -141,14 +137,12 @@ describe("EvidenceQueryService", () => {
       ok: false,
     };
 
-    expect(() => service.findById("evidence-1")).not.toThrow();
-    expect(() => service.findByMatch(createMatchId("match-1"))).not.toThrow();
-    expect(() => service.findByType("MATCH_INFO")).not.toThrow();
-    expect(() => service.findAll()).not.toThrow();
-    expect(service.findById("evidence-1")).toEqual(expectedFailure);
-    expect(service.findByMatch(createMatchId("match-1"))).toEqual(expectedFailure);
-    expect(service.findByType("MATCH_INFO")).toEqual(expectedFailure);
-    const result = service.findAll();
+    await expect(service.findById("evidence-1")).resolves.toEqual(expectedFailure);
+    await expect(service.findByMatch(createMatchId("match-1"))).resolves.toEqual(
+      expectedFailure,
+    );
+    await expect(service.findByType("MATCH_INFO")).resolves.toEqual(expectedFailure);
+    const result = await service.findAll();
     expect(result).toEqual(expectedFailure);
     expect(Object.isFrozen(result)).toBe(true);
     if (!result.ok) {

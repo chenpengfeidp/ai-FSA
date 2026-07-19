@@ -5,7 +5,7 @@ type ImportMatchSuccess = Extract<ImportMatchResult, { ok: true }>;
 type ImportMatchFailure = Extract<ImportMatchResult, { ok: false }>;
 
 export interface ImportMatchOperation {
-  execute(matchId: MatchId): ImportMatchResult;
+  execute(matchId: MatchId): Promise<ImportMatchResult>;
 }
 
 export interface UnexpectedImportFailureReason {
@@ -56,14 +56,14 @@ export class ImportMatchesUseCase {
     this.#importMatch = importMatch;
   }
 
-  execute(matchIds: readonly MatchId[]): ImportMatchesResult {
+  async execute(matchIds: readonly MatchId[]): Promise<ImportMatchesResult> {
     const results: MatchImportResult[] = [];
     const successfulImports: SuccessfulMatchImport[] = [];
     const failedImports: FailedMatchImport[] = [];
 
     for (const matchId of matchIds) {
       try {
-        const result = this.#importMatch.execute(matchId);
+        const result = await this.#importMatch.execute(matchId);
 
         if (result.ok) {
           const successfulImport = Object.freeze({

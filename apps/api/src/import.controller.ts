@@ -49,6 +49,6 @@ export class ImportController {
   })
   async importMatchById(matchId: string): Promise<ImportMatchResult> {
     await this.oddsPrimer.ensurePreMatch1x2(matchId);
-    return this.importMatch.execute(matchId);
+    return await this.importMatch.execute(matchId);
   }
 }

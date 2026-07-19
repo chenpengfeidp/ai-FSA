@@ -7,11 +7,11 @@ export interface MatchProvider {
 }
 
 export interface EvidenceImporter {
-  importEvidence(input: unknown): EvidenceImportResult;
+  importEvidence(input: unknown): Promise<EvidenceImportResult>;
 }
 
 export interface EvidenceRecordImporter extends EvidenceImporter {
-  importEvidenceRecordIdempotent(evidence: Evidence): EvidenceImportResult;
+  importEvidenceRecordIdempotent(evidence: Evidence): Promise<EvidenceImportResult>;
 }
 
 export type ImportMatchErrorCode =
@@ -68,7 +68,7 @@ export class ImportMatchUseCase {
     this.#collectedAt = collectedAt;
   }
 
-  execute(matchId: string): ImportMatchResult {
+  async execute(matchId: string): Promise<ImportMatchResult> {
     let providerInput: unknown;
 
     try {
@@ -89,7 +89,7 @@ export class ImportMatchUseCase {
     }
 
     try {
-      return this.#evidenceImporter.importEvidence(providerInput);
+      return await this.#evidenceImporter.importEvidence(providerInput);
     } catch {
       return failure(
         "EVIDENCE_IMPORT_FAILED",
@@ -98,10 +98,10 @@ export class ImportMatchUseCase {
     }
   }
 
-  #importEvidenceSet(
+  async #importEvidenceSet(
     providerInput: unknown,
     importer: EvidenceRecordImporter,
-  ): ImportMatchResult {
+  ): Promise<ImportMatchResult> {
     let matchInfo: Evidence | undefined;
 
     try {
@@ -114,7 +114,7 @@ export class ImportMatchUseCase {
       }
 
       for (const evidence of normalized.value) {
-        const imported = importer.importEvidenceRecordIdempotent(evidence);
+        const imported = await importer.importEvidenceRecordIdempotent(evidence);
 
         if (!imported.ok) {
           return imported;

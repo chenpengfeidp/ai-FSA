@@ -78,7 +78,7 @@ export class EvidenceImportPipeline {
     this.#repository = repository;
   }
 
-  importEvidence(input: unknown): EvidenceImportResult {
+  async importEvidence(input: unknown): Promise<EvidenceImportResult> {
     let evidence: Evidence;
 
     try {
@@ -99,12 +99,14 @@ export class EvidenceImportPipeline {
     return this.#persist(evidence);
   }
 
-  importEvidenceRecord(evidence: Evidence): EvidenceImportResult {
+  importEvidenceRecord(evidence: Evidence): Promise<EvidenceImportResult> {
     return this.#persist(evidence);
   }
 
-  importEvidenceRecordIdempotent(evidence: Evidence): EvidenceImportResult {
-    const persisted = this.#persist(evidence);
+  async importEvidenceRecordIdempotent(
+    evidence: Evidence,
+  ): Promise<EvidenceImportResult> {
+    const persisted = await this.#persist(evidence);
 
     if (persisted.ok || persisted.error.code !== "DUPLICATE_EVIDENCE") {
       return persisted;
@@ -115,7 +117,7 @@ export class EvidenceImportPipeline {
     }
 
     try {
-      const existing = this.#repository.findById(evidence.id);
+      const existing = await this.#repository.findById(evidence.id);
 
       if (existing === undefined) {
         return persisted;
@@ -127,13 +129,13 @@ export class EvidenceImportPipeline {
     }
   }
 
-  #persist(evidence: Evidence): EvidenceImportResult {
+  async #persist(evidence: Evidence): Promise<EvidenceImportResult> {
     if (this.#repository === undefined) {
       return success(evidence);
     }
 
     try {
-      this.#repository.save(evidence);
+      await this.#repository.save(evidence);
       return success(evidence);
     } catch (error: unknown) {
       if (error instanceof DuplicateEvidenceError) {

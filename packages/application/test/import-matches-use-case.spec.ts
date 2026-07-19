@@ -38,16 +38,16 @@ function notFoundResult(matchId: MatchId): ImportMatchResult {
 }
 
 describe("ImportMatchesUseCase", () => {
-  it("aggregates successful imports in input order", () => {
+  it("aggregates successful imports in input order", async () => {
     const matchIds = Object.freeze([
       createMatchId("match-1"),
       createMatchId("match-2"),
       createMatchId("match-3"),
     ]);
-    const execute = vi.fn((matchId: MatchId) => successfulResult(matchId));
+    const execute = vi.fn(async (matchId: MatchId) => successfulResult(matchId));
     const useCase = new ImportMatchesUseCase({ execute });
 
-    const result = useCase.execute(matchIds);
+    const result = await useCase.execute(matchIds);
 
     expect(result.summary).toEqual({
       failed: 0,
@@ -61,21 +61,21 @@ describe("ImportMatchesUseCase", () => {
     expect(matchIds).toEqual(["match-1", "match-2", "match-3"]);
   });
 
-  it("continues after failure and reports partial success", () => {
+  it("continues after failure and reports partial success", async () => {
     const matchIds = [
       createMatchId("match-1"),
       createMatchId("match-missing"),
       createMatchId("match-3"),
     ] as const;
     const execute = vi.fn(
-      (matchId: MatchId): ImportMatchResult =>
+      async (matchId: MatchId): Promise<ImportMatchResult> =>
         matchId === "match-missing"
           ? notFoundResult(matchId)
           : successfulResult(matchId),
     );
     const useCase = new ImportMatchesUseCase({ execute });
 
-    const result = useCase.execute(matchIds);
+    const result = await useCase.execute(matchIds);
 
     expect(result.summary).toEqual({
       failed: 1,
@@ -96,16 +96,16 @@ describe("ImportMatchesUseCase", () => {
     expect(execute).toHaveBeenCalledTimes(3);
   });
 
-  it("reports all failures when no import succeeds", () => {
+  it("reports all failures when no import succeeds", async () => {
     const matchIds = [
       createMatchId("match-missing-1"),
       createMatchId("match-missing-2"),
     ] as const;
     const useCase = new ImportMatchesUseCase({
-      execute: (matchId) => notFoundResult(matchId),
+      execute: async (matchId) => notFoundResult(matchId),
     });
 
-    const result = useCase.execute(matchIds);
+    const result = await useCase.execute(matchIds);
 
     expect(result.summary).toEqual({
       failed: 2,
@@ -116,10 +116,10 @@ describe("ImportMatchesUseCase", () => {
     expect(result.failedImports.map(({ matchId }) => matchId)).toEqual(matchIds);
   });
 
-  it("preserves duplicate Evidence failure reasons", () => {
+  it("preserves duplicate Evidence failure reasons", async () => {
     const matchId = createMatchId("match-duplicate");
     const useCase = new ImportMatchesUseCase({
-      execute: () =>
+      execute: async () =>
         Object.freeze({
           ok: false,
           error: Object.freeze({
@@ -129,7 +129,7 @@ describe("ImportMatchesUseCase", () => {
         }),
     });
 
-    const result = useCase.execute([matchId]);
+    const result = await useCase.execute([matchId]);
 
     expect(result.failedImports).toEqual([
       {
@@ -143,12 +143,12 @@ describe("ImportMatchesUseCase", () => {
     ]);
   });
 
-  it("returns deeply immutable aggregate structures", () => {
+  it("returns deeply immutable aggregate structures", async () => {
     const useCase = new ImportMatchesUseCase({
-      execute: (matchId) => successfulResult(matchId),
+      execute: async (matchId) => successfulResult(matchId),
     });
 
-    const result = useCase.execute([createMatchId("match-immutable")]);
+    const result = await useCase.execute([createMatchId("match-immutable")]);
 
     expect(Object.isFrozen(result)).toBe(true);
     expect(Object.isFrozen(result.results)).toBe(true);
@@ -159,13 +159,13 @@ describe("ImportMatchesUseCase", () => {
     expect(Reflect.set(result.summary, "total", 0)).toBe(false);
   });
 
-  it("converts unexpected errors and continues with remaining matches", () => {
+  it("converts unexpected errors and continues with remaining matches", async () => {
     const matchIds = [
       createMatchId("match-1"),
       createMatchId("match-throws"),
       createMatchId("match-3"),
     ] as const;
-    const execute = vi.fn((matchId: MatchId): ImportMatchResult => {
+    const execute = vi.fn(async (matchId: MatchId): Promise<ImportMatchResult> => {
       if (matchId === "match-throws") {
         throw new Error("unexpected import failure");
       }
@@ -174,9 +174,9 @@ describe("ImportMatchesUseCase", () => {
     });
     const useCase = new ImportMatchesUseCase({ execute });
 
-    expect(() => useCase.execute(matchIds)).not.toThrow();
+    await expect(useCase.execute(matchIds)).resolves.toBeDefined();
 
-    const result = useCase.execute(matchIds);
+    const result = await useCase.execute(matchIds);
 
     expect(result.summary).toEqual({
       failed: 1,

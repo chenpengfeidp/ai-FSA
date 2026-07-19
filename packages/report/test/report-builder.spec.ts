@@ -197,23 +197,23 @@ describe("ReportBuilder", () => {
 });
 
 describe("GenerateMatchReportUseCase", () => {
-  it("returns AnalysisReport JSON directly after successful analysis", () => {
+  it("returns AnalysisReport JSON directly after successful analysis", async () => {
     const analysis = makeCompletedAnalysis();
     const useCase = new GenerateMatchReportUseCase(
-      { execute: () => ({ ok: true, value: analysis }) },
+      { execute: async () => ({ ok: true, value: analysis }) },
       new ReportBuilder(),
     );
 
-    const result = useCase.execute(matchId);
+    const result = await useCase.execute(matchId);
 
     expect(result).toEqual(new ReportBuilder().build(analysis));
     expect("ok" in result).toBe(false);
   });
 
-  it("preserves typed analysis failures", () => {
+  it("preserves typed analysis failures", async () => {
     const useCase = new GenerateMatchReportUseCase(
       {
-        execute: () => ({
+        execute: async () => ({
           error: {
             code: "EVIDENCE_NOT_FOUND",
             message: "Evidence was not found.",
@@ -224,7 +224,7 @@ describe("GenerateMatchReportUseCase", () => {
       new ReportBuilder(),
     );
 
-    expect(useCase.execute(matchId)).toEqual({
+    await expect(useCase.execute(matchId)).resolves.toEqual({
       error: {
         code: "EVIDENCE_NOT_FOUND",
         message: "Evidence was not found.",
@@ -233,17 +233,17 @@ describe("GenerateMatchReportUseCase", () => {
     });
   });
 
-  it("converts unexpected analysis and report failures", () => {
+  it("converts unexpected analysis and report failures", async () => {
     const analysisFailure = new GenerateMatchReportUseCase(
       {
-        execute: () => {
+        execute: async () => {
           throw new Error("analysis failed");
         },
       },
       new ReportBuilder(),
     );
     const reportFailure = new GenerateMatchReportUseCase(
-      { execute: () => ({ ok: true, value: makeCompletedAnalysis() }) },
+      { execute: async () => ({ ok: true, value: makeCompletedAnalysis() }) },
       {
         build: () => {
           throw new Error("report failed");
@@ -251,11 +251,11 @@ describe("GenerateMatchReportUseCase", () => {
       },
     );
 
-    expect(analysisFailure.execute(matchId)).toMatchObject({
+    await expect(analysisFailure.execute(matchId)).resolves.toMatchObject({
       error: { code: "ANALYSIS_FAILED" },
       ok: false,
     });
-    expect(reportFailure.execute(matchId)).toMatchObject({
+    await expect(reportFailure.execute(matchId)).resolves.toMatchObject({
       error: { code: "REPORT_BUILD_FAILED" },
       ok: false,
     });

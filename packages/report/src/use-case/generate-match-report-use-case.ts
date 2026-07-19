@@ -5,7 +5,7 @@ import type { AnalysisReport } from "../domain/analysis-report.js";
 type AnalysisFailure = Extract<AnalyzeMatchResult, { ok: false }>;
 
 export interface AnalyzeMatchOperation {
-  execute(matchId: MatchId): AnalyzeMatchResult;
+  execute(matchId: MatchId): Promise<AnalyzeMatchResult>;
 }
 
 export interface AnalysisReportBuilder {
@@ -51,11 +51,11 @@ export class GenerateMatchReportUseCase {
     this.#reportBuilder = reportBuilder;
   }
 
-  execute(matchId: MatchId): GenerateMatchReportResult {
+  async execute(matchId: MatchId): Promise<GenerateMatchReportResult> {
     let analysis: AnalyzeMatchResult;
 
     try {
-      analysis = this.#analyzeMatch.execute(matchId);
+      analysis = await this.#analyzeMatch.execute(matchId);
     } catch {
       return failure("ANALYSIS_FAILED", "Match analysis failed unexpectedly.");
     }

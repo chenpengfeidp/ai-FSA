@@ -40,6 +40,9 @@ describe("@fas/config environment loading", () => {
         url: "postgresql://fas_local:change_me_local_only@127.0.0.1:5432/fas_local",
         clientMode: "live",
       },
+      evidenceRepository: {
+        mode: "memory",
+      },
     });
   });
 
@@ -82,6 +85,9 @@ describe("@fas/config environment loading", () => {
         url: "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
         clientMode: "stub",
       },
+      evidenceRepository: {
+        mode: "memory",
+      },
     });
   });
 
@@ -121,7 +127,37 @@ describe("@fas/config environment loading", () => {
         url: "postgresql://fas_local:change_me_local_only@127.0.0.1:5432/fas_local",
         clientMode: "live",
       },
+      evidenceRepository: {
+        mode: "memory",
+      },
     });
+  });
+
+  it("loads postgres evidence repository mode with live database", () => {
+    expect(
+      loadApiConfig({
+        DATABASE_CLIENT_MODE: "live",
+        EVIDENCE_REPOSITORY_MODE: "postgres",
+      }).evidenceRepository.mode,
+    ).toBe("postgres");
+  });
+
+  it("rejects postgres evidence mode with stub database", () => {
+    const error = captureConfigurationError(() =>
+      loadApiConfig({
+        DATABASE_CLIENT_MODE: "stub",
+        EVIDENCE_REPOSITORY_MODE: "postgres",
+      }),
+    );
+
+    expect(error.issues).toEqual([
+      {
+        variable: "EVIDENCE_REPOSITORY_MODE",
+        code: "INVALID_EVIDENCE_REPOSITORY_MODE",
+        message:
+          "EVIDENCE_REPOSITORY_MODE must be memory or postgres, and postgres requires DATABASE_CLIENT_MODE=live.",
+      },
+    ]);
   });
 
   it("rejects a non-PostgreSQL DATABASE_URL", () => {

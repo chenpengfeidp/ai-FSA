@@ -16,11 +16,16 @@
   "scripts": {
     "build": "pnpm generate && tsc --project tsconfig.json",
     "generate": "prisma generate --config prisma.config.ts",
+    "prisma:migrate": "prisma migrate deploy --config prisma.config.ts",
+    "prisma:migrate:dev": "prisma migrate dev --config prisma.config.ts",
     "prisma:validate": "prisma validate --config prisma.config.ts",
     "test": "pnpm generate && vitest run --root ../.. --config vitest.config.ts --project database",
     "typecheck": "pnpm generate && tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@fas/domain": "workspace:*",
+    "@fas/evidence": "workspace:*",
+    "@fas/match": "workspace:*",
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "7.8.0",
     "pg": "8.22.0"

@@ -22,18 +22,18 @@ const input = {
 } as const;
 
 describe("EvidenceService", () => {
-  it("records evidence and makes it available through the repository port", () => {
+  it("records evidence and makes it available through the repository port", async () => {
     const service = new EvidenceService(new InMemoryEvidenceRepository());
 
-    const evidence = service.record(input);
+    const evidence = await service.record(input);
 
     expect(evidence).toEqual(input);
-    expect(service.findById(evidence.id)).toBe(evidence);
+    await expect(service.findById(evidence.id)).resolves.toBe(evidence);
   });
 
-  it("returns undefined when evidence does not exist", () => {
+  it("returns undefined when evidence does not exist", async () => {
     const service = new EvidenceService(new InMemoryEvidenceRepository());
 
-    expect(service.findById("missing")).toBeUndefined();
+    await expect(service.findById("missing")).resolves.toBeUndefined();
   });
 });

@@ -1,9 +1,9 @@
 import type { Evidence } from "../domain/evidence.js";
 
 export interface EvidenceRepository {
-  findAll(): readonly Evidence[];
-  findById(id: string): Evidence | undefined;
-  save(evidence: Evidence): Evidence;
+  findAll(): Promise<readonly Evidence[]>;
+  findById(id: string): Promise<Evidence | undefined>;
+  save(evidence: Evidence): Promise<Evidence>;
 }
 
 export class DuplicateEvidenceError extends Error {

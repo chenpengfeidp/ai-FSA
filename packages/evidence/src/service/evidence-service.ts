@@ -12,11 +12,11 @@ export class EvidenceService {
     this.#repository = repository;
   }
 
-  findById(id: string): Evidence | undefined {
+  findById(id: string): Promise<Evidence | undefined> {
     return this.#repository.findById(id);
   }
 
-  record(input: CreateEvidenceInput): Evidence {
+  record(input: CreateEvidenceInput): Promise<Evidence> {
     return this.#repository.save(createEvidence(input));
   }
 }

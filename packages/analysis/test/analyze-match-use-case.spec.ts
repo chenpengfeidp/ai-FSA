@@ -58,7 +58,7 @@ function createUseCase(
 }
 
 describe("AnalyzeMatchUseCase", () => {
-  it("coordinates the complete deterministic analysis workflow", () => {
+  it("coordinates the complete deterministic analysis workflow", async () => {
     const repository = new InMemoryEvidenceRepository();
     const normalizer = new FixtureEvidenceNormalizer({
       evidenceId: "evidence-fixture-match-example",
@@ -69,7 +69,7 @@ describe("AnalyzeMatchUseCase", () => {
     const importMatch = new ImportMatchUseCase(new FixtureProvider(), importer);
     const useCase = createUseCase(importMatch, new EvidenceQueryService(repository));
 
-    const result = useCase.execute(createMatchId("match-example"));
+    const result = await useCase.execute(createMatchId("match-example"));
 
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -98,17 +98,17 @@ describe("AnalyzeMatchUseCase", () => {
     }
   });
 
-  it("calls injected operations in workflow order", () => {
+  it("calls injected operations in workflow order", async () => {
     const evidence = makeEvidence();
     const calls: string[] = [];
     const importMatch: MatchImportOperation = {
-      execute: vi.fn(() => {
+      execute: vi.fn(async () => {
         calls.push("import");
         return { ok: true, value: evidence };
       }),
     };
     const evidenceQuery: EvidenceByMatchQuery = {
-      findByMatch: vi.fn(() => {
+      findByMatch: vi.fn(async () => {
         calls.push("query");
         return { ok: true, value: Object.freeze([evidence]) };
       }),
@@ -134,7 +134,7 @@ describe("AnalyzeMatchUseCase", () => {
       ruleEvaluator,
     );
 
-    const result = useCase.execute(createMatchId("match-1"));
+    const result = await useCase.execute(createMatchId("match-1"));
 
     expect(calls).toEqual(["import", "query", "extract", "evaluate"]);
     expect(result.ok).toBe(true);
@@ -143,10 +143,10 @@ describe("AnalyzeMatchUseCase", () => {
     }
   });
 
-  it("maps import failure", () => {
+  it("maps import failure", async () => {
     const useCase = createUseCase(
       {
-        execute: () =>
+        execute: async () =>
           Object.freeze({
             ok: false,
             error: Object.freeze({
@@ -156,11 +156,12 @@ describe("AnalyzeMatchUseCase", () => {
           }),
       },
       {
-        findByMatch: () => Object.freeze({ ok: true, value: Object.freeze([]) }),
+        findByMatch: async () =>
+          Object.freeze({ ok: true, value: Object.freeze([]) }),
       },
     );
 
-    const result = useCase.execute(createMatchId("match-1"));
+    const result = await useCase.execute(createMatchId("match-1"));
 
     expect(result).toMatchObject({
       ok: false,
@@ -168,21 +169,22 @@ describe("AnalyzeMatchUseCase", () => {
     });
   });
 
-  it("maps missing MATCH_INFO after query", () => {
+  it("maps missing MATCH_INFO after query", async () => {
     const useCase = createUseCase(
       {
-        execute: () =>
+        execute: async () =>
           Object.freeze({
             ok: true,
             value: makeEvidence(),
           }),
       },
       {
-        findByMatch: () => Object.freeze({ ok: true, value: Object.freeze([]) }),
+        findByMatch: async () =>
+          Object.freeze({ ok: true, value: Object.freeze([]) }),
       },
     );
 
-    const result = useCase.execute(createMatchId("match-1"));
+    const result = await useCase.execute(createMatchId("match-1"));
 
     expect(result).toMatchObject({
       ok: false,
@@ -190,14 +192,14 @@ describe("AnalyzeMatchUseCase", () => {
     });
   });
 
-  it("maps feature extraction failure", () => {
+  it("maps feature extraction failure", async () => {
     const evidence = makeEvidence();
     const useCase = createUseCase(
       {
-        execute: () => Object.freeze({ ok: true, value: evidence }),
+        execute: async () => Object.freeze({ ok: true, value: evidence }),
       },
       {
-        findByMatch: () =>
+        findByMatch: async () =>
           Object.freeze({ ok: true, value: Object.freeze([evidence]) }),
       },
       {
@@ -207,7 +209,7 @@ describe("AnalyzeMatchUseCase", () => {
       },
     );
 
-    const result = useCase.execute(createMatchId("match-1"));
+    const result = await useCase.execute(createMatchId("match-1"));
 
     expect(result).toMatchObject({
       ok: false,
@@ -215,15 +217,15 @@ describe("AnalyzeMatchUseCase", () => {
     });
   });
 
-  it("maps rule evaluation failure", () => {
+  it("maps rule evaluation failure", async () => {
     const evidence = makeEvidence();
     const bundle: FeatureBundle = new FeatureExtractor().extractBundle([evidence]);
     const useCase = createUseCase(
       {
-        execute: () => Object.freeze({ ok: true, value: evidence }),
+        execute: async () => Object.freeze({ ok: true, value: evidence }),
       },
       {
-        findByMatch: () =>
+        findByMatch: async () =>
           Object.freeze({ ok: true, value: Object.freeze([evidence]) }),
       },
       {
@@ -236,7 +238,7 @@ describe("AnalyzeMatchUseCase", () => {
       },
     );
 
-    const result = useCase.execute(createMatchId("match-1"));
+    const result = await useCase.execute(createMatchId("match-1"));
 
     expect(result).toMatchObject({
       ok: false,

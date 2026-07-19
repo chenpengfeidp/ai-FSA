@@ -30,6 +30,9 @@ services:
       PORT: "3001"
       DATABASE_URL: "postgresql://${FAS_POSTGRES_USER}:${FAS_POSTGRES_PASSWORD}@postgres:5432/${FAS_POSTGRES_DB}"
       DATABASE_CLIENT_MODE: live
+      # Apply migrations before relying on durable Evidence:
+      # DATABASE_URL=... pnpm --filter @fas/database prisma:migrate
+      EVIDENCE_REPOSITORY_MODE: postgres
     depends_on:
       postgres:
         condition: service_healthy

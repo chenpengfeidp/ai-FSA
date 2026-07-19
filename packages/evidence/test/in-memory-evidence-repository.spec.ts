@@ -26,30 +26,30 @@ const evidence = createEvidence({
 });
 
 describe("InMemoryEvidenceRepository", () => {
-  it("stores and retrieves evidence by id", () => {
+  it("stores and retrieves evidence by id", async () => {
     const repository = new InMemoryEvidenceRepository();
 
-    expect(repository.findById(evidence.id)).toBeUndefined();
-    expect(repository.findAll()).toEqual([]);
-    expect(repository.save(evidence)).toBe(evidence);
-    expect(repository.findById(evidence.id)).toBe(evidence);
+    await expect(repository.findById(evidence.id)).resolves.toBeUndefined();
+    await expect(repository.findAll()).resolves.toEqual([]);
+    await expect(repository.save(evidence)).resolves.toBe(evidence);
+    await expect(repository.findById(evidence.id)).resolves.toBe(evidence);
   });
 
-  it("returns an immutable snapshot of stored evidence", () => {
+  it("returns an immutable snapshot of stored evidence", async () => {
     const repository = new InMemoryEvidenceRepository();
-    repository.save(evidence);
+    await repository.save(evidence);
 
-    const snapshot = repository.findAll();
+    const snapshot = await repository.findAll();
 
     expect(snapshot).toEqual([evidence]);
     expect(Object.isFrozen(snapshot)).toBe(true);
   });
 
-  it("does not overwrite immutable evidence identities", () => {
+  it("does not overwrite immutable evidence identities", async () => {
     const repository = new InMemoryEvidenceRepository();
-    repository.save(evidence);
+    await repository.save(evidence);
 
-    expect(() => repository.save(evidence)).toThrow(DuplicateEvidenceError);
-    expect(repository.findById(evidence.id)).toBe(evidence);
+    await expect(repository.save(evidence)).rejects.toThrow(DuplicateEvidenceError);
+    await expect(repository.findById(evidence.id)).resolves.toBe(evidence);
   });
 });

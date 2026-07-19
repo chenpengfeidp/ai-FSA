@@ -60,6 +60,6 @@ export class AnalysisController {
     // Populate odds-event shells used by EnrichedMatchProvider for odds:* ids.
     await this.upcomingBoard.listUpcoming();
     await this.oddsPrimer.ensurePreMatch1x2(matchId);
-    return this.generateMatchReport.execute(createMatchId(matchId));
+    return await this.generateMatchReport.execute(createMatchId(matchId));
   }
 }

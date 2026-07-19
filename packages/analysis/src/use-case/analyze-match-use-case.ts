@@ -20,11 +20,11 @@ export type Result<Value, Failure> =
   | Readonly<{ error: Failure; ok: false }>;
 
 export interface MatchImportOperation {
-  execute(matchId: MatchId): ImportMatchResult;
+  execute(matchId: MatchId): Promise<ImportMatchResult>;
 }
 
 export interface EvidenceByMatchQuery {
-  findByMatch(matchId: MatchId): EvidenceQueryResult<readonly Evidence[]>;
+  findByMatch(matchId: MatchId): Promise<EvidenceQueryResult<readonly Evidence[]>>;
 }
 
 export interface FeatureExtractionOperation {
@@ -142,11 +142,11 @@ export class AnalyzeMatchUseCase {
     this.#calibrationArtifact = calibrationArtifact;
   }
 
-  execute(matchId: MatchId): AnalyzeMatchResult {
+  async execute(matchId: MatchId): Promise<AnalyzeMatchResult> {
     let imported: ImportMatchResult;
 
     try {
-      imported = this.#importMatch.execute(matchId);
+      imported = await this.#importMatch.execute(matchId);
     } catch {
       return failure("IMPORT_FAILED", "Match import failed unexpectedly.");
     }
@@ -158,7 +158,7 @@ export class AnalyzeMatchUseCase {
     let queried: EvidenceQueryResult<readonly Evidence[]>;
 
     try {
-      queried = this.#evidenceQuery.findByMatch(matchId);
+      queried = await this.#evidenceQuery.findByMatch(matchId);
     } catch {
       return failure("EVIDENCE_QUERY_FAILED", "Evidence query failed unexpectedly.");
     }

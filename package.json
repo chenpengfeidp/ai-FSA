@@ -21,6 +21,7 @@
     "lint": "biome lint .",
     "prepare": "node scripts/install-git-hooks.mjs",
     "prisma:generate": "pnpm --filter @fas/database generate",
+    "prisma:migrate": "pnpm --filter @fas/database prisma:migrate",
     "prisma:validate": "pnpm --filter @fas/database prisma:validate",
     "quality": "pnpm check && pnpm boundaries && pnpm boundaries:test",
     "test": "turbo run test",

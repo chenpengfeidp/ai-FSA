@@ -6,3 +6,137 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Competition {
+  id              String   @id @db.Uuid
+  name            String
+  countryCode     String?  @map("country_code") @db.Char(2)
+  competitionType String   @map("competition_type")
+  externalKey     String?  @unique @map("external_key")
+  createdAt       DateTime @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @map("updated_at") @db.Timestamptz(3)
+  rowVersion      Int      @default(1) @map("row_version")
+  seasons         Season[]
+
+  @@map("competitions")
+}
+
+model Season {
+  id            String      @id @db.Uuid
+  competitionId String      @map("competition_id") @db.Uuid
+  name          String
+  startsOn      DateTime    @map("starts_on") @db.Date
+  endsOn        DateTime    @map("ends_on") @db.Date
+  competition   Competition @relation(fields: [competitionId], references: [id])
+  matches       Match[]
+
+  @@unique([competitionId, name])
+  @@map("seasons")
+}
+
+model Team {
+  id           String             @id @db.Uuid
+  name         String
+  shortName    String?            @map("short_name")
+  countryCode  String?            @map("country_code") @db.Char(2)
+  externalKey  String?            @unique @map("external_key")
+  createdAt    DateTime           @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime           @map("updated_at") @db.Timestamptz(3)
+  rowVersion   Int                @default(1) @map("row_version")
+  participants MatchParticipant[]
+
+  @@map("teams")
+}
+
+model Match {
+  id            String             @id @db.Uuid
+  seasonId      String             @map("season_id") @db.Uuid
+  externalKey   String?            @unique @map("external_key")
+  stage         String?
+  kickoffAt     DateTime           @map("kickoff_at") @db.Timestamptz(3)
+  sourceTimezone String            @map("source_timezone")
+  venueName     String?            @map("venue_name")
+  status        String
+  dataCutoffAt  DateTime?          @map("data_cutoff_at") @db.Timestamptz(3)
+  createdAt     DateTime           @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime           @map("updated_at") @db.Timestamptz(3)
+  rowVersion    Int                @default(1) @map("row_version")
+  season        Season             @relation(fields: [seasonId], references: [id])
+  participants  MatchParticipant[]
+  sourceRecords SourceRecord[]
+  evidenceItems EvidenceItem[]
+
+  @@index([seasonId, kickoffAt])
+  @@index([status, kickoffAt])
+  @@map("matches")
+}
+
+model MatchParticipant {
+  matchId String @map("match_id") @db.Uuid
+  teamId  String @map("team_id") @db.Uuid
+  role    String
+  match   Match  @relation(fields: [matchId], references: [id])
+  team    Team   @relation(fields: [teamId], references: [id])
+
+  @@id([matchId, role])
+  @@unique([matchId, teamId])
+  @@map("match_participants")
+}
+
+model DataSource {
+  id            String         @id @db.Uuid
+  name          String         @unique
+  sourceClass   String         @map("source_class")
+  trustMetadata String?        @map("trust_metadata")
+  active        Boolean        @default(true)
+  createdAt     DateTime       @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime       @map("updated_at") @db.Timestamptz(3)
+  rowVersion    Int            @default(1) @map("row_version")
+  sourceRecords SourceRecord[]
+
+  @@map("data_sources")
+}
+
+model SourceRecord {
+  id               String         @id @db.Uuid
+  dataSourceId     String         @map("data_source_id") @db.Uuid
+  matchId          String?        @map("match_id") @db.Uuid
+  externalRecordId String?        @map("external_record_id")
+  sourceUri        String?        @map("source_uri")
+  observedAt       DateTime       @map("observed_at") @db.Timestamptz(3)
+  retrievedAt      DateTime       @map("retrieved_at") @db.Timestamptz(3)
+  payloadRef       String?        @map("payload_ref")
+  payloadSha256    String         @map("payload_sha256") @db.Char(64)
+  parserVersion    String         @map("parser_version")
+  status           String
+  dataSource       DataSource     @relation(fields: [dataSourceId], references: [id])
+  match            Match?         @relation(fields: [matchId], references: [id])
+  evidenceItems    EvidenceItem[]
+
+  @@unique([dataSourceId, externalRecordId, payloadSha256])
+  @@map("source_records")
+}
+
+model EvidenceItem {
+  id                String       @id @db.Uuid
+  matchId           String       @map("match_id") @db.Uuid
+  sourceRecordId    String       @map("source_record_id") @db.Uuid
+  evidenceType      String       @map("evidence_type")
+  subjectType       String       @map("subject_type")
+  subjectId         String?      @map("subject_id") @db.Uuid
+  metricKey         String       @map("metric_key")
+  valueJson         Json         @map("value_json")
+  unit              String?
+  observedAt        DateTime     @map("observed_at") @db.Timestamptz(3)
+  validFrom         DateTime?    @map("valid_from") @db.Timestamptz(3)
+  validTo           DateTime?    @map("valid_to") @db.Timestamptz(3)
+  qualityStatus     String       @map("quality_status")
+  qualityScore      Decimal?     @map("quality_score") @db.Decimal(5, 4)
+  normalizerVersion String       @map("normalizer_version")
+  contentSha256     String       @map("content_sha256") @db.Char(64)
+  match             Match        @relation(fields: [matchId], references: [id])
+  sourceRecord      SourceRecord @relation(fields: [sourceRecordId], references: [id])
+
+  @@index([matchId, evidenceType, metricKey, observedAt(sort: Desc)])
+  @@map("evidence_items")
+}

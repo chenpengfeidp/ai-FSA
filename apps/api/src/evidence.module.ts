@@ -5,11 +5,7 @@ import {
 import { ImportMatchUseCase } from "@fas/application";
 import { loadApiConfig } from "@fas/config";
 
-import {
-  type EvidenceRepository,
-  EvidenceService,
-  InMemoryEvidenceRepository,
-} from "@fas/evidence";
+import { type EvidenceRepository, EvidenceService } from "@fas/evidence";
 import {
   EvidenceImportPipeline,
   type EvidenceNormalizer,
@@ -29,6 +25,7 @@ import { ImportController } from "./import.controller.js";
 import { MatchesController } from "./matches.controller.js";
 import { createMatchProviderWiring } from "./match-provider.factory.js";
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
+import { createApiEvidenceRepository } from "./runtime-database.js";
 import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
 import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
 import { createUpcomingMatchesBoard } from "./upcoming-matches.factory.js";
@@ -52,10 +49,9 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(apiConfig.oddsProvider, 
     MatchesController,
   ],
   providers: [
-    InMemoryEvidenceRepository,
     {
       provide: evidenceRepositoryToken,
-      useExisting: InMemoryEvidenceRepository,
+      useFactory: (): EvidenceRepository => createApiEvidenceRepository(),
     },
     {
       provide: EvidenceService,

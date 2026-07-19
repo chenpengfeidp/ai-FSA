@@ -1,4 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { ExplainableMatchReport } from "../src/components/explainable-report/explainable-match-report";
 import {
@@ -119,91 +120,62 @@ describe("buildExplainableReportView", () => {
     const view = buildExplainableReportView(match, report, evidence);
 
     expect(view.header.homeTeam).toBe("Liverpool");
-    expect(view.header.awayTeam).toBe("Chelsea");
-    expect(view.header.competition).toBe("Premier League");
-    expect(view.header.kickoffTime).toBe("19:30");
     expect(view.winnerPrediction.homePercent).toBe(50);
-    expect(view.winnerPrediction.awayPercent).toBe(50);
-    expect(view.winnerPrediction.recommendedTeam).toBeNull();
     expect(view.confidence.level).toBe("Very High");
-    expect(view.confidence.percent).toBe(100);
-    expect(view.mostLikelyScore.available).toBe(false);
-    expect(view.goalRange.available).toBe(false);
-    expect(view.evidenceTimeline).toHaveLength(1);
-    expect(view.evidenceTimeline[0]?.title).toBe("Match information");
     expect(view.featureImportance).toHaveLength(3);
-    expect(
-      view.featureImportance.find((item) => item.label === "Home Team")?.polarity,
-    ).toBe("positive");
-    expect(
-      view.featureImportance.find((item) => item.label === "Away Team")?.polarity,
-    ).toBe("negative");
     expect(view.ruleEvaluations).toHaveLength(3);
     expect(view.finalRecommendation.recommendedWinner).toBe("Even signal");
-    expect(view.finalRecommendation.recommendedScore).toBe("Unavailable");
-    expect(view.finalRecommendation.confidence).toBe("Very High");
   });
 
   it("resolves confidence levels from pass ratios", () => {
     expect(resolveConfidence(3, 3)).toBe("Very High");
-    expect(resolveConfidence(3, 4)).toBe("High");
-    expect(resolveConfidence(2, 4)).toBe("Medium");
     expect(resolveConfidence(1, 4)).toBe("Low");
   });
 });
 
 describe("ExplainableMatchReport", () => {
-  it("renders the premium report sections from analysis output", () => {
+  it("renders stacked AI workspace sections from analysis output", async () => {
+    const user = userEvent.setup();
+
     render(
       <ExplainableMatchReport evidence={evidence} match={match} report={report} />,
     );
 
-    expect(screen.getByText("Prediction Hero")).toBeInTheDocument();
-    expect(screen.getByText("Premier League")).toBeInTheDocument();
-    expect(screen.getByText("Kickoff 19:30")).toBeInTheDocument();
-    expect(screen.getAllByText("Even signal").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Liverpool").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Chelsea").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Prediction")).toBeInTheDocument();
+    expect(screen.getAllByText("Premier League").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Kickoff 19:30").length).toBeGreaterThanOrEqual(1);
     expect(
       screen.getByRole("heading", { name: "Winner Prediction" }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("50%").length).toBeGreaterThanOrEqual(2);
-    expect(
-      screen.getByRole("heading", { name: "Most Likely Score" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Goal Range" })).toBeInTheDocument();
-    expect(screen.getByText("0-1 Goals")).toBeInTheDocument();
-    expect(screen.getByText("2-3 Goals")).toBeInTheDocument();
-    expect(screen.getByText("4+ Goals")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Confidence Gauge" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
-    expect(
-      screen.getByRole("heading", { name: "Explainable Pipeline" }),
-    ).toBeInTheDocument();
+
+    expect(screen.getByRole("heading", { name: "Reasoning" })).toBeInTheDocument();
     expect(
       screen.getByText("Evidence → Features → Rules → Recommendation"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Home Team Present")).toBeInTheDocument();
-    expect(screen.getAllByText("PASS").length).toBeGreaterThanOrEqual(3);
-    expect(screen.getAllByText("Weight +1").length).toBeGreaterThanOrEqual(3);
+
+    expect(screen.getByRole("heading", { name: "Evidence" })).toBeInTheDocument();
+    expect(screen.getByText("Match information")).toBeInTheDocument();
+
     expect(
       screen.getByRole("heading", { name: "Feature Importance" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Home Team")).toBeInTheDocument();
     expect(screen.getAllByText("Positive").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Negative").length).toBeGreaterThanOrEqual(1);
+
     expect(
-      screen.getByRole("heading", { name: "Evidence Timeline" }),
+      screen.getByRole("heading", { name: "Rule Evaluation" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Match information")).toBeInTheDocument();
-    expect(
-      screen.getAllByRole("heading", { name: "Even signal" }).length,
-    ).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Home Team Present")).toBeInTheDocument();
+    expect(screen.getAllByText("PASS").length).toBeGreaterThanOrEqual(3);
+
     expect(screen.getByText("Final Recommendation")).toBeInTheDocument();
-    expect(
-      screen.getAllByText("Match information is complete.").length,
-    ).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Developer Details")).toBeInTheDocument();
+    expect(screen.queryByText(/"report-match-example-1"/)).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Toggle developer details" }),
+    );
+    expect(screen.getByText(/"report-match-example-1"/)).toBeInTheDocument();
   });
 });

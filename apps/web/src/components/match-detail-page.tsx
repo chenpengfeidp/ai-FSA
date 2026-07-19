@@ -6,14 +6,24 @@ import { useMatchDetail } from "../hooks/use-match-detail";
 import { recordAnalysisHistoryEntry } from "../lib/analysis-history";
 import { findMatchById } from "../lib/todays-matches";
 import type { MatchStatus } from "../types/match-center";
-import { Breadcrumb } from "./breadcrumb";
 import { EmptyState } from "./empty-state";
 import { ErrorPanel } from "./error-panel";
 import { ExplainableMatchReport } from "./explainable-report/explainable-match-report";
 import { ExplainableReportSkeleton } from "./explainable-report-skeleton";
-import { MatchDetailHeader } from "./match-detail-header";
-import { PageContainer } from "./page-container";
+import { MatchWorkspaceShell } from "./match-workspace/match-workspace-shell";
+import { WorkspaceMatchHeader } from "./match-workspace/workspace-match-header";
+import { WorkspaceSectionNav } from "./match-workspace/workspace-section-nav";
 import { Button } from "./ui/button";
+
+const workspaceNav = Object.freeze([
+  Object.freeze({ id: "prediction", label: "Prediction" }),
+  Object.freeze({ id: "reasoning", label: "Reasoning" }),
+  Object.freeze({ id: "evidence", label: "Evidence" }),
+  Object.freeze({ id: "features", label: "Features" }),
+  Object.freeze({ id: "rules", label: "Rules" }),
+  Object.freeze({ id: "recommendation", label: "Recommendation" }),
+  Object.freeze({ id: "developer", label: "Developer" }),
+]);
 
 function resolveStatus(
   isError: boolean,
@@ -66,59 +76,48 @@ export function MatchDetailPage({
   }, [detail.data, match]);
 
   return (
-    <PageContainer>
-      <div className="space-y-6">
-        <Breadcrumb
-          items={[
-            { href: "/", label: "Dashboard" },
-            { href: "/", label: "Matches" },
-            { label: "Explainable Report" },
-          ]}
+    <MatchWorkspaceShell activeMatchId={match?.id}>
+      {match === undefined ? (
+        <EmptyState
+          action={
+            <Button asChild variant="outline">
+              <Link href="/">Back to Match Center</Link>
+            </Button>
+          }
+          description={`No catalog entry exists for "${matchId}". Choose a match from today's fixtures.`}
+          title="Match not found"
         />
+      ) : (
+        <div className="space-y-6">
+          <WorkspaceMatchHeader match={match} status={status} />
+          <WorkspaceSectionNav items={workspaceNav} />
 
-        {match === undefined ? (
-          <EmptyState
-            action={
-              <Button asChild variant="outline">
-                <Link href="/">Back to Match Center</Link>
-              </Button>
-            }
-            description={`No catalog entry exists for "${matchId}". Choose a match from today's fixtures.`}
-            title="Match not found"
-          />
-        ) : null}
+          {detail.isPending ? <ExplainableReportSkeleton /> : null}
 
-        {match !== undefined && detail.isPending ? (
-          <>
-            <MatchDetailHeader match={match} status={status} />
-            <ExplainableReportSkeleton />
-          </>
-        ) : null}
+          {detail.isError ? (
+            <div className="space-y-4">
+              <ErrorPanel message={detail.error.message} />
+              <EmptyState
+                action={
+                  <Button asChild variant="outline">
+                    <Link href="/">Back to Match Center</Link>
+                  </Button>
+                }
+                description="The analysis pipeline could not complete for this match. Return to the dashboard and try another fixture."
+                title="Unable to load match analysis"
+              />
+            </div>
+          ) : null}
 
-        {match !== undefined && detail.isError ? (
-          <div className="space-y-4">
-            <MatchDetailHeader match={match} status={status} />
-            <ErrorPanel message={detail.error.message} />
-            <EmptyState
-              action={
-                <Button asChild variant="outline">
-                  <Link href="/">Back to Match Center</Link>
-                </Button>
-              }
-              description="The analysis pipeline could not complete for this match. Return to the dashboard and try another fixture."
-              title="Unable to load match analysis"
+          {detail.data ? (
+            <ExplainableMatchReport
+              evidence={detail.data.evidence}
+              match={match}
+              report={detail.data.report}
             />
-          </div>
-        ) : null}
-
-        {match !== undefined && detail.data ? (
-          <ExplainableMatchReport
-            evidence={detail.data.evidence}
-            match={match}
-            report={detail.data.report}
-          />
-        ) : null}
-      </div>
-    </PageContainer>
+          ) : null}
+        </div>
+      )}
+    </MatchWorkspaceShell>
   );
 }

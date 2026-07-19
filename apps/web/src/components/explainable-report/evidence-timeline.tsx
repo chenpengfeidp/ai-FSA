@@ -59,9 +59,9 @@ export function EvidenceTimeline({
 }: Readonly<{ items: readonly EvidenceTimelineItemView[] }>): ReactElement {
   return (
     <section aria-labelledby="evidence-timeline-heading">
-      <Card className="animate-fade-in-delay-3 hover:translate-y-0">
+      <Card className="animate-fade-in-delay-2 hover:translate-y-0">
         <CardHeader>
-          <CardTitle id="evidence-timeline-heading">Evidence Timeline</CardTitle>
+          <CardTitle id="evidence-timeline-heading">Evidence</CardTitle>
           <p className="text-caption text-muted-foreground">
             Vertical timeline with type icons and visual hierarchy
           </p>

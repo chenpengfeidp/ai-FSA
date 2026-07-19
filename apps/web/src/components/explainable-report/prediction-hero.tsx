@@ -69,7 +69,7 @@ export function PredictionHero({
               <div className="space-y-5">
                 <p className="inline-flex items-center gap-2 text-caption font-semibold uppercase tracking-[0.16em] text-primary">
                   <Sparkles aria-hidden="true" className="size-3.5" />
-                  Prediction Hero
+                  Prediction
                 </p>
                 <div className="space-y-2">
                   <p className="text-caption font-semibold uppercase tracking-wide text-subtle">

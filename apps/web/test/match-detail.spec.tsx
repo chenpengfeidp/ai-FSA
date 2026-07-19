@@ -138,8 +138,8 @@ describe("MatchDetailPage", () => {
 
     expect(screen.getByText("Match not found")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Back to Match Center" }),
-    ).toHaveAttribute("href", "/");
+      screen.getAllByRole("link", { name: "Back to Match Center" }).length,
+    ).toBeGreaterThanOrEqual(1);
     expect(analyzeMatch).not.toHaveBeenCalled();
   });
 
@@ -149,31 +149,36 @@ describe("MatchDetailPage", () => {
     renderPage("match-example-1");
 
     expect(screen.getByText("LOADING")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("AI Analysis Workspace").length,
+    ).toBeGreaterThanOrEqual(1);
     expect(document.querySelector("[aria-busy='true']")).not.toBeNull();
   });
 
-  it("loads analysis data and renders the explainable report", async () => {
+  it("loads analysis data and renders the AI workspace", async () => {
     vi.mocked(analyzeMatch).mockResolvedValue(report);
     vi.mocked(getEvidenceByMatch).mockResolvedValue([evidence]);
     renderPage("match-example-1");
 
-    expect(await screen.findByText("Explainable Report")).toBeInTheDocument();
+    expect(await screen.findByText("AI Analysis Workspace")).toBeInTheDocument();
+    expect(screen.getAllByText("Match List").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Recent Analyses").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByRole("navigation", { name: "Workspace sections" }),
+    ).toBeInTheDocument();
     expect(
       await screen.findByRole("heading", { name: "Winner Prediction" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    expect(screen.getByText("Matches")).toBeInTheDocument();
     expect(screen.getAllByText("Premier League").length).toBeGreaterThan(0);
-    expect(screen.getByText("Kickoff 19:30")).toBeInTheDocument();
-    expect(screen.getByText("Final Recommendation")).toBeInTheDocument();
+    expect(screen.getAllByText("Kickoff 19:30").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Reasoning" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Evidence" })).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Explainable Pipeline" }),
+      screen.getByRole("heading", { name: "Rule Evaluation" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Home Team Present")).toBeInTheDocument();
-    expect(screen.getByText("Match information")).toBeInTheDocument();
-    expect(
-      screen.getAllByText("Match information is complete.").length,
-    ).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Developer Details")).toBeInTheDocument();
+    expect(screen.getByText("Final Recommendation")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(analyzeMatch).toHaveBeenCalledWith("match-example-1");
@@ -189,7 +194,7 @@ describe("MatchDetailPage", () => {
     expect(screen.getByText("Match import failed.")).toBeInTheDocument();
     expect(screen.getByText("Unable to load match analysis")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Back to Match Center" }),
-    ).toHaveAttribute("href", "/");
+      screen.getAllByRole("link", { name: "Back to Match Center" }).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 });

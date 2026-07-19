@@ -155,10 +155,13 @@ For a match to enter projection:
 | `TEAM_FORM` | home team, away team | yes |
 | `STATISTICS` | home team, away team | yes |
 | `HEAD_TO_HEAD` | match (current-side oriented) | optional (slice 1.1) |
+| `ODDS` | match (decimal 1X2) | optional (slice 1.2) |
 
 Missing any required item → Feature stage may partially compute, but Projection stage is `blocked` with `insufficient_evidence`.
 
 Optional `HEAD_TO_HEAD` thickens evidence when present. Absence must not block projection and must not permanently cap football-rule alignment `A` (inapplicable H2H rules are excluded from the alignment denominator).
+
+Optional `ODDS` is a **market signal**, not ground truth. Slice 1.2 derives market lean findings and applies a recommendation conflict gate; it does **not** blend market-implied probabilities into model 1X2.
 
 ### 5.2 `TEAM_FORM` required payload fields
 
@@ -193,11 +196,21 @@ Meetings are oriented to the **current** fixture sides (`homeGoals` / `awayGoals
 | `meetings[].homeGoals` | non-negative integer | Goals by current home side |
 | `meetings[].awayGoals` | non-negative integer | Goals by current away side |
 
-### 5.5 Quality / freshness for the slice
+### 5.5 `ODDS` optional payload fields (slice 1.2)
+
+| Field | Type | Meaning |
+|---|---|---|
+| `homeOdds` | finite number `> 1` | Decimal odds for home win |
+| `drawOdds` | finite number `> 1` | Decimal odds for draw |
+| `awayOdds` | finite number `> 1` | Decimal odds for away win |
+| `observedAt` | ISO 8601 timestamp | Observation time of the market snapshot |
+
+### 5.6 Quality / freshness for the slice
 
 - Rejected evidence cannot contribute.
 - Fixture/demo evidence may be `unverified`.
 - No post-kickoff outcome evidence may enter.
+- Market signals retain observation time and are never promoted to facts.
 
 ---
 
@@ -288,7 +301,25 @@ H2hLean = clamp(shrink(raw, 0, sampleSize), -1, 1)
 H2hSampleSize = sampleSize
 ```
 
-### 6.7 Feature bundle output
+### 6.7 Market features (optional, slice 1.2)
+
+Present only when `ODDS` evidence is present and valid.
+
+```text
+rawH = 1 / homeOdds
+rawD = 1 / drawOdds
+rawA = 1 / awayOdds
+sum  = rawH + rawD + rawA
+
+marketImpliedHome = rawH / sum
+marketImpliedDraw = rawD / sum
+marketImpliedAway = rawA / sum
+marketLean = clamp(marketImpliedHome - marketImpliedAway, -1, 1)
+```
+
+Explanations must label these as market signals, not outcome forecasts.
+
+### 6.8 Feature bundle output
 
 ```text
 FeatureBundle {
@@ -318,6 +349,7 @@ Rules consume FeatureBundle values only. They emit findings; they do not compute
 | `τ_home` | `0.30` |
 | `τ_h2h` | `0.20` |
 | `n_min_h2h` | `3` |
+| `τ_market` | `0.08` |
 
 ### 7.2 Rules
 
@@ -330,6 +362,10 @@ Rules consume FeatureBundle values only. They emit findings; they do not compute
 | `HOME_ADVANTAGE_MATERIAL` | `HomeAdvantage ≥ τ_home` | `0.55` | home+ |
 | `H2H_SUPPORTS_HOME` | `H2hLean ≥ τ_h2h` and `H2hSampleSize ≥ n_min_h2h` | `0.25` | home+ |
 | `H2H_SUPPORTS_AWAY` | `H2hLean ≤ -τ_h2h` and `H2hSampleSize ≥ n_min_h2h` | `0.25` | away+ |
+| `MARKET_LEAN_HOME` | `marketLean ≥ τ_market` | `1.00` | none (finding only) |
+| `MARKET_LEAN_AWAY` | `marketLean ≤ -τ_market` | `1.00` | none (finding only) |
+
+Market rules never enter the football softmax adjustment.
 
 Status mapping for this slice:
 
@@ -456,13 +492,16 @@ If any required evidence missing: `confidence ≤ 0.40` and recommendation gate 
 Ordered gates:
 
 1. If required evidence missing or `confidence < 0.40` → `insufficient_evidence`
-2. Else if `confidence < 0.55` or `A < 0.50` or `X ≥ 1` → `cautious`
-3. Else if `pHome` is max and `pHome - second ≥ 0.08` → `lean_home`
-4. Else if `pAway` is max and `pAway - second ≥ 0.08` → `lean_away`
-5. Else if `pDraw` is max and `pDraw - second ≥ 0.05` → `lean_draw`
-6. Else → `cautious`
+2. Else if market lean conflicts with directional football lean (`lean_home` vs `MARKET_LEAN_AWAY`, or `lean_away` vs `MARKET_LEAN_HOME`) → `cautious` and record an explicit limitation
+3. Else if `confidence < 0.55` or `A < 0.50` or `X ≥ 1` → `cautious`
+4. Else if `pHome` is max and `pHome - second ≥ 0.08` → `lean_home`
+5. Else if `pAway` is max and `pAway - second ≥ 0.08` → `lean_away`
+6. Else if `pDraw` is max and `pDraw - second ≥ 0.05` → `lean_draw`
+7. Else → `cautious`
 
 Slice 1 does not emit `high_scoring` / `low_scoring` codes.
+
+Slice 1.2 does not blend market-implied probabilities into model `pHome`/`pDraw`/`pAway`.
 
 ### 8.7 Projection bundle
 

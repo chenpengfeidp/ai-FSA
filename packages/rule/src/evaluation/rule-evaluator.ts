@@ -28,6 +28,7 @@ const TAU_MOM = 0.25;
 const TAU_HOME = 0.3;
 const TAU_H2H = 0.2;
 const H2H_N_MIN = 3;
+const TAU_MARKET = 0.08;
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -200,6 +201,37 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
         lean <= -TAU_H2H &&
         sample >= H2H_N_MIN
       );
+    },
+  }) satisfies FootballRuleDefinition,
+  // Market rules use channel "none" — findings only; never enter football softmax.
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:market-lean-home:v1",
+    ruleName: "MARKET_LEAN_HOME",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "marketLean",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const lean = numericValue(features.get("marketLean"));
+
+      return lean !== undefined && lean >= TAU_MARKET;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:market-lean-away:v1",
+    ruleName: "MARKET_LEAN_AWAY",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "marketLean",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const lean = numericValue(features.get("marketLean"));
+
+      return lean !== undefined && lean <= -TAU_MARKET;
     },
   }) satisfies FootballRuleDefinition,
 ]);

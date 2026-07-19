@@ -12,6 +12,10 @@ export type FeatureName =
   | "homeAdvantage"
   | "homeTeam"
   | "kickoff"
+  | "marketImpliedAway"
+  | "marketImpliedDraw"
+  | "marketImpliedHome"
+  | "marketLean"
   | "momentumAway"
   | "momentumHome";
 
@@ -53,6 +57,10 @@ const featureNames: ReadonlySet<string> = new Set([
   "homeAdvantage",
   "homeTeam",
   "kickoff",
+  "marketImpliedAway",
+  "marketImpliedDraw",
+  "marketImpliedHome",
+  "marketLean",
   "momentumAway",
   "momentumHome",
 ]);

@@ -23,6 +23,7 @@ function makeFeature(name: FeatureName, options: FeatureOptions = {}): Feature {
     homeAdvantage: 0.35,
     h2hLean: 0.5,
     h2hSampleSize: 5,
+    marketLean: 0.2,
   };
 
   return createFeature({
@@ -142,6 +143,7 @@ describe("RuleEvaluator", () => {
       makeFeature("homeAdvantage"),
       makeFeature("h2hLean"),
       makeFeature("h2hSampleSize"),
+      makeFeature("marketLean"),
     ]);
 
     expect(
@@ -156,6 +158,8 @@ describe("RuleEvaluator", () => {
       { ruleName: "HOME_ADVANTAGE_MATERIAL", status: "PASS", score: 0.55 },
       { ruleName: "H2H_SUPPORTS_HOME", status: "PASS", score: 0.25 },
       { ruleName: "H2H_SUPPORTS_AWAY", status: "FAIL", score: 0 },
+      { ruleName: "MARKET_LEAN_HOME", status: "PASS", score: 1 },
+      { ruleName: "MARKET_LEAN_AWAY", status: "FAIL", score: 0 },
     ]);
   });
 

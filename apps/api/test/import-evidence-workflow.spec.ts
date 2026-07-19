@@ -150,6 +150,8 @@ describe("HTTP import and Evidence query workflow", () => {
         expect.objectContaining({ name: "attackRatingHome" }),
         expect.objectContaining({ name: "h2hLean" }),
         expect.objectContaining({ name: "h2hSampleSize", value: 5 }),
+        expect.objectContaining({ name: "marketLean" }),
+        expect.objectContaining({ name: "marketImpliedHome" }),
       ]),
     );
     expect(report.rules).toEqual(
@@ -168,6 +170,10 @@ describe("HTTP import and Evidence query workflow", () => {
         }),
         expect.objectContaining({
           ruleName: "H2H_SUPPORTS_HOME",
+          status: "PASS",
+        }),
+        expect.objectContaining({
+          ruleName: "MARKET_LEAN_HOME",
           status: "PASS",
         }),
       ]),
@@ -218,6 +224,7 @@ describe("HTTP import and Evidence query workflow", () => {
           expect.objectContaining({ name: "homeAdvantage" }),
           expect.objectContaining({ name: "h2hLean" }),
           expect.objectContaining({ name: "h2hSampleSize" }),
+          expect.objectContaining({ name: "marketLean" }),
         ]),
       );
       expect(report.rules).toEqual(
@@ -243,6 +250,12 @@ describe("HTTP import and Evidence query workflow", () => {
           expect.objectContaining({
             ruleName: "H2H_SUPPORTS_AWAY",
           }),
+          expect.objectContaining({
+            ruleName: "MARKET_LEAN_HOME",
+          }),
+          expect.objectContaining({
+            ruleName: "MARKET_LEAN_AWAY",
+          }),
         ]),
       );
       expect(report.deterministic).toMatchObject({
@@ -256,6 +269,36 @@ describe("HTTP import and Evidence query workflow", () => {
           Number(deterministic.pAway),
       ).toBeCloseTo(1, 9);
     }
+  });
+
+  it("forces cautious recommendation when market lean conflicts with football lean", async () => {
+    const response = await request(
+      baseUrl,
+      "/api/analyze/match/match-example-1",
+      "POST",
+    );
+    const report = requireRecord(response.body);
+    const deterministic = requireRecord(report.deterministic);
+
+    expect(response.status).toBe(200);
+    expect(report.rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleName: "H2H_SUPPORTS_HOME",
+          status: "PASS",
+        }),
+        expect.objectContaining({
+          ruleName: "MARKET_LEAN_AWAY",
+          status: "PASS",
+        }),
+      ]),
+    );
+    expect(deterministic.recommendation).toBe("cautious");
+    expect(deterministic.limitations).toEqual(
+      expect.arrayContaining([
+        "Market lean conflicts with football-model directional lean; recommendation forced to cautious.",
+      ]),
+    );
   });
 
   it("returns a typed failure for an unknown Match", async () => {

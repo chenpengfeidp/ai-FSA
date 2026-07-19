@@ -26,23 +26,11 @@ function numericFeature(
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function recommendationFor(input: {
-  readonly requiredEvidenceMissing: boolean;
-  readonly confidence: number;
-  readonly A: number;
-  readonly X: number;
+function directionalRecommendation(input: {
   readonly pHome: number;
   readonly pDraw: number;
   readonly pAway: number;
 }): RecommendationCode {
-  if (input.requiredEvidenceMissing || input.confidence < 0.4) {
-    return "insufficient_evidence";
-  }
-
-  if (input.confidence < 0.55 || input.A < 0.5 || input.X >= 1) {
-    return "cautious";
-  }
-
   const ordered = [
     { code: "lean_home" as const, value: input.pHome, margin: 0.08 },
     { code: "lean_away" as const, value: input.pAway, margin: 0.08 },
@@ -59,6 +47,48 @@ function recommendationFor(input: {
   }
 
   return "cautious";
+}
+
+function marketConflictsWithFootball(input: {
+  readonly footballRecommendation: RecommendationCode;
+  readonly marketLeanHome: boolean;
+  readonly marketLeanAway: boolean;
+}): boolean {
+  if (input.footballRecommendation === "lean_home" && input.marketLeanAway) {
+    return true;
+  }
+
+  if (input.footballRecommendation === "lean_away" && input.marketLeanHome) {
+    return true;
+  }
+
+  return false;
+}
+
+function recommendationFor(input: {
+  readonly requiredEvidenceMissing: boolean;
+  readonly confidence: number;
+  readonly A: number;
+  readonly X: number;
+  readonly pHome: number;
+  readonly pDraw: number;
+  readonly pAway: number;
+  readonly marketConflict: boolean;
+}): RecommendationCode {
+  if (input.requiredEvidenceMissing || input.confidence < 0.4) {
+    return "insufficient_evidence";
+  }
+
+  if (
+    input.marketConflict ||
+    input.confidence < 0.55 ||
+    input.A < 0.5 ||
+    input.X >= 1
+  ) {
+    return "cautious";
+  }
+
+  return directionalRecommendation(input);
 }
 
 export function computeDeterministicMatchProjection(input: {
@@ -191,6 +221,26 @@ export function computeDeterministicMatchProjection(input: {
     strengthValues.reduce((sum, value) => sum + value, 0) / strengthValues.length;
   const confidenceRaw = 0.35 * A + 0.3 * C + 0.35 * S;
   const confidence = clamp(confidenceRaw * (1 - 0.5 * X), 0, 0.95);
+  const marketRules = input.ruleResults.filter(
+    (rule) =>
+      rule.ruleName === "MARKET_LEAN_HOME" || rule.ruleName === "MARKET_LEAN_AWAY",
+  );
+  const marketLeanHome = marketRules.some(
+    (rule) => rule.ruleName === "MARKET_LEAN_HOME" && rule.status === "PASS",
+  );
+  const marketLeanAway = marketRules.some(
+    (rule) => rule.ruleName === "MARKET_LEAN_AWAY" && rule.status === "PASS",
+  );
+  const footballRecommendation = directionalRecommendation({
+    pHome: adjusted.pHome,
+    pDraw: adjusted.pDraw,
+    pAway: adjusted.pAway,
+  });
+  const marketConflict = marketConflictsWithFootball({
+    footballRecommendation,
+    marketLeanHome,
+    marketLeanAway,
+  });
   const recommendation = recommendationFor({
     requiredEvidenceMissing: false,
     confidence,
@@ -199,7 +249,20 @@ export function computeDeterministicMatchProjection(input: {
     pHome: adjusted.pHome,
     pDraw: adjusted.pDraw,
     pAway: adjusted.pAway,
+    marketConflict,
   });
+  const limitations = [
+    "Uncalibrated independent Poisson baseline; not validated for real-world decision making.",
+    "Scorelines use pre-rule-adjustment matrix; 1X2 uses post-rule-adjustment probabilities.",
+    "Market odds are signals of market state, not ground truth; they do not blend into 1X2 in this slice.",
+  ];
+
+  if (marketConflict) {
+    limitations.push(
+      "Market lean conflicts with football-model directional lean; recommendation forced to cautious.",
+    );
+  }
+
   const projectionBody = {
     matchId: input.featureBundle.matchId,
     lambdaHome: roundProbability(lambdas.lambdaHome),
@@ -227,13 +290,13 @@ export function computeDeterministicMatchProjection(input: {
       X: roundProbability(X),
     }),
     recommendation,
-    limitations: Object.freeze([
-      "Uncalibrated independent Poisson baseline; not validated for real-world decision making.",
-      "Scorelines use pre-rule-adjustment matrix; 1X2 uses post-rule-adjustment probabilities.",
-    ]),
+    limitations: Object.freeze(limitations),
     truncationMass: roundProbability(poisson.truncationMass),
     featureBundleChecksum: input.featureBundle.checksum,
-    ruleEvaluationRefs: footballRules.map((rule) => rule.ruleId),
+    ruleEvaluationRefs: [
+      ...footballRules.map((rule) => rule.ruleId),
+      ...marketRules.map((rule) => rule.ruleId),
+    ],
   };
   const checksum = stableChecksum(JSON.stringify(projectionBody));
 

@@ -33,6 +33,8 @@ export {
   computeAttackRating,
   computeDefenseRating,
   computeH2hLean,
+  computeImpliedProbabilities,
+  computeMarketLean,
   computeMomentum,
   DEFAULT_HOME_ADVANTAGE,
   mean,

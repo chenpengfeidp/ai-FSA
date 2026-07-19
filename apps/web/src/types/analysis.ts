@@ -17,6 +17,10 @@ export type FeatureName =
   | "homeAdvantage"
   | "homeTeam"
   | "kickoff"
+  | "marketImpliedAway"
+  | "marketImpliedDraw"
+  | "marketImpliedHome"
+  | "marketLean"
   | "momentumAway"
   | "momentumHome";
 
@@ -39,6 +43,8 @@ export type RuleName =
   | "HOME_ATTACK_EDGE"
   | "HOME_TEAM_PRESENT"
   | "KICKOFF_PRESENT"
+  | "MARKET_LEAN_AWAY"
+  | "MARKET_LEAN_HOME"
   | "MOMENTUM_AWAY"
   | "MOMENTUM_HOME";
 

@@ -75,7 +75,7 @@ describe("AnalyzeMatchUseCase", () => {
     if (result.ok) {
       expect(result.value.matchId).toBe("match-example");
       expect(result.value.evidence.type).toBe("MATCH_INFO");
-      expect(result.value.evidenceSet).toHaveLength(6);
+      expect(result.value.evidenceSet).toHaveLength(7);
       expect(result.value.features.map(({ name }) => name)).toEqual(
         expect.arrayContaining([
           "homeTeam",
@@ -85,6 +85,8 @@ describe("AnalyzeMatchUseCase", () => {
           "homeAdvantage",
           "h2hLean",
           "h2hSampleSize",
+          "marketLean",
+          "marketImpliedHome",
         ]),
       );
       expect(result.value.projection.status).toBe("completed_nonempty");

@@ -154,6 +154,48 @@ describe("FeatureExtractor", () => {
     expect(features.every(Object.isFrozen)).toBe(true);
   });
 
+  it("extracts market lean features from ODDS evidence", () => {
+    const matchInfo = makeEvidence();
+    const odds = createEvidence({
+      id: "evidence-odds",
+      source: "fixture",
+      sourceId: "fixture-match-1-odds",
+      type: "ODDS",
+      matchId: createMatchId("match-1"),
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        homeOdds: 3.6,
+        drawOdds: 3.4,
+        awayOdds: 2.05,
+        observedAt: "2026-07-18T12:00:00Z",
+      },
+    });
+    const bundle = new FeatureExtractor().extractBundle([matchInfo, odds]);
+
+    expect(bundle.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "marketLean",
+          sourceEvidenceId: "evidence-odds",
+        }),
+        expect.objectContaining({
+          name: "marketImpliedAway",
+          sourceEvidenceId: "evidence-odds",
+        }),
+      ]),
+    );
+    const lean = bundle.features.find((feature) => feature.name === "marketLean");
+    expect(typeof lean?.value).toBe("number");
+    expect(Number(lean?.value)).toBeLessThan(0);
+  });
+
   it("extracts h2hLean and h2hSampleSize from HEAD_TO_HEAD evidence", () => {
     const matchInfo = makeEvidence();
     const headToHead = createEvidence({

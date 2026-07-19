@@ -424,6 +424,100 @@ function parseHeadToHead(
   }
 }
 
+function requireDecimalOdds(
+  value: unknown,
+  field: string,
+): Result<number, EvidenceNormalizationError> {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 1) {
+    return failure(
+      "INVALID_FIELD",
+      `${field} must be a finite decimal odds value > 1.`,
+      field,
+    );
+  }
+
+  return success(value);
+}
+
+function parseOdds(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): EvidenceNormalizationResult {
+  if (!isRecord(value)) {
+    return failure("INVALID_FIELD", "odds must be an object.", "odds");
+  }
+
+  const homeOdds = requireDecimalOdds(value.homeOdds, "homeOdds");
+
+  if (!homeOdds.ok) {
+    return homeOdds;
+  }
+
+  const drawOdds = requireDecimalOdds(value.drawOdds, "drawOdds");
+
+  if (!drawOdds.ok) {
+    return drawOdds;
+  }
+
+  const awayOdds = requireDecimalOdds(value.awayOdds, "awayOdds");
+
+  if (!awayOdds.ok) {
+    return awayOdds;
+  }
+
+  if (
+    typeof value.observedAt !== "string" ||
+    value.observedAt.trim().length === 0 ||
+    Number.isNaN(Date.parse(value.observedAt))
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "observedAt must be a valid ISO 8601 timestamp.",
+      "observedAt",
+    );
+  }
+
+  try {
+    return success(
+      createEvidence({
+        id: `evidence-fixture-${matchId}-odds`,
+        source: "fixture",
+        sourceId: `fixture-${matchId}-odds`,
+        type: "ODDS",
+        matchId: createMatchId(matchId),
+        collectedAt,
+        eventTime,
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          homeOdds: homeOdds.value,
+          drawOdds: drawOdds.value,
+          awayOdds: awayOdds.value,
+          observedAt: value.observedAt,
+        },
+      }),
+    );
+  } catch (error: unknown) {
+    if (
+      error instanceof EvidenceValidationError ||
+      error instanceof MatchValidationError
+    ) {
+      return failure("DOMAIN_VALIDATION_FAILED", error.message);
+    }
+
+    return failure(
+      "UNEXPECTED_ERROR",
+      "ODDS evidence normalization failed unexpectedly.",
+    );
+  }
+}
+
 export function normalizeFixtureEvidenceSet(
   input: unknown,
   context: FixtureEvidenceContext,
@@ -498,6 +592,21 @@ export function normalizeFixtureEvidenceSet(
   if (input.headToHead !== undefined) {
     const normalized = parseHeadToHead(
       input.headToHead,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalized.ok) {
+      return normalized;
+    }
+
+    evidences.push(normalized.value);
+  }
+
+  if (input.odds !== undefined) {
+    const normalized = parseOdds(
+      input.odds,
       matchId,
       context.collectedAt,
       matchInfo.value.eventTime,

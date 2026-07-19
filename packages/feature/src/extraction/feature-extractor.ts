@@ -10,6 +10,8 @@ import {
   computeAttackRating,
   computeDefenseRating,
   computeH2hLean,
+  computeImpliedProbabilities,
+  computeMarketLean,
   computeMomentum,
   DEFAULT_HOME_ADVANTAGE,
   roundFeature,
@@ -366,6 +368,73 @@ export class FeatureExtractor {
             value: sampleSize,
             explanation: `H2H sample size ${sampleSize}.`,
             sourceEvidenceId: headToHead.id,
+            generatedAt,
+          }),
+        );
+      }
+    }
+
+    const oddsEvidence = evidences.find((evidence) => evidence.type === "ODDS");
+
+    if (oddsEvidence !== undefined) {
+      const homeOdds = asFiniteNumber(oddsEvidence.payload.homeOdds);
+      const drawOdds = asFiniteNumber(oddsEvidence.payload.drawOdds);
+      const awayOdds = asFiniteNumber(oddsEvidence.payload.awayOdds);
+
+      if (
+        homeOdds !== undefined &&
+        drawOdds !== undefined &&
+        awayOdds !== undefined &&
+        homeOdds > 1 &&
+        drawOdds > 1 &&
+        awayOdds > 1
+      ) {
+        const implied = computeImpliedProbabilities({
+          homeOdds,
+          drawOdds,
+          awayOdds,
+        });
+        const lean = roundFeature(
+          computeMarketLean({ homeOdds, drawOdds, awayOdds }),
+        );
+        features.push(
+          createFeature({
+            featureId: featureId(oddsEvidence.id, "marketImpliedHome"),
+            matchId,
+            name: "marketImpliedHome",
+            value: roundFeature(implied.home),
+            explanation:
+              "De-vigged market-implied home win probability from decimal odds (market signal).",
+            sourceEvidenceId: oddsEvidence.id,
+            generatedAt,
+          }),
+          createFeature({
+            featureId: featureId(oddsEvidence.id, "marketImpliedDraw"),
+            matchId,
+            name: "marketImpliedDraw",
+            value: roundFeature(implied.draw),
+            explanation:
+              "De-vigged market-implied draw probability from decimal odds (market signal).",
+            sourceEvidenceId: oddsEvidence.id,
+            generatedAt,
+          }),
+          createFeature({
+            featureId: featureId(oddsEvidence.id, "marketImpliedAway"),
+            matchId,
+            name: "marketImpliedAway",
+            value: roundFeature(implied.away),
+            explanation:
+              "De-vigged market-implied away win probability from decimal odds (market signal).",
+            sourceEvidenceId: oddsEvidence.id,
+            generatedAt,
+          }),
+          createFeature({
+            featureId: featureId(oddsEvidence.id, "marketLean"),
+            matchId,
+            name: "marketLean",
+            value: lean,
+            explanation: `Market lean ${lean} = impliedHome - impliedAway (not an outcome forecast).`,
+            sourceEvidenceId: oddsEvidence.id,
             generatedAt,
           }),
         );

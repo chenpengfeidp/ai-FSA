@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { computeH2hLean, shrink } from "../src/extraction/feature-math.js";
+import {
+  computeH2hLean,
+  computeImpliedProbabilities,
+  computeMarketLean,
+  shrink,
+} from "../src/extraction/feature-math.js";
 
 describe("computeH2hLean", () => {
   it("returns 0 for an empty meeting list", () => {
@@ -29,5 +34,28 @@ describe("computeH2hLean", () => {
 
     expect(lean).toBeCloseTo(shrink(-0.75, 0, 4), 6);
     expect(lean).toBeLessThan(-0.2);
+  });
+});
+
+describe("market odds features", () => {
+  it("de-viggs decimal odds into probabilities that sum to 1", () => {
+    const implied = computeImpliedProbabilities({
+      homeOdds: 2,
+      drawOdds: 3.5,
+      awayOdds: 3.5,
+    });
+
+    expect(implied.home + implied.draw + implied.away).toBeCloseTo(1, 12);
+    expect(implied.home).toBeGreaterThan(implied.away);
+  });
+
+  it("leans negative when away odds are shorter", () => {
+    expect(
+      computeMarketLean({
+        homeOdds: 3.6,
+        drawOdds: 3.4,
+        awayOdds: 2.05,
+      }),
+    ).toBeLessThan(-0.08);
   });
 });

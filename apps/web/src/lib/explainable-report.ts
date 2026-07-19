@@ -31,6 +31,10 @@ const FEATURE_LABELS: Readonly<Record<FeatureName, string>> = Object.freeze({
   homeAdvantage: "Home Advantage",
   homeTeam: "Home Team",
   kickoff: "Kickoff",
+  marketImpliedAway: "Market Implied Away",
+  marketImpliedDraw: "Market Implied Draw",
+  marketImpliedHome: "Market Implied Home",
+  marketLean: "Market Lean",
   momentumAway: "Away Momentum",
   momentumHome: "Home Momentum",
 });
@@ -44,6 +48,8 @@ const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
   HOME_ATTACK_EDGE: "Home Attack Edge",
   HOME_TEAM_PRESENT: "Home Team Present",
   KICKOFF_PRESENT: "Kickoff Present",
+  MARKET_LEAN_AWAY: "Market Lean Away",
+  MARKET_LEAN_HOME: "Market Lean Home",
   MOMENTUM_AWAY: "Away Momentum Edge",
   MOMENTUM_HOME: "Home Momentum Edge",
 });

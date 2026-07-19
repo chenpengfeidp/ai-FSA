@@ -16,6 +16,8 @@ describe("FixtureProvider", () => {
     expect(match?.statistics).toHaveLength(2);
     expect(match?.teamForm[0]?.teamSide).toBe("home");
     expect(match?.statistics[1]?.teamSide).toBe("away");
+    expect(match?.odds.homeOdds).toBeGreaterThan(1);
+    expect(match?.headToHead.sampleSize).toBeGreaterThan(0);
   });
 
   it("returns immutable raw fixture data for demo matches", () => {

@@ -29,6 +29,14 @@ export interface FixtureHeadToHead {
   readonly meetings: readonly FixtureHeadToHeadMeeting[];
 }
 
+/** Decimal 1X2 odds observed at a point in time — market signal, not ground truth. */
+export interface FixtureOdds {
+  readonly homeOdds: number;
+  readonly drawOdds: number;
+  readonly awayOdds: number;
+  readonly observedAt: string;
+}
+
 export interface FixtureMatch {
   readonly matchId: string;
   readonly home: string;
@@ -37,6 +45,7 @@ export interface FixtureMatch {
   readonly teamForm: readonly FixtureTeamForm[];
   readonly statistics: readonly FixtureStatistics[];
   readonly headToHead: FixtureHeadToHead;
+  readonly odds: FixtureOdds;
 }
 
 function form(
@@ -81,6 +90,20 @@ function h2h(meetings: readonly FixtureHeadToHeadMeeting[]): FixtureHeadToHead {
   });
 }
 
+function odds(
+  homeOdds: number,
+  drawOdds: number,
+  awayOdds: number,
+  observedAt = "2026-07-18T12:00:00Z",
+): FixtureOdds {
+  return Object.freeze({
+    homeOdds,
+    drawOdds,
+    awayOdds,
+    observedAt,
+  });
+}
+
 function fixture(
   matchId: string,
   home: string,
@@ -91,6 +114,7 @@ function fixture(
   homeStats: FixtureStatistics,
   awayStats: FixtureStatistics,
   headToHead: FixtureHeadToHead,
+  matchOdds: FixtureOdds,
 ): FixtureMatch {
   return Object.freeze({
     matchId,
@@ -100,6 +124,7 @@ function fixture(
     teamForm: Object.freeze([homeForm, awayForm]),
     statistics: Object.freeze([homeStats, awayStats]),
     headToHead,
+    odds: matchOdds,
   });
 }
 
@@ -153,6 +178,13 @@ const awayLeanH2h = h2h([
   { playedAt: "2024-04-02T15:00:00Z", homeGoals: 1, awayGoals: 1 },
 ]);
 
+/** Aligned with strong-home football lean. */
+const homeFavoredOdds = odds(1.55, 4.2, 5.8);
+/** Conflicts with strong-home football / H2H lean — market prices away. */
+const awayFavoredOddsConflict = odds(3.6, 3.4, 2.05);
+const balancedOdds = odds(2.4, 3.3, 2.9);
+const slightAwayOdds = odds(2.9, 3.3, 2.35);
+
 const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
   "match-example": fixture(
     "match-example",
@@ -164,6 +196,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     strongHomeStats,
     weakAwayStats,
     homeLeanH2h,
+    homeFavoredOdds,
   ),
   "match-example-1": fixture(
     "match-example-1",
@@ -175,6 +208,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     strongHomeStats,
     weakAwayStats,
     homeLeanH2h,
+    awayFavoredOddsConflict,
   ),
   "match-example-2": fixture(
     "match-example-2",
@@ -186,6 +220,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     balancedHomeStats,
     balancedAwayStats,
     balancedH2h,
+    balancedOdds,
   ),
   "match-example-3": fixture(
     "match-example-3",
@@ -197,6 +232,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     strongHomeStats,
     balancedAwayStats,
     homeLeanH2h,
+    homeFavoredOdds,
   ),
   "match-example-4": fixture(
     "match-example-4",
@@ -208,6 +244,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     balancedHomeStats,
     weakAwayStats,
     awayLeanH2h,
+    slightAwayOdds,
   ),
   "match-example-5": fixture(
     "match-example-5",
@@ -219,6 +256,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     strongHomeStats,
     weakAwayStats,
     homeLeanH2h,
+    homeFavoredOdds,
   ),
   "match-example-6": fixture(
     "match-example-6",
@@ -230,6 +268,7 @@ const fixtureMatches: Readonly<Record<string, FixtureMatch>> = Object.freeze({
     balancedHomeStats,
     balancedAwayStats,
     balancedH2h,
+    balancedOdds,
   ),
 });
 

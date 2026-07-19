@@ -91,10 +91,13 @@ describe("ImportMatchUseCase", () => {
 
     expect(requireEvidence(first).type).toBe("MATCH_INFO");
     expect(requireEvidence(second).id).toBe(requireEvidence(first).id);
-    expect(repository.findAll()).toHaveLength(6);
+    expect(repository.findAll()).toHaveLength(7);
     expect(
       repository.findAll().some((evidence) => evidence.type === "HEAD_TO_HEAD"),
     ).toBe(true);
+    expect(repository.findAll().some((evidence) => evidence.type === "ODDS")).toBe(
+      true,
+    );
   });
 
   it("returns a typed failure when the provider has no match", () => {

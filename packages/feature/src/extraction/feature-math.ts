@@ -106,3 +106,39 @@ export function computeH2hLean(
 
   return clamp(shrink(raw, 0, meetings.length), -1, 1);
 }
+
+/**
+ * Convert decimal 1X2 odds into de-vigged implied probabilities.
+ * Market signal only — not an outcome forecast.
+ */
+export function computeImpliedProbabilities(input: {
+  readonly homeOdds: number;
+  readonly drawOdds: number;
+  readonly awayOdds: number;
+}): Readonly<{
+  home: number;
+  draw: number;
+  away: number;
+}> {
+  const rawHome = 1 / input.homeOdds;
+  const rawDraw = 1 / input.drawOdds;
+  const rawAway = 1 / input.awayOdds;
+  const sum = rawHome + rawDraw + rawAway;
+
+  return Object.freeze({
+    home: rawHome / sum,
+    draw: rawDraw / sum,
+    away: rawAway / sum,
+  });
+}
+
+/** Positive favors the home side in market-implied terms. */
+export function computeMarketLean(input: {
+  readonly homeOdds: number;
+  readonly drawOdds: number;
+  readonly awayOdds: number;
+}): number {
+  const implied = computeImpliedProbabilities(input);
+
+  return clamp(implied.home - implied.away, -1, 1);
+}

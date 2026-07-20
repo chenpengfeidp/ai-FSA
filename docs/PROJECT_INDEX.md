@@ -56,6 +56,7 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/DEVELOPMENT_WORKFLOW.md` | 工程生命周期与治理流程。 |
 | `AGENTS.md` | AI agent 必读规则；**Project Governance Rule**（产品研发阶段铁规则）。 |
 | `docs/40_PRODUCT_ROADMAP.md` | v0.2 后唯一产品路线图；每个 Sprint 必须引用。 |
+| `docs/41_EVIDENCE_PROVIDER_ARCHITECTURE.md` | Evidence Provider Layer 架构规划冻结（多 Provider；不授权 coding / 新 package）。 |
 | `docs/PROJECT_STATE.md` | **当前里程碑 / 已交付 / 下一步** 的活快照。 |
 | `docs/decisions/ADR-001-*.md` | 模块化单体 + TypeScript monorepo。 |
 | `docs/decisions/ADR-002-*.md` | V1 用 PostgreSQL + 持久任务方向。 |

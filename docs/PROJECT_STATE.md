@@ -8,8 +8,8 @@
 - Current task status: **Architecture Freeze v0.2** holding; F.1 landed; product roadmap is `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Architecture Freeze Cleanup v0.2; F.1 facts≠odds split; Repository Health Check (doc 36); Product Roadmap (doc 40); Project Governance Rule recorded
-- Next authorized work: **Sprint F1.1** per `docs/40_PRODUCT_ROADMAP.md` (Player/Lineup/Injury/Referee/Recent Form) after an implementation gate; Compose postgres smoke as platform companion
+- Last completed delivery: Architecture Freeze Cleanup v0.2; F.1 facts≠odds split; Repository Health Check (doc 36); Product Roadmap (doc 40); Project Governance Rule recorded; Evidence Provider Architecture planning (`docs/41_EVIDENCE_PROVIDER_ARCHITECTURE.md`)
+- Next authorized work: thin **Sprint F1.1 Specification** (then coding gate) per `docs/40_PRODUCT_ROADMAP.md`; F1.1 must respect doc 41 Evidence Provider boundaries; Compose postgres smoke as platform companion
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.2** (stable for long-term feature work inside frozen boundaries)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`

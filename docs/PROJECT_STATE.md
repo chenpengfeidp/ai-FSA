@@ -7,9 +7,9 @@
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
 - Current task status: **Architecture Freeze v0.2** holding; F.1 landed; product roadmap is `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: No numbered implementation sprint active
-- Last completed delivery: Architecture Freeze Cleanup v0.2; F.1 facts≠odds split; Repository Health Check (doc 36); Product Roadmap (doc 40); Project Governance Rule recorded; Evidence Provider Architecture planning (`docs/41_EVIDENCE_PROVIDER_ARCHITECTURE.md`)
-- Next authorized work: thin **Sprint F1.1 Specification** (then coding gate) per `docs/40_PRODUCT_ROADMAP.md`; F1.1 must respect doc 41 Evidence Provider boundaries; Compose postgres smoke as platform companion
+- Current sprint: **F1.1A Provider Foundation** delivered (registry + evidence metadata); F1.1 capability ingest still pending
+- Last completed delivery: Sprint **F1.1A** Provider Foundation (`docs/sprints/F1.1/F1.1A_IMPLEMENTATION_REPORT.md`); prior: Freeze v0.2, F.1, docs 36/40/41
+- Next authorized work: continue **Sprint F1.1** product capabilities (Injury/Lineup/Referee/richer form) under doc 40 + doc 41; not Player/Injury/Lineup in F1.1A scope (already excluded)
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.2** (stable for long-term feature work inside frozen boundaries)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`

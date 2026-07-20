@@ -25,13 +25,16 @@ export function EvidenceCard({
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="info">{evidence.type}</Badge>
+              <Badge>{evidence.providerId}</Badge>
               <Badge>{evidence.source}</Badge>
               <Badge>{evidence.quality}</Badge>
               <Badge>{evidence.freshness}</Badge>
+              <Badge>{evidence.confidence}</Badge>
             </div>
             <CardTitle className="font-mono text-sm">{evidence.id}</CardTitle>
             <CardDescription>
-              Collected {formatTimestamp(evidence.collectedAt)} UTC
+              Collected {formatTimestamp(evidence.timestamp ?? evidence.collectedAt)}{" "}
+              UTC · {evidence.provenance.method}
             </CardDescription>
           </div>
           <Collapsible.Trigger asChild>

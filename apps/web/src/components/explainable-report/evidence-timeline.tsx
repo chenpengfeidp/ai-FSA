@@ -91,11 +91,19 @@ export function EvidenceTimeline({
                         status={freshnessStatus(item.freshness)}
                       />
                       <StatusBadge label={item.quality} status="INFO" />
+                      <StatusBadge label={item.confidence} status="INFO" />
                     </div>
                     <p className="mt-2 text-caption font-medium text-subtle">
                       {zh.report.step(
                         index + 1,
                         formatEvidenceTimestamp(item.timestamp),
+                      )}
+                    </p>
+                    <p className="mt-1 text-caption text-muted-foreground">
+                      {zh.report.evidenceSource(
+                        item.providerId,
+                        item.source,
+                        item.provenanceMethod,
                       )}
                     </p>
                     <p className="mt-3 text-body leading-6 text-foreground">

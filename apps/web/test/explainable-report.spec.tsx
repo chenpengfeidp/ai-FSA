@@ -145,17 +145,22 @@ const report: AnalysisReportDto = {
 const evidence: readonly EvidenceDto[] = [
   {
     id: "evidence-fixture-match-example-1",
+    providerId: "internal:recorded",
     source: "fixture",
     sourceId: "fixture-match-example-1",
     type: "MATCH_INFO",
     matchId: "match-example-1",
     collectedAt: "2026-07-17T10:00:00.000Z",
     eventTime: "2026-08-01T19:30:00.000Z",
+    timestamp: "2026-07-17T10:00:00.000Z",
     freshness: "fresh",
+    confidence: "unknown",
     quality: "unverified",
     provenance: {
       collector: "@fas/evidence-normalizer",
       method: "fixture",
+      providerId: "internal:recorded",
+      category: "internal",
     },
     payload: {
       home: "Liverpool",
@@ -207,5 +212,10 @@ describe("ExplainableMatchReport", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText("48%").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Match information")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        zh.report.evidenceSource("internal:recorded", "fixture", "fixture"),
+      ),
+    ).toBeInTheDocument();
   });
 });

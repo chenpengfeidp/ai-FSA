@@ -27,7 +27,17 @@ describe("EvidenceService", () => {
 
     const evidence = await service.record(input);
 
-    expect(evidence).toEqual(input);
+    expect(evidence).toMatchObject({
+      ...input,
+      providerId: "internal:recorded",
+      confidence: "unknown",
+      timestamp: input.collectedAt,
+      provenance: {
+        ...input.provenance,
+        providerId: "internal:recorded",
+        category: "internal",
+      },
+    });
     await expect(service.findById(evidence.id)).resolves.toBe(evidence);
   });
 

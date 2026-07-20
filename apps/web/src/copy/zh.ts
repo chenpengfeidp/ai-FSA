@@ -224,7 +224,9 @@ export const zh = {
       },
     },
     evidence: "证据",
-    evidenceHint: "纵向时间线，含类型图标与视觉层级",
+    evidenceHint: "纵向时间线，含类型图标与视觉层级；显示 Provider 来源",
+    evidenceSource: (providerId: string, source: string, method: string): string =>
+      `来源 · ${providerId} · ${source} · ${method}`,
     noEvidence: "暂无证据",
     noEvidenceDescription: "本场比赛未返回任何证据记录。",
     step: (step: number, timestamp: string): string =>

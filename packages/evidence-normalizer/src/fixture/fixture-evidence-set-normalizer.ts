@@ -196,6 +196,8 @@ function parseTeamForm(
         eventTime,
         freshness: "fresh",
         quality: "unverified",
+        confidence: source === "api-football" ? "medium" : "unknown",
+        timestamp: collectedAt,
         provenance: {
           collector: "@fas/evidence-normalizer",
           method,
@@ -307,6 +309,8 @@ function parseStatistics(
         eventTime,
         freshness: "fresh",
         quality: "unverified",
+        confidence: source === "api-football" ? "medium" : "unknown",
+        timestamp: collectedAt,
         provenance: {
           collector: "@fas/evidence-normalizer",
           method,
@@ -413,21 +417,34 @@ function parseHeadToHead(
     });
   }
 
+  const provenanceOverlay = parseProviderProvenanceOverlay(value);
+
+  if (!provenanceOverlay.ok) {
+    return provenanceOverlay;
+  }
+
+  const provenance = provenanceOverlay.value;
+  const source = provenance?.source ?? "fixture";
+  const sourceId = provenance?.sourceId ?? `fixture-${matchId}-h2h`;
+  const method = provenance?.method ?? "fixture";
+
   try {
     return success(
       createEvidence({
-        id: `evidence-fixture-${matchId}-h2h`,
-        source: "fixture",
-        sourceId: `fixture-${matchId}-h2h`,
+        id: `evidence-${source}-${matchId}-h2h`,
+        source,
+        sourceId,
         type: "HEAD_TO_HEAD",
         matchId: createMatchId(matchId),
         collectedAt,
         eventTime,
+        timestamp: collectedAt,
         freshness: "fresh",
+        confidence: source === "api-football" ? "medium" : "unknown",
         quality: "unverified",
         provenance: {
           collector: "@fas/evidence-normalizer",
-          method: "fixture",
+          method,
         },
         payload: {
           sampleSize: value.sampleSize,
@@ -671,7 +688,9 @@ function parseOdds(
         matchId: createMatchId(matchId),
         collectedAt,
         eventTime,
+        timestamp: collectedAt,
         freshness: "fresh",
+        confidence: source === "the-odds-api" ? "medium" : "unknown",
         quality: "unverified",
         provenance: {
           collector: "@fas/evidence-normalizer",

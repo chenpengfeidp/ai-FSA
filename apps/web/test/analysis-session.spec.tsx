@@ -83,17 +83,22 @@ const report: AnalysisReportDto = {
 
 const evidence: EvidenceDto = {
   id: "evidence-fixture-match-example-1",
+  providerId: "internal:recorded",
   source: "fixture",
   sourceId: "fixture-match-example-1",
   type: "MATCH_INFO",
   matchId: "match-example-1",
   collectedAt: "2026-07-17T10:00:00.000Z",
   eventTime: "2026-08-01T19:30:00.000Z",
+  timestamp: "2026-07-17T10:00:00.000Z",
   freshness: "fresh",
+  confidence: "unknown",
   quality: "unverified",
   provenance: {
     collector: "@fas/evidence-normalizer",
     method: "fixture",
+    providerId: "internal:recorded",
+    category: "internal",
   },
   payload: {
     home: "Liverpool",
@@ -186,8 +191,13 @@ describe("AnalysisSessionPage", () => {
       screen.getAllByText(zh.session.statusPending).length,
     ).toBeGreaterThanOrEqual(5);
 
+    const firstStage = ANALYSIS_SESSION_STAGES[0];
+    if (firstStage === undefined) {
+      throw new Error("Expected at least one analysis session stage.");
+    }
+
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(ANALYSIS_SESSION_STAGES[0]!.durationMs);
+      await vi.advanceTimersByTimeAsync(firstStage.durationMs);
     });
 
     expect(

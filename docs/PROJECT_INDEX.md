@@ -240,7 +240,7 @@ Match Center (web)
 
 产品顺序以 [`docs/40_PRODUCT_ROADMAP.md`](./40_PRODUCT_ROADMAP.md) 为准：
 
-1. **Sprint F1.1** — Player / Lineup / Injury / Referee / Recent Form  
+1. **Sprint F1.1** — 继续 Injury / Lineup / Referee / 更丰富 Form（**F1.1A Provider Foundation 已落地**，见 `docs/sprints/F1.1/F1.1A_IMPLEMENTATION_REPORT.md`）  
 2. **Sprint F1.2** — Advanced match statistics  
 3. **Sprint F1.3** — xG / xGA / shot map（注意：路线图已重新定义 F1.1≠xG）  
 4. 其后 A1 → A2 → K1 / C1 / S1 / R1 → v1.0 → v2.0  

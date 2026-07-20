@@ -6,10 +6,13 @@ import {
   DuplicateEvidenceError,
   type Evidence,
   type EvidenceFreshness,
+  type EvidenceProviderCategory,
   type EvidenceProvenance,
   type EvidenceQuality,
   type EvidenceRepository,
+  type EvidenceSourceConfidence,
   type EvidenceType,
+  resolveProviderFromSource,
 } from "@fas/evidence";
 import { createMatchId } from "@fas/match";
 import { Prisma } from "../generated/prisma/client.js";
@@ -27,13 +30,16 @@ interface DomainEnvelope {
   readonly domain: {
     readonly id: string;
     readonly type: EvidenceType;
+    readonly providerId: string;
     readonly source: string;
     readonly sourceId: string;
     readonly freshness: EvidenceFreshness;
+    readonly confidence: EvidenceSourceConfidence;
     readonly quality: EvidenceQuality;
     readonly provenance: EvidenceProvenance;
     readonly collectedAt: string;
     readonly eventTime: string;
+    readonly timestamp: string;
     readonly matchId?: string;
   };
   readonly payload: JsonObject;
@@ -81,22 +87,44 @@ function parseEnvelope(value: unknown): DomainEnvelope | undefined {
   }
 
   const matchId = typeof domain.matchId === "string" ? domain.matchId : undefined;
+  const binding = resolveProviderFromSource(
+    domain.source,
+    typeof domain.providerId === "string" ? domain.providerId : undefined,
+    typeof provenance.category === "string"
+      ? (provenance.category as EvidenceProviderCategory)
+      : undefined,
+  );
+  const confidence =
+    typeof domain.confidence === "string"
+      ? (domain.confidence as EvidenceSourceConfidence)
+      : "unknown";
+  const timestamp =
+    typeof domain.timestamp === "string" ? domain.timestamp : domain.collectedAt;
+  const providerId =
+    typeof provenance.providerId === "string" && provenance.providerId.length > 0
+      ? provenance.providerId
+      : binding.providerId;
 
   return {
     schema_version: value.schema_version,
     domain: {
       id: domain.id,
       type: domain.type as EvidenceType,
+      providerId,
       source: domain.source,
       sourceId: domain.sourceId,
       freshness: domain.freshness as EvidenceFreshness,
+      confidence,
       quality: domain.quality as EvidenceQuality,
       provenance: {
         collector: provenance.collector,
         method: provenance.method,
+        providerId,
+        category: binding.category,
       },
       collectedAt: domain.collectedAt,
       eventTime: domain.eventTime,
+      timestamp,
       ...(matchId === undefined ? {} : { matchId }),
     },
     payload: value.payload as JsonObject,
@@ -116,13 +144,16 @@ function toDomainEvidence(
 
   return createEvidence({
     id: envelope.domain.id,
+    providerId: envelope.domain.providerId,
     source: envelope.domain.source,
     sourceId: envelope.domain.sourceId,
     type: envelope.domain.type,
     ...(matchId === undefined ? {} : { matchId }),
     collectedAt: envelope.domain.collectedAt,
     eventTime: envelope.domain.eventTime,
+    timestamp: envelope.domain.timestamp,
     freshness: envelope.domain.freshness,
+    confidence: envelope.domain.confidence,
     quality: envelope.domain.quality,
     provenance: envelope.domain.provenance,
     payload: envelope.payload,
@@ -189,13 +220,16 @@ export class PrismaEvidenceRepository implements EvidenceRepository {
       domain: {
         id: evidence.id,
         type: evidence.type,
+        providerId: evidence.providerId,
         source: evidence.source,
         sourceId: evidence.sourceId,
         freshness: evidence.freshness,
+        confidence: evidence.confidence,
         quality: evidence.quality,
         provenance: evidence.provenance,
         collectedAt: evidence.collectedAt,
         eventTime: evidence.eventTime,
+        timestamp: evidence.timestamp,
         matchId: evidence.matchId,
       },
       payload: evidence.payload,

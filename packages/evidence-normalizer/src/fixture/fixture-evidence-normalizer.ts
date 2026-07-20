@@ -92,6 +92,40 @@ function parseFixtureInput(
   );
 }
 
+function readProviderOverlay(
+  input: unknown,
+): Readonly<{ source: string; sourceId: string; method: string }> | undefined {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    return undefined;
+  }
+
+  const record = input as Record<string, unknown>;
+  const hasSource = "providerSource" in record;
+  const hasSourceId = "providerSourceId" in record;
+  const hasMethod = "providerMethod" in record;
+
+  if (!hasSource && !hasSourceId && !hasMethod) {
+    return undefined;
+  }
+
+  if (
+    typeof record.providerSource !== "string" ||
+    record.providerSource.trim().length === 0 ||
+    typeof record.providerSourceId !== "string" ||
+    record.providerSourceId.trim().length === 0 ||
+    typeof record.providerMethod !== "string" ||
+    record.providerMethod.trim().length === 0
+  ) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    source: record.providerSource.trim(),
+    sourceId: record.providerSourceId.trim(),
+    method: record.providerMethod.trim(),
+  });
+}
+
 export function normalizeFixtureEvidence(
   input: unknown,
   context: FixtureEvidenceContext,
@@ -104,19 +138,26 @@ export function normalizeFixtureEvidence(
     }
 
     const raw = parsed.value;
+    const overlay = readProviderOverlay(input);
+    const source = overlay?.source ?? "fixture";
+    const sourceId =
+      overlay?.sourceId ?? context.sourceId ?? `fixture-${raw.matchId}`;
+    const method = overlay?.method ?? "fixture";
     const evidence = createEvidence({
-      id: context.evidenceId ?? `evidence-fixture-${raw.matchId}`,
-      source: "fixture",
-      sourceId: context.sourceId ?? `fixture-${raw.matchId}`,
+      id: context.evidenceId ?? `evidence-${source}-${raw.matchId}`,
+      source,
+      sourceId,
       type: "MATCH_INFO",
       matchId: createMatchId(raw.matchId),
       collectedAt: context.collectedAt,
       eventTime: raw.kickoff,
+      timestamp: context.collectedAt,
       freshness: "fresh",
+      confidence: source === "api-football" ? "medium" : "unknown",
       quality: "unverified",
       provenance: {
         collector: "@fas/evidence-normalizer",
-        method: "fixture",
+        method,
       },
       payload: {
         home: raw.home,

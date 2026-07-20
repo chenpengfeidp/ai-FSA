@@ -24,6 +24,7 @@ import { EvidenceController } from "./evidence.controller.js";
 import { matchProviderToken } from "./evidence.tokens.js";
 import { ImportController } from "./import.controller.js";
 import { MatchesController } from "./matches.controller.js";
+import { ProvidersController } from "./providers.controller.js";
 import { FootballMatchPrimerBridge } from "./football-match-primer.bridge.js";
 import { createMatchProviderWiring } from "./match-provider.factory.js";
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
@@ -54,6 +55,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
   controllers: [
     AnalysisController,
     EvidenceController,
+    ProvidersController,
     ImportController,
     MatchesController,
   ],

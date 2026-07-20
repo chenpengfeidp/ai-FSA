@@ -46,12 +46,40 @@ describe("Evidence", () => {
   it("creates an immutable evidence value with all required fields", () => {
     const evidence = createEvidence(validInput);
 
-    expect(evidence).toEqual(validInput);
+    expect(evidence.id).toBe(validInput.id);
+    expect(evidence.source).toBe(validInput.source);
+    expect(evidence.providerId).toBe("internal:recorded");
+    expect(evidence.confidence).toBe("unknown");
+    expect(evidence.timestamp).toBe(validInput.collectedAt);
+    expect(evidence.freshness).toBe("fresh");
+    expect(evidence.provenance).toEqual({
+      collector: "@fas/evidence",
+      method: "fixture",
+      providerId: "internal:recorded",
+      category: "internal",
+    });
     expect(Object.isFrozen(evidence)).toBe(true);
     expect(Object.isFrozen(evidence.provenance)).toBe(true);
     expect(Object.isFrozen(evidence.payload)).toBe(true);
     expect(Object.isFrozen(evidence.payload.score)).toBe(true);
     expect(evidence.payload).not.toHaveProperty("matchId");
+  });
+
+  it("records provider metadata for api-football sources", () => {
+    const evidence = createEvidence({
+      ...validInput,
+      source: "api-football",
+      sourceId: "api-football:1:match",
+      confidence: "medium",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "recorded-snapshot",
+      },
+    });
+
+    expect(evidence.providerId).toBe("football:api-sports");
+    expect(evidence.provenance.category).toBe("football");
+    expect(evidence.confidence).toBe("medium");
   });
 
   it("supports evidence without a match relationship", () => {
@@ -75,7 +103,15 @@ describe("Evidence", () => {
   it("serializes its classification and match relationship", () => {
     const evidence = createEvidence(validInput);
 
-    expect(JSON.parse(JSON.stringify(evidence))).toEqual(validInput);
+    expect(JSON.parse(JSON.stringify(evidence))).toMatchObject({
+      id: validInput.id,
+      providerId: "internal:recorded",
+      source: validInput.source,
+      type: "MATCH_INFO",
+      matchId: validInput.matchId,
+      confidence: "unknown",
+      timestamp: validInput.collectedAt,
+    });
   });
 
   it("rejects missing identity and invalid timestamps", () => {

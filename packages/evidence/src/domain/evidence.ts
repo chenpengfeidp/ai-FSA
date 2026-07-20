@@ -1,8 +1,12 @@
 import type { JsonObject, JsonValue } from "@fas/domain";
 import { createMatchId, type MatchId } from "@fas/match";
+import type { EvidenceProviderCategory } from "../provider/categories.js";
+import { resolveProviderFromSource } from "../provider/resolve-provider.js";
 
 export type EvidenceFreshness = "fresh" | "stale" | "unknown";
 export type EvidenceQuality = "rejected" | "unverified" | "verified";
+/** Source/evidence confidence — not Rule, Projection, or AI confidence (doc 41). */
+export type EvidenceSourceConfidence = "high" | "low" | "medium" | "unknown";
 export type EvidenceType =
   | "HEAD_TO_HEAD"
   | "INJURY"
@@ -18,17 +22,24 @@ export type EvidenceType =
 export interface EvidenceProvenance {
   readonly collector: string;
   readonly method: string;
+  readonly providerId: string;
+  readonly category: EvidenceProviderCategory;
 }
 
 export interface Evidence {
   readonly id: string;
+  /** Stable FAS provider registry id (e.g. football:api-sports). */
+  readonly providerId: string;
   readonly source: string;
   readonly sourceId: string;
   readonly type: EvidenceType;
   readonly matchId?: MatchId;
   readonly collectedAt: string;
   readonly eventTime: string;
+  /** Intake timestamp (defaults to collectedAt). */
+  readonly timestamp: string;
   readonly freshness: EvidenceFreshness;
+  readonly confidence: EvidenceSourceConfidence;
   readonly quality: EvidenceQuality;
   readonly provenance: EvidenceProvenance;
   readonly payload: JsonObject;
@@ -36,15 +47,23 @@ export interface Evidence {
 
 export interface CreateEvidenceInput {
   readonly id: string;
+  readonly providerId?: string;
   readonly source: string;
   readonly sourceId: string;
   readonly type: string;
   readonly matchId?: MatchId;
   readonly collectedAt: string;
   readonly eventTime: string;
+  readonly timestamp?: string;
   readonly freshness: EvidenceFreshness;
+  readonly confidence?: EvidenceSourceConfidence;
   readonly quality: EvidenceQuality;
-  readonly provenance: EvidenceProvenance;
+  readonly provenance: {
+    readonly collector: string;
+    readonly method: string;
+    readonly providerId?: string;
+    readonly category?: EvidenceProviderCategory;
+  };
   readonly payload: JsonObject;
 }
 
@@ -62,6 +81,12 @@ const qualityValues: ReadonlySet<string> = new Set([
   "rejected",
   "unverified",
   "verified",
+]);
+const confidenceValues: ReadonlySet<string> = new Set([
+  "high",
+  "medium",
+  "low",
+  "unknown",
 ]);
 const evidenceTypeValues: ReadonlySet<string> = new Set([
   "HEAD_TO_HEAD",
@@ -134,9 +159,26 @@ function cloneAndFreezeJson(value: JsonValue): JsonValue {
 }
 
 export function createEvidence(input: CreateEvidenceInput): Evidence {
+  const source = requireNonEmpty(input.source, "source");
+  const binding = resolveProviderFromSource(
+    source,
+    input.providerId ?? input.provenance.providerId,
+    input.provenance.category,
+  );
+  const providerId = requireNonEmpty(binding.providerId, "providerId");
+  const collectedAt = requireTimestamp(input.collectedAt, "collectedAt");
+  const timestamp = requireTimestamp(input.timestamp ?? collectedAt, "timestamp");
+  const confidence = requireAllowedValue(
+    input.confidence ?? "unknown",
+    confidenceValues,
+    "confidence",
+  ) as EvidenceSourceConfidence;
+
   const provenance = Object.freeze({
     collector: requireNonEmpty(input.provenance.collector, "provenance.collector"),
     method: requireNonEmpty(input.provenance.method, "provenance.method"),
+    providerId,
+    category: binding.category,
   });
   const payload = cloneAndFreezeJson(input.payload) as JsonObject;
   const matchReference =
@@ -144,7 +186,8 @@ export function createEvidence(input: CreateEvidenceInput): Evidence {
 
   return Object.freeze({
     id: requireNonEmpty(input.id, "id"),
-    source: requireNonEmpty(input.source, "source"),
+    providerId,
+    source,
     sourceId: requireNonEmpty(input.sourceId, "sourceId"),
     type: requireAllowedValue(
       input.type,
@@ -152,9 +195,11 @@ export function createEvidence(input: CreateEvidenceInput): Evidence {
       "type",
     ) as EvidenceType,
     ...matchReference,
-    collectedAt: requireTimestamp(input.collectedAt, "collectedAt"),
+    collectedAt,
     eventTime: requireTimestamp(input.eventTime, "eventTime"),
+    timestamp,
     freshness: requireAllowedValue(input.freshness, freshnessValues, "freshness"),
+    confidence,
     quality: requireAllowedValue(input.quality, qualityValues, "quality"),
     provenance,
     payload,

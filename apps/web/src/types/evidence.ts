@@ -16,20 +16,34 @@ export type EvidenceFreshness = "fresh" | "stale" | "unknown";
 
 export type EvidenceQuality = "rejected" | "unverified" | "verified";
 
+export type EvidenceSourceConfidence = "high" | "low" | "medium" | "unknown";
+
+export type EvidenceProviderCategory =
+  | "football"
+  | "internal"
+  | "market"
+  | "prediction"
+  | "sentiment";
+
 export interface EvidenceProvenanceDto {
   readonly collector: string;
   readonly method: string;
+  readonly providerId: string;
+  readonly category: EvidenceProviderCategory;
 }
 
 export interface EvidenceDto {
   readonly id: string;
+  readonly providerId: string;
   readonly source: string;
   readonly sourceId: string;
   readonly type: EvidenceType;
   readonly matchId?: string;
   readonly collectedAt: string;
   readonly eventTime: string;
+  readonly timestamp: string;
   readonly freshness: EvidenceFreshness;
+  readonly confidence: EvidenceSourceConfidence;
   readonly quality: EvidenceQuality;
   readonly provenance: EvidenceProvenanceDto;
   readonly payload: Readonly<{ [key: string]: JsonValue }>;

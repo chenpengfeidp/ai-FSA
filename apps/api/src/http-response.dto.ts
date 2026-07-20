@@ -29,13 +29,25 @@ export class EvidenceProvenanceDto {
 
   @ApiProperty({ example: "fixture" })
   declare readonly method: string;
+
+  @ApiProperty({ example: "football:api-sports" })
+  declare readonly providerId: string;
+
+  @ApiProperty({
+    enum: ["football", "market", "sentiment", "prediction", "internal"],
+    example: "football",
+  })
+  declare readonly category: string;
 }
 
 export class EvidenceDto {
   @ApiProperty({ example: "evidence-fixture-match-example" })
   declare readonly id: string;
 
-  @ApiProperty({ example: "fixture" })
+  @ApiProperty({ example: "football:api-sports" })
+  declare readonly providerId: string;
+
+  @ApiProperty({ example: "api-football" })
   declare readonly source: string;
 
   @ApiProperty({ example: "fixture-match-example" })
@@ -53,8 +65,17 @@ export class EvidenceDto {
   @ApiProperty({ example: "2026-08-01T19:30:00Z", format: "date-time" })
   declare readonly eventTime: string;
 
+  @ApiProperty({ example: "2026-07-17T10:00:00Z", format: "date-time" })
+  declare readonly timestamp: string;
+
   @ApiProperty({ enum: ["fresh", "stale", "unknown"], example: "fresh" })
   declare readonly freshness: string;
+
+  @ApiProperty({
+    enum: ["high", "medium", "low", "unknown"],
+    example: "medium",
+  })
+  declare readonly confidence: string;
 
   @ApiProperty({
     enum: ["rejected", "unverified", "verified"],

@@ -57,6 +57,11 @@ export interface EvidenceTimelineItemView {
   readonly freshness: EvidenceFreshness;
   readonly quality: EvidenceQuality;
   readonly detail: string;
+  /** FAS provider registry id (Evidence source display). */
+  readonly providerId: string;
+  readonly source: string;
+  readonly provenanceMethod: string;
+  readonly confidence: string;
 }
 
 export type FeaturePolarity = "negative" | "positive";

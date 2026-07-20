@@ -20,7 +20,7 @@ Implemented (non-exhaustive):
 - Pipeline: Evidence → Feature → Rule → Analysis → Report → Prompt → AI (`LocalDeterministicNarrativeAdapter` wired at composition root)
 - Web Match Center / Session / Workspace / Library (ZH-1/ZH-2 Chinese chrome)
 
-Not in scope without a new gate: Redis, BullMQ, pgvector, microservices, public auth, network AI SDKs, F.1.1 true xG.
+Not in scope without a new gate: Redis, BullMQ, pgvector, microservices, public auth, network AI SDKs. Product sequencing after Architecture Freeze v0.2 is `docs/40_PRODUCT_ROADMAP.md` (next: Sprint F1.1; true xG is Sprint F1.3).
 
 ## Current Delivery State Pointer
 

@@ -8,6 +8,20 @@ Use it to determine what to read, which documents are authoritative, how work is
 
 For the live delivery snapshot, read `docs/PROJECT_STATE.md`.
 
+For product sprint sequencing after Architecture Freeze v0.2, read `docs/40_PRODUCT_ROADMAP.md`.
+
+## Project Governance Rule (Product Development Phase)
+
+Effective from Architecture Freeze **v0.2** and Product Roadmap **doc 40**, FAS has left the architecture-design phase and entered the **product development phase**. Agents and contributors must follow these iron rules:
+
+1. **No new Architecture documents** unless a real architecture defect is found (conflict that cannot be resolved by existing Bible / ADRs / freeze boundaries, or a measured structural failure). Prefer correcting the owning document over inventing a parallel design paper.
+2. **No new Engine** unless an existing governed engine (Prompt, Knowledge, Rule, Case, Review, Evaluation, Statistics) and the Analysis Orchestrator **cannot** satisfy the product need. Roadmap sprints K1 / C1 / S1 / R1 **activate** existing engine slots; they do not invent eighth engines.
+3. **After each Sprint, prioritize implementation code, tests, and validation evidence** over further design documentation. Sprint artifacts stay thin: goal, inputs, outputs, acceptance criteria, completion report — not new architecture chapters.
+4. **Every new Sprint must cite** `docs/40_PRODUCT_ROADMAP.md` and the Sprint id defined there.
+5. **Every Sprint must have** clear inputs, outputs, acceptance criteria, and a completion report.
+
+Stop and request human review before writing a new numbered architecture document, proposing a new engine name, or starting a sprint that is not on the product roadmap.
+
 ## Project Overview
 
 FAS is an evidence-first, reviewable AI football analysis platform.
@@ -33,9 +47,10 @@ When documents disagree, use this order:
 3. Owning numbered architecture documents
 4. Approved implementation plan and implementation gate/sign-off
 5. `docs/PROJECT_STATE.md`
-6. Sprint plans and sprint reports
-7. Existing implementation
-8. Comments, examples, and agent assumptions
+6. `docs/40_PRODUCT_ROADMAP.md` for **product sprint sequencing** (sole post-v0.2 product roadmap)
+7. Sprint plans and sprint reports (must cite doc 40)
+8. Existing implementation
+9. Comments, examples, and agent assumptions
 
 Stop and request review when a conflict cannot be resolved by this hierarchy. Never create a parallel source of truth to avoid correcting the owning document.
 
@@ -209,10 +224,13 @@ requirement on later small implementation tasks.
 ## Rules for AI Agents
 
 - Read this file and `docs/PROJECT_STATE.md` first.
+- Follow the **Project Governance Rule (Product Development Phase)** above.
 - Follow the repository reading order below before relevant changes.
 - Do not invent approval, requirements, endpoints, tables, packages, or engine behavior.
+- Do not invent new Architecture documents or new Engines without the defects / capability-gap gates in the Project Governance Rule.
+- Do not open a Sprint that does not cite `docs/40_PRODUCT_ROADMAP.md`.
 - Do not modify files outside the explicit task scope.
-- Do not turn documentation work into implementation work.
+- Do not turn documentation work into implementation work; prefer code, tests, and validation after each Sprint.
 - Do not turn diagnosis into a fix unless the request authorizes changes.
 - Do not create business code during bootstrap or governance tasks.
 - Do not create future packages merely to mirror a target tree.
@@ -263,6 +281,7 @@ For every task:
 
 Then read by change type:
 
+- product sequencing or new Sprint scope after Architecture Freeze v0.2: `docs/40_PRODUCT_ROADMAP.md` (sole product roadmap; every Sprint Plan/Spec/Report must cite it);
 - product or architecture: `01` through `04`, then affected downstream contracts;
 - engine work: `04`, `15`, the owning engine document from `05` through `11`, and applicable ADRs;
 - data or API: `02`, `04`, `12`, `13`, `19`, and the owning engine document;

@@ -22,10 +22,11 @@
 | UI 中文 ZH-1 / ZH-2 | **已落地**（比赛中心/会话 + 工作区/报告/资料库） |
 | Football Data ≠ Odds（F.1） | **已落地**（`@fas/provider-football`；Match Center 主源；Odds 为可选赔率层） |
 | Architecture Freeze | **v0.2**（Report narrative DI；pipeline depcruise；Odds vendor DTO 非公共契约） |
-| 真 xG（F.1.1） | **未做**（F.1 可用 shots-based STATISTICS；goals-proxy 仅 Odds 回退路径） |
+| 交付阶段 | **产品研发**（架构设计阶段关闭；见 `AGENTS.md` Project Governance Rule） |
+| 真 xG（路线图 **Sprint F1.3**） | **未做**（F.1 可用 shots-based STATISTICS；goals-proxy 仅 Odds 回退路径） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**私有环境确定性闭环已通；Football Data 与 Odds 已拆分；架构冻结 v0.2。下一步须单独门禁（F.1.1 xG / postgres 冒烟 / Evaluation 校准），禁止擅自开 Redis/微服务/网络 AI。**
+一句话：**已进入产品研发阶段。** 私有环境确定性闭环已通；架构冻结 v0.2；下一步 **Sprint F1.1**（`docs/40_PRODUCT_ROADMAP.md`）。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
 
 ---
 
@@ -36,11 +37,12 @@
 3. Owning numbered architecture docs（`01`–`19` 等）
 4. Approved implementation plan / gate / sign-off
 5. `docs/PROJECT_STATE.md`（**当前交付真相**）
-6. Sprint plans / reports（历史证据，不覆盖契约）
-7. 现有实现
-8. 评论、示例、agent 假设
+6. `docs/40_PRODUCT_ROADMAP.md`（**产品 Sprint 排序唯一权威**）
+7. Sprint plans / reports（须引用 doc 40；历史证据不覆盖契约）
+8. 现有实现
+9. 评论、示例、agent 假设
 
-Agent 规则：`AGENTS.md` → 再读 `PROJECT_STATE.md`。
+Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md` → 产品工作再读 doc 40。
 
 ---
 
@@ -52,7 +54,8 @@ Agent 规则：`AGENTS.md` → 再读 `PROJECT_STATE.md`。
 |------|------------|
 | `docs/00_PROJECT_BIBLE.md` | 产品使命与不可违背原则；最高权威之一。 |
 | `docs/DEVELOPMENT_WORKFLOW.md` | 工程生命周期与治理流程。 |
-| `AGENTS.md` | AI agent 必读规则、阅读顺序、禁止项。 |
+| `AGENTS.md` | AI agent 必读规则；**Project Governance Rule**（产品研发阶段铁规则）。 |
+| `docs/40_PRODUCT_ROADMAP.md` | v0.2 后唯一产品路线图；每个 Sprint 必须引用。 |
 | `docs/PROJECT_STATE.md` | **当前里程碑 / 已交付 / 下一步** 的活快照。 |
 | `docs/decisions/ADR-001-*.md` | 模块化单体 + TypeScript monorepo。 |
 | `docs/decisions/ADR-002-*.md` | V1 用 PostgreSQL + 持久任务方向。 |
@@ -99,6 +102,7 @@ Agent 规则：`AGENTS.md` → 再读 `PROJECT_STATE.md`。
 | `docs/33_ANALYSIS_PIPELINE_V2.md` | Analysis Pipeline V2 设计。 |
 | `docs/34_V2_ARCHITECTURE_ALIGNMENT.md` | V2 与现架构对齐决策。 |
 | `docs/35_V2_FIRST_VERTICAL_SLICE_SPECIFICATION.md` | 首个 V2 垂直切片规格（1.0–1.4 已实现对照）。 |
+| `docs/36_PROJECT_HEALTH_CHECK.md` | Staff Engineer 仓库健康检查（2026-07-20；非架构重设计）。 |
 
 ### 3.4 垂直切片规格 / 完成报告（Planning + delivery evidence）
 
@@ -112,7 +116,7 @@ Agent 规则：`AGENTS.md` → 再读 `PROJECT_STATE.md`。
 | `docs/sprints/VERTICAL_SLICE_A1_CALIBRATION_POPULATION_SPEC.md` | 人口频率比校准 artifact。 |
 | `docs/sprints/VERTICAL_SLICE_P1_DATABASE_READY_SPEC.md` | `/health/ready` DB ping。 |
 | `docs/sprints/VERTICAL_SLICE_P2_EVIDENCE_PERSISTENCE_SPEC.md` | 首批 Evidence/Match Prisma 持久化。 |
-| `docs/sprints/VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` | Football Data≠Odds；Match Center 事实源（**已落地**；xG → F.1.1）。 |
+| `docs/sprints/VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` | Football Data≠Odds；Match Center 事实源（**已落地**；xG 现归路线图 **Sprint F1.3**）。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 
@@ -231,11 +235,16 @@ Match Center (web)
 
 ---
 
-## 8. 推荐下一步（与 PROJECT_STATE 一致）
+## 8. 推荐下一步（与 PROJECT_STATE / 路线图一致）
 
-1. **F.1.1** true xG（单独门禁）  
-2. Compose migrate / postgres-mode 冒烟证据  
-3. Evaluation-qualified calibration  
+产品顺序以 [`docs/40_PRODUCT_ROADMAP.md`](./40_PRODUCT_ROADMAP.md) 为准：
+
+1. **Sprint F1.1** — Player / Lineup / Injury / Referee / Recent Form  
+2. **Sprint F1.2** — Advanced match statistics  
+3. **Sprint F1.3** — xG / xGA / shot map（注意：路线图已重新定义 F1.1≠xG）  
+4. 其后 A1 → A2 → K1 / C1 / S1 / R1 → v1.0 → v2.0  
+
+平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 
 环境操作：Football Data 联赛收窄 → `.env` 的 `FOOTBALL_DATA_LEAGUE_IDS`；Odds 联赛收窄 → `ODDS_SPORT_KEYS`。
 

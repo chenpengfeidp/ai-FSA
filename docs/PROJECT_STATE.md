@@ -2,17 +2,20 @@
 
 ## Snapshot
 
-- Last updated: 2026-07-19
+- Last updated: 2026-07-20
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **Architecture Freeze v0.2** complete; F.1 Football Data Provider landed (`@fas/provider-football`)
+- Current task status: **Architecture Freeze v0.2** holding; F.1 landed; product roadmap is `docs/40_PRODUCT_ROADMAP.md`
+- Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
 - Current sprint: No numbered implementation sprint active
-- Last completed delivery: Architecture Freeze Cleanup v0.2 (Report narrative DI, pipeline depcruise rules, Odds DTO scoping, docs sync); F.1 facts≠odds split
-- Next authorized work: F.1.1 true xG (separate gate); Compose postgres smoke; Evaluation-qualified calibration later
+- Last completed delivery: Architecture Freeze Cleanup v0.2; F.1 facts≠odds split; Repository Health Check (doc 36); Product Roadmap (doc 40); Project Governance Rule recorded
+- Next authorized work: **Sprint F1.1** per `docs/40_PRODUCT_ROADMAP.md` (Player/Lineup/Injury/Referee/Recent Form) after an implementation gate; Compose postgres smoke as platform companion
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.2** (stable for long-term feature work inside frozen boundaries)
+- Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
+- Project Governance Rule: no new Architecture docs / Engines without defect or capability gap; Sprint → code+tests+validation first; every Sprint cites doc 40 with I/O + acceptance + completion report
 - Document map for AI/onboarding: `docs/PROJECT_INDEX.md`
-- Approved gate: `docs/sprints/VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` (API-Football, `@fas/provider-football`, API-Sports direct, xG → F.1.1)
+- Approved gate (facts provider): `docs/sprints/VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` (API-Football, `@fas/provider-football`, API-Sports direct). **xG is roadmap Sprint F1.3** (doc 40 supersedes informal “F.1.1 = xG” naming).
 
 Update this document after every sprint, implementation gate, or material governance change.
 
@@ -44,7 +47,7 @@ Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
   → Web Match Center / Session / Workspace / Library
 ```
 
-Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG is deferred to F.1.1.
+Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG is deferred to roadmap **Sprint F1.3** (`docs/40_PRODUCT_ROADMAP.md`).
 
 Implemented packages used by the slice (non-exhaustive):
 
@@ -230,11 +233,11 @@ No numbered sprint is active. B.1/B.2/C.1/C.2/A.1/P.1/P.2/ZH-1 path is implement
 
 Recommended follow-ons (ordered):
 
-1. **F.1.1** true xG (do not start without an explicit gate);
+1. Follow **`docs/40_PRODUCT_ROADMAP.md`**: next product sprint **F1.1** (then F1.2 → F1.3 → A1 → A2 → K1/C1/S1/R1 → v1.0 → v2.0);
 2. Keep Odds as optional market layer only; do not re-merge schedule ownership into Odds;
-3. Compose migrate automation / postgres-mode smoke evidence;
-4. Evaluation-qualified calibration / larger reviewed populations;
-5. Later: volume / 战意 as separate evidence kinds (not ODDS fields).
+3. Compose migrate automation / postgres-mode smoke evidence (platform companion);
+4. Do not start a sprint without citing doc 40 Sprint id;
+5. Later product items only as listed in doc 40 (no ad-hoc engine invention).
 
 Recently delivered: Architecture Freeze v0.2; F.1 Football Data Provider; Match Center date filter; multi-league odds/scores; ZH-2; `docs/PROJECT_INDEX.md`.
 

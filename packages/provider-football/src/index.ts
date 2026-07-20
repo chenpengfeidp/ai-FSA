@@ -13,6 +13,7 @@ export type {
   FootballH2H,
   FootballH2HMeeting,
   FootballMatchBundle,
+  FootballPlayer,
   FootballProviderMethod,
   FootballResultCode,
   FootballStandingRow,
@@ -43,6 +44,7 @@ export {
 } from "./mapper/map-api-football-fixture.js";
 export { mapApiFootballTeamForm } from "./mapper/map-api-football-form.js";
 export { mapApiFootballH2H } from "./mapper/map-api-football-h2h.js";
+export { mapApiFootballSquadResponse } from "./mapper/map-api-football-squad.js";
 export { mapApiFootballStandings } from "./mapper/map-api-football-standings.js";
 export { mapApiFootballTeamStats } from "./mapper/map-api-football-stats.js";
 export { mapBoardRowToUpcomingFixture } from "./mapper/map-board-row-to-upcoming.js";

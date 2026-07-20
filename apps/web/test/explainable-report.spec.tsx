@@ -193,6 +193,37 @@ const evidence: readonly EvidenceDto[] = [
       venueId: "550",
     },
   },
+  {
+    id: "evidence-api-football-match-example-1-player-1",
+    providerId: "football:api-sports",
+    source: "api-football",
+    sourceId: "api-football:example:player:1",
+    type: "PLAYER",
+    matchId: "match-example-1",
+    collectedAt: "2026-07-17T10:00:00.000Z",
+    eventTime: "2026-08-01T19:30:00.000Z",
+    timestamp: "2026-07-17T10:00:00.000Z",
+    freshness: "fresh",
+    confidence: "medium",
+    quality: "unverified",
+    provenance: {
+      collector: "@fas/evidence-normalizer",
+      method: "recorded-snapshot",
+      providerId: "football:api-sports",
+      category: "football",
+    },
+    payload: {
+      playerId: "1",
+      name: "Alisson",
+      teamId: "40",
+      teamName: "Liverpool",
+      teamSide: "home",
+      position: "Goalkeeper",
+      number: 1,
+      nationality: "Brazil",
+      photo: "https://media.api-sports.io/football/players/1.png",
+    },
+  },
 ];
 
 afterEach(() => {
@@ -216,6 +247,9 @@ describe("buildExplainableReportView", () => {
     expect(view.venue.available).toBe(true);
     expect(view.venue.name).toBe("Anfield");
     expect(view.header.venueLabel).toBe("Anfield · Liverpool");
+    expect(view.players.available).toBe(true);
+    expect(view.players.home).toHaveLength(1);
+    expect(view.players.home[0]?.name).toBe("Alisson");
   });
 
   it("resolves confidence levels from pass ratios", () => {
@@ -242,6 +276,9 @@ describe("ExplainableMatchReport", () => {
     expect(screen.getByText("Match information")).toBeInTheDocument();
     expect(screen.getByText(zh.report.venue)).toBeInTheDocument();
     expect(screen.getByText("Anfield")).toBeInTheDocument();
+    expect(screen.getByText(zh.report.players)).toBeInTheDocument();
+    expect(screen.getByText("Alisson")).toBeInTheDocument();
+    expect(screen.getByText("Player")).toBeInTheDocument();
     expect(
       screen.getByText(
         zh.report.evidenceSource("internal:recorded", "fixture", "fixture"),

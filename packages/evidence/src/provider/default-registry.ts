@@ -6,8 +6,8 @@ function footballCapabilities(): readonly ProviderCapabilityDeclaration[] {
     Object.freeze({
       kind: "player" as const,
       supported: true,
-      ingestImplemented: false,
-      notes: "Provider supports players; F1.1A does not import player evidence.",
+      ingestImplemented: true,
+      notes: "F1.1C-1 Player Basic Evidence (squad identity only; no stats/injury).",
     }),
     Object.freeze({
       kind: "coach" as const,

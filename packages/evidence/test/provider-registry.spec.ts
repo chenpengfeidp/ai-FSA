@@ -26,7 +26,7 @@ describe("Evidence Provider Registry (F1.1A)", () => {
     expect(registry.get("prediction:stub")?.connected).toBe(false);
   });
 
-  it("declares football capabilities without claiming player/injury/lineup ingest", () => {
+  it("declares football capabilities with player/venue ingest only among deferred slices", () => {
     const registry = createDefaultEvidenceProviderRegistry();
 
     for (const kind of PROVIDER_CAPABILITY_KINDS) {
@@ -41,7 +41,7 @@ describe("Evidence Provider Registry (F1.1A)", () => {
     ).toBe(false);
     expect(
       registry.getCapability("football:api-sports", "player")?.ingestImplemented,
-    ).toBe(false);
+    ).toBe(true);
     expect(
       registry.getCapability("football:api-sports", "recent_form")
         ?.ingestImplemented,

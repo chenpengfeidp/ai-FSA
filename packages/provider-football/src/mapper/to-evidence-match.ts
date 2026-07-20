@@ -5,7 +5,8 @@ import type { FootballMatchBundle } from "../domain/football-models.js";
  * FixtureEvidenceNormalizer / ImportMatchUseCase (never vendor JSON).
  */
 export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
-  const { fixture, homeForm, awayForm, homeStats, awayStats, headToHead } = bundle;
+  const { fixture, homeForm, awayForm, homeStats, awayStats, headToHead, players } =
+    bundle;
   const fixtureKey = fixture.fixtureId;
 
   return Object.freeze({
@@ -27,6 +28,28 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
             providerSourceId: `api-football:${fixtureKey}:venue`,
             providerMethod: fixture.providerMethod,
           }),
+        }),
+    ...(players.length === 0
+      ? {}
+      : {
+          players: Object.freeze(
+            players.map((player) =>
+              Object.freeze({
+                playerId: player.playerId,
+                name: player.name,
+                teamId: player.teamId,
+                teamName: player.teamName,
+                teamSide: player.teamSide,
+                position: player.position,
+                number: player.number,
+                nationality: player.nationality,
+                photo: player.photoUrl,
+                providerSource: "api-football",
+                providerSourceId: `api-football:${fixtureKey}:player:${player.playerId}`,
+                providerMethod: player.providerMethod,
+              }),
+            ),
+          ),
         }),
     teamForm: Object.freeze([
       Object.freeze({

@@ -118,7 +118,57 @@
             "points": 36
           }
         ]
-      }
+      },
+      "players": [
+        {
+          "playerId": "1000011",
+          "name": "FC Seoul Keeper",
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "position": "Goalkeeper",
+          "number": 1,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000011.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000012",
+          "name": "FC Seoul Forward",
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "position": "Attacker",
+          "number": 9,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000012.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000013",
+          "name": "Ulsan Hyundai FC Midfielder",
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "position": "Midfielder",
+          "number": 8,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000013.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000014",
+          "name": "Ulsan Hyundai FC Defender",
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "position": "Defender",
+          "number": 4,
+          "nationality": null,
+          "photoUrl": "https://media.api-sports.io/football/players/1000014.png",
+          "providerMethod": "recorded-snapshot"
+        }
+      ]
     },
     {
       "fixture": {
@@ -202,7 +252,57 @@
         ],
         "providerMethod": "recorded-snapshot"
       },
-      "standings": null
+      "standings": null,
+      "players": [
+        {
+          "playerId": "1000021",
+          "name": "Jeonbuk Hyundai Motors Keeper",
+          "teamId": "2768",
+          "teamName": "Jeonbuk Hyundai Motors",
+          "teamSide": "home",
+          "position": "Goalkeeper",
+          "number": 1,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000021.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000022",
+          "name": "Jeonbuk Hyundai Motors Forward",
+          "teamId": "2768",
+          "teamName": "Jeonbuk Hyundai Motors",
+          "teamSide": "home",
+          "position": "Attacker",
+          "number": 9,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000022.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000023",
+          "name": "Daejeon Citizen Midfielder",
+          "teamId": "2770",
+          "teamName": "Daejeon Citizen",
+          "teamSide": "away",
+          "position": "Midfielder",
+          "number": 8,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000023.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000024",
+          "name": "Daejeon Citizen Defender",
+          "teamId": "2770",
+          "teamName": "Daejeon Citizen",
+          "teamSide": "away",
+          "position": "Defender",
+          "number": 4,
+          "nationality": null,
+          "photoUrl": "https://media.api-sports.io/football/players/1000024.png",
+          "providerMethod": "recorded-snapshot"
+        }
+      ]
     },
     {
       "fixture": {
@@ -286,7 +386,57 @@
         ],
         "providerMethod": "recorded-snapshot"
       },
-      "standings": null
+      "standings": null,
+      "players": [
+        {
+          "playerId": "1000031",
+          "name": "Kawasaki Frontale Keeper",
+          "teamId": "282",
+          "teamName": "Kawasaki Frontale",
+          "teamSide": "home",
+          "position": "Goalkeeper",
+          "number": 1,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000031.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000032",
+          "name": "Kawasaki Frontale Forward",
+          "teamId": "282",
+          "teamName": "Kawasaki Frontale",
+          "teamSide": "home",
+          "position": "Attacker",
+          "number": 9,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000032.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000033",
+          "name": "Yokohama F. Marinos Midfielder",
+          "teamId": "281",
+          "teamName": "Yokohama F. Marinos",
+          "teamSide": "away",
+          "position": "Midfielder",
+          "number": 8,
+          "nationality": "Korea Republic",
+          "photoUrl": "https://media.api-sports.io/football/players/1000033.png",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000034",
+          "name": "Yokohama F. Marinos Defender",
+          "teamId": "281",
+          "teamName": "Yokohama F. Marinos",
+          "teamSide": "away",
+          "position": "Defender",
+          "number": 4,
+          "nationality": null,
+          "photoUrl": "https://media.api-sports.io/football/players/1000034.png",
+          "providerMethod": "recorded-snapshot"
+        }
+      ]
     }
   ]
 }

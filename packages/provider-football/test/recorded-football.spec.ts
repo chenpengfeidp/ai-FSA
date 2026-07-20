@@ -70,6 +70,15 @@ describe("RecordedFootballCatalog", () => {
     const venue = result.value.find((item) => item.type === "VENUE");
     expect(venue?.payload.name).toBe("Seoul World Cup Stadium");
     expect(venue?.providerId).toBe("football:api-sports");
+
+    const players = result.value.filter((item) => item.type === "PLAYER");
+    expect(players.length).toBeGreaterThanOrEqual(4);
+    expect(players.every((item) => item.providerId === "football:api-sports")).toBe(
+      true,
+    );
+    expect(players.some((item) => item.payload.name === "FC Seoul Keeper")).toBe(
+      true,
+    );
   });
 });
 

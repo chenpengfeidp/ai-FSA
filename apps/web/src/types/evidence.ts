@@ -7,6 +7,7 @@ export type EvidenceType =
   | "MATCH_INFO"
   | "NEWS"
   | "ODDS"
+  | "PLAYER"
   | "RANKING"
   | "STATISTICS"
   | "TEAM_FORM"

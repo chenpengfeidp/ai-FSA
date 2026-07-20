@@ -6,6 +6,7 @@ import {
   Scale,
   Shirt,
   Trophy,
+  UserRound,
   Users,
   Workflow,
 } from "lucide-react";
@@ -49,6 +50,8 @@ function evidenceIcon(type: EvidenceType): ReactElement {
       return <Newspaper aria-hidden="true" className={className} />;
     case "VENUE":
       return <MapPin aria-hidden="true" className={className} />;
+    case "PLAYER":
+      return <UserRound aria-hidden="true" className={className} />;
     case "ODDS":
     case "RANKING":
     case "STATISTICS":

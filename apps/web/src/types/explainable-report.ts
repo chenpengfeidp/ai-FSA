@@ -24,6 +24,27 @@ export interface VenueContextView {
   readonly note: string;
 }
 
+export interface PlayerContextItemView {
+  readonly playerId: string;
+  readonly name: string;
+  readonly teamId: string;
+  readonly teamName: string;
+  readonly teamSide: "away" | "home";
+  readonly position: string | null;
+  readonly number: number | null;
+  readonly nationality: string | null;
+  readonly photo: string | null;
+  readonly providerId: string;
+  readonly source: string;
+}
+
+export interface PlayersContextView {
+  readonly available: boolean;
+  readonly home: readonly PlayerContextItemView[];
+  readonly away: readonly PlayerContextItemView[];
+  readonly note: string;
+}
+
 export interface WinnerPredictionView {
   readonly homeTeam: string;
   readonly awayTeam: string;
@@ -112,6 +133,7 @@ export interface FinalRecommendationView {
 export interface ExplainableReportView {
   readonly header: ExplainableMatchHeader;
   readonly venue: VenueContextView;
+  readonly players: PlayersContextView;
   readonly winnerPrediction: WinnerPredictionView;
   readonly mostLikelyScore: MostLikelyScoreView;
   readonly goalRange: GoalRangeView;

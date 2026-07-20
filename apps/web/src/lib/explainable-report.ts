@@ -14,6 +14,8 @@ import type {
   GoalRangeId,
   GoalRangeView,
   MostLikelyScoreView,
+  PlayerContextItemView,
+  PlayersContextView,
   RuleEvaluationItemView,
   VenueContextView,
   WinnerPredictionView,
@@ -66,6 +68,7 @@ const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
   MATCH_INFO: "Match information",
   NEWS: "News",
   ODDS: "Odds",
+  PLAYER: "Player",
   RANKING: "Ranking",
   STATISTICS: "Statistics",
   TEAM_FORM: "Recent form",
@@ -121,6 +124,83 @@ function buildVenueContext(evidence: readonly EvidenceDto[]): {
       note: "Venue is factual match context from Evidence (not used by Rules or Projection).",
     }),
   };
+}
+
+function mapPlayerEvidence(item: EvidenceDto): PlayerContextItemView | null {
+  if (item.type !== "PLAYER") {
+    return null;
+  }
+
+  const name =
+    typeof item.payload.name === "string" && item.payload.name.trim().length > 0
+      ? item.payload.name.trim()
+      : null;
+  const playerId =
+    typeof item.payload.playerId === "string" &&
+    item.payload.playerId.trim().length > 0
+      ? item.payload.playerId.trim()
+      : null;
+  const teamId =
+    typeof item.payload.teamId === "string" && item.payload.teamId.trim().length > 0
+      ? item.payload.teamId.trim()
+      : null;
+  const teamName =
+    typeof item.payload.teamName === "string" &&
+    item.payload.teamName.trim().length > 0
+      ? item.payload.teamName.trim()
+      : null;
+  const teamSide =
+    item.payload.teamSide === "home" || item.payload.teamSide === "away"
+      ? item.payload.teamSide
+      : null;
+
+  if (
+    name === null ||
+    playerId === null ||
+    teamId === null ||
+    teamName === null ||
+    teamSide === null
+  ) {
+    return null;
+  }
+
+  return Object.freeze({
+    playerId,
+    name,
+    teamId,
+    teamName,
+    teamSide,
+    position:
+      typeof item.payload.position === "string" ? item.payload.position : null,
+    number: typeof item.payload.number === "number" ? item.payload.number : null,
+    nationality:
+      typeof item.payload.nationality === "string" ? item.payload.nationality : null,
+    photo: typeof item.payload.photo === "string" ? item.payload.photo : null,
+    providerId: item.providerId,
+    source: item.source,
+  });
+}
+
+function buildPlayersContext(evidence: readonly EvidenceDto[]): PlayersContextView {
+  const players = evidence
+    .map(mapPlayerEvidence)
+    .filter((item): item is PlayerContextItemView => item !== null);
+
+  if (players.length === 0) {
+    return Object.freeze({
+      available: false,
+      home: Object.freeze([]),
+      away: Object.freeze([]),
+      note: "Player evidence is not available for this match.",
+    });
+  }
+
+  return Object.freeze({
+    available: true,
+    home: Object.freeze(players.filter((player) => player.teamSide === "home")),
+    away: Object.freeze(players.filter((player) => player.teamSide === "away")),
+    note: "Players are basic squad identity from Evidence (not used by Rules or Projection).",
+  });
 }
 
 function roundPercent(value: number): number {
@@ -406,6 +486,7 @@ export function buildExplainableReportView(
             : "Insufficient evidence";
 
   const venueContext = buildVenueContext(evidence);
+  const playersContext = buildPlayersContext(evidence);
 
   return Object.freeze({
     header: Object.freeze({
@@ -417,6 +498,7 @@ export function buildExplainableReportView(
       venueLabel: venueContext.headerLabel,
     }),
     venue: venueContext.venue,
+    players: playersContext,
     winnerPrediction,
     mostLikelyScore,
     goalRange,

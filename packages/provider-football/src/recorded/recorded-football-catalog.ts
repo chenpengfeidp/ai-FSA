@@ -2,13 +2,14 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
+  FootballBoardRow,
+  FootballFixture,
   FootballH2H,
   FootballMatchBundle,
+  FootballPlayer,
   FootballStandings,
   FootballTeamForm,
   FootballTeamStats,
-  FootballFixture,
-  FootballBoardRow,
 } from "../domain/football-models.js";
 import type {
   FootballFixturesSource,
@@ -48,6 +49,8 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
       ? undefined
       : (raw.standings as FootballStandings);
 
+  const playersRaw = Array.isArray(raw.players) ? raw.players : [];
+
   return Object.freeze({
     fixture: Object.freeze({ ...fixture }),
     homeForm: Object.freeze({ ...homeForm }),
@@ -56,6 +59,68 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
     awayStats: Object.freeze({ ...awayStats }),
     headToHead: Object.freeze({ ...headToHead }),
     standings: standings === undefined ? undefined : Object.freeze({ ...standings }),
+    players: Object.freeze(
+      playersRaw.flatMap((entry) => {
+        if (!isRecord(entry)) {
+          return [];
+        }
+
+        const playerId =
+          typeof entry.playerId === "string" ? entry.playerId.trim() : "";
+        const name = typeof entry.name === "string" ? entry.name.trim() : "";
+        const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+        const teamName =
+          typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+        const teamSide =
+          entry.teamSide === "home" || entry.teamSide === "away"
+            ? entry.teamSide
+            : undefined;
+        const providerMethod =
+          entry.providerMethod === "http-live" ||
+          entry.providerMethod === "recorded-snapshot"
+            ? entry.providerMethod
+            : undefined;
+
+        if (
+          playerId.length === 0 ||
+          name.length === 0 ||
+          teamId.length === 0 ||
+          teamName.length === 0 ||
+          teamSide === undefined ||
+          providerMethod === undefined
+        ) {
+          return [];
+        }
+
+        const player: FootballPlayer = Object.freeze({
+          playerId,
+          name,
+          teamId,
+          teamName,
+          teamSide,
+          position:
+            typeof entry.position === "string" && entry.position.trim().length > 0
+              ? entry.position.trim()
+              : undefined,
+          number:
+            typeof entry.number === "number" && Number.isFinite(entry.number)
+              ? entry.number
+              : undefined,
+          nationality:
+            typeof entry.nationality === "string" &&
+            entry.nationality.trim().length > 0
+              ? entry.nationality.trim()
+              : undefined,
+          photoUrl:
+            typeof entry.photoUrl === "string" && entry.photoUrl.trim().length > 0
+              ? entry.photoUrl.trim()
+              : undefined,
+          providerMethod,
+        });
+
+        return [player];
+      }),
+    ),
   });
 }
 

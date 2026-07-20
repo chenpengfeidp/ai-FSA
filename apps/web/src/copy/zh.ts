@@ -227,6 +227,13 @@ export const zh = {
     venueHint: "来自 Venue Evidence 的事实场地信息（不进入规则/投影）",
     venueId: (id: string): string => `场地 ID · ${id}`,
     noVenue: "暂无场地证据",
+    players: "球员基本信息",
+    playersHint: "来自 Player Evidence 的阵容身份（无统计/伤病/评分）",
+    playersHome: "主队球员",
+    playersAway: "客队球员",
+    playerNumber: (value: number): string => `号码 ${String(value)}`,
+    playerId: (id: string): string => `球员 ID · ${id}`,
+    noPlayers: "暂无球员证据",
     evidence: "证据",
     evidenceHint: "纵向时间线，含类型图标与视觉层级；显示 Provider 来源",
     evidenceSource: (providerId: string, source: string, method: string): string =>

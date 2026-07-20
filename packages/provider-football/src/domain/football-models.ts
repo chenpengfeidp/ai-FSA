@@ -12,6 +12,23 @@ export interface FootballVenue {
   readonly city: string | undefined;
 }
 
+/**
+ * Basic player identity for a match context (F1.1C-1).
+ * No statistics, rating, injury, or lineup status.
+ */
+export interface FootballPlayer {
+  readonly playerId: string;
+  readonly name: string;
+  readonly teamId: string;
+  readonly teamName: string;
+  readonly teamSide: "away" | "home";
+  readonly position: string | undefined;
+  readonly number: number | undefined;
+  readonly nationality: string | undefined;
+  readonly photoUrl: string | undefined;
+  readonly providerMethod: FootballProviderMethod;
+}
+
 export interface FootballFixture {
   readonly fixtureId: string;
   readonly matchId: string;
@@ -102,6 +119,8 @@ export interface FootballMatchBundle {
   readonly awayStats: FootballTeamStats;
   readonly headToHead: FootballH2H;
   readonly standings: FootballStandings | undefined;
+  /** Basic squad players for both sides (may be empty when unavailable). */
+  readonly players: readonly FootballPlayer[];
 }
 
 export interface FootballBoardRow {

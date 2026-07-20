@@ -3,6 +3,7 @@ import type { FootballMatchCatalog } from "../domain/ports.js";
 import { mapApiFootballFixtureItem } from "../mapper/map-api-football-fixture.js";
 import { mapApiFootballTeamForm } from "../mapper/map-api-football-form.js";
 import { mapApiFootballH2H } from "../mapper/map-api-football-h2h.js";
+import { mapApiFootballSquadResponse } from "../mapper/map-api-football-squad.js";
 import { mapApiFootballStandings } from "../mapper/map-api-football-standings.js";
 import { mapApiFootballTeamStats } from "../mapper/map-api-football-stats.js";
 import { statsFromFormGoals } from "../mapper/stats-from-form.js";
@@ -99,6 +100,8 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       awayStatsBody,
       h2hBody,
       standingsBody,
+      homeSquadBody,
+      awaySquadBody,
     ] = await Promise.all([
       this.#getJson(
         `/fixtures?team=${encodeURIComponent(fixture.homeTeamId)}&last=5`,
@@ -117,6 +120,12 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       ),
       this.#getJson(
         `/standings?league=${encodeURIComponent(fixture.competitionId)}&season=${String(fixture.season)}`,
+      ),
+      this.#getJson(
+        `/players/squads?team=${encodeURIComponent(fixture.homeTeamId)}`,
+      ),
+      this.#getJson(
+        `/players/squads?team=${encodeURIComponent(fixture.awayTeamId)}`,
       ),
     ]);
 
@@ -188,6 +197,27 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
           })
         : undefined;
 
+    const homePlayers =
+      homeSquadBody !== undefined
+        ? mapApiFootballSquadResponse(homeSquadBody, {
+            teamId: fixture.homeTeamId,
+            teamName: fixture.homeTeamName,
+            teamSide: "home",
+            providerMethod: "http-live",
+            maxPlayers: 12,
+          })
+        : Object.freeze([]);
+    const awayPlayers =
+      awaySquadBody !== undefined
+        ? mapApiFootballSquadResponse(awaySquadBody, {
+            teamId: fixture.awayTeamId,
+            teamName: fixture.awayTeamName,
+            teamSide: "away",
+            providerMethod: "http-live",
+            maxPlayers: 12,
+          })
+        : Object.freeze([]);
+
     const bundle: FootballMatchBundle = Object.freeze({
       fixture,
       homeForm,
@@ -196,6 +226,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       awayStats,
       headToHead,
       standings,
+      players: Object.freeze([...homePlayers, ...awayPlayers]),
     });
 
     this.#cache.set(matchId, bundle);

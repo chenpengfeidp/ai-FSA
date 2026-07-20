@@ -827,6 +827,21 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(normalized.value);
   }
 
+  if (input.players !== undefined) {
+    const normalizedPlayers = parsePlayers(
+      input.players,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalizedPlayers.ok) {
+      return normalizedPlayers;
+    }
+
+    evidences.push(...normalizedPlayers.value);
+  }
+
   if (input.odds !== undefined) {
     const normalized = parseOdds(
       input.odds,
@@ -946,4 +961,199 @@ function parseVenue(
       "VENUE evidence normalization failed unexpectedly.",
     );
   }
+}
+
+function parsePlayers(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): Result<readonly Evidence[], EvidenceNormalizationError> {
+  if (!Array.isArray(value)) {
+    return failure("INVALID_FIELD", "players must be an array.", "players");
+  }
+
+  if (value.length === 0) {
+    return success(Object.freeze([]));
+  }
+
+  const players: Evidence[] = [];
+
+  for (const [index, entry] of value.entries()) {
+    if (!isRecord(entry)) {
+      return failure(
+        "INVALID_FIELD",
+        `players[${String(index)}] must be an object.`,
+        "players",
+      );
+    }
+
+    if (typeof entry.playerId !== "string" || entry.playerId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "playerId must be a non-empty string.",
+        "playerId",
+      );
+    }
+
+    if (typeof entry.name !== "string" || entry.name.trim().length === 0) {
+      return failure("INVALID_FIELD", "name must be a non-empty string.", "name");
+    }
+
+    if (typeof entry.teamId !== "string" || entry.teamId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "teamId must be a non-empty string.",
+        "teamId",
+      );
+    }
+
+    if (typeof entry.teamName !== "string" || entry.teamName.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "teamName must be a non-empty string.",
+        "teamName",
+      );
+    }
+
+    const teamSide = requireTeamSide(entry.teamSide);
+
+    if (teamSide === undefined) {
+      return failure("INVALID_FIELD", "teamSide must be home or away.", "teamSide");
+    }
+
+    const position =
+      entry.position === undefined || entry.position === null
+        ? undefined
+        : typeof entry.position === "string" && entry.position.trim().length > 0
+          ? entry.position.trim()
+          : undefined;
+
+    if (
+      entry.position !== undefined &&
+      entry.position !== null &&
+      position === undefined
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "position must be a non-empty string when provided.",
+        "position",
+      );
+    }
+
+    const number =
+      entry.number === undefined || entry.number === null
+        ? undefined
+        : typeof entry.number === "number" &&
+            Number.isInteger(entry.number) &&
+            entry.number >= 0
+          ? entry.number
+          : undefined;
+
+    if (
+      entry.number !== undefined &&
+      entry.number !== null &&
+      number === undefined
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "number must be a non-negative integer when provided.",
+        "number",
+      );
+    }
+
+    const nationality =
+      entry.nationality === undefined || entry.nationality === null
+        ? undefined
+        : typeof entry.nationality === "string" &&
+            entry.nationality.trim().length > 0
+          ? entry.nationality.trim()
+          : undefined;
+
+    if (
+      entry.nationality !== undefined &&
+      entry.nationality !== null &&
+      nationality === undefined
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "nationality must be a non-empty string when provided.",
+        "nationality",
+      );
+    }
+
+    const photo =
+      entry.photo === undefined || entry.photo === null
+        ? undefined
+        : typeof entry.photo === "string" && entry.photo.trim().length > 0
+          ? entry.photo.trim()
+          : undefined;
+
+    if (entry.photo !== undefined && entry.photo !== null && photo === undefined) {
+      return failure(
+        "INVALID_FIELD",
+        "photo must be a non-empty string when provided.",
+        "photo",
+      );
+    }
+
+    const provenanceOverlay = parseProviderProvenanceOverlay(entry);
+
+    if (!provenanceOverlay.ok) {
+      return provenanceOverlay;
+    }
+
+    const provenance = provenanceOverlay.value;
+    const source = provenance?.source ?? "fixture";
+    const playerId = entry.playerId.trim();
+    const sourceId = provenance?.sourceId ?? `fixture-${matchId}-player-${playerId}`;
+    const method = provenance?.method ?? "fixture";
+
+    try {
+      players.push(
+        createEvidence({
+          id: `evidence-${source}-${matchId}-player-${playerId}`,
+          source,
+          sourceId,
+          type: "PLAYER",
+          matchId: createMatchId(matchId),
+          collectedAt,
+          eventTime,
+          timestamp: collectedAt,
+          freshness: "fresh",
+          confidence: source === "api-football" ? "medium" : "unknown",
+          quality: "unverified",
+          provenance: {
+            collector: "@fas/evidence-normalizer",
+            method,
+          },
+          payload: Object.freeze({
+            playerId,
+            name: entry.name.trim(),
+            teamId: entry.teamId.trim(),
+            teamName: entry.teamName.trim(),
+            teamSide,
+            ...(position === undefined ? {} : { position }),
+            ...(number === undefined ? {} : { number }),
+            ...(nationality === undefined ? {} : { nationality }),
+            ...(photo === undefined ? {} : { photo }),
+          }),
+        }),
+      );
+    } catch (error: unknown) {
+      if (
+        error instanceof EvidenceValidationError ||
+        error instanceof MatchValidationError
+      ) {
+        return failure("DOMAIN_VALIDATION_FAILED", error.message);
+      }
+
+      return failure(
+        "UNEXPECTED_ERROR",
+        "PLAYER evidence normalization failed unexpectedly.",
+      );
+    }
+  }
+
+  return success(Object.freeze(players));
 }

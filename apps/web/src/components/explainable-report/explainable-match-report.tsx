@@ -10,6 +10,7 @@ import { FinalRecommendation } from "./final-recommendation";
 import { PredictionHero } from "./prediction-hero";
 import { ReasoningSection } from "./reasoning-section";
 import { RuleEvaluationSection } from "./rule-evaluation-section";
+import { VenueContextSection } from "./venue-context";
 import { WinnerPredictionCard } from "./winner-prediction-card";
 import { WorkspaceSection } from "./workspace-section";
 
@@ -37,6 +38,10 @@ export function ExplainableMatchReport({
       </WorkspaceSection>
 
       <ReasoningSection />
+
+      <WorkspaceSection id="venue">
+        <VenueContextSection venue={view.venue} />
+      </WorkspaceSection>
 
       <WorkspaceSection id="evidence">
         <EvidenceTimeline items={view.evidenceTimeline} />

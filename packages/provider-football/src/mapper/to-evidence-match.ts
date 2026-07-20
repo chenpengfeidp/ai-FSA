@@ -16,6 +16,18 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     providerSource: "api-football",
     providerSourceId: `api-football:${fixtureKey}:match`,
     providerMethod: fixture.providerMethod,
+    ...(fixture.venue === undefined
+      ? {}
+      : {
+          venue: Object.freeze({
+            venueId: fixture.venue.venueId,
+            name: fixture.venue.name,
+            city: fixture.venue.city,
+            providerSource: "api-football",
+            providerSourceId: `api-football:${fixtureKey}:venue`,
+            providerMethod: fixture.providerMethod,
+          }),
+        }),
     teamForm: Object.freeze([
       Object.freeze({
         teamSide: homeForm.teamSide,

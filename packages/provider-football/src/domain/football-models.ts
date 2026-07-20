@@ -5,6 +5,13 @@
 
 export type FootballProviderMethod = "http-live" | "recorded-snapshot";
 
+/** Stadium / ground identity for a fixture (F1.1B-1 Venue Evidence). */
+export interface FootballVenue {
+  readonly venueId: string | undefined;
+  readonly name: string;
+  readonly city: string | undefined;
+}
+
 export interface FootballFixture {
   readonly fixtureId: string;
   readonly matchId: string;
@@ -17,6 +24,7 @@ export interface FootballFixture {
   readonly awayTeamId: string;
   readonly awayTeamName: string;
   readonly status: "SCHEDULED" | "FINISHED" | "OTHER";
+  readonly venue: FootballVenue | undefined;
   readonly providerMethod: FootballProviderMethod;
 }
 

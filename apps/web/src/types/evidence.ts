@@ -10,6 +10,7 @@ export type EvidenceType =
   | "RANKING"
   | "STATISTICS"
   | "TEAM_FORM"
+  | "VENUE"
   | "WEATHER";
 
 export type EvidenceFreshness = "fresh" | "stale" | "unknown";

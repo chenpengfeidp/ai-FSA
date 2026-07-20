@@ -11,6 +11,17 @@ export interface ExplainableMatchHeader {
   readonly homeTeam: string;
   readonly awayTeam: string;
   readonly matchId: string;
+  readonly venueLabel: string | null;
+}
+
+export interface VenueContextView {
+  readonly available: boolean;
+  readonly name: string | null;
+  readonly city: string | null;
+  readonly venueId: string | null;
+  readonly providerId: string | null;
+  readonly source: string | null;
+  readonly note: string;
 }
 
 export interface WinnerPredictionView {
@@ -100,6 +111,7 @@ export interface FinalRecommendationView {
 
 export interface ExplainableReportView {
   readonly header: ExplainableMatchHeader;
+  readonly venue: VenueContextView;
   readonly winnerPrediction: WinnerPredictionView;
   readonly mostLikelyScore: MostLikelyScoreView;
   readonly goalRange: GoalRangeView;

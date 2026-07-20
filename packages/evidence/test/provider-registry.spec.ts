@@ -46,6 +46,9 @@ describe("Evidence Provider Registry (F1.1A)", () => {
       registry.getCapability("football:api-sports", "recent_form")
         ?.ingestImplemented,
     ).toBe(true);
+    expect(
+      registry.getCapability("football:api-sports", "venue")?.ingestImplemented,
+    ).toBe(true);
   });
 
   it("resolves legacy source strings to provider ids", () => {

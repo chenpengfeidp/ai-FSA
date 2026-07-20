@@ -10,6 +10,7 @@ const evidenceTypes = [
   "RANKING",
   "STATISTICS",
   "TEAM_FORM",
+  "VENUE",
   "WEATHER",
 ] as const;
 

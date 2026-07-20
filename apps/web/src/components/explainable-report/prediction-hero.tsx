@@ -1,4 +1,4 @@
-import { CalendarClock, Sparkles, Trophy } from "lucide-react";
+import { CalendarClock, MapPin, Sparkles, Trophy } from "lucide-react";
 import type { ReactElement } from "react";
 import { zh } from "../../copy/zh";
 import { cn } from "../../lib/utils";
@@ -62,6 +62,12 @@ export function PredictionHero({
                 <CalendarClock aria-hidden="true" className="size-3.5" />
                 {zh.workspace.kickoff(header.kickoffTime)}
               </span>
+              {header.venueLabel !== null ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-surface/80 px-2.5 py-1 text-caption font-semibold text-muted-foreground backdrop-blur">
+                  <MapPin aria-hidden="true" className="size-3.5" />
+                  {header.venueLabel}
+                </span>
+              ) : null}
               <StatusBadge
                 label={zh.report.confidenceLevel(confidence.level)}
                 status="SUCCESS"

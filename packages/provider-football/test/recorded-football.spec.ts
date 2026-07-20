@@ -63,6 +63,13 @@ describe("RecordedFootballCatalog", () => {
     );
 
     expect(result.ok).toBe(true);
+    if (!result.ok) {
+      throw new Error("expected normalize success");
+    }
+
+    const venue = result.value.find((item) => item.type === "VENUE");
+    expect(venue?.payload.name).toBe("Seoul World Cup Stadium");
+    expect(venue?.providerId).toBe("football:api-sports");
   });
 });
 
@@ -101,9 +108,39 @@ describe("mapApiFootballFixturesResponse", () => {
         awayTeamId: "2",
         awayTeamName: "Away FC",
         status: "SCHEDULED",
+        venue: undefined,
         providerMethod: "http-live",
       },
     ]);
     expect(JSON.stringify(mapped[0])).not.toContain('"response"');
+  });
+
+  it("maps fixture venue into FAS domain", () => {
+    const mapped = mapApiFootballFixturesResponse(
+      {
+        response: [
+          {
+            fixture: {
+              id: 43,
+              date: "2026-07-20T10:00:00+00:00",
+              status: { short: "NS" },
+              venue: { id: 900, name: "Example Stadium", city: "Seoul" },
+            },
+            league: { id: 292, name: "K League 1", season: 2026 },
+            teams: {
+              home: { id: 1, name: "Home FC" },
+              away: { id: 2, name: "Away FC" },
+            },
+          },
+        ],
+      },
+      "http-live",
+    );
+
+    expect(mapped[0]?.venue).toEqual({
+      venueId: "900",
+      name: "Example Stadium",
+      city: "Seoul",
+    });
   });
 });

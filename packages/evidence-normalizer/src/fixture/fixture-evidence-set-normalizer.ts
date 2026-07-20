@@ -812,6 +812,21 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(normalized.value);
   }
 
+  if (input.venue !== undefined) {
+    const normalized = parseVenue(
+      input.venue,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalized.ok) {
+      return normalized;
+    }
+
+    evidences.push(normalized.value);
+  }
+
   if (input.odds !== undefined) {
     const normalized = parseOdds(
       input.odds,
@@ -828,4 +843,107 @@ export function normalizeFixtureEvidenceSet(
   }
 
   return success(Object.freeze(evidences));
+}
+
+function parseVenue(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): EvidenceNormalizationResult {
+  if (!isRecord(value)) {
+    return failure("INVALID_FIELD", "venue must be an object.", "venue");
+  }
+
+  if (typeof value.name !== "string" || value.name.trim().length === 0) {
+    return failure(
+      "INVALID_FIELD",
+      "venue.name must be a non-empty string.",
+      "name",
+    );
+  }
+
+  const city =
+    value.city === undefined || value.city === null
+      ? undefined
+      : typeof value.city === "string" && value.city.trim().length > 0
+        ? value.city.trim()
+        : undefined;
+
+  if (value.city !== undefined && value.city !== null && city === undefined) {
+    return failure(
+      "INVALID_FIELD",
+      "venue.city must be a non-empty string when provided.",
+      "city",
+    );
+  }
+
+  const venueId =
+    value.venueId === undefined || value.venueId === null
+      ? undefined
+      : typeof value.venueId === "string" && value.venueId.trim().length > 0
+        ? value.venueId.trim()
+        : undefined;
+
+  if (
+    value.venueId !== undefined &&
+    value.venueId !== null &&
+    venueId === undefined
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "venue.venueId must be a non-empty string when provided.",
+      "venueId",
+    );
+  }
+
+  const provenanceOverlay = parseProviderProvenanceOverlay(value);
+
+  if (!provenanceOverlay.ok) {
+    return provenanceOverlay;
+  }
+
+  const provenance = provenanceOverlay.value;
+  const source = provenance?.source ?? "fixture";
+  const sourceId = provenance?.sourceId ?? `fixture-${matchId}-venue`;
+  const method = provenance?.method ?? "fixture";
+
+  try {
+    return success(
+      createEvidence({
+        id: `evidence-${source}-${matchId}-venue`,
+        source,
+        sourceId,
+        type: "VENUE",
+        matchId: createMatchId(matchId),
+        collectedAt,
+        eventTime,
+        timestamp: collectedAt,
+        freshness: "fresh",
+        confidence: source === "api-football" ? "medium" : "unknown",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method,
+        },
+        payload: Object.freeze({
+          name: value.name.trim(),
+          ...(city === undefined ? {} : { city }),
+          ...(venueId === undefined ? {} : { venueId }),
+        }),
+      }),
+    );
+  } catch (error: unknown) {
+    if (
+      error instanceof EvidenceValidationError ||
+      error instanceof MatchValidationError
+    ) {
+      return failure("DOMAIN_VALIDATION_FAILED", error.message);
+    }
+
+    return failure(
+      "UNEXPECTED_ERROR",
+      "VENUE evidence normalization failed unexpectedly.",
+    );
+  }
 }

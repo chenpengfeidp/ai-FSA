@@ -13,6 +13,11 @@
         "awayTeamId": "2765",
         "awayTeamName": "Ulsan Hyundai FC",
         "status": "SCHEDULED",
+        "venue": {
+          "venueId": "1960",
+          "name": "Seoul World Cup Stadium",
+          "city": "Seoul"
+        },
         "providerMethod": "recorded-snapshot"
       },
       "homeForm": {
@@ -64,9 +69,21 @@
         "awayTeamId": "2765",
         "sampleSize": 3,
         "meetings": [
-          { "playedAt": "2026-05-10T10:00:00Z", "homeGoals": 1, "awayGoals": 2 },
-          { "playedAt": "2025-10-18T07:00:00Z", "homeGoals": 0, "awayGoals": 0 },
-          { "playedAt": "2025-05-03T07:00:00Z", "homeGoals": 2, "awayGoals": 1 }
+          {
+            "playedAt": "2026-05-10T10:00:00Z",
+            "homeGoals": 1,
+            "awayGoals": 2
+          },
+          {
+            "playedAt": "2025-10-18T07:00:00Z",
+            "homeGoals": 0,
+            "awayGoals": 0
+          },
+          {
+            "playedAt": "2025-05-03T07:00:00Z",
+            "homeGoals": 2,
+            "awayGoals": 1
+          }
         ],
         "providerMethod": "recorded-snapshot"
       },
@@ -116,6 +133,11 @@
         "awayTeamId": "2770",
         "awayTeamName": "Daejeon Citizen",
         "status": "SCHEDULED",
+        "venue": {
+          "venueId": "1961",
+          "name": "Suwon World Cup Stadium",
+          "city": "Suwon"
+        },
         "providerMethod": "recorded-snapshot"
       },
       "homeForm": {
@@ -167,8 +189,16 @@
         "awayTeamId": "2770",
         "sampleSize": 2,
         "meetings": [
-          { "playedAt": "2026-04-12T07:00:00Z", "homeGoals": 2, "awayGoals": 0 },
-          { "playedAt": "2025-09-20T07:00:00Z", "homeGoals": 1, "awayGoals": 1 }
+          {
+            "playedAt": "2026-04-12T07:00:00Z",
+            "homeGoals": 2,
+            "awayGoals": 0
+          },
+          {
+            "playedAt": "2025-09-20T07:00:00Z",
+            "homeGoals": 1,
+            "awayGoals": 1
+          }
         ],
         "providerMethod": "recorded-snapshot"
       },
@@ -187,6 +217,11 @@
         "awayTeamId": "281",
         "awayTeamName": "Yokohama F. Marinos",
         "status": "SCHEDULED",
+        "venue": {
+          "venueId": "1962",
+          "name": "Jeonju World Cup Stadium",
+          "city": "Jeonju"
+        },
         "providerMethod": "recorded-snapshot"
       },
       "homeForm": {
@@ -238,8 +273,16 @@
         "awayTeamId": "281",
         "sampleSize": 2,
         "meetings": [
-          { "playedAt": "2026-03-01T05:00:00Z", "homeGoals": 1, "awayGoals": 0 },
-          { "playedAt": "2025-08-15T10:00:00Z", "homeGoals": 2, "awayGoals": 2 }
+          {
+            "playedAt": "2026-03-01T05:00:00Z",
+            "homeGoals": 1,
+            "awayGoals": 0
+          },
+          {
+            "playedAt": "2025-08-15T10:00:00Z",
+            "homeGoals": 2,
+            "awayGoals": 2
+          }
         ],
         "providerMethod": "recorded-snapshot"
       },

@@ -168,6 +168,31 @@ const evidence: readonly EvidenceDto[] = [
       kickoff: "2026-08-01T19:30:00Z",
     },
   },
+  {
+    id: "evidence-api-football-match-example-1-venue",
+    providerId: "football:api-sports",
+    source: "api-football",
+    sourceId: "api-football:example:venue",
+    type: "VENUE",
+    matchId: "match-example-1",
+    collectedAt: "2026-07-17T10:00:00.000Z",
+    eventTime: "2026-08-01T19:30:00.000Z",
+    timestamp: "2026-07-17T10:00:00.000Z",
+    freshness: "fresh",
+    confidence: "medium",
+    quality: "unverified",
+    provenance: {
+      collector: "@fas/evidence-normalizer",
+      method: "recorded-snapshot",
+      providerId: "football:api-sports",
+      category: "football",
+    },
+    payload: {
+      name: "Anfield",
+      city: "Liverpool",
+      venueId: "550",
+    },
+  },
 ];
 
 afterEach(() => {
@@ -188,6 +213,9 @@ describe("buildExplainableReportView", () => {
     expect(view.goalRange.available).toBe(true);
     expect(view.goalRange.recommendedLabel).toBe("2-3 Goals");
     expect(view.finalRecommendation.recommendedWinner).toBe("Liverpool");
+    expect(view.venue.available).toBe(true);
+    expect(view.venue.name).toBe("Anfield");
+    expect(view.header.venueLabel).toBe("Anfield · Liverpool");
   });
 
   it("resolves confidence levels from pass ratios", () => {
@@ -212,6 +240,8 @@ describe("ExplainableMatchReport", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText("48%").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Match information")).toBeInTheDocument();
+    expect(screen.getByText(zh.report.venue)).toBeInTheDocument();
+    expect(screen.getByText("Anfield")).toBeInTheDocument();
     expect(
       screen.getByText(
         zh.report.evidenceSource("internal:recorded", "fixture", "fixture"),

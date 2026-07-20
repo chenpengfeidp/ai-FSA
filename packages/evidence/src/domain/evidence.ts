@@ -17,6 +17,7 @@ export type EvidenceType =
   | "RANKING"
   | "STATISTICS"
   | "TEAM_FORM"
+  | "VENUE"
   | "WEATHER";
 
 export interface EvidenceProvenance {
@@ -98,6 +99,7 @@ const evidenceTypeValues: ReadonlySet<string> = new Set([
   "RANKING",
   "STATISTICS",
   "TEAM_FORM",
+  "VENUE",
   "WEATHER",
 ]);
 

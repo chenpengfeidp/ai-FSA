@@ -15,6 +15,7 @@ import type {
   GoalRangeView,
   MostLikelyScoreView,
   RuleEvaluationItemView,
+  VenueContextView,
   WinnerPredictionView,
 } from "../types/explainable-report";
 import type { MatchSummary } from "../types/match-center";
@@ -68,8 +69,59 @@ const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
   RANKING: "Ranking",
   STATISTICS: "Statistics",
   TEAM_FORM: "Recent form",
+  VENUE: "Venue",
   WEATHER: "Weather",
 });
+
+function buildVenueContext(evidence: readonly EvidenceDto[]): {
+  readonly headerLabel: string | null;
+  readonly venue: VenueContextView;
+} {
+  const venueEvidence = evidence.find((item) => item.type === "VENUE");
+
+  if (venueEvidence === undefined) {
+    return {
+      headerLabel: null,
+      venue: Object.freeze({
+        available: false,
+        name: null,
+        city: null,
+        venueId: null,
+        providerId: null,
+        source: null,
+        note: "Venue evidence is not available for this match.",
+      }),
+    };
+  }
+
+  const name =
+    typeof venueEvidence.payload.name === "string"
+      ? venueEvidence.payload.name
+      : null;
+  const city =
+    typeof venueEvidence.payload.city === "string"
+      ? venueEvidence.payload.city
+      : null;
+  const venueId =
+    typeof venueEvidence.payload.venueId === "string"
+      ? venueEvidence.payload.venueId
+      : null;
+  const headerLabel =
+    name === null ? null : city === null ? name : `${name} · ${city}`;
+
+  return {
+    headerLabel,
+    venue: Object.freeze({
+      available: true,
+      name,
+      city,
+      venueId,
+      providerId: venueEvidence.providerId,
+      source: venueEvidence.source,
+      note: "Venue is factual match context from Evidence (not used by Rules or Projection).",
+    }),
+  };
+}
 
 function roundPercent(value: number): number {
   return Math.round(value);
@@ -353,6 +405,8 @@ export function buildExplainableReportView(
             ? "Cautious"
             : "Insufficient evidence";
 
+  const venueContext = buildVenueContext(evidence);
+
   return Object.freeze({
     header: Object.freeze({
       competition: match.competition,
@@ -360,7 +414,9 @@ export function buildExplainableReportView(
       homeTeam: match.homeTeam,
       awayTeam: match.awayTeam,
       matchId: match.id,
+      venueLabel: venueContext.headerLabel,
     }),
+    venue: venueContext.venue,
     winnerPrediction,
     mostLikelyScore,
     goalRange,

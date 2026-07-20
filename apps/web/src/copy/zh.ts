@@ -223,6 +223,10 @@ export const zh = {
         description: "组装供审查的人类可读推荐。",
       },
     },
+    venue: "比赛场地",
+    venueHint: "来自 Venue Evidence 的事实场地信息（不进入规则/投影）",
+    venueId: (id: string): string => `场地 ID · ${id}`,
+    noVenue: "暂无场地证据",
     evidence: "证据",
     evidenceHint: "纵向时间线，含类型图标与视觉层级；显示 Provider 来源",
     evidenceSource: (providerId: string, source: string, method: string): string =>

@@ -1,6 +1,7 @@
 import type {
   FootballFixture,
   FootballProviderMethod,
+  FootballVenue,
 } from "../domain/football-models.js";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -59,6 +60,19 @@ export function mapApiFootballFixtureItem(
   const awayName = asString(away?.name);
   const competitionName = asString(league?.name) ?? "Unknown";
   const shortStatus = asString(status?.short);
+  const venueRaw =
+    fixture !== undefined && isRecord(fixture.venue) ? fixture.venue : undefined;
+  const venueName = asString(venueRaw?.name);
+  const venueCity = asString(venueRaw?.city);
+  const venueIdNum = asNumber(venueRaw?.id);
+  const venue: FootballVenue | undefined =
+    venueName === undefined
+      ? undefined
+      : Object.freeze({
+          venueId: venueIdNum === undefined ? undefined : String(venueIdNum),
+          name: venueName,
+          city: venueCity,
+        });
 
   if (
     fixtureIdNum === undefined ||
@@ -87,6 +101,7 @@ export function mapApiFootballFixtureItem(
     awayTeamId: String(awayId),
     awayTeamName: awayName,
     status: mapStatus(shortStatus),
+    venue,
     providerMethod,
   });
 }

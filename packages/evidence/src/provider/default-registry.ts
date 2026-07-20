@@ -24,8 +24,8 @@ function footballCapabilities(): readonly ProviderCapabilityDeclaration[] {
     Object.freeze({
       kind: "venue" as const,
       supported: true,
-      ingestImplemented: false,
-      notes: "Venue on fixtures; ingest deferred past F1.1A.",
+      ingestImplemented: true,
+      notes: "F1.1B-1 Venue Evidence vertical slice (fixture venue → VENUE).",
     }),
     Object.freeze({
       kind: "lineup" as const,

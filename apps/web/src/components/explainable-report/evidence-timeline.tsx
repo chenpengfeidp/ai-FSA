@@ -1,6 +1,7 @@
 import {
   Activity,
   CloudSun,
+  MapPin,
   Newspaper,
   Scale,
   Shirt,
@@ -46,6 +47,8 @@ function evidenceIcon(type: EvidenceType): ReactElement {
       return <Shirt aria-hidden="true" className={className} />;
     case "NEWS":
       return <Newspaper aria-hidden="true" className={className} />;
+    case "VENUE":
+      return <MapPin aria-hidden="true" className={className} />;
     case "ODDS":
     case "RANKING":
     case "STATISTICS":

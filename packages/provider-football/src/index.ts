@@ -19,6 +19,7 @@ export type {
   FootballStandings,
   FootballTeamForm,
   FootballTeamStats,
+  FootballVenue,
 } from "./domain/football-models.js";
 export type {
   FootballFixturesSource,

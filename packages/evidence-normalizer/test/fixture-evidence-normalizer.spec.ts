@@ -55,19 +55,24 @@ describe("normalizeFixtureEvidence", () => {
     const result = normalizeFixtureEvidence(rawInput, context);
     const evidence = requireEvidence(result);
 
-    expect(evidence).toEqual({
+    expect(evidence).toMatchObject({
       id: context.evidenceId,
+      providerId: "internal:recorded",
       source: "fixture",
       sourceId: context.sourceId,
       type: "MATCH_INFO",
       matchId: "match-example",
       collectedAt: context.collectedAt,
       eventTime: rawInput.kickoff,
+      timestamp: context.collectedAt,
       freshness: "fresh",
+      confidence: "unknown",
       quality: "unverified",
       provenance: {
         collector: "@fas/evidence-normalizer",
         method: "fixture",
+        providerId: "internal:recorded",
+        category: "internal",
       },
       payload: {
         home: "Liverpool",

@@ -8,12 +8,14 @@ import {
   type CalibrationArtifact,
   IDENTITY_CALIBRATION_ARTIFACT,
 } from "@fas/statistics";
+import { computeIntelligenceConfidence } from "../confidence/intelligence-confidence.js";
 import {
   createAnalysisResult,
   type AnalysisResult,
 } from "../domain/analysis-result.js";
 import { computeDeterministicMatchProjection } from "../projection/compute-deterministic-projection.js";
 import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
+import { buildScenarioSet } from "../scenario/scenario-set.js";
 
 export type Result<Value, Failure> =
   | Readonly<{ ok: true; value: Value }>
@@ -220,6 +222,15 @@ export class AnalyzeMatchUseCase {
       );
     }
 
+    const scenarios = buildScenarioSet(projection);
+    const intelligenceConfidence = computeIntelligenceConfidence({
+      matchId,
+      evidenceSet,
+      featureBundle,
+      ruleResults,
+      scenarios,
+    });
+
     try {
       return success(
         createAnalysisResult({
@@ -230,6 +241,8 @@ export class AnalyzeMatchUseCase {
           featureBundle,
           ruleResults,
           projection,
+          scenarios,
+          intelligenceConfidence,
           generatedAt: latestEvaluationTime(ruleResults),
         }),
       );

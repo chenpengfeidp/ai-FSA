@@ -73,6 +73,44 @@ export function computeMomentum(results: readonly ("D" | "L" | "W")[]): number {
   return clamp(weighted / weightSum, -1, 1);
 }
 
+/** Recent form score in [0, 100] from W/D/L (W=1, D=0.5, L=0). */
+export function computeRecentFormScore(
+  results: readonly ("D" | "L" | "W")[],
+): number {
+  if (results.length === 0) {
+    return 0;
+  }
+
+  const points = results.reduce((sum, result) => {
+    if (result === "W") {
+      return sum + 1;
+    }
+
+    if (result === "D") {
+      return sum + 0.5;
+    }
+
+    return sum;
+  }, 0);
+
+  return clamp((points / results.length) * 100, 0, 100);
+}
+
+/**
+ * Availability penalty magnitude from absence counts.
+ * Emitted only when at least one absence Fact exists for the side.
+ */
+export function computeAvailabilityPenalty(input: {
+  readonly injuryCount: number;
+  readonly suspensionCount: number;
+}): number {
+  const raw = input.injuryCount * 8 + input.suspensionCount * 10;
+  return clamp(raw, 0, 40);
+}
+
+/** Bounded venue advantage score when VENUE Evidence is present. */
+export const VENUE_ADVANTAGE_SCORE = 8;
+
 export function roundFeature(value: number): number {
   return Math.round(value * 1e6) / 1e6;
 }

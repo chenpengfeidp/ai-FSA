@@ -1,6 +1,8 @@
 import { LocalDeterministicNarrativeAdapter } from "@fas/ai-provider";
 import {
+  buildScenarioSet,
   computeDeterministicMatchProjection,
+  computeIntelligenceConfidence,
   createAnalysisResult,
   type AnalysisResult,
 } from "@fas/analysis";
@@ -138,6 +140,14 @@ function makeCompletedAnalysis(): AnalysisResult {
     ruleResults,
     requiredEvidencePresentCount: 5,
   });
+  const scenarios = buildScenarioSet(projection);
+  const intelligenceConfidence = computeIntelligenceConfidence({
+    matchId,
+    evidenceSet,
+    featureBundle,
+    ruleResults,
+    scenarios,
+  });
 
   const matchInfo = evidenceSet[0];
 
@@ -153,6 +163,8 @@ function makeCompletedAnalysis(): AnalysisResult {
     featureBundle,
     ruleResults,
     projection,
+    scenarios,
+    intelligenceConfidence,
     generatedAt,
   });
 }
@@ -169,8 +181,17 @@ describe("ReportBuilder", () => {
     expect(report.features).toEqual(analysis.features);
     expect(report.rules).toEqual(analysis.ruleResults);
     expect(report.narrative.epistemicKind).toBe("inference");
-    expect(report.narrative.sections.length).toBeGreaterThan(0);
-    expect(report.narrative.sections[0]?.body).toContain("were not recomputed");
+    expect(report.narrative.sections.length).toBe(6);
+    expect(report.narrative.sections.map((section) => section.title)).toEqual([
+      "Overview",
+      "Key Factors",
+      "Strength Comparison",
+      "Risk Analysis",
+      "Prediction",
+      "Recommended Score",
+    ]);
+    expect(report.scenarios.mostLikely.slot).toBe("mostLikely");
+    expect(report.intelligenceConfidence.policyVersion).toBe("confidence.mvp.a05");
   });
 
   it("returns a deeply immutable report", () => {

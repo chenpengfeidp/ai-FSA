@@ -5,7 +5,9 @@ import { RuleEvaluator } from "@fas/rule";
 import { describe, expect, it } from "vitest";
 import {
   AnalysisResultValidationError,
+  buildScenarioSet,
   computeDeterministicMatchProjection,
+  computeIntelligenceConfidence,
   createAnalysisResult,
 } from "../src/index.js";
 
@@ -102,6 +104,14 @@ function makeCompletedAnalysisInput(matchId = createMatchId("match-1")) {
     ruleResults,
     requiredEvidencePresentCount: 5,
   });
+  const scenarios = buildScenarioSet(projection);
+  const intelligenceConfidence = computeIntelligenceConfidence({
+    matchId,
+    evidenceSet,
+    featureBundle,
+    ruleResults,
+    scenarios,
+  });
 
   return {
     matchId,
@@ -111,6 +121,8 @@ function makeCompletedAnalysisInput(matchId = createMatchId("match-1")) {
     featureBundle,
     ruleResults,
     projection,
+    scenarios,
+    intelligenceConfidence,
     generatedAt: "2026-07-17T10:00:00Z",
   };
 }

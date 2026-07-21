@@ -16,6 +16,7 @@ describe("RecordedFootballCatalog", () => {
     expect(rows.every((row) => row.providerSource === "api-football")).toBe(true);
     expect(rows.every((row) => row.analyzable)).toBe(true);
     expect(rows.some((row) => row.matchId === "football:100001")).toBe(true);
+    expect(rows.some((row) => row.matchId === "football:244001")).toBe(true);
   });
 
   it("filters by local date window", async () => {

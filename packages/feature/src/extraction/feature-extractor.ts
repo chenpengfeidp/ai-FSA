@@ -9,13 +9,16 @@ import { createFeature, type Feature, type FeatureName } from "../domain/feature
 import {
   computeAsianHandicapLean,
   computeAttackRating,
+  computeAvailabilityPenalty,
   computeDefenseRating,
   computeH2hLean,
   computeImpliedProbabilities,
   computeMarketLean,
   computeMomentum,
+  computeRecentFormScore,
   DEFAULT_HOME_ADVANTAGE,
   roundFeature,
+  VENUE_ADVANTAGE_SCORE,
 } from "./feature-math.js";
 import { stableChecksum } from "./stable-checksum.js";
 
@@ -278,7 +281,12 @@ export class FeatureExtractor {
         }),
       );
       const momentum = roundFeature(computeMomentum(results));
+      const recentForm = roundFeature(computeRecentFormScore(results));
       const sourceEvidenceId = side.stats.id;
+      const recentFormName =
+        side.side === "home"
+          ? ("recentFormHome" as const)
+          : ("recentFormAway" as const);
 
       features.push(
         createFeature({
@@ -286,7 +294,7 @@ export class FeatureExtractor {
           matchId,
           name: side.attackName,
           value: attack,
-          explanation: `Attack rating ${attack} from shots/xG/goals-for vs baseline; sample=${windowMatches}.`,
+          explanation: `Attack rating ${attack} from shots/goals-for vs baseline; sample=${windowMatches}.`,
           sourceEvidenceId,
           generatedAt,
         }),
@@ -295,7 +303,7 @@ export class FeatureExtractor {
           matchId,
           name: side.defenseName,
           value: defense,
-          explanation: `Defense rating ${defense} from shots/xG/goals-against vs baseline; sample=${windowMatches}.`,
+          explanation: `Defense rating ${defense} from shots/goals-against vs baseline; sample=${windowMatches}.`,
           sourceEvidenceId,
           generatedAt,
         }),
@@ -308,6 +316,42 @@ export class FeatureExtractor {
           sourceEvidenceId: side.form.id,
           generatedAt,
         }),
+        createFeature({
+          featureId: featureId(side.form.id, recentFormName),
+          matchId,
+          name: recentFormName,
+          value: recentForm,
+          explanation: `Recent form ${recentForm} from W/D/L window (W=1, D=0.5, L=0).`,
+          sourceEvidenceId: side.form.id,
+          generatedAt,
+        }),
+      );
+    }
+
+    const momentumHomeFeature = features.find(
+      (feature) => feature.name === "momentumHome",
+    );
+    const momentumAwayFeature = features.find(
+      (feature) => feature.name === "momentumAway",
+    );
+
+    if (
+      typeof momentumHomeFeature?.value === "number" &&
+      typeof momentumAwayFeature?.value === "number"
+    ) {
+      const momentumLean = roundFeature(
+        momentumHomeFeature.value - momentumAwayFeature.value,
+      );
+      features.push(
+        createFeature({
+          featureId: featureId(matchInfo.id, "momentum"),
+          matchId,
+          name: "momentum",
+          value: momentumLean,
+          explanation: `Signed momentum lean ${momentumLean} (home momentum minus away momentum).`,
+          sourceEvidenceId: matchInfo.id,
+          generatedAt,
+        }),
       );
     }
 
@@ -318,11 +362,66 @@ export class FeatureExtractor {
         name: "homeAdvantage",
         value: DEFAULT_HOME_ADVANTAGE,
         explanation:
-          "HomeAdvantage uses the slice-1 competition baseline constant, not derived home/away splits.",
+          "HomeAdvantage uses the competition baseline constant, not derived home/away splits.",
         sourceEvidenceId: matchInfo.id,
         generatedAt,
       }),
     );
+
+    const venueEvidence = evidences.find((evidence) => evidence.type === "VENUE");
+
+    if (venueEvidence !== undefined) {
+      features.push(
+        createFeature({
+          featureId: featureId(venueEvidence.id, "venueAdvantage"),
+          matchId,
+          name: "venueAdvantage",
+          value: VENUE_ADVANTAGE_SCORE,
+          explanation: `VenueAdvantage ${VENUE_ADVANTAGE_SCORE} from VENUE Evidence (home context).`,
+          sourceEvidenceId: venueEvidence.id,
+          generatedAt,
+        }),
+      );
+    }
+
+    for (const side of ["home", "away"] as const) {
+      const absenceEvidence = evidences.filter(
+        (evidence) =>
+          (evidence.type === "INJURY" || evidence.type === "SUSPENSION") &&
+          evidence.payload.teamSide === side,
+      );
+
+      if (absenceEvidence.length === 0) {
+        continue;
+      }
+
+      const injuryCount = absenceEvidence.filter(
+        (evidence) => evidence.type === "INJURY",
+      ).length;
+      const suspensionCount = absenceEvidence.filter(
+        (evidence) => evidence.type === "SUSPENSION",
+      ).length;
+      const penalty = roundFeature(
+        computeAvailabilityPenalty({ injuryCount, suspensionCount }),
+      );
+      const name =
+        side === "home"
+          ? ("availabilityPenaltyHome" as const)
+          : ("availabilityPenaltyAway" as const);
+      const sourceEvidenceId = absenceEvidence[0]?.id ?? matchInfo.id;
+
+      features.push(
+        createFeature({
+          featureId: featureId(sourceEvidenceId, name),
+          matchId,
+          name,
+          value: penalty,
+          explanation: `Availability penalty ${penalty} from ${injuryCount} injury and ${suspensionCount} suspension Facts.`,
+          sourceEvidenceId,
+          generatedAt,
+        }),
+      );
+    }
 
     const headToHead = evidences.find(
       (evidence) => evidence.type === "HEAD_TO_HEAD",

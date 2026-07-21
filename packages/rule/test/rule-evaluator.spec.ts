@@ -94,7 +94,26 @@ describe("RuleEvaluator", () => {
         evaluatedAt: "2026-07-17T10:00:00Z",
       },
     ]);
-    expect(football.every((result) => result.status === "INAPPLICABLE")).toBe(true);
+    const channelFootball = football.filter(
+      (result) =>
+        result.ruleName !== "VENUE_UNAVAILABLE" &&
+        result.ruleName !== "AVAILABILITY_HOME_UNKNOWN" &&
+        result.ruleName !== "AVAILABILITY_AWAY_UNKNOWN",
+    );
+    expect(channelFootball.every((result) => result.status === "INAPPLICABLE")).toBe(
+      true,
+    );
+    expect(
+      football
+        .filter((result) =>
+          [
+            "VENUE_UNAVAILABLE",
+            "AVAILABILITY_HOME_UNKNOWN",
+            "AVAILABILITY_AWAY_UNKNOWN",
+          ].includes(result.ruleName),
+        )
+        .every((result) => result.status === "PASS"),
+    ).toBe(true);
   });
 
   it("fails only presence rules whose Features are missing", () => {
@@ -153,9 +172,24 @@ describe("RuleEvaluator", () => {
     ).toEqual([
       { ruleName: "HOME_ATTACK_EDGE", status: "PASS", score: 0.7 },
       { ruleName: "AWAY_ATTACK_EDGE", status: "FAIL", score: 0 },
+      { ruleName: "FORM_HOME_SUPERIOR", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "FORM_AWAY_SUPERIOR", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "FORM_NEAR_PARITY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "DEFENSE_HOME_STABLE", status: "PASS", score: 0.45 },
+      { ruleName: "DEFENSE_AWAY_STABLE", status: "FAIL", score: 0 },
+      { ruleName: "DEFENSE_HOME_FRAGILE", status: "FAIL", score: 0 },
+      { ruleName: "DEFENSE_AWAY_FRAGILE", status: "PASS", score: 0.5 },
       { ruleName: "MOMENTUM_HOME", status: "PASS", score: 0.45 },
       { ruleName: "MOMENTUM_AWAY", status: "FAIL", score: 0 },
       { ruleName: "HOME_ADVANTAGE_MATERIAL", status: "PASS", score: 0.55 },
+      { ruleName: "VENUE_SUPPORTS_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "VENUE_UNAVAILABLE", status: "PASS", score: 1 },
+      { ruleName: "AVAILABILITY_HOME_HIT", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "AVAILABILITY_AWAY_HIT", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "AVAILABILITY_HOME_UNKNOWN", status: "PASS", score: 1 },
+      { ruleName: "AVAILABILITY_AWAY_UNKNOWN", status: "PASS", score: 1 },
+      { ruleName: "SIGNALS_ALIGNED_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "SIGNALS_ALIGNED_AWAY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "H2H_SUPPORTS_HOME", status: "PASS", score: 0.25 },
       { ruleName: "H2H_SUPPORTS_AWAY", status: "FAIL", score: 0 },
       { ruleName: "MARKET_LEAN_HOME", status: "PASS", score: 1 },

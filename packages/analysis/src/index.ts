@@ -37,6 +37,24 @@ export type {
   ScorelineDto,
 } from "./projection/deterministic-match-projection.js";
 export {
+  buildScenarioSet,
+  SCENARIO_POLICY_VERSION,
+} from "./scenario/scenario-set.js";
+export type {
+  Scenario,
+  ScenarioSet,
+  ScenarioSlot,
+  ScenarioWinner,
+} from "./scenario/scenario-set.js";
+export {
+  computeIntelligenceConfidence,
+  INTELLIGENCE_CONFIDENCE_POLICY_VERSION,
+} from "./confidence/intelligence-confidence.js";
+export type {
+  ConfidenceBand,
+  IntelligenceConfidence,
+} from "./confidence/intelligence-confidence.js";
+export {
   buildIndependentPoissonMatrix,
   clamp,
   computeLambdas,

@@ -368,6 +368,78 @@ export class NarrativeDraftDto {
   declare readonly generatedAt: string;
 }
 
+export class ScenarioDto {
+  @ApiProperty({ enum: ["mostLikely", "secondLikely", "upset"] })
+  declare readonly slot: string;
+
+  @ApiProperty({ enum: ["home", "draw", "away"] })
+  declare readonly winner: string;
+
+  @ApiProperty({ example: 2 })
+  declare readonly homeGoals: number;
+
+  @ApiProperty({ example: 1 })
+  declare readonly awayGoals: number;
+
+  @ApiProperty({ example: 0.12 })
+  declare readonly probability: number;
+
+  @ApiProperty({ example: "Home win 2-1" })
+  declare readonly label: string;
+}
+
+export class ScenarioSetDto {
+  @ApiProperty({ example: "scenario.mvp.a05" })
+  declare readonly policyVersion: string;
+
+  @ApiProperty({ example: "football:244001" })
+  declare readonly matchId: string;
+
+  @ApiProperty({ type: () => ScenarioDto })
+  declare readonly mostLikely: ScenarioDto;
+
+  @ApiProperty({ type: () => ScenarioDto })
+  declare readonly secondLikely: ScenarioDto;
+
+  @ApiProperty({ type: () => ScenarioDto })
+  declare readonly upset: ScenarioDto;
+
+  @ApiProperty({ example: 0.45 })
+  declare readonly residualMass: number;
+
+  @ApiProperty({ example: "fnv1a-deadbeef" })
+  declare readonly checksum: string;
+}
+
+export class IntelligenceConfidenceDto {
+  @ApiProperty({ example: "confidence.mvp.a05" })
+  declare readonly policyVersion: string;
+
+  @ApiProperty({ example: "football:244001" })
+  declare readonly matchId: string;
+
+  @ApiProperty({ example: 62.5 })
+  declare readonly predictionConfidence: number;
+
+  @ApiProperty({ enum: ["low", "medium", "high", "very_high"] })
+  declare readonly confidenceBand: string;
+
+  @ApiProperty({ example: 28.4 })
+  declare readonly upsetRisk: number;
+
+  @ApiProperty({ example: 85.7 })
+  declare readonly evidenceCompleteness: number;
+
+  @ApiProperty({ example: 70.0 })
+  declare readonly ruleAgreement: number;
+
+  @ApiProperty({ isArray: true, type: String })
+  declare readonly limitations: readonly string[];
+
+  @ApiProperty({ example: "fnv1a-deadbeef" })
+  declare readonly checksum: string;
+}
+
 export class AnalysisReportDto {
   @ApiProperty({
     example: "report:match-example:2026-07-17T10:00:00Z",
@@ -400,6 +472,12 @@ export class AnalysisReportDto {
 
   @ApiProperty({ type: () => DeterministicProjectionDto })
   declare readonly deterministic: DeterministicProjectionDto;
+
+  @ApiProperty({ type: () => ScenarioSetDto })
+  declare readonly scenarios: ScenarioSetDto;
+
+  @ApiProperty({ type: () => IntelligenceConfidenceDto })
+  declare readonly intelligenceConfidence: IntelligenceConfidenceDto;
 
   @ApiProperty({ type: () => NarrativeDraftDto })
   declare readonly narrative: NarrativeDraftDto;

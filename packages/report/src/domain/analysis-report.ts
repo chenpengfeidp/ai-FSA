@@ -1,4 +1,8 @@
-import type { DeterministicMatchProjection } from "@fas/analysis";
+import type {
+  DeterministicMatchProjection,
+  IntelligenceConfidence,
+  ScenarioSet,
+} from "@fas/analysis";
 import type { NarrativeDraft } from "@fas/ai-provider";
 import type { Feature } from "@fas/feature";
 import { createMatchId, type MatchId } from "@fas/match";
@@ -12,6 +16,8 @@ export interface AnalysisReport {
   readonly features: readonly Feature[];
   readonly rules: readonly RuleResult[];
   readonly deterministic: DeterministicMatchProjection;
+  readonly scenarios: ScenarioSet;
+  readonly intelligenceConfidence: IntelligenceConfidence;
   readonly narrative: NarrativeDraft;
 }
 
@@ -23,6 +29,8 @@ export interface CreateAnalysisReportInput {
   readonly features: readonly Feature[];
   readonly rules: readonly RuleResult[];
   readonly deterministic: DeterministicMatchProjection;
+  readonly scenarios: ScenarioSet;
+  readonly intelligenceConfidence: IntelligenceConfidence;
   readonly narrative: NarrativeDraft;
 }
 
@@ -96,6 +104,18 @@ export function createAnalysisReport(
     );
   }
 
+  if (input.scenarios.matchId !== matchId) {
+    throw new AnalysisReportValidationError(
+      "scenarios must reference the AnalysisReport MatchId.",
+    );
+  }
+
+  if (input.intelligenceConfidence.matchId !== matchId) {
+    throw new AnalysisReportValidationError(
+      "intelligenceConfidence must reference the AnalysisReport MatchId.",
+    );
+  }
+
   if (input.deterministic.status === "blocked") {
     throw new AnalysisReportValidationError(
       "deterministic projection is blocked; report cannot be sealed.",
@@ -120,6 +140,8 @@ export function createAnalysisReport(
     features,
     rules,
     deterministic: input.deterministic,
+    scenarios: input.scenarios,
+    intelligenceConfidence: input.intelligenceConfidence,
     narrative: Object.freeze({
       ...input.narrative,
       sections: Object.freeze(

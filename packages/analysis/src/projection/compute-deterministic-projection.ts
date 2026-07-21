@@ -176,15 +176,28 @@ export function computeDeterministicMatchProjection(input: {
     lambdas.lambdaHome,
     lambdas.lambdaAway,
   );
-  const footballRules = input.ruleResults.filter(
-    (rule) =>
-      rule.ruleName === "HOME_ATTACK_EDGE" ||
-      rule.ruleName === "AWAY_ATTACK_EDGE" ||
-      rule.ruleName === "MOMENTUM_HOME" ||
-      rule.ruleName === "MOMENTUM_AWAY" ||
-      rule.ruleName === "HOME_ADVANTAGE_MATERIAL" ||
-      rule.ruleName === "H2H_SUPPORTS_HOME" ||
-      rule.ruleName === "H2H_SUPPORTS_AWAY",
+  const footballChannelRules = new Set([
+    "HOME_ATTACK_EDGE",
+    "AWAY_ATTACK_EDGE",
+    "FORM_HOME_SUPERIOR",
+    "FORM_AWAY_SUPERIOR",
+    "DEFENSE_HOME_STABLE",
+    "DEFENSE_AWAY_STABLE",
+    "DEFENSE_HOME_FRAGILE",
+    "DEFENSE_AWAY_FRAGILE",
+    "MOMENTUM_HOME",
+    "MOMENTUM_AWAY",
+    "HOME_ADVANTAGE_MATERIAL",
+    "VENUE_SUPPORTS_HOME",
+    "AVAILABILITY_HOME_HIT",
+    "AVAILABILITY_AWAY_HIT",
+    "SIGNALS_ALIGNED_HOME",
+    "SIGNALS_ALIGNED_AWAY",
+    "H2H_SUPPORTS_HOME",
+    "H2H_SUPPORTS_AWAY",
+  ]);
+  const footballRules = input.ruleResults.filter((rule) =>
+    footballChannelRules.has(rule.ruleName),
   );
   const homeSignal = footballRules
     .filter((rule) => rule.status === "PASS" && rule.channel === "home+")

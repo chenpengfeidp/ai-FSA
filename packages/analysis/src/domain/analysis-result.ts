@@ -2,7 +2,9 @@ import type { Evidence } from "@fas/evidence";
 import type { Feature, FeatureBundle } from "@fas/feature";
 import { createMatchId, type MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
+import type { IntelligenceConfidence } from "../confidence/intelligence-confidence.js";
 import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
+import type { ScenarioSet } from "../scenario/scenario-set.js";
 
 export interface AnalysisResult {
   readonly matchId: MatchId;
@@ -12,6 +14,8 @@ export interface AnalysisResult {
   readonly featureBundle: FeatureBundle;
   readonly ruleResults: readonly RuleResult[];
   readonly projection: DeterministicMatchProjection;
+  readonly scenarios: ScenarioSet;
+  readonly intelligenceConfidence: IntelligenceConfidence;
   readonly generatedAt: string;
 }
 
@@ -23,6 +27,8 @@ export interface CreateAnalysisResultInput {
   readonly featureBundle: FeatureBundle;
   readonly ruleResults: readonly RuleResult[];
   readonly projection: DeterministicMatchProjection;
+  readonly scenarios: ScenarioSet;
+  readonly intelligenceConfidence: IntelligenceConfidence;
   readonly generatedAt: string;
 }
 
@@ -101,6 +107,18 @@ export function createAnalysisResult(
     );
   }
 
+  if (input.scenarios.matchId !== matchId) {
+    throw new AnalysisResultValidationError(
+      "scenarios must reference the AnalysisResult MatchId.",
+    );
+  }
+
+  if (input.intelligenceConfidence.matchId !== matchId) {
+    throw new AnalysisResultValidationError(
+      "intelligenceConfidence must reference the AnalysisResult MatchId.",
+    );
+  }
+
   return Object.freeze({
     matchId,
     evidence: input.evidence,
@@ -109,6 +127,8 @@ export function createAnalysisResult(
     featureBundle: input.featureBundle,
     ruleResults,
     projection: input.projection,
+    scenarios: input.scenarios,
+    intelligenceConfidence: input.intelligenceConfidence,
     generatedAt: requireTimestamp(input.generatedAt),
   });
 }

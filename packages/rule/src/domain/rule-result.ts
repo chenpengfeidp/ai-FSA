@@ -1,8 +1,19 @@
 import { createMatchId, type MatchId } from "@fas/match";
 
 export type RuleId =
+  | "rule:availability-away-hit:v1"
+  | "rule:availability-away-unknown:v1"
+  | "rule:availability-home-hit:v1"
+  | "rule:availability-home-unknown:v1"
   | "rule:away-attack-edge:v1"
   | "rule:away-team-present:v1"
+  | "rule:defense-away-fragile:v1"
+  | "rule:defense-away-stable:v1"
+  | "rule:defense-home-fragile:v1"
+  | "rule:defense-home-stable:v1"
+  | "rule:form-away-superior:v1"
+  | "rule:form-home-superior:v1"
+  | "rule:form-near-parity:v1"
   | "rule:h2h-supports-away:v1"
   | "rule:h2h-supports-home:v1"
   | "rule:home-advantage-material:v1"
@@ -14,11 +25,26 @@ export type RuleId =
   | "rule:market-lean-away:v1"
   | "rule:market-lean-home:v1"
   | "rule:momentum-away:v1"
-  | "rule:momentum-home:v1";
+  | "rule:momentum-home:v1"
+  | "rule:signals-aligned-away:v1"
+  | "rule:signals-aligned-home:v1"
+  | "rule:venue-supports-home:v1"
+  | "rule:venue-unavailable:v1";
 
 export type RuleName =
+  | "AVAILABILITY_AWAY_HIT"
+  | "AVAILABILITY_AWAY_UNKNOWN"
+  | "AVAILABILITY_HOME_HIT"
+  | "AVAILABILITY_HOME_UNKNOWN"
   | "AWAY_ATTACK_EDGE"
   | "AWAY_TEAM_PRESENT"
+  | "DEFENSE_AWAY_FRAGILE"
+  | "DEFENSE_AWAY_STABLE"
+  | "DEFENSE_HOME_FRAGILE"
+  | "DEFENSE_HOME_STABLE"
+  | "FORM_AWAY_SUPERIOR"
+  | "FORM_HOME_SUPERIOR"
+  | "FORM_NEAR_PARITY"
   | "H2H_SUPPORTS_AWAY"
   | "H2H_SUPPORTS_HOME"
   | "HOME_ADVANTAGE_MATERIAL"
@@ -30,7 +56,11 @@ export type RuleName =
   | "MARKET_LEAN_AWAY"
   | "MARKET_LEAN_HOME"
   | "MOMENTUM_AWAY"
-  | "MOMENTUM_HOME";
+  | "MOMENTUM_HOME"
+  | "SIGNALS_ALIGNED_AWAY"
+  | "SIGNALS_ALIGNED_HOME"
+  | "VENUE_SUPPORTS_HOME"
+  | "VENUE_UNAVAILABLE";
 
 export type RuleStatus = "FAIL" | "INAPPLICABLE" | "PASS";
 
@@ -70,8 +100,19 @@ export class RuleResultValidationError extends Error {
 }
 
 const ruleIds: ReadonlySet<string> = new Set([
+  "rule:availability-away-hit:v1",
+  "rule:availability-away-unknown:v1",
+  "rule:availability-home-hit:v1",
+  "rule:availability-home-unknown:v1",
   "rule:away-attack-edge:v1",
   "rule:away-team-present:v1",
+  "rule:defense-away-fragile:v1",
+  "rule:defense-away-stable:v1",
+  "rule:defense-home-fragile:v1",
+  "rule:defense-home-stable:v1",
+  "rule:form-away-superior:v1",
+  "rule:form-home-superior:v1",
+  "rule:form-near-parity:v1",
   "rule:h2h-supports-away:v1",
   "rule:h2h-supports-home:v1",
   "rule:home-advantage-material:v1",
@@ -84,10 +125,25 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:market-lean-home:v1",
   "rule:momentum-away:v1",
   "rule:momentum-home:v1",
+  "rule:signals-aligned-away:v1",
+  "rule:signals-aligned-home:v1",
+  "rule:venue-supports-home:v1",
+  "rule:venue-unavailable:v1",
 ]);
 const ruleNames: ReadonlySet<string> = new Set([
+  "AVAILABILITY_AWAY_HIT",
+  "AVAILABILITY_AWAY_UNKNOWN",
+  "AVAILABILITY_HOME_HIT",
+  "AVAILABILITY_HOME_UNKNOWN",
   "AWAY_ATTACK_EDGE",
   "AWAY_TEAM_PRESENT",
+  "DEFENSE_AWAY_FRAGILE",
+  "DEFENSE_AWAY_STABLE",
+  "DEFENSE_HOME_FRAGILE",
+  "DEFENSE_HOME_STABLE",
+  "FORM_AWAY_SUPERIOR",
+  "FORM_HOME_SUPERIOR",
+  "FORM_NEAR_PARITY",
   "H2H_SUPPORTS_AWAY",
   "H2H_SUPPORTS_HOME",
   "HOME_ADVANTAGE_MATERIAL",
@@ -100,6 +156,10 @@ const ruleNames: ReadonlySet<string> = new Set([
   "MARKET_LEAN_HOME",
   "MOMENTUM_AWAY",
   "MOMENTUM_HOME",
+  "SIGNALS_ALIGNED_AWAY",
+  "SIGNALS_ALIGNED_HOME",
+  "VENUE_SUPPORTS_HOME",
+  "VENUE_UNAVAILABLE",
 ]);
 const ruleStatuses: ReadonlySet<string> = new Set(["FAIL", "INAPPLICABLE", "PASS"]);
 const ruleChannels: ReadonlySet<string> = new Set(["away+", "home+", "none"]);

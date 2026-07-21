@@ -7,6 +7,7 @@ export type {
   AnalysisReport,
   CreateAnalysisReportInput,
 } from "./domain/analysis-report.js";
+export { buildMvpIntelligenceNarrative } from "./narrative/mvp/build-mvp-narrative.js";
 export { GenerateMatchReportUseCase } from "./use-case/generate-match-report-use-case.js";
 export type {
   AnalysisReportBuilder,

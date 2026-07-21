@@ -1,12 +1,12 @@
-import type { NarrativeDraft, NarrativeGenerator } from "@fas/ai-provider";
+import type { NarrativeGenerator } from "@fas/ai-provider";
 import type { AnalysisResult, DeterministicMatchProjection } from "@fas/analysis";
 import type { Feature } from "@fas/feature";
-import { composeNarrativePrompt } from "@fas/prompt";
 import type { RuleResult } from "@fas/rule";
 import {
   createAnalysisReport,
   type AnalysisReport,
 } from "../domain/analysis-report.js";
+import { buildMvpIntelligenceNarrative } from "../narrative/mvp/build-mvp-narrative.js";
 
 function formatFeatureValue(feature: Feature): string {
   if (typeof feature.value === "string") {
@@ -63,23 +63,15 @@ function buildSummary(analysis: AnalysisResult): readonly string[] {
     summary.push(...failedPresenceRules.map(failedRuleSummary));
   }
 
+  summary.push(
+    `Most Likely: ${analysis.scenarios.mostLikely.label} (${(analysis.scenarios.mostLikely.probability * 100).toFixed(1)}%).`,
+  );
+  summary.push(
+    `Prediction Confidence: ${analysis.intelligenceConfidence.predictionConfidence} (${analysis.intelligenceConfidence.confidenceBand}).`,
+  );
   summary.push(...analysis.features.map(featureSummary));
   summary.push(projectionSummary(analysis.projection));
   return Object.freeze(summary);
-}
-
-function teamName(
-  features: readonly Feature[],
-  name: "awayTeam" | "homeTeam",
-): string {
-  const feature = features.find((entry) => entry.name === name);
-  return typeof feature?.value === "string" ? feature.value : name;
-}
-
-function marketConflict(projection: DeterministicMatchProjection): boolean {
-  return projection.limitations.some((line) =>
-    line.includes("Market lean conflicts with football-model directional lean"),
-  );
 }
 
 export class ReportBuilder {
@@ -91,6 +83,9 @@ export class ReportBuilder {
 
   build(analysis: AnalysisResult): AnalysisReport {
     const reportId = `report:${analysis.matchId}:${analysis.generatedAt}`;
+    // Slice-1 intelligence narrative is local/deterministic (no LLM).
+    // NarrativeGenerator remains injected for composition-root compatibility.
+    void this.#narrativeGenerator;
 
     return createAnalysisReport({
       reportId,
@@ -100,33 +95,9 @@ export class ReportBuilder {
       features: analysis.features,
       rules: analysis.ruleResults,
       deterministic: analysis.projection,
-      narrative: this.#buildNarrative(analysis, reportId),
+      scenarios: analysis.scenarios,
+      intelligenceConfidence: analysis.intelligenceConfidence,
+      narrative: buildMvpIntelligenceNarrative(analysis, reportId),
     });
-  }
-
-  #buildNarrative(analysis: AnalysisResult, reportId: string): NarrativeDraft {
-    const matchedRuleNames = analysis.ruleResults
-      .filter((rule) => rule.status === "PASS" && !isPresenceRule(rule))
-      .map((rule) => rule.ruleName);
-    const composition = composeNarrativePrompt({
-      reportId,
-      matchId: analysis.matchId,
-      homeTeam: teamName(analysis.features, "homeTeam"),
-      awayTeam: teamName(analysis.features, "awayTeam"),
-      recommendation: analysis.projection.recommendation,
-      pHome: analysis.projection.pHome,
-      pDraw: analysis.projection.pDraw,
-      pAway: analysis.projection.pAway,
-      confidence: analysis.projection.confidence,
-      limitations: analysis.projection.limitations,
-      matchedRuleNames,
-      marketConflict: marketConflict(analysis.projection),
-      calibrationArtifactId: analysis.projection.calibrationArtifactId,
-      calibrationStatus: analysis.projection.calibrationStatus,
-      calibrationQualified: analysis.projection.calibrationQualified,
-      deterministicChecksum: analysis.projection.checksum,
-    });
-
-    return this.#narrativeGenerator.generate(composition, analysis.generatedAt);
   }
 }

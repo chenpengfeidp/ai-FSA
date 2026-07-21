@@ -234,13 +234,11 @@ export class RecordedFootballCatalog
   }
 }
 
-function loadDefaultBundles(): readonly FootballMatchBundle[] {
-  const here = dirname(fileURLToPath(import.meta.url));
-  const path = join(here, "../../fixtures/match-bundles-k-league.json");
+function loadBundlesFromFile(path: string): FootballMatchBundle[] {
   const parsed: unknown = JSON.parse(readFileSync(path, "utf8"));
 
   if (!isRecord(parsed) || !Array.isArray(parsed.bundles)) {
-    return Object.freeze([]);
+    return [];
   }
 
   const bundles: FootballMatchBundle[] = [];
@@ -252,6 +250,17 @@ function loadDefaultBundles(): readonly FootballMatchBundle[] {
       bundles.push(frozen);
     }
   }
+
+  return bundles;
+}
+
+function loadDefaultBundles(): readonly FootballMatchBundle[] {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const fixtureFiles = [
+    join(here, "../../fixtures/match-bundles-k-league.json"),
+    join(here, "../../fixtures/match-bundles-veikkausliiga.json"),
+  ];
+  const bundles = fixtureFiles.flatMap((path) => loadBundlesFromFile(path));
 
   return Object.freeze(bundles);
 }

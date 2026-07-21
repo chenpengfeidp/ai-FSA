@@ -54,8 +54,18 @@ async function request(
   baseUrl: string,
   path: string,
   method = "GET",
+  body?: unknown,
 ): Promise<HttpResponse> {
-  const response = await fetch(`${baseUrl}${path}`, { method });
+  const response = await fetch(`${baseUrl}${path}`, {
+    method,
+    headers:
+      body === undefined
+        ? undefined
+        : {
+            "content-type": "application/json",
+          },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 
   return {
     body: (await response.json()) as unknown,
@@ -206,10 +216,21 @@ describe("HTTP import and Evidence query workflow", () => {
       expect.arrayContaining([
         expect.objectContaining({
           title: "Overview",
-          body: expect.stringContaining("were not recomputed"),
+          body: expect.stringContaining("Most Likely"),
         }),
+        expect.objectContaining({ title: "Key Factors" }),
+        expect.objectContaining({ title: "Recommended Score" }),
       ]),
     );
+    expect(report.scenarios).toMatchObject({
+      policyVersion: "scenario.mvp.a05",
+      mostLikely: expect.objectContaining({ slot: "mostLikely" }),
+      secondLikely: expect.objectContaining({ slot: "secondLikely" }),
+      upset: expect.objectContaining({ slot: "upset" }),
+    });
+    expect(report.intelligenceConfidence).toMatchObject({
+      policyVersion: "confidence.mvp.a05",
+    });
     expect(report.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "homeTeam", value: "Liverpool" }),
@@ -254,7 +275,79 @@ describe("HTTP import and Evidence query workflow", () => {
     const openApi = requireRecord(openApiResponse.body);
     const paths = requireRecord(openApi.paths);
     expect(paths).toHaveProperty("/api/analyze/match/{matchId}");
+    expect(paths).toHaveProperty("/api/v1/match-analysis");
     expect(paths).toHaveProperty("/api/matches/upcoming");
+  });
+
+  it("analyses IFK Mariehamn vs FC Lahti via POST /api/v1/match-analysis", async () => {
+    const response = await request(baseUrl, "/api/v1/match-analysis", "POST", {
+      matchId: "football:244001",
+    });
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      matchId: "football:244001",
+    });
+    expect(report.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "homeTeam",
+          value: "IFK Mariehamn",
+        }),
+        expect.objectContaining({
+          name: "awayTeam",
+          value: "FC Lahti",
+        }),
+        expect.objectContaining({ name: "recentFormHome" }),
+        expect.objectContaining({ name: "recentFormAway" }),
+        expect.objectContaining({ name: "venueAdvantage" }),
+        expect.objectContaining({ name: "availabilityPenaltyAway" }),
+        expect.objectContaining({ name: "momentum" }),
+      ]),
+    );
+    expect(report.features).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "availabilityPenaltyHome" }),
+      ]),
+    );
+    expect(report.rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleName: "AVAILABILITY_HOME_UNKNOWN",
+          status: "PASS",
+        }),
+        expect.objectContaining({
+          ruleName: "VENUE_SUPPORTS_HOME",
+          status: "PASS",
+        }),
+      ]),
+    );
+    expect(report.scenarios).toMatchObject({
+      policyVersion: "scenario.mvp.a05",
+      mostLikely: expect.objectContaining({ slot: "mostLikely" }),
+      secondLikely: expect.objectContaining({ slot: "secondLikely" }),
+      upset: expect.objectContaining({ slot: "upset" }),
+    });
+    expect(report.intelligenceConfidence).toMatchObject({
+      policyVersion: "confidence.mvp.a05",
+    });
+    expect(
+      typeof requireRecord(report.intelligenceConfidence).predictionConfidence,
+    ).toBe("number");
+    const narrative = requireRecord(report.narrative);
+    expect(narrative.providerId).toBe("local_deterministic_v1");
+    expect(narrative.sections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ title: "Overview" }),
+        expect.objectContaining({ title: "Key Factors" }),
+        expect.objectContaining({ title: "Strength Comparison" }),
+        expect.objectContaining({ title: "Risk Analysis" }),
+        expect.objectContaining({ title: "Prediction" }),
+        expect.objectContaining({ title: "Recommended Score" }),
+      ]),
+    );
+    expect(String(narrative.disclaimer)).toContain("no LLM");
   });
 
   it("lists upcoming Match Center fixtures from the recorded football-data board", async () => {

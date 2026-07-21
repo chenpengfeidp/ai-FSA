@@ -19,6 +19,7 @@ import { GenerateMatchReportUseCase, ReportBuilder } from "@fas/report";
 import { RuleEvaluator } from "@fas/rule";
 import { Module } from "@nestjs/common";
 import { AnalysisController } from "./analysis.controller.js";
+import { MatchAnalysisController } from "./match-analysis.controller.js";
 import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
 import { matchProviderToken } from "./evidence.tokens.js";
@@ -54,6 +55,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
 @Module({
   controllers: [
     AnalysisController,
+    MatchAnalysisController,
     EvidenceController,
     ProvidersController,
     ImportController,

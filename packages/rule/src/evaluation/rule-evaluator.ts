@@ -29,6 +29,13 @@ const TAU_HOME = 0.3;
 const TAU_H2H = 0.2;
 const H2H_N_MIN = 3;
 const TAU_MARKET = 0.08;
+const TAU_FORM = 12;
+const TAU_FORM_NEAR = 6;
+const TAU_DEFENSE_STABLE = 55;
+const TAU_DEFENSE_FRAGILE = 45;
+const TAU_AVAILABILITY_HIT = 8;
+const TAU_VENUE = 1;
+const RULE_POLICY = "rule.mvp.a05";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -47,7 +54,18 @@ interface FootballRuleDefinition {
   readonly matched: (features: ReadonlyMap<FeatureName, Feature>) => boolean;
 }
 
-type RuleDefinition = FootballRuleDefinition | PresenceRuleDefinition;
+/** Honesty / limitation rules that PASS when a Feature is absent. */
+interface AbsenceHonestyRuleDefinition {
+  readonly kind: "absence_honesty";
+  readonly featureName: FeatureName;
+  readonly ruleId: RuleId;
+  readonly ruleName: RuleName;
+}
+
+type RuleDefinition =
+  | AbsenceHonestyRuleDefinition
+  | FootballRuleDefinition
+  | PresenceRuleDefinition;
 
 const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
   Object.freeze({
@@ -112,6 +130,135 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
   }) satisfies FootballRuleDefinition,
   Object.freeze({
     kind: "football",
+    ruleId: "rule:form-home-superior:v1",
+    ruleName: "FORM_HOME_SUPERIOR",
+    weight: 0.55,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "recentFormHome",
+      "recentFormAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("recentFormHome"));
+      const away = numericValue(features.get("recentFormAway"));
+
+      return home !== undefined && away !== undefined && home - away >= TAU_FORM;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:form-away-superior:v1",
+    ruleName: "FORM_AWAY_SUPERIOR",
+    weight: 0.55,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "recentFormHome",
+      "recentFormAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("recentFormHome"));
+      const away = numericValue(features.get("recentFormAway"));
+
+      return home !== undefined && away !== undefined && away - home >= TAU_FORM;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:form-near-parity:v1",
+    ruleName: "FORM_NEAR_PARITY",
+    weight: 0.2,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "recentFormHome",
+      "recentFormAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("recentFormHome"));
+      const away = numericValue(features.get("recentFormAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        Math.abs(home - away) <= TAU_FORM_NEAR
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:defense-home-stable:v1",
+    ruleName: "DEFENSE_HOME_STABLE",
+    weight: 0.45,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "defenseRatingHome",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const defense = numericValue(features.get("defenseRatingHome"));
+
+      return defense !== undefined && defense >= TAU_DEFENSE_STABLE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:defense-away-stable:v1",
+    ruleName: "DEFENSE_AWAY_STABLE",
+    weight: 0.45,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "defenseRatingAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const defense = numericValue(features.get("defenseRatingAway"));
+
+      return defense !== undefined && defense >= TAU_DEFENSE_STABLE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:defense-home-fragile:v1",
+    ruleName: "DEFENSE_HOME_FRAGILE",
+    weight: 0.5,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "defenseRatingHome",
+      "attackRatingAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const defense = numericValue(features.get("defenseRatingHome"));
+      const attack = numericValue(features.get("attackRatingAway"));
+
+      return (
+        defense !== undefined &&
+        attack !== undefined &&
+        defense <= TAU_DEFENSE_FRAGILE &&
+        attack - defense >= TAU_ATTACK
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:defense-away-fragile:v1",
+    ruleName: "DEFENSE_AWAY_FRAGILE",
+    weight: 0.5,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "defenseRatingAway",
+      "attackRatingHome",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const defense = numericValue(features.get("defenseRatingAway"));
+      const attack = numericValue(features.get("attackRatingHome"));
+
+      return (
+        defense !== undefined &&
+        attack !== undefined &&
+        defense <= TAU_DEFENSE_FRAGILE &&
+        attack - defense >= TAU_ATTACK
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
     ruleId: "rule:momentum-home:v1",
     ruleName: "MOMENTUM_HOME",
     weight: 0.45,
@@ -157,6 +304,133 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
       const homeAdvantage = numericValue(features.get("homeAdvantage"));
 
       return homeAdvantage !== undefined && homeAdvantage >= TAU_HOME;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:venue-supports-home:v1",
+    ruleName: "VENUE_SUPPORTS_HOME",
+    weight: 0.3,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "venueAdvantage",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const venue = numericValue(features.get("venueAdvantage"));
+
+      return venue !== undefined && venue >= TAU_VENUE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "absence_honesty",
+    featureName: "venueAdvantage",
+    ruleId: "rule:venue-unavailable:v1",
+    ruleName: "VENUE_UNAVAILABLE",
+  }) satisfies AbsenceHonestyRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:availability-home-hit:v1",
+    ruleName: "AVAILABILITY_HOME_HIT",
+    weight: 0.5,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "availabilityPenaltyHome",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const penalty = numericValue(features.get("availabilityPenaltyHome"));
+
+      return penalty !== undefined && penalty >= TAU_AVAILABILITY_HIT;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:availability-away-hit:v1",
+    ruleName: "AVAILABILITY_AWAY_HIT",
+    weight: 0.5,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "availabilityPenaltyAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const penalty = numericValue(features.get("availabilityPenaltyAway"));
+
+      return penalty !== undefined && penalty >= TAU_AVAILABILITY_HIT;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "absence_honesty",
+    featureName: "availabilityPenaltyHome",
+    ruleId: "rule:availability-home-unknown:v1",
+    ruleName: "AVAILABILITY_HOME_UNKNOWN",
+  }) satisfies AbsenceHonestyRuleDefinition,
+  Object.freeze({
+    kind: "absence_honesty",
+    featureName: "availabilityPenaltyAway",
+    ruleId: "rule:availability-away-unknown:v1",
+    ruleName: "AVAILABILITY_AWAY_UNKNOWN",
+  }) satisfies AbsenceHonestyRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:signals-aligned-home:v1",
+    ruleName: "SIGNALS_ALIGNED_HOME",
+    weight: 0.35,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "recentFormHome",
+      "recentFormAway",
+      "attackRatingHome",
+      "attackRatingAway",
+      "momentum",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const formHome = numericValue(features.get("recentFormHome"));
+      const formAway = numericValue(features.get("recentFormAway"));
+      const attackHome = numericValue(features.get("attackRatingHome"));
+      const attackAway = numericValue(features.get("attackRatingAway"));
+      const momentum = numericValue(features.get("momentum"));
+
+      return (
+        formHome !== undefined &&
+        formAway !== undefined &&
+        attackHome !== undefined &&
+        attackAway !== undefined &&
+        momentum !== undefined &&
+        formHome > formAway &&
+        attackHome > attackAway &&
+        momentum > 0
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:signals-aligned-away:v1",
+    ruleName: "SIGNALS_ALIGNED_AWAY",
+    weight: 0.35,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "recentFormHome",
+      "recentFormAway",
+      "attackRatingHome",
+      "attackRatingAway",
+      "momentum",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const formHome = numericValue(features.get("recentFormHome"));
+      const formAway = numericValue(features.get("recentFormAway"));
+      const attackHome = numericValue(features.get("attackRatingHome"));
+      const attackAway = numericValue(features.get("attackRatingAway"));
+      const momentum = numericValue(features.get("momentum"));
+
+      return (
+        formHome !== undefined &&
+        formAway !== undefined &&
+        attackHome !== undefined &&
+        attackAway !== undefined &&
+        momentum !== undefined &&
+        formAway > formHome &&
+        attackAway > attackHome &&
+        momentum < 0
+      );
     },
   }) satisfies FootballRuleDefinition,
   Object.freeze({
@@ -297,12 +571,18 @@ function presenceExplanation(ruleName: RuleName, present: boolean): string {
 function footballExplanation(ruleName: RuleName, status: RuleStatus): string {
   switch (status) {
     case "PASS":
-      return `${ruleName} matched under rule.v2.slice1 thresholds.`;
+      return `${ruleName} matched under ${RULE_POLICY} thresholds.`;
     case "FAIL":
-      return `${ruleName} did not match under rule.v2.slice1 thresholds.`;
+      return `${ruleName} did not match under ${RULE_POLICY} thresholds.`;
     case "INAPPLICABLE":
       return `${ruleName} is inapplicable because required Features are missing.`;
   }
+}
+
+function absenceHonestyExplanation(ruleName: RuleName, absent: boolean): string {
+  return absent
+    ? `${ruleName} recorded because the Feature is unavailable; do not infer full strength.`
+    : `${ruleName} does not apply because the Feature is present.`;
 }
 
 export class RuleEvaluator {
@@ -351,6 +631,25 @@ export class RuleEvaluator {
           weight: 1,
           channel: "none",
           explanation: presenceExplanation(definition.ruleName, present),
+          sourceFeatureIds:
+            sourceFeature === undefined ? [] : [sourceFeature.featureId],
+          evaluatedAt,
+        });
+      }
+
+      if (definition.kind === "absence_honesty") {
+        const sourceFeature = featureByName.get(definition.featureName);
+        const absent = sourceFeature === undefined;
+
+        return createRuleResult({
+          ruleId: definition.ruleId,
+          matchId: firstFeature.matchId,
+          ruleName: definition.ruleName,
+          status: absent ? "PASS" : "FAIL",
+          score: absent ? 1 : 0,
+          weight: 1,
+          channel: "none",
+          explanation: absenceHonestyExplanation(definition.ruleName, absent),
           sourceFeatureIds:
             sourceFeature === undefined ? [] : [sourceFeature.featureId],
           evaluatedAt,

@@ -6,6 +6,8 @@ export type FeatureName =
   | "asianHandicapLine"
   | "attackRatingAway"
   | "attackRatingHome"
+  | "availabilityPenaltyAway"
+  | "availabilityPenaltyHome"
   | "awayTeam"
   | "defenseRatingAway"
   | "defenseRatingHome"
@@ -18,8 +20,12 @@ export type FeatureName =
   | "marketImpliedDraw"
   | "marketImpliedHome"
   | "marketLean"
+  | "momentum"
   | "momentumAway"
-  | "momentumHome";
+  | "momentumHome"
+  | "recentFormAway"
+  | "recentFormHome"
+  | "venueAdvantage";
 
 export interface Feature {
   readonly featureId: string;
@@ -53,6 +59,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "asianHandicapLine",
   "attackRatingAway",
   "attackRatingHome",
+  "availabilityPenaltyAway",
+  "availabilityPenaltyHome",
   "awayTeam",
   "defenseRatingAway",
   "defenseRatingHome",
@@ -65,8 +73,12 @@ const featureNames: ReadonlySet<string> = new Set([
   "marketImpliedDraw",
   "marketImpliedHome",
   "marketLean",
+  "momentum",
   "momentumAway",
   "momentumHome",
+  "recentFormAway",
+  "recentFormHome",
+  "venueAdvantage",
 ]);
 const isoTimestampPattern =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;

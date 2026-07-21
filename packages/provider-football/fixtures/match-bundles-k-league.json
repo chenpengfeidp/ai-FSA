@@ -168,6 +168,28 @@
           "photoUrl": "https://media.api-sports.io/football/players/1000014.png",
           "providerMethod": "recorded-snapshot"
         }
+      ],
+      "availabilityAbsences": [
+        {
+          "playerId": "1000012",
+          "playerName": "FC Seoul Forward",
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "kind": "injury",
+          "reason": "Hamstring Strain",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "playerId": "1000014",
+          "playerName": "Ulsan Hyundai FC Defender",
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "kind": "suspension",
+          "reason": "Suspended 1 match",
+          "providerMethod": "recorded-snapshot"
+        }
       ]
     },
     {

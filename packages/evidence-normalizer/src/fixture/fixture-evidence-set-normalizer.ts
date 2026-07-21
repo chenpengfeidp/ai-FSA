@@ -842,6 +842,21 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(...normalizedPlayers.value);
   }
 
+  if (input.availabilityAbsences !== undefined) {
+    const normalizedAbsences = parseAvailabilityAbsences(
+      input.availabilityAbsences,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalizedAbsences.ok) {
+      return normalizedAbsences;
+    }
+
+    evidences.push(...normalizedAbsences.value);
+  }
+
   if (input.odds !== undefined) {
     const normalized = parseOdds(
       input.odds,
@@ -1156,4 +1171,159 @@ function parsePlayers(
   }
 
   return success(Object.freeze(players));
+}
+
+function parseAvailabilityAbsences(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): Result<readonly Evidence[], EvidenceNormalizationError> {
+  if (!Array.isArray(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "availabilityAbsences must be an array.",
+      "availabilityAbsences",
+    );
+  }
+
+  if (value.length === 0) {
+    return success(Object.freeze([]));
+  }
+
+  const absences: Evidence[] = [];
+
+  for (const [index, entry] of value.entries()) {
+    if (!isRecord(entry)) {
+      return failure(
+        "INVALID_FIELD",
+        `availabilityAbsences[${String(index)}] must be an object.`,
+        "availabilityAbsences",
+      );
+    }
+
+    if (typeof entry.playerId !== "string" || entry.playerId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "playerId must be a non-empty string.",
+        "playerId",
+      );
+    }
+
+    if (
+      typeof entry.playerName !== "string" ||
+      entry.playerName.trim().length === 0
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "playerName must be a non-empty string.",
+        "playerName",
+      );
+    }
+
+    if (typeof entry.teamId !== "string" || entry.teamId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "teamId must be a non-empty string.",
+        "teamId",
+      );
+    }
+
+    if (typeof entry.teamName !== "string" || entry.teamName.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "teamName must be a non-empty string.",
+        "teamName",
+      );
+    }
+
+    const teamSide = requireTeamSide(entry.teamSide);
+
+    if (teamSide === undefined) {
+      return failure("INVALID_FIELD", "teamSide must be home or away.", "teamSide");
+    }
+
+    if (entry.kind !== "injury" && entry.kind !== "suspension") {
+      return failure("INVALID_FIELD", "kind must be injury or suspension.", "kind");
+    }
+
+    const reason =
+      entry.reason === undefined || entry.reason === null
+        ? undefined
+        : typeof entry.reason === "string" && entry.reason.trim().length > 0
+          ? entry.reason.trim()
+          : undefined;
+
+    if (
+      entry.reason !== undefined &&
+      entry.reason !== null &&
+      reason === undefined
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "reason must be a non-empty string when provided.",
+        "reason",
+      );
+    }
+
+    const provenanceOverlay = parseProviderProvenanceOverlay(entry);
+
+    if (!provenanceOverlay.ok) {
+      return provenanceOverlay;
+    }
+
+    const provenance = provenanceOverlay.value;
+    const source = provenance?.source ?? "fixture";
+    const playerId = entry.playerId.trim();
+    const kind = entry.kind;
+    const evidenceType = kind === "injury" ? "INJURY" : "SUSPENSION";
+    const sourceId =
+      provenance?.sourceId ?? `fixture-${matchId}-availability-${kind}-${playerId}`;
+    const method = provenance?.method ?? "fixture";
+
+    try {
+      absences.push(
+        createEvidence({
+          id: `evidence-${source}-${matchId}-availability-${kind}-${playerId}`,
+          source,
+          sourceId,
+          type: evidenceType,
+          matchId: createMatchId(matchId),
+          collectedAt,
+          eventTime,
+          timestamp: collectedAt,
+          freshness: "fresh",
+          confidence: source === "api-football" ? "medium" : "unknown",
+          quality: "unverified",
+          provenance: {
+            collector: "@fas/evidence-normalizer",
+            method,
+          },
+          payload: Object.freeze({
+            playerId,
+            playerName: entry.playerName.trim(),
+            teamId: entry.teamId.trim(),
+            teamName: entry.teamName.trim(),
+            teamSide,
+            kind,
+            ...(reason === undefined ? {} : { reason }),
+          }),
+        }),
+      );
+    } catch (error: unknown) {
+      if (
+        error instanceof EvidenceValidationError ||
+        error instanceof MatchValidationError
+      ) {
+        return failure("DOMAIN_VALIDATION_FAILED", error.message);
+      }
+
+      return failure(
+        "UNEXPECTED_ERROR",
+        `${evidenceType} evidence normalization failed unexpectedly.`,
+      );
+    }
+  }
+
+  return success(Object.freeze(absences));
 }

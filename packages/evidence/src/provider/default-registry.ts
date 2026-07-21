@@ -36,8 +36,9 @@ function footballCapabilities(): readonly ProviderCapabilityDeclaration[] {
     Object.freeze({
       kind: "injury" as const,
       supported: true,
-      ingestImplemented: false,
-      notes: "Injuries/suspensions via /injuries; not in F1.1A.",
+      ingestImplemented: true,
+      notes:
+        "F1.1D Availability: /injuries → INJURY + SUSPENSION Evidence (no Expected Lineup).",
     }),
     Object.freeze({
       kind: "recent_form" as const,

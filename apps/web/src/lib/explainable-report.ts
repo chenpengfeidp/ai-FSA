@@ -7,6 +7,8 @@ import type {
 } from "../types/analysis";
 import type { EvidenceDto, EvidenceType } from "../types/evidence";
 import type {
+  AvailabilityAbsenceItemView,
+  AvailabilitySummaryView,
   ConfidenceLevel,
   EvidenceTimelineItemView,
   ExplainableReportView,
@@ -63,7 +65,7 @@ const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
 
 const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
   HEAD_TO_HEAD: "Head-to-head",
-  INJURY: "Player injuries",
+  INJURY: "Injury",
   LINEUP: "Lineup",
   MATCH_INFO: "Match information",
   NEWS: "News",
@@ -71,6 +73,7 @@ const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
   PLAYER: "Player",
   RANKING: "Ranking",
   STATISTICS: "Statistics",
+  SUSPENSION: "Suspension",
   TEAM_FORM: "Recent form",
   VENUE: "Venue",
   WEATHER: "Weather",
@@ -200,6 +203,104 @@ function buildPlayersContext(evidence: readonly EvidenceDto[]): PlayersContextVi
     home: Object.freeze(players.filter((player) => player.teamSide === "home")),
     away: Object.freeze(players.filter((player) => player.teamSide === "away")),
     note: "Players are basic squad identity from Evidence (not used by Rules or Projection).",
+  });
+}
+
+function mapAvailabilityEvidence(
+  item: EvidenceDto,
+): AvailabilityAbsenceItemView | null {
+  if (item.type !== "INJURY" && item.type !== "SUSPENSION") {
+    return null;
+  }
+
+  const kind =
+    item.payload.kind === "injury" || item.payload.kind === "suspension"
+      ? item.payload.kind
+      : item.type === "INJURY"
+        ? ("injury" as const)
+        : ("suspension" as const);
+
+  const playerName =
+    typeof item.payload.playerName === "string" &&
+    item.payload.playerName.trim().length > 0
+      ? item.payload.playerName.trim()
+      : typeof item.payload.name === "string" && item.payload.name.trim().length > 0
+        ? item.payload.name.trim()
+        : null;
+  const playerId =
+    typeof item.payload.playerId === "string" &&
+    item.payload.playerId.trim().length > 0
+      ? item.payload.playerId.trim()
+      : null;
+  const teamId =
+    typeof item.payload.teamId === "string" && item.payload.teamId.trim().length > 0
+      ? item.payload.teamId.trim()
+      : null;
+  const teamName =
+    typeof item.payload.teamName === "string" &&
+    item.payload.teamName.trim().length > 0
+      ? item.payload.teamName.trim()
+      : null;
+  const teamSide =
+    item.payload.teamSide === "home" || item.payload.teamSide === "away"
+      ? item.payload.teamSide
+      : null;
+
+  if (
+    playerName === null ||
+    playerId === null ||
+    teamId === null ||
+    teamName === null ||
+    teamSide === null
+  ) {
+    return null;
+  }
+
+  return Object.freeze({
+    playerId,
+    playerName,
+    teamId,
+    teamName,
+    teamSide,
+    kind,
+    reason: typeof item.payload.reason === "string" ? item.payload.reason : null,
+    providerId: item.providerId,
+    source: item.source,
+  });
+}
+
+function buildAvailabilitySummary(
+  evidence: readonly EvidenceDto[],
+): AvailabilitySummaryView {
+  const absences = evidence
+    .map(mapAvailabilityEvidence)
+    .filter((item): item is AvailabilityAbsenceItemView => item !== null);
+
+  if (absences.length === 0) {
+    return Object.freeze({
+      available: false,
+      injuryCount: 0,
+      suspensionCount: 0,
+      totalCount: 0,
+      injuries: Object.freeze([]),
+      suspensions: Object.freeze([]),
+      note: "Availability evidence is not available for this match. Absence of Facts is not a confirmation that all players are available.",
+    });
+  }
+
+  const injuries = Object.freeze(absences.filter((item) => item.kind === "injury"));
+  const suspensions = Object.freeze(
+    absences.filter((item) => item.kind === "suspension"),
+  );
+
+  return Object.freeze({
+    available: true,
+    injuryCount: injuries.length,
+    suspensionCount: suspensions.length,
+    totalCount: absences.length,
+    injuries,
+    suspensions,
+    note: "Availability Summary is composed from Injury and Suspension Evidence (not used by Rules or Projection).",
   });
 }
 
@@ -487,6 +588,7 @@ export function buildExplainableReportView(
 
   const venueContext = buildVenueContext(evidence);
   const playersContext = buildPlayersContext(evidence);
+  const availabilityContext = buildAvailabilitySummary(evidence);
 
   return Object.freeze({
     header: Object.freeze({
@@ -499,6 +601,7 @@ export function buildExplainableReportView(
     }),
     venue: venueContext.venue,
     players: playersContext,
+    availability: availabilityContext,
     winnerPrediction,
     mostLikelyScore,
     goalRange,

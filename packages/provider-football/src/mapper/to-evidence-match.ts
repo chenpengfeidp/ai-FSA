@@ -5,8 +5,16 @@ import type { FootballMatchBundle } from "../domain/football-models.js";
  * FixtureEvidenceNormalizer / ImportMatchUseCase (never vendor JSON).
  */
 export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
-  const { fixture, homeForm, awayForm, homeStats, awayStats, headToHead, players } =
-    bundle;
+  const {
+    fixture,
+    homeForm,
+    awayForm,
+    homeStats,
+    awayStats,
+    headToHead,
+    players,
+    availabilityAbsences,
+  } = bundle;
   const fixtureKey = fixture.fixtureId;
 
   return Object.freeze({
@@ -47,6 +55,26 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
                 providerSource: "api-football",
                 providerSourceId: `api-football:${fixtureKey}:player:${player.playerId}`,
                 providerMethod: player.providerMethod,
+              }),
+            ),
+          ),
+        }),
+    ...(availabilityAbsences.length === 0
+      ? {}
+      : {
+          availabilityAbsences: Object.freeze(
+            availabilityAbsences.map((absence) =>
+              Object.freeze({
+                playerId: absence.playerId,
+                playerName: absence.playerName,
+                teamId: absence.teamId,
+                teamName: absence.teamName,
+                teamSide: absence.teamSide,
+                kind: absence.kind,
+                reason: absence.reason,
+                providerSource: "api-football",
+                providerSourceId: `api-football:${fixtureKey}:availability:${absence.kind}:${absence.playerId}`,
+                providerMethod: absence.providerMethod,
               }),
             ),
           ),

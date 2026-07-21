@@ -38,7 +38,7 @@ describe("Evidence Provider Registry (F1.1A)", () => {
     ).toBe(false);
     expect(
       registry.getCapability("football:api-sports", "injury")?.ingestImplemented,
-    ).toBe(false);
+    ).toBe(true);
     expect(
       registry.getCapability("football:api-sports", "player")?.ingestImplemented,
     ).toBe(true);

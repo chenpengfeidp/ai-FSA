@@ -45,6 +45,30 @@ export interface PlayersContextView {
   readonly note: string;
 }
 
+export type AvailabilityKind = "injury" | "suspension";
+
+export interface AvailabilityAbsenceItemView {
+  readonly playerId: string;
+  readonly playerName: string;
+  readonly teamId: string;
+  readonly teamName: string;
+  readonly teamSide: "away" | "home";
+  readonly kind: AvailabilityKind;
+  readonly reason: string | null;
+  readonly providerId: string;
+  readonly source: string;
+}
+
+export interface AvailabilitySummaryView {
+  readonly available: boolean;
+  readonly injuryCount: number;
+  readonly suspensionCount: number;
+  readonly totalCount: number;
+  readonly injuries: readonly AvailabilityAbsenceItemView[];
+  readonly suspensions: readonly AvailabilityAbsenceItemView[];
+  readonly note: string;
+}
+
 export interface WinnerPredictionView {
   readonly homeTeam: string;
   readonly awayTeam: string;
@@ -134,6 +158,7 @@ export interface ExplainableReportView {
   readonly header: ExplainableMatchHeader;
   readonly venue: VenueContextView;
   readonly players: PlayersContextView;
+  readonly availability: AvailabilitySummaryView;
   readonly winnerPrediction: WinnerPredictionView;
   readonly mostLikelyScore: MostLikelyScoreView;
   readonly goalRange: GoalRangeView;

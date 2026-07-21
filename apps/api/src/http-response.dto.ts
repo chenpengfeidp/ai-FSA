@@ -10,6 +10,7 @@ const evidenceTypes = [
   "PLAYER",
   "RANKING",
   "STATISTICS",
+  "SUSPENSION",
   "TEAM_FORM",
   "VENUE",
   "WEATHER",

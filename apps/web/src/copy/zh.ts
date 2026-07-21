@@ -234,6 +234,16 @@ export const zh = {
     playerNumber: (value: number): string => `号码 ${String(value)}`,
     playerId: (id: string): string => `球员 ID · ${id}`,
     noPlayers: "暂无球员证据",
+    availability: "出场可用性",
+    availabilityHint:
+      "来自 Injury / Suspension Evidence 的可用性摘要（不进入规则/投影）",
+    availabilitySummary: (injuries: number, suspensions: number): string =>
+      `伤病 ${String(injuries)} · 停赛 ${String(suspensions)}`,
+    availabilityInjuries: "伤病",
+    availabilitySuspensions: "停赛",
+    noAvailability: "暂无可用性证据",
+    noAvailabilityDescription:
+      "本场无 Injury / Suspension Evidence。这不表示全员可出战，也不得猜测 Unknown。",
     evidence: "证据",
     evidenceHint: "纵向时间线，含类型图标与视觉层级；显示 Provider 来源",
     evidenceSource: (providerId: string, source: string, method: string): string =>

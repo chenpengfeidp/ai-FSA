@@ -3,6 +3,7 @@ import type { FootballMatchCatalog } from "../domain/ports.js";
 import { mapApiFootballFixtureItem } from "../mapper/map-api-football-fixture.js";
 import { mapApiFootballTeamForm } from "../mapper/map-api-football-form.js";
 import { mapApiFootballH2H } from "../mapper/map-api-football-h2h.js";
+import { mapApiFootballInjuriesResponse } from "../mapper/map-api-football-injuries.js";
 import { mapApiFootballSquadResponse } from "../mapper/map-api-football-squad.js";
 import { mapApiFootballStandings } from "../mapper/map-api-football-standings.js";
 import { mapApiFootballTeamStats } from "../mapper/map-api-football-stats.js";
@@ -102,6 +103,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       standingsBody,
       homeSquadBody,
       awaySquadBody,
+      injuriesBody,
     ] = await Promise.all([
       this.#getJson(
         `/fixtures?team=${encodeURIComponent(fixture.homeTeamId)}&last=5`,
@@ -127,6 +129,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       this.#getJson(
         `/players/squads?team=${encodeURIComponent(fixture.awayTeamId)}`,
       ),
+      this.#getJson(`/injuries?fixture=${encodeURIComponent(fixture.fixtureId)}`),
     ]);
 
     const homeForm =
@@ -218,6 +221,16 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
           })
         : Object.freeze([]);
 
+    // Empty injuries body or empty rows → honest absence (not “all available”).
+    const availabilityAbsences =
+      injuriesBody !== undefined
+        ? mapApiFootballInjuriesResponse(injuriesBody, {
+            homeTeamId: fixture.homeTeamId,
+            awayTeamId: fixture.awayTeamId,
+            providerMethod: "http-live",
+          })
+        : Object.freeze([]);
+
     const bundle: FootballMatchBundle = Object.freeze({
       fixture,
       homeForm,
@@ -227,6 +240,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       headToHead,
       standings,
       players: Object.freeze([...homePlayers, ...awayPlayers]),
+      availabilityAbsences,
     });
 
     this.#cache.set(matchId, bundle);

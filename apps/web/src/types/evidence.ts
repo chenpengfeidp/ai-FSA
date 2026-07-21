@@ -10,6 +10,7 @@ export type EvidenceType =
   | "PLAYER"
   | "RANKING"
   | "STATISTICS"
+  | "SUSPENSION"
   | "TEAM_FORM"
   | "VENUE"
   | "WEATHER";

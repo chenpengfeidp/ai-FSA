@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
+  FootballAvailabilityAbsence,
   FootballBoardRow,
   FootballFixture,
   FootballH2H,
@@ -50,6 +51,9 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
       : (raw.standings as FootballStandings);
 
   const playersRaw = Array.isArray(raw.players) ? raw.players : [];
+  const absencesRaw = Array.isArray(raw.availabilityAbsences)
+    ? raw.availabilityAbsences
+    : [];
 
   return Object.freeze({
     fixture: Object.freeze({ ...fixture }),
@@ -119,6 +123,62 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
         });
 
         return [player];
+      }),
+    ),
+    availabilityAbsences: Object.freeze(
+      absencesRaw.flatMap((entry) => {
+        if (!isRecord(entry)) {
+          return [];
+        }
+
+        const playerId =
+          typeof entry.playerId === "string" ? entry.playerId.trim() : "";
+        const playerName =
+          typeof entry.playerName === "string" ? entry.playerName.trim() : "";
+        const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+        const teamName =
+          typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+        const teamSide =
+          entry.teamSide === "home" || entry.teamSide === "away"
+            ? entry.teamSide
+            : undefined;
+        const kind =
+          entry.kind === "injury" || entry.kind === "suspension"
+            ? entry.kind
+            : undefined;
+        const providerMethod =
+          entry.providerMethod === "http-live" ||
+          entry.providerMethod === "recorded-snapshot"
+            ? entry.providerMethod
+            : undefined;
+
+        if (
+          playerId.length === 0 ||
+          playerName.length === 0 ||
+          teamId.length === 0 ||
+          teamName.length === 0 ||
+          teamSide === undefined ||
+          kind === undefined ||
+          providerMethod === undefined
+        ) {
+          return [];
+        }
+
+        const absence: FootballAvailabilityAbsence = Object.freeze({
+          playerId,
+          playerName,
+          teamId,
+          teamName,
+          teamSide,
+          kind,
+          reason:
+            typeof entry.reason === "string" && entry.reason.trim().length > 0
+              ? entry.reason.trim()
+              : undefined,
+          providerMethod,
+        });
+
+        return [absence];
       }),
     ),
   });

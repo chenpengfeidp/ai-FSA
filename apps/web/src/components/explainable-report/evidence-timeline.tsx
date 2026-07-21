@@ -1,5 +1,6 @@
 import {
   Activity,
+  Ban,
   CloudSun,
   MapPin,
   Newspaper,
@@ -38,6 +39,8 @@ function evidenceIcon(type: EvidenceType): ReactElement {
   switch (type) {
     case "INJURY":
       return <Activity aria-hidden="true" className={className} />;
+    case "SUSPENSION":
+      return <Ban aria-hidden="true" className={className} />;
     case "TEAM_FORM":
       return <Workflow aria-hidden="true" className={className} />;
     case "HEAD_TO_HEAD":

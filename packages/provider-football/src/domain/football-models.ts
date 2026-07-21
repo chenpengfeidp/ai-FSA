@@ -29,6 +29,20 @@ export interface FootballPlayer {
   readonly providerMethod: FootballProviderMethod;
 }
 
+/** Injury or suspension absence row (F1.1D). Not Expected Lineup. */
+export type FootballAvailabilityKind = "injury" | "suspension";
+
+export interface FootballAvailabilityAbsence {
+  readonly playerId: string;
+  readonly playerName: string;
+  readonly teamId: string;
+  readonly teamName: string;
+  readonly teamSide: "away" | "home";
+  readonly kind: FootballAvailabilityKind;
+  readonly reason: string | undefined;
+  readonly providerMethod: FootballProviderMethod;
+}
+
 export interface FootballFixture {
   readonly fixtureId: string;
   readonly matchId: string;
@@ -121,6 +135,11 @@ export interface FootballMatchBundle {
   readonly standings: FootballStandings | undefined;
   /** Basic squad players for both sides (may be empty when unavailable). */
   readonly players: readonly FootballPlayer[];
+  /**
+   * Injury/suspension absences for the fixture (may be empty when unavailable).
+   * Empty means honest absence — not “everyone available”.
+   */
+  readonly availabilityAbsences: readonly FootballAvailabilityAbsence[];
 }
 
 export interface FootballBoardRow {

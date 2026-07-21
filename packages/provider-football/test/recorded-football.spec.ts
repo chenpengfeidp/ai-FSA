@@ -79,6 +79,13 @@ describe("RecordedFootballCatalog", () => {
     expect(players.some((item) => item.payload.name === "FC Seoul Keeper")).toBe(
       true,
     );
+
+    const injuries = result.value.filter((item) => item.type === "INJURY");
+    const suspensions = result.value.filter((item) => item.type === "SUSPENSION");
+    expect(injuries).toHaveLength(1);
+    expect(suspensions).toHaveLength(1);
+    expect(injuries[0]?.payload.playerName).toBe("FC Seoul Forward");
+    expect(suspensions[0]?.payload.kind).toBe("suspension");
   });
 });
 

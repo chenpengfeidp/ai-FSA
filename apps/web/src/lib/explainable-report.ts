@@ -13,6 +13,9 @@ import type {
   AvailabilitySummaryView,
   ConfidenceLevel,
   EvidenceTimelineItemView,
+  ExpectedGoalsContextView,
+  ExpectedGoalsRecordView,
+  ExpectedGoalsWindowId,
   ExplainableReportView,
   FeatureImportanceItemView,
   GoalRangeId,
@@ -35,11 +38,17 @@ const FEATURE_LABELS: Readonly<Partial<Record<FeatureName, string>>> = Object.fr
   {
     asianHandicapLean: "Asian Handicap Lean",
     asianHandicapLine: "Asian Handicap Line",
+    attackEfficiencyAway: "Away Attack Efficiency (derived)",
+    attackEfficiencyHome: "Home Attack Efficiency (derived)",
     attackRatingAway: "Away Attack Rating",
     attackRatingHome: "Home Attack Rating",
     awayTeam: "Away Team",
+    chanceCreationAway: "Away Chance Creation (derived)",
+    chanceCreationHome: "Home Chance Creation (derived)",
     defenseRatingAway: "Away Defense Rating",
     defenseRatingHome: "Home Defense Rating",
+    disciplineRiskAway: "Away Discipline Risk (derived)",
+    disciplineRiskHome: "Home Discipline Risk (derived)",
     formAtHomeAway: "Away Team Form At Home",
     formAtHomeHome: "Home Team Form At Home",
     formOnRoadAway: "Away Team Form On Road",
@@ -59,6 +68,8 @@ const FEATURE_LABELS: Readonly<Partial<Record<FeatureName, string>>> = Object.fr
     marketLean: "Market Lean",
     momentumAway: "Away Momentum",
     momentumHome: "Home Momentum",
+    possessionAway: "Away Possession (derived)",
+    possessionHome: "Home Possession (derived)",
     recentFormAway: "Away Recent Form",
     recentFormHome: "Home Recent Form",
     recentFormShortAway: "Away Short-Window Form",
@@ -67,9 +78,15 @@ const FEATURE_LABELS: Readonly<Partial<Record<FeatureName, string>>> = Object.fr
 );
 
 const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
+  ATTACK_EFFICIENCY_AWAY_EDGE: "Away Attack Efficiency Edge",
+  ATTACK_EFFICIENCY_HOME_EDGE: "Home Attack Efficiency Edge",
   AWAY_ATTACK_EDGE: "Away Attack Edge",
   AWAY_TEAM_PRESENT: "Away Team Present",
   AWAY_VENUE_FORM_EDGE: "Away Venue Form Edge",
+  CHANCE_CREATION_AWAY_EDGE: "Away Chance Creation Edge",
+  CHANCE_CREATION_HOME_EDGE: "Home Chance Creation Edge",
+  DISCIPLINE_AWAY_RISK: "Away Discipline Risk",
+  DISCIPLINE_HOME_RISK: "Home Discipline Risk",
   GOALS_SCORED_AWAY_EDGE: "Away Goals Scored Edge",
   GOALS_SCORED_HOME_EDGE: "Home Goals Scored Edge",
   H2H_SUPPORTS_AWAY: "H2H Supports Away",
@@ -85,9 +102,12 @@ const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
   MARKET_LEAN_HOME: "Market Lean Home",
   MOMENTUM_AWAY: "Away Momentum Edge",
   MOMENTUM_HOME: "Home Momentum Edge",
+  POSSESSION_AWAY_EDGE: "Away Possession Edge",
+  POSSESSION_HOME_EDGE: "Home Possession Edge",
 });
 
 const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
+  EXPECTED_GOALS: "Expected Goals",
   HEAD_TO_HEAD: "Head-to-head",
   INJURY: "Injury",
   LINEUP: "Lineup",
@@ -531,6 +551,97 @@ function buildAdvancedStatisticsContext(
   });
 }
 
+const EXPECTED_GOALS_WINDOWS: ReadonlySet<ExpectedGoalsWindowId> = new Set([
+  "overall",
+  "home",
+  "away",
+  "recent",
+  "last5",
+  "last10",
+  "fixture",
+]);
+
+function mapExpectedGoalsRecord(item: EvidenceDto): ExpectedGoalsRecordView | null {
+  if (item.type !== "EXPECTED_GOALS") {
+    return null;
+  }
+
+  const teamSide =
+    item.payload.teamSide === "home" || item.payload.teamSide === "away"
+      ? item.payload.teamSide
+      : null;
+  const teamName =
+    typeof item.payload.teamName === "string" ? item.payload.teamName : null;
+  const window =
+    typeof item.payload.window === "string" &&
+    EXPECTED_GOALS_WINDOWS.has(item.payload.window as ExpectedGoalsWindowId)
+      ? (item.payload.window as ExpectedGoalsWindowId)
+      : null;
+  const observedAt =
+    typeof item.payload.observedAt === "string" ? item.payload.observedAt : null;
+  const metricsRaw =
+    typeof item.payload.metrics === "object" &&
+    item.payload.metrics !== null &&
+    !Array.isArray(item.payload.metrics)
+      ? (item.payload.metrics as Record<string, unknown>)
+      : null;
+
+  if (
+    teamSide === null ||
+    teamName === null ||
+    window === null ||
+    observedAt === null ||
+    metricsRaw === null
+  ) {
+    return null;
+  }
+
+  return Object.freeze({
+    teamSide,
+    teamName,
+    window,
+    competitionName:
+      typeof item.payload.competitionName === "string"
+        ? item.payload.competitionName
+        : null,
+    season: typeof item.payload.season === "string" ? item.payload.season : null,
+    observedAt,
+    metrics: Object.freeze({
+      xg: optionalNumber(metricsRaw.xg),
+      xga: optionalNumber(metricsRaw.xga),
+      nonPenaltyXg: optionalNumber(metricsRaw.nonPenaltyXg),
+      nonPenaltyXga: optionalNumber(metricsRaw.nonPenaltyXga),
+      expectedPoints: optionalNumber(metricsRaw.expectedPoints),
+      expectedGoalDifference: optionalNumber(metricsRaw.expectedGoalDifference),
+    }),
+    providerId: item.providerId,
+    source: item.source,
+    provenanceMethod: item.provenance.method,
+  });
+}
+
+function buildExpectedGoalsContext(
+  evidence: readonly EvidenceDto[],
+): ExpectedGoalsContextView {
+  const records = evidence
+    .map(mapExpectedGoalsRecord)
+    .filter((item): item is ExpectedGoalsRecordView => item !== null);
+
+  if (records.length === 0) {
+    return Object.freeze({
+      available: false,
+      records: Object.freeze([]),
+      note: "Expected Goals Evidence is not available for this match (honest absence). Never estimated from shots.",
+    });
+  }
+
+  return Object.freeze({
+    available: true,
+    records: Object.freeze(records),
+    note: "Expected Goals are provider measurements only (F1.3A Evidence; not Features, Rules, or Projection).",
+  });
+}
+
 function buildLineupsContext(evidence: readonly EvidenceDto[]): LineupsContextView {
   const sheets = evidence
     .map(mapTeamLineup)
@@ -842,6 +953,7 @@ export function buildExplainableReportView(
   const playersContext = buildPlayersContext(evidence);
   const lineupsContext = buildLineupsContext(evidence);
   const advancedStatisticsContext = buildAdvancedStatisticsContext(evidence);
+  const expectedGoalsContext = buildExpectedGoalsContext(evidence);
   const availabilityContext = buildAvailabilitySummary(evidence);
 
   return Object.freeze({
@@ -858,6 +970,7 @@ export function buildExplainableReportView(
     players: playersContext,
     lineups: lineupsContext,
     advancedStatistics: advancedStatisticsContext,
+    expectedGoals: expectedGoalsContext,
     availability: availabilityContext,
     winnerPrediction,
     mostLikelyScore,

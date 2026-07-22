@@ -115,6 +115,96 @@ export function roundFeature(value: number): number {
   return Math.round(value * 1e6) / 1e6;
 }
 
+export interface AdvancedStatInputs {
+  readonly shotsTotal: number | undefined;
+  readonly shotsOnTarget: number | undefined;
+  readonly possessionPct: number | undefined;
+  readonly corners: number | undefined;
+  readonly dangerousAttacks: number | undefined;
+  readonly yellowCards: number | undefined;
+  readonly redCards: number | undefined;
+  readonly fouls: number | undefined;
+}
+
+/**
+ * F1.2b Attack Efficiency in [0, 100] from shots + shots on target.
+ * Honest absence when neither measurement exists.
+ */
+export function computeAttackEfficiency(
+  input: AdvancedStatInputs,
+): number | undefined {
+  const { shotsTotal, shotsOnTarget } = input;
+
+  if (shotsTotal === undefined && shotsOnTarget === undefined) {
+    return undefined;
+  }
+
+  if (shotsTotal !== undefined && shotsOnTarget !== undefined) {
+    const rate = shotsTotal > 0 ? shotsOnTarget / shotsTotal : 0;
+    return clamp(rate * 55 + Math.min(shotsTotal, 20) * 2.25, 0, 100);
+  }
+
+  if (shotsOnTarget !== undefined) {
+    return clamp(shotsOnTarget * 9, 0, 100);
+  }
+
+  return clamp((shotsTotal ?? 0) * 4.5, 0, 100);
+}
+
+/**
+ * F1.2b Possession Dominance — provider possession % when supplied.
+ */
+export function computePossessionDominance(
+  input: AdvancedStatInputs,
+): number | undefined {
+  return input.possessionPct === undefined
+    ? undefined
+    : clamp(input.possessionPct, 0, 100);
+}
+
+/**
+ * F1.2b Chance Creation in [0, 100] from dangerous attacks + shots + corners.
+ * Honest absence when none of the three measurements exist.
+ */
+export function computeChanceCreation(
+  input: AdvancedStatInputs,
+): number | undefined {
+  const { dangerousAttacks, shotsTotal, corners } = input;
+
+  if (
+    dangerousAttacks === undefined &&
+    shotsTotal === undefined &&
+    corners === undefined
+  ) {
+    return undefined;
+  }
+
+  const raw =
+    (dangerousAttacks ?? 0) * 0.45 + (shotsTotal ?? 0) * 3.5 + (corners ?? 0) * 4.5;
+
+  return clamp(raw, 0, 100);
+}
+
+/**
+ * F1.2b Discipline Risk — higher means more cards/fouls pressure on that side.
+ * Honest absence when yellow, red, and fouls are all missing.
+ */
+export function computeDisciplineRisk(
+  input: AdvancedStatInputs,
+): number | undefined {
+  const { yellowCards, redCards, fouls } = input;
+
+  if (yellowCards === undefined && redCards === undefined && fouls === undefined) {
+    return undefined;
+  }
+
+  return clamp(
+    (yellowCards ?? 0) * 8 + (redCards ?? 0) * 25 + (fouls ?? 0) * 2,
+    0,
+    100,
+  );
+}
+
 /**
  * Head-to-head lean from meetings oriented to the current fixture.
  * Positive favors the current home side. Shrinks toward 0 with small samples.

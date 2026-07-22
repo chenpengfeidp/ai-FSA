@@ -13,6 +13,10 @@ export type {
   FootballAvailabilityAbsence,
   FootballAvailabilityKind,
   FootballBoardRow,
+  FootballExpectedGoalsMetrics,
+  FootballExpectedGoalsRecord,
+  FootballExpectedGoalsSide,
+  FootballExpectedGoalsWindow,
   FootballFixture,
   FootballFormSplit,
   FootballH2H,
@@ -58,6 +62,7 @@ export {
 } from "./mapper/map-api-football-fixture.js";
 export { mapApiFootballTeamForm } from "./mapper/map-api-football-form.js";
 export { mapApiFootballFixtureStatistics } from "./mapper/map-api-football-fixture-statistics.js";
+export { mapApiFootballFixtureExpectedGoals } from "./mapper/map-api-football-expected-goals.js";
 export { mapApiFootballH2H } from "./mapper/map-api-football-h2h.js";
 export { mapApiFootballInjuriesResponse } from "./mapper/map-api-football-injuries.js";
 export { mapApiFootballLineupsResponse } from "./mapper/map-api-football-lineups.js";

@@ -33,11 +33,15 @@ const TAU_FORM = 12;
 const TAU_FORM_NEAR = 6;
 const TAU_FORM_VENUE = 12;
 const TAU_GOALS_RATE = 0.35;
+const TAU_ATTACK_EFFICIENCY = 8;
+const TAU_POSSESSION = 8;
+const TAU_CHANCE_CREATION = 8;
+const TAU_DISCIPLINE_RISK = 8;
 const TAU_DEFENSE_STABLE = 55;
 const TAU_DEFENSE_FRAGILE = 45;
 const TAU_AVAILABILITY_HIT = 8;
 const TAU_VENUE = 1;
-const RULE_POLICY = "rule.mvp.f11e.formdecomp";
+const RULE_POLICY = "rule.mvp.f12b.advstats";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -262,6 +266,170 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
 
       return (
         home !== undefined && away !== undefined && away - home >= TAU_GOALS_RATE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:attack-efficiency-home-edge:v1",
+    ruleName: "ATTACK_EFFICIENCY_HOME_EDGE",
+    weight: 0.45,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "attackEfficiencyHome",
+      "attackEfficiencyAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("attackEfficiencyHome"));
+      const away = numericValue(features.get("attackEfficiencyAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_ATTACK_EFFICIENCY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:attack-efficiency-away-edge:v1",
+    ruleName: "ATTACK_EFFICIENCY_AWAY_EDGE",
+    weight: 0.45,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "attackEfficiencyHome",
+      "attackEfficiencyAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("attackEfficiencyHome"));
+      const away = numericValue(features.get("attackEfficiencyAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_ATTACK_EFFICIENCY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:possession-home-edge:v1",
+    ruleName: "POSSESSION_HOME_EDGE",
+    weight: 0.35,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "possessionHome",
+      "possessionAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("possessionHome"));
+      const away = numericValue(features.get("possessionAway"));
+
+      return (
+        home !== undefined && away !== undefined && home - away >= TAU_POSSESSION
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:possession-away-edge:v1",
+    ruleName: "POSSESSION_AWAY_EDGE",
+    weight: 0.35,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "possessionHome",
+      "possessionAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("possessionHome"));
+      const away = numericValue(features.get("possessionAway"));
+
+      return (
+        home !== undefined && away !== undefined && away - home >= TAU_POSSESSION
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:chance-creation-home-edge:v1",
+    ruleName: "CHANCE_CREATION_HOME_EDGE",
+    weight: 0.45,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "chanceCreationHome",
+      "chanceCreationAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("chanceCreationHome"));
+      const away = numericValue(features.get("chanceCreationAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_CHANCE_CREATION
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:chance-creation-away-edge:v1",
+    ruleName: "CHANCE_CREATION_AWAY_EDGE",
+    weight: 0.45,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "chanceCreationHome",
+      "chanceCreationAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("chanceCreationHome"));
+      const away = numericValue(features.get("chanceCreationAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_CHANCE_CREATION
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:discipline-away-risk:v1",
+    ruleName: "DISCIPLINE_AWAY_RISK",
+    weight: 0.3,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "disciplineRiskHome",
+      "disciplineRiskAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("disciplineRiskHome"));
+      const away = numericValue(features.get("disciplineRiskAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_DISCIPLINE_RISK
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:discipline-home-risk:v1",
+    ruleName: "DISCIPLINE_HOME_RISK",
+    weight: 0.3,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "disciplineRiskHome",
+      "disciplineRiskAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("disciplineRiskHome"));
+      const away = numericValue(features.get("disciplineRiskAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_DISCIPLINE_RISK
       );
     },
   }) satisfies FootballRuleDefinition,

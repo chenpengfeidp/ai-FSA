@@ -9,13 +9,19 @@ export type JsonValue =
 export type FeatureName =
   | "asianHandicapLean"
   | "asianHandicapLine"
+  | "attackEfficiencyAway"
+  | "attackEfficiencyHome"
   | "attackRatingAway"
   | "attackRatingHome"
   | "availabilityPenaltyAway"
   | "availabilityPenaltyHome"
   | "awayTeam"
+  | "chanceCreationAway"
+  | "chanceCreationHome"
   | "defenseRatingAway"
   | "defenseRatingHome"
+  | "disciplineRiskAway"
+  | "disciplineRiskHome"
   | "formAtHomeAway"
   | "formAtHomeHome"
   | "formOnRoadAway"
@@ -36,6 +42,8 @@ export type FeatureName =
   | "momentum"
   | "momentumAway"
   | "momentumHome"
+  | "possessionAway"
+  | "possessionHome"
   | "recentFormAway"
   | "recentFormHome"
   | "recentFormShortAway"
@@ -53,9 +61,15 @@ export interface FeatureDto {
 }
 
 export type RuleName =
+  | "ATTACK_EFFICIENCY_AWAY_EDGE"
+  | "ATTACK_EFFICIENCY_HOME_EDGE"
   | "AWAY_ATTACK_EDGE"
   | "AWAY_TEAM_PRESENT"
   | "AWAY_VENUE_FORM_EDGE"
+  | "CHANCE_CREATION_AWAY_EDGE"
+  | "CHANCE_CREATION_HOME_EDGE"
+  | "DISCIPLINE_AWAY_RISK"
+  | "DISCIPLINE_HOME_RISK"
   | "GOALS_SCORED_AWAY_EDGE"
   | "GOALS_SCORED_HOME_EDGE"
   | "H2H_SUPPORTS_AWAY"
@@ -70,7 +84,9 @@ export type RuleName =
   | "MARKET_LEAN_AWAY"
   | "MARKET_LEAN_HOME"
   | "MOMENTUM_AWAY"
-  | "MOMENTUM_HOME";
+  | "MOMENTUM_HOME"
+  | "POSSESSION_AWAY_EDGE"
+  | "POSSESSION_HOME_EDGE";
 
 export type RuleStatus = "FAIL" | "INAPPLICABLE" | "PASS";
 

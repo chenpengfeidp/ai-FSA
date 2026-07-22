@@ -2,15 +2,15 @@
 
 ## Snapshot
 
-- Last updated: 2026-07-20
+- Last updated: 2026-07-22
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
 - Current task status: **Architecture Freeze v0.2** holding; F.1 landed; product roadmap is `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **F1.1D Availability** (Injury + Suspension + Summary) vertical slice delivered; further F1.1 capabilities pending
-- Last completed delivery: Sprint **F1.1D** Availability (`docs/sprints/F1.1/F1.1D_AVAILABILITY_IMPLEMENTATION_REPORT.md`); prior F1.1C-1 Player, F1.1B-1 Venue, F1.1A Foundation
-- Demo: `docs/demo/F1.1D_AVAILABILITY_DEMO.md`; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`
-- Next authorized work: continue **Sprint F1.1** (Lineup / Referee / richer form) under doc 40 + doc 41; Feature/Rule/Projection remain untouched for these fact slices
+- Current sprint: **F1.3A Expected Goals Evidence** delivered (Evidence only; no Feature/Rule/Projection consume)
+- Last completed delivery: Sprint **F1.3A** Expected Goals Evidence (`docs/sprints/F1.3/F1.3A_EXPECTED_GOALS_EVIDENCE_COMPLETION_REPORT.md`); prior F1.2b Advanced Statistics Intelligence, F1.2a, F1.1E
+- Demo: recorded cassette `football:100001` includes full xG windows; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`
+- Next authorized work: **F1.3B** transform xG Evidence into deterministic Football Intelligence Features and integrate into Rule / Confidence / Projection
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.2** (stable for long-term feature work inside frozen boundaries)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
@@ -48,7 +48,7 @@ Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
   → Web Match Center / Session / Workspace / Library
 ```
 
-Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG is deferred to roadmap **Sprint F1.3** (`docs/40_PRODUCT_ROADMAP.md`).
+Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG Evidence is **F1.3A** (`EXPECTED_GOALS`); Feature/Rule/Projection consume remains **F1.3B**.
 
 Implemented packages used by the slice (non-exhaustive):
 

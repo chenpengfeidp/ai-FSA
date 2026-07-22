@@ -8,17 +8,22 @@ import {
 import { createFeature, type Feature, type FeatureName } from "../domain/feature.js";
 import {
   computeAsianHandicapLean,
+  computeAttackEfficiency,
   computeAttackRating,
   computeAvailabilityPenalty,
+  computeChanceCreation,
   computeDefenseRating,
+  computeDisciplineRisk,
   computeH2hLean,
   computeImpliedProbabilities,
   computeMarketLean,
   computeMomentum,
+  computePossessionDominance,
   computeRecentFormScore,
   DEFAULT_HOME_ADVANTAGE,
   roundFeature,
   VENUE_ADVANTAGE_SCORE,
+  type AdvancedStatInputs,
 } from "./feature-math.js";
 import { stableChecksum } from "./stable-checksum.js";
 
@@ -222,6 +227,132 @@ function extractFormDecompositionFeatures(input: {
   return Object.freeze(features);
 }
 
+function readAdvancedStatInputs(stats: Evidence): AdvancedStatInputs | undefined {
+  const advancedRaw = stats.payload.advanced;
+
+  if (
+    typeof advancedRaw !== "object" ||
+    advancedRaw === null ||
+    Array.isArray(advancedRaw)
+  ) {
+    return undefined;
+  }
+
+  const advanced = advancedRaw as Record<string, unknown>;
+
+  return Object.freeze({
+    shotsTotal: asFiniteNumber(advanced.shotsTotal),
+    shotsOnTarget: asFiniteNumber(advanced.shotsOnTarget),
+    possessionPct: asFiniteNumber(advanced.possessionPct),
+    corners: asFiniteNumber(advanced.corners),
+    dangerousAttacks: asFiniteNumber(advanced.dangerousAttacks),
+    yellowCards: asFiniteNumber(advanced.yellowCards),
+    redCards: asFiniteNumber(advanced.redCards),
+    fouls: asFiniteNumber(advanced.fouls),
+  });
+}
+
+/**
+ * F1.2b: derived football Features from STATISTICS.advanced Evidence only.
+ * Never invents missing provider metrics.
+ */
+function extractAdvancedStatisticsFeatures(input: {
+  readonly stats: Evidence;
+  readonly side: "away" | "home";
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { stats, side, matchId, generatedAt } = input;
+
+  if (matchId === undefined) {
+    return emptyFeatures;
+  }
+
+  const advanced = readAdvancedStatInputs(stats);
+
+  if (advanced === undefined) {
+    return emptyFeatures;
+  }
+
+  const features: Feature[] = [];
+  const efficiencyName =
+    side === "home"
+      ? ("attackEfficiencyHome" as const)
+      : ("attackEfficiencyAway" as const);
+  const possessionName =
+    side === "home" ? ("possessionHome" as const) : ("possessionAway" as const);
+  const chanceName =
+    side === "home"
+      ? ("chanceCreationHome" as const)
+      : ("chanceCreationAway" as const);
+  const disciplineName =
+    side === "home"
+      ? ("disciplineRiskHome" as const)
+      : ("disciplineRiskAway" as const);
+
+  const efficiency = computeAttackEfficiency(advanced);
+  if (efficiency !== undefined) {
+    features.push(
+      createFeature({
+        featureId: featureId(stats.id, efficiencyName),
+        matchId,
+        name: efficiencyName,
+        value: roundFeature(efficiency),
+        explanation: `Attack efficiency ${roundFeature(efficiency)} derived from STATISTICS.advanced shots/SoT (Evidence ${stats.id}).`,
+        sourceEvidenceId: stats.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const possession = computePossessionDominance(advanced);
+  if (possession !== undefined) {
+    features.push(
+      createFeature({
+        featureId: featureId(stats.id, possessionName),
+        matchId,
+        name: possessionName,
+        value: roundFeature(possession),
+        explanation: `Possession ${roundFeature(possession)}% from STATISTICS.advanced (Evidence ${stats.id}).`,
+        sourceEvidenceId: stats.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const chance = computeChanceCreation(advanced);
+  if (chance !== undefined) {
+    features.push(
+      createFeature({
+        featureId: featureId(stats.id, chanceName),
+        matchId,
+        name: chanceName,
+        value: roundFeature(chance),
+        explanation: `Chance creation ${roundFeature(chance)} from dangerous attacks/shots/corners (Evidence ${stats.id}).`,
+        sourceEvidenceId: stats.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const discipline = computeDisciplineRisk(advanced);
+  if (discipline !== undefined) {
+    features.push(
+      createFeature({
+        featureId: featureId(stats.id, disciplineName),
+        matchId,
+        name: disciplineName,
+        value: roundFeature(discipline),
+        explanation: `Discipline risk ${roundFeature(discipline)} from yellow/red/fouls (Evidence ${stats.id}).`,
+        sourceEvidenceId: stats.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
 function findSideEvidence(
   evidences: readonly Evidence[],
   type: "STATISTICS" | "TEAM_FORM",
@@ -359,6 +490,17 @@ export class FeatureExtractor {
     let missingFootballEvidence = false;
 
     for (const side of sides) {
+      if (side.stats !== undefined) {
+        features.push(
+          ...extractAdvancedStatisticsFeatures({
+            stats: side.stats,
+            side: side.side,
+            matchId,
+            generatedAt,
+          }),
+        );
+      }
+
       if (side.form === undefined || side.stats === undefined) {
         missingFootballEvidence = true;
         continue;

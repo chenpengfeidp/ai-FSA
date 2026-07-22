@@ -113,6 +113,14 @@ export function buildMvpIntelligenceNarrative(
   const formOnRoadAway = numericFeature(analysis.features, "formOnRoadAway");
   const goalsScoredHome = numericFeature(analysis.features, "goalsScoredRateHome");
   const goalsScoredAway = numericFeature(analysis.features, "goalsScoredRateAway");
+  const attackEffHome = numericFeature(analysis.features, "attackEfficiencyHome");
+  const attackEffAway = numericFeature(analysis.features, "attackEfficiencyAway");
+  const possessionHome = numericFeature(analysis.features, "possessionHome");
+  const possessionAway = numericFeature(analysis.features, "possessionAway");
+  const chanceHome = numericFeature(analysis.features, "chanceCreationHome");
+  const chanceAway = numericFeature(analysis.features, "chanceCreationAway");
+  const disciplineHome = numericFeature(analysis.features, "disciplineRiskHome");
+  const disciplineAway = numericFeature(analysis.features, "disciplineRiskAway");
 
   const overview = [
     `${homeTeam} vs ${awayTeam}: Most Likely is ${most.label} (${formatPct(most.probability)}).`,
@@ -130,6 +138,7 @@ export function buildMvpIntelligenceNarrative(
     `DefenseStability: home defenseRatingHome=${defenseHome ?? "n/a"} vs away defenseRatingAway=${defenseAway ?? "n/a"}.`,
     `RecentForm: recentFormHome=${formHome ?? "n/a"} vs recentFormAway=${formAway ?? "n/a"}.`,
     `FormDecomposition: homeAtHome=${formAtHomeHome ?? "n/a"} vs awayOnRoad=${formOnRoadAway ?? "n/a"}; goalsScoredRate home=${goalsScoredHome ?? "n/a"} away=${goalsScoredAway ?? "n/a"}.`,
+    `AdvancedStatsFeatures (derived, not raw Evidence): attackEfficiency home=${attackEffHome ?? "n/a"} away=${attackEffAway ?? "n/a"}; possession home=${possessionHome ?? "n/a"} away=${possessionAway ?? "n/a"}; chanceCreation home=${chanceHome ?? "n/a"} away=${chanceAway ?? "n/a"}; disciplineRisk home=${disciplineHome ?? "n/a"} away=${disciplineAway ?? "n/a"}.`,
   ].join(" ");
 
   const riskRules = analysis.ruleResults.filter(

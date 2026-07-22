@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   computeAsianHandicapLean,
+  computeAttackEfficiency,
   computeAvailabilityPenalty,
+  computeChanceCreation,
+  computeDisciplineRisk,
   computeH2hLean,
   computeImpliedProbabilities,
   computeMarketLean,
+  computePossessionDominance,
   computeRecentFormScore,
   shrink,
   VENUE_ADVANTAGE_SCORE,
@@ -35,6 +39,54 @@ describe("intelligence MVP feature math", () => {
 
   it("exposes a fixed venue advantage score when VENUE Evidence is present", () => {
     expect(VENUE_ADVANTAGE_SCORE).toBe(8);
+  });
+
+  it("computes F1.2b advanced-stat Features with honest absence", () => {
+    const empty = {
+      shotsTotal: undefined,
+      shotsOnTarget: undefined,
+      possessionPct: undefined,
+      corners: undefined,
+      dangerousAttacks: undefined,
+      yellowCards: undefined,
+      redCards: undefined,
+      fouls: undefined,
+    };
+
+    expect(computeAttackEfficiency(empty)).toBeUndefined();
+    expect(computePossessionDominance(empty)).toBeUndefined();
+    expect(computeChanceCreation(empty)).toBeUndefined();
+    expect(computeDisciplineRisk(empty)).toBeUndefined();
+
+    expect(
+      computeAttackEfficiency({
+        ...empty,
+        shotsTotal: 14,
+        shotsOnTarget: 6,
+      }),
+    ).toBeGreaterThan(0);
+    expect(
+      computePossessionDominance({
+        ...empty,
+        possessionPct: 58,
+      }),
+    ).toBe(58);
+    expect(
+      computeChanceCreation({
+        ...empty,
+        shotsTotal: 12,
+        corners: 5,
+        dangerousAttacks: 40,
+      }),
+    ).toBeGreaterThan(0);
+    expect(
+      computeDisciplineRisk({
+        ...empty,
+        yellowCards: 2,
+        redCards: 0,
+        fouls: 12,
+      }),
+    ).toBe(40);
   });
 });
 

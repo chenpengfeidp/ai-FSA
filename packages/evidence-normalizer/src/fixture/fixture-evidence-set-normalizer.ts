@@ -1027,6 +1027,21 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(...normalizedLineups.value);
   }
 
+  if (input.expectedGoals !== undefined) {
+    const normalizedExpectedGoals = parseExpectedGoals(
+      input.expectedGoals,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalizedExpectedGoals.ok) {
+      return normalizedExpectedGoals;
+    }
+
+    evidences.push(...normalizedExpectedGoals.value);
+  }
+
   if (input.odds !== undefined) {
     const normalized = parseOdds(
       input.odds,
@@ -1814,4 +1829,249 @@ function parseConfirmedLineups(
   }
 
   return success(Object.freeze(lineups));
+}
+
+type ExpectedGoalsWindow =
+  | "overall"
+  | "home"
+  | "away"
+  | "recent"
+  | "last5"
+  | "last10"
+  | "fixture";
+
+function isExpectedGoalsWindow(value: unknown): value is ExpectedGoalsWindow {
+  return (
+    value === "overall" ||
+    value === "home" ||
+    value === "away" ||
+    value === "recent" ||
+    value === "last5" ||
+    value === "last10" ||
+    value === "fixture"
+  );
+}
+
+function parseOptionalFiniteNumber(
+  value: unknown,
+  field: string,
+): Result<number | undefined, EvidenceNormalizationError> {
+  if (value === undefined) {
+    return success(undefined);
+  }
+
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return failure("INVALID_FIELD", `${field} must be a finite number.`, field);
+  }
+
+  return success(value);
+}
+
+function parseExpectedGoalsMetrics(
+  value: unknown,
+): Result<Readonly<Record<string, number>>, EvidenceNormalizationError> {
+  if (value === undefined) {
+    return failure(
+      "INVALID_FIELD",
+      "expectedGoals.metrics is required when a record is present.",
+      "expectedGoals.metrics",
+    );
+  }
+
+  if (!isRecord(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "expectedGoals.metrics must be an object.",
+      "expectedGoals.metrics",
+    );
+  }
+
+  const metricFields = [
+    "xg",
+    "xga",
+    "nonPenaltyXg",
+    "nonPenaltyXga",
+    "expectedPoints",
+    "expectedGoalDifference",
+  ] as const;
+
+  const metrics: { -readonly [K in (typeof metricFields)[number]]?: number } = {};
+
+  for (const field of metricFields) {
+    const parsed = parseOptionalFiniteNumber(
+      value[field],
+      `expectedGoals.metrics.${field}`,
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    if (parsed.value !== undefined) {
+      metrics[field] = parsed.value;
+    }
+  }
+
+  if (Object.keys(metrics).length === 0) {
+    return failure(
+      "INVALID_FIELD",
+      "expectedGoals.metrics must include at least one provider metric.",
+      "expectedGoals.metrics",
+    );
+  }
+
+  return success(Object.freeze(metrics));
+}
+
+/**
+ * F1.3A: optional Expected Goals Evidence records.
+ * Absent array → honest absence. Never invent metrics or derive from shots.
+ */
+function parseExpectedGoals(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): Result<readonly Evidence[], EvidenceNormalizationError> {
+  if (!Array.isArray(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "expectedGoals must be an array.",
+      "expectedGoals",
+    );
+  }
+
+  const records: Evidence[] = [];
+
+  for (const entry of value) {
+    if (!isRecord(entry)) {
+      return failure(
+        "INVALID_FIELD",
+        "expectedGoals entry must be an object.",
+        "expectedGoals",
+      );
+    }
+
+    const teamSide = requireTeamSide(entry.teamSide);
+
+    if (teamSide === undefined) {
+      return failure(
+        "INVALID_FIELD",
+        'expectedGoals.teamSide must be "home" or "away".',
+        "expectedGoals.teamSide",
+      );
+    }
+
+    if (typeof entry.teamId !== "string" || entry.teamId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "expectedGoals.teamId must be a non-empty string.",
+        "expectedGoals.teamId",
+      );
+    }
+
+    if (typeof entry.teamName !== "string" || entry.teamName.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "expectedGoals.teamName must be a non-empty string.",
+        "expectedGoals.teamName",
+      );
+    }
+
+    if (!isExpectedGoalsWindow(entry.window)) {
+      return failure(
+        "INVALID_FIELD",
+        "expectedGoals.window must be one of overall|home|away|recent|last5|last10|fixture.",
+        "expectedGoals.window",
+      );
+    }
+
+    const window = entry.window;
+
+    if (
+      typeof entry.observedAt !== "string" ||
+      entry.observedAt.trim().length === 0
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "expectedGoals.observedAt must be a non-empty string.",
+        "expectedGoals.observedAt",
+      );
+    }
+
+    const metrics = parseExpectedGoalsMetrics(entry.metrics);
+
+    if (!metrics.ok) {
+      return metrics;
+    }
+
+    const provenanceOverlay = parseProviderProvenanceOverlay(entry);
+
+    if (!provenanceOverlay.ok) {
+      return provenanceOverlay;
+    }
+
+    const provenance = provenanceOverlay.value;
+    const source = provenance?.source ?? "fixture";
+    const sourceId =
+      provenance?.sourceId ?? `fixture-${matchId}-xg-${teamSide}-${window}`;
+    const method = provenance?.method ?? "fixture";
+
+    try {
+      records.push(
+        createEvidence({
+          id: `evidence-${source}-${matchId}-xg-${teamSide}-${window}`,
+          source,
+          sourceId,
+          type: "EXPECTED_GOALS",
+          matchId: createMatchId(matchId),
+          collectedAt,
+          eventTime,
+          timestamp: collectedAt,
+          freshness: "fresh",
+          confidence: source === "api-football" ? "medium" : "unknown",
+          quality: "unverified",
+          provenance: {
+            collector: "@fas/evidence-normalizer",
+            method,
+          },
+          payload: Object.freeze({
+            teamId: entry.teamId.trim(),
+            teamName: entry.teamName.trim(),
+            teamSide,
+            ...(typeof entry.competitionId === "string" &&
+            entry.competitionId.trim().length > 0
+              ? { competitionId: entry.competitionId.trim() }
+              : {}),
+            ...(typeof entry.competitionName === "string" &&
+            entry.competitionName.trim().length > 0
+              ? { competitionName: entry.competitionName.trim() }
+              : {}),
+            ...(typeof entry.season === "string" && entry.season.trim().length > 0
+              ? { season: entry.season.trim() }
+              : typeof entry.season === "number" && Number.isFinite(entry.season)
+                ? { season: String(entry.season) }
+                : {}),
+            window,
+            metrics: metrics.value,
+            observedAt: entry.observedAt.trim(),
+          }),
+        }),
+      );
+    } catch (error: unknown) {
+      if (
+        error instanceof EvidenceValidationError ||
+        error instanceof MatchValidationError
+      ) {
+        return failure("DOMAIN_VALIDATION_FAILED", error.message);
+      }
+
+      return failure(
+        "UNEXPECTED_ERROR",
+        "EXPECTED_GOALS evidence normalization failed unexpectedly.",
+      );
+    }
+  }
+
+  return success(Object.freeze(records));
 }

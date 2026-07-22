@@ -137,6 +137,43 @@ export interface AdvancedStatisticsContextView {
   readonly note: string;
 }
 
+export type ExpectedGoalsWindowId =
+  | "overall"
+  | "home"
+  | "away"
+  | "recent"
+  | "last5"
+  | "last10"
+  | "fixture";
+
+export interface ExpectedGoalsMetricsView {
+  readonly xg: number | null;
+  readonly xga: number | null;
+  readonly nonPenaltyXg: number | null;
+  readonly nonPenaltyXga: number | null;
+  readonly expectedPoints: number | null;
+  readonly expectedGoalDifference: number | null;
+}
+
+export interface ExpectedGoalsRecordView {
+  readonly teamSide: "away" | "home";
+  readonly teamName: string;
+  readonly window: ExpectedGoalsWindowId;
+  readonly competitionName: string | null;
+  readonly season: string | null;
+  readonly observedAt: string;
+  readonly metrics: ExpectedGoalsMetricsView;
+  readonly providerId: string;
+  readonly source: string;
+  readonly provenanceMethod: string;
+}
+
+export interface ExpectedGoalsContextView {
+  readonly available: boolean;
+  readonly records: readonly ExpectedGoalsRecordView[];
+  readonly note: string;
+}
+
 export interface WinnerPredictionView {
   readonly homeTeam: string;
   readonly awayTeam: string;
@@ -229,6 +266,7 @@ export interface ExplainableReportView {
   readonly players: PlayersContextView;
   readonly lineups: LineupsContextView;
   readonly advancedStatistics: AdvancedStatisticsContextView;
+  readonly expectedGoals: ExpectedGoalsContextView;
   readonly availability: AvailabilitySummaryView;
   readonly winnerPrediction: WinnerPredictionView;
   readonly mostLikelyScore: MostLikelyScoreView;

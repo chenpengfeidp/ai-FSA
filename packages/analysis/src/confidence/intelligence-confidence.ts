@@ -30,6 +30,14 @@ const P1_CHANNEL_RULES = new Set([
   "AWAY_VENUE_FORM_EDGE",
   "GOALS_SCORED_HOME_EDGE",
   "GOALS_SCORED_AWAY_EDGE",
+  "ATTACK_EFFICIENCY_HOME_EDGE",
+  "ATTACK_EFFICIENCY_AWAY_EDGE",
+  "POSSESSION_HOME_EDGE",
+  "POSSESSION_AWAY_EDGE",
+  "CHANCE_CREATION_HOME_EDGE",
+  "CHANCE_CREATION_AWAY_EDGE",
+  "DISCIPLINE_AWAY_RISK",
+  "DISCIPLINE_HOME_RISK",
   "DEFENSE_HOME_STABLE",
   "DEFENSE_AWAY_STABLE",
   "DEFENSE_HOME_FRAGILE",
@@ -103,6 +111,18 @@ function evidenceCompleteness(evidences: readonly Evidence[]): number {
         evidence.type === "TEAM_FORM" &&
         evidence.payload.teamSide === "away" &&
         evidence.payload.awaySplit !== undefined,
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "STATISTICS" &&
+        evidence.payload.teamSide === "home" &&
+        evidence.payload.advanced !== undefined,
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "STATISTICS" &&
+        evidence.payload.teamSide === "away" &&
+        evidence.payload.advanced !== undefined,
     ),
   ];
   const present = checks.filter(Boolean).length;
@@ -200,6 +220,25 @@ export function computeIntelligenceConfidence(input: {
 
   if (venueUnavailable) {
     limitations.push("VENUE Evidence unavailable; venue support not claimed.");
+  }
+
+  const hasAdvancedHome = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "STATISTICS" &&
+      evidence.payload.teamSide === "home" &&
+      evidence.payload.advanced !== undefined,
+  );
+  const hasAdvancedAway = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "STATISTICS" &&
+      evidence.payload.teamSide === "away" &&
+      evidence.payload.advanced !== undefined,
+  );
+
+  if (!hasAdvancedHome || !hasAdvancedAway) {
+    limitations.push(
+      "Advanced STATISTICS Evidence incomplete; attack efficiency / possession / chance / discipline Features may be absent.",
+    );
   }
 
   if (input.scenarios.residualMass > 0.05) {

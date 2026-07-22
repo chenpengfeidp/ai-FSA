@@ -1,17 +1,23 @@
 import { createMatchId, type MatchId } from "@fas/match";
 
 export type RuleId =
+  | "rule:attack-efficiency-away-edge:v1"
+  | "rule:attack-efficiency-home-edge:v1"
   | "rule:availability-away-hit:v1"
   | "rule:availability-away-unknown:v1"
   | "rule:availability-home-hit:v1"
   | "rule:availability-home-unknown:v1"
   | "rule:away-attack-edge:v1"
   | "rule:away-team-present:v1"
+  | "rule:away-venue-form-edge:v1"
+  | "rule:chance-creation-away-edge:v1"
+  | "rule:chance-creation-home-edge:v1"
   | "rule:defense-away-fragile:v1"
   | "rule:defense-away-stable:v1"
   | "rule:defense-home-fragile:v1"
   | "rule:defense-home-stable:v1"
-  | "rule:away-venue-form-edge:v1"
+  | "rule:discipline-away-risk:v1"
+  | "rule:discipline-home-risk:v1"
   | "rule:form-away-superior:v1"
   | "rule:form-home-superior:v1"
   | "rule:form-near-parity:v1"
@@ -30,6 +36,8 @@ export type RuleId =
   | "rule:market-lean-home:v1"
   | "rule:momentum-away:v1"
   | "rule:momentum-home:v1"
+  | "rule:possession-away-edge:v1"
+  | "rule:possession-home-edge:v1"
   | "rule:signals-aligned-away:v1"
   | "rule:signals-aligned-home:v1"
   | "rule:venue-supports-home:v1"
@@ -40,13 +48,19 @@ export type RuleName =
   | "AVAILABILITY_AWAY_UNKNOWN"
   | "AVAILABILITY_HOME_HIT"
   | "AVAILABILITY_HOME_UNKNOWN"
+  | "ATTACK_EFFICIENCY_AWAY_EDGE"
+  | "ATTACK_EFFICIENCY_HOME_EDGE"
   | "AWAY_ATTACK_EDGE"
   | "AWAY_TEAM_PRESENT"
   | "AWAY_VENUE_FORM_EDGE"
+  | "CHANCE_CREATION_AWAY_EDGE"
+  | "CHANCE_CREATION_HOME_EDGE"
   | "DEFENSE_AWAY_FRAGILE"
   | "DEFENSE_AWAY_STABLE"
   | "DEFENSE_HOME_FRAGILE"
   | "DEFENSE_HOME_STABLE"
+  | "DISCIPLINE_AWAY_RISK"
+  | "DISCIPLINE_HOME_RISK"
   | "FORM_AWAY_SUPERIOR"
   | "FORM_HOME_SUPERIOR"
   | "FORM_NEAR_PARITY"
@@ -65,6 +79,8 @@ export type RuleName =
   | "MARKET_LEAN_HOME"
   | "MOMENTUM_AWAY"
   | "MOMENTUM_HOME"
+  | "POSSESSION_AWAY_EDGE"
+  | "POSSESSION_HOME_EDGE"
   | "SIGNALS_ALIGNED_AWAY"
   | "SIGNALS_ALIGNED_HOME"
   | "VENUE_SUPPORTS_HOME"
@@ -108,6 +124,8 @@ export class RuleResultValidationError extends Error {
 }
 
 const ruleIds: ReadonlySet<string> = new Set([
+  "rule:attack-efficiency-away-edge:v1",
+  "rule:attack-efficiency-home-edge:v1",
   "rule:availability-away-hit:v1",
   "rule:availability-away-unknown:v1",
   "rule:availability-home-hit:v1",
@@ -115,10 +133,14 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:away-attack-edge:v1",
   "rule:away-team-present:v1",
   "rule:away-venue-form-edge:v1",
+  "rule:chance-creation-away-edge:v1",
+  "rule:chance-creation-home-edge:v1",
   "rule:defense-away-fragile:v1",
   "rule:defense-away-stable:v1",
   "rule:defense-home-fragile:v1",
   "rule:defense-home-stable:v1",
+  "rule:discipline-away-risk:v1",
+  "rule:discipline-home-risk:v1",
   "rule:form-away-superior:v1",
   "rule:form-home-superior:v1",
   "rule:form-near-parity:v1",
@@ -137,12 +159,16 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:market-lean-home:v1",
   "rule:momentum-away:v1",
   "rule:momentum-home:v1",
+  "rule:possession-away-edge:v1",
+  "rule:possession-home-edge:v1",
   "rule:signals-aligned-away:v1",
   "rule:signals-aligned-home:v1",
   "rule:venue-supports-home:v1",
   "rule:venue-unavailable:v1",
 ]);
 const ruleNames: ReadonlySet<string> = new Set([
+  "ATTACK_EFFICIENCY_AWAY_EDGE",
+  "ATTACK_EFFICIENCY_HOME_EDGE",
   "AVAILABILITY_AWAY_HIT",
   "AVAILABILITY_AWAY_UNKNOWN",
   "AVAILABILITY_HOME_HIT",
@@ -150,10 +176,14 @@ const ruleNames: ReadonlySet<string> = new Set([
   "AWAY_ATTACK_EDGE",
   "AWAY_TEAM_PRESENT",
   "AWAY_VENUE_FORM_EDGE",
+  "CHANCE_CREATION_AWAY_EDGE",
+  "CHANCE_CREATION_HOME_EDGE",
   "DEFENSE_AWAY_FRAGILE",
   "DEFENSE_AWAY_STABLE",
   "DEFENSE_HOME_FRAGILE",
   "DEFENSE_HOME_STABLE",
+  "DISCIPLINE_AWAY_RISK",
+  "DISCIPLINE_HOME_RISK",
   "FORM_AWAY_SUPERIOR",
   "FORM_HOME_SUPERIOR",
   "FORM_NEAR_PARITY",
@@ -172,6 +202,8 @@ const ruleNames: ReadonlySet<string> = new Set([
   "MARKET_LEAN_HOME",
   "MOMENTUM_AWAY",
   "MOMENTUM_HOME",
+  "POSSESSION_AWAY_EDGE",
+  "POSSESSION_HOME_EDGE",
   "SIGNALS_ALIGNED_AWAY",
   "SIGNALS_ALIGNED_HOME",
   "VENUE_SUPPORTS_HOME",

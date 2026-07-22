@@ -12,6 +12,7 @@ import { ReasoningSection } from "./reasoning-section";
 import { RuleEvaluationSection } from "./rule-evaluation-section";
 import { AdvancedStatisticsContextSection } from "./advanced-statistics-context";
 import { AvailabilityContextSection } from "./availability-context";
+import { ExpectedGoalsContextSection } from "./expected-goals-context";
 import { LineupContextSection } from "./lineup-context";
 import { PlayersContextSection } from "./player-context";
 import { RefereeContextSection } from "./referee-context";
@@ -62,6 +63,10 @@ export function ExplainableMatchReport({
 
       <WorkspaceSection id="advanced-statistics">
         <AdvancedStatisticsContextSection statistics={view.advancedStatistics} />
+      </WorkspaceSection>
+
+      <WorkspaceSection id="expected-goals">
+        <ExpectedGoalsContextSection expectedGoals={view.expectedGoals} />
       </WorkspaceSection>
 
       <WorkspaceSection id="availability">

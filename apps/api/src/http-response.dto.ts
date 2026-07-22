@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 const evidenceTypes = [
+  "EXPECTED_GOALS",
   "HEAD_TO_HEAD",
   "INJURY",
   "LINEUP",

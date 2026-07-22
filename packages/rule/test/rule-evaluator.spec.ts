@@ -179,6 +179,30 @@ describe("RuleEvaluator", () => {
       { ruleName: "AWAY_VENUE_FORM_EDGE", status: "INAPPLICABLE", score: 0 },
       { ruleName: "GOALS_SCORED_HOME_EDGE", status: "INAPPLICABLE", score: 0 },
       { ruleName: "GOALS_SCORED_AWAY_EDGE", status: "INAPPLICABLE", score: 0 },
+      {
+        ruleName: "ATTACK_EFFICIENCY_HOME_EDGE",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      {
+        ruleName: "ATTACK_EFFICIENCY_AWAY_EDGE",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      { ruleName: "POSSESSION_HOME_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "POSSESSION_AWAY_EDGE", status: "INAPPLICABLE", score: 0 },
+      {
+        ruleName: "CHANCE_CREATION_HOME_EDGE",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      {
+        ruleName: "CHANCE_CREATION_AWAY_EDGE",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      { ruleName: "DISCIPLINE_AWAY_RISK", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "DISCIPLINE_HOME_RISK", status: "INAPPLICABLE", score: 0 },
       { ruleName: "DEFENSE_HOME_STABLE", status: "PASS", score: 0.45 },
       { ruleName: "DEFENSE_AWAY_STABLE", status: "FAIL", score: 0 },
       { ruleName: "DEFENSE_HOME_FRAGILE", status: "FAIL", score: 0 },
@@ -411,6 +435,145 @@ describe("RuleEvaluator", () => {
       },
       {
         ruleName: "GOALS_SCORED_AWAY_EDGE",
+        status: "FAIL",
+        channel: "away+",
+      },
+    ]);
+  });
+
+  it("evaluates F1.2b advanced-statistics edges", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      createFeature({
+        featureId: "feature:evidence-1:attackEfficiencyHome",
+        matchId: createMatchId("match-1"),
+        name: "attackEfficiencyHome",
+        value: 70,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:attackEfficiencyAway",
+        matchId: createMatchId("match-1"),
+        name: "attackEfficiencyAway",
+        value: 50,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:possessionHome",
+        matchId: createMatchId("match-1"),
+        name: "possessionHome",
+        value: 58,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:possessionAway",
+        matchId: createMatchId("match-1"),
+        name: "possessionAway",
+        value: 42,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:chanceCreationHome",
+        matchId: createMatchId("match-1"),
+        name: "chanceCreationHome",
+        value: 72,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:chanceCreationAway",
+        matchId: createMatchId("match-1"),
+        name: "chanceCreationAway",
+        value: 55,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:disciplineRiskHome",
+        matchId: createMatchId("match-1"),
+        name: "disciplineRiskHome",
+        value: 20,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:disciplineRiskAway",
+        matchId: createMatchId("match-1"),
+        name: "disciplineRiskAway",
+        value: 40,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "ATTACK_EFFICIENCY_HOME_EDGE",
+            "ATTACK_EFFICIENCY_AWAY_EDGE",
+            "POSSESSION_HOME_EDGE",
+            "POSSESSION_AWAY_EDGE",
+            "CHANCE_CREATION_HOME_EDGE",
+            "CHANCE_CREATION_AWAY_EDGE",
+            "DISCIPLINE_AWAY_RISK",
+            "DISCIPLINE_HOME_RISK",
+          ].includes(result.ruleName),
+        )
+        .map(({ ruleName, status, channel }) => ({
+          ruleName,
+          status,
+          channel,
+        })),
+    ).toEqual([
+      {
+        ruleName: "ATTACK_EFFICIENCY_HOME_EDGE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "ATTACK_EFFICIENCY_AWAY_EDGE",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "POSSESSION_HOME_EDGE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "POSSESSION_AWAY_EDGE",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "CHANCE_CREATION_HOME_EDGE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "CHANCE_CREATION_AWAY_EDGE",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "DISCIPLINE_AWAY_RISK",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "DISCIPLINE_HOME_RISK",
         status: "FAIL",
         channel: "away+",
       },

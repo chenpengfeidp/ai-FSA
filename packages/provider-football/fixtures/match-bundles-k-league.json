@@ -490,6 +490,226 @@
           ],
           "providerMethod": "recorded-snapshot"
         }
+      ],
+      "expectedGoals": [
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "overall",
+          "metrics": {
+            "xg": 1.48,
+            "xga": 1.12,
+            "nonPenaltyXg": 1.31,
+            "nonPenaltyXga": 1.05,
+            "expectedPoints": 1.55,
+            "expectedGoalDifference": 0.36
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "home",
+          "metrics": {
+            "xg": 1.62,
+            "xga": 0.98
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "away",
+          "metrics": {
+            "xg": 1.21,
+            "xga": 1.34
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "recent",
+          "metrics": {
+            "xg": 1.55,
+            "xga": 1.08
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "last5",
+          "metrics": {
+            "xg": 1.51,
+            "xga": 1.1
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "last10",
+          "metrics": {
+            "xg": 1.44,
+            "xga": 1.18
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "fixture",
+          "metrics": {
+            "xg": 1.72,
+            "nonPenaltyXg": 1.55
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "overall",
+          "metrics": {
+            "xg": 1.67,
+            "xga": 0.94,
+            "nonPenaltyXg": 1.5,
+            "nonPenaltyXga": 0.88,
+            "expectedPoints": 1.78,
+            "expectedGoalDifference": 0.73
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "home",
+          "metrics": {
+            "xg": 1.88,
+            "xga": 0.81
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "away",
+          "metrics": {
+            "xg": 1.41,
+            "xga": 1.12
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "recent",
+          "metrics": {
+            "xg": 1.6,
+            "xga": 1.02
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "last5",
+          "metrics": {
+            "xg": 1.58,
+            "xga": 0.96
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "last10",
+          "metrics": {
+            "xg": 1.63,
+            "xga": 0.99
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "window": "fixture",
+          "metrics": {
+            "xg": 1.39,
+            "nonPenaltyXg": 1.39
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        }
       ]
     },
     {

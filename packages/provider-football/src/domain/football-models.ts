@@ -3,6 +3,15 @@
  * Adapters map vendor payloads into these types; Evidence never sees raw vendor JSON.
  */
 
+import type { FootballExpectedGoalsRecord } from "./football-expected-goals.js";
+
+export type { FootballExpectedGoalsRecord } from "./football-expected-goals.js";
+export type {
+  FootballExpectedGoalsMetrics,
+  FootballExpectedGoalsSide,
+  FootballExpectedGoalsWindow,
+} from "./football-expected-goals.js";
+
 export type FootballProviderMethod = "http-live" | "recorded-snapshot";
 
 /** Stadium / ground identity for a fixture (F1.1B-1 Venue Evidence). */
@@ -152,7 +161,8 @@ export interface FootballAdvancedTeamStats {
 /**
  * Team aggregate stats for evidence STATISTICS.
  * Base shots/xG fields remain F.1-compatible; advanced is F1.2a optional.
- * True provider xG remains F1.3 — xG fields may stay zero / unavailable.
+ * True provider xG lives on FootballMatchBundle.expectedGoals (F1.3A).
+ * STATISTICS xG fields stay zero until F1.3B Feature consume — never fabricate.
  */
 export interface FootballTeamStats {
   readonly teamId: string;
@@ -225,6 +235,11 @@ export interface FootballMatchBundle {
    * Empty means honest absence — never Expected Lineup.
    */
   readonly lineups: readonly FootballTeamLineup[];
+  /**
+   * Provider-supplied Expected Goals records (F1.3A Evidence only).
+   * Empty means honest absence — never estimate from shots/goals.
+   */
+  readonly expectedGoals: readonly FootballExpectedGoalsRecord[];
 }
 
 export interface FootballBoardRow {

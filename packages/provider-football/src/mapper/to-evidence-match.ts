@@ -1,3 +1,4 @@
+import type { FootballExpectedGoalsRecord } from "../domain/football-expected-goals.js";
 import type {
   FootballAdvancedTeamStats,
   FootballFormSplit,
@@ -5,6 +6,51 @@ import type {
   FootballTeamForm,
   FootballTeamStats,
 } from "../domain/football-models.js";
+
+function freezeExpectedGoalsMetrics(
+  metrics: FootballExpectedGoalsRecord["metrics"],
+): unknown {
+  return Object.freeze({
+    ...(metrics.xg === undefined ? {} : { xg: metrics.xg }),
+    ...(metrics.xga === undefined ? {} : { xga: metrics.xga }),
+    ...(metrics.nonPenaltyXg === undefined
+      ? {}
+      : { nonPenaltyXg: metrics.nonPenaltyXg }),
+    ...(metrics.nonPenaltyXga === undefined
+      ? {}
+      : { nonPenaltyXga: metrics.nonPenaltyXga }),
+    ...(metrics.expectedPoints === undefined
+      ? {}
+      : { expectedPoints: metrics.expectedPoints }),
+    ...(metrics.expectedGoalDifference === undefined
+      ? {}
+      : { expectedGoalDifference: metrics.expectedGoalDifference }),
+  });
+}
+
+function toExpectedGoalsShape(
+  record: FootballExpectedGoalsRecord,
+  fixtureKey: string,
+): unknown {
+  return Object.freeze({
+    teamId: record.teamId,
+    teamName: record.teamName,
+    teamSide: record.teamSide,
+    ...(record.competitionId === undefined
+      ? {}
+      : { competitionId: record.competitionId }),
+    ...(record.competitionName === undefined
+      ? {}
+      : { competitionName: record.competitionName }),
+    ...(record.season === undefined ? {} : { season: record.season }),
+    window: record.window,
+    metrics: freezeExpectedGoalsMetrics(record.metrics),
+    observedAt: record.observedAt,
+    providerSource: "api-football",
+    providerSourceId: `api-football:${fixtureKey}:xg:${record.teamSide}:${record.window}`,
+    providerMethod: record.providerMethod,
+  });
+}
 
 function freezeAdvancedShape(
   advanced: FootballAdvancedTeamStats | undefined,
@@ -114,6 +160,7 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     players,
     availabilityAbsences,
     lineups,
+    expectedGoals,
   } = bundle;
   const fixtureKey = fixture.fixtureId;
 
@@ -216,6 +263,13 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
                 providerMethod: lineup.providerMethod,
               }),
             ),
+          ),
+        }),
+    ...(expectedGoals.length === 0
+      ? {}
+      : {
+          expectedGoals: Object.freeze(
+            expectedGoals.map((record) => toExpectedGoalsShape(record, fixtureKey)),
           ),
         }),
     teamForm: Object.freeze([

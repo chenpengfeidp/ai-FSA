@@ -4,13 +4,19 @@ import { createMatchId, type MatchId } from "@fas/match";
 export type FeatureName =
   | "asianHandicapLean"
   | "asianHandicapLine"
+  | "attackEfficiencyAway"
+  | "attackEfficiencyHome"
   | "attackRatingAway"
   | "attackRatingHome"
   | "availabilityPenaltyAway"
   | "availabilityPenaltyHome"
   | "awayTeam"
+  | "chanceCreationAway"
+  | "chanceCreationHome"
   | "defenseRatingAway"
   | "defenseRatingHome"
+  | "disciplineRiskAway"
+  | "disciplineRiskHome"
   | "formAtHomeAway"
   | "formAtHomeHome"
   | "formOnRoadAway"
@@ -31,6 +37,8 @@ export type FeatureName =
   | "momentum"
   | "momentumAway"
   | "momentumHome"
+  | "possessionHome"
+  | "possessionAway"
   | "recentFormAway"
   | "recentFormHome"
   | "recentFormShortAway"
@@ -67,13 +75,19 @@ export class FeatureValidationError extends Error {
 const featureNames: ReadonlySet<string> = new Set([
   "asianHandicapLean",
   "asianHandicapLine",
+  "attackEfficiencyAway",
+  "attackEfficiencyHome",
   "attackRatingAway",
   "attackRatingHome",
   "availabilityPenaltyAway",
   "availabilityPenaltyHome",
   "awayTeam",
+  "chanceCreationAway",
+  "chanceCreationHome",
   "defenseRatingAway",
   "defenseRatingHome",
+  "disciplineRiskAway",
+  "disciplineRiskHome",
   "formAtHomeAway",
   "formAtHomeHome",
   "formOnRoadAway",
@@ -94,6 +108,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "momentum",
   "momentumAway",
   "momentumHome",
+  "possessionAway",
+  "possessionHome",
   "recentFormAway",
   "recentFormHome",
   "recentFormShortAway",

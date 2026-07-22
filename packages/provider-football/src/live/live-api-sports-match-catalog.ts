@@ -7,6 +7,7 @@ import { mapApiFootballInjuriesResponse } from "../mapper/map-api-football-injur
 import { mapApiFootballLineupsResponse } from "../mapper/map-api-football-lineups.js";
 import { mapApiFootballSquadResponse } from "../mapper/map-api-football-squad.js";
 import { mapApiFootballStandings } from "../mapper/map-api-football-standings.js";
+import { mapApiFootballFixtureExpectedGoals } from "../mapper/map-api-football-expected-goals.js";
 import { mapApiFootballFixtureStatistics } from "../mapper/map-api-football-fixture-statistics.js";
 import {
   mapApiFootballTeamStats,
@@ -252,6 +253,19 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       providerMethod: "http-live",
     });
 
+    // Empty expectedGoals → honest absence (never estimate from shots).
+    const expectedGoals = mapApiFootballFixtureExpectedGoals(fixtureStatsBody, {
+      homeTeamId: fixture.homeTeamId,
+      homeTeamName: fixture.homeTeamName,
+      awayTeamId: fixture.awayTeamId,
+      awayTeamName: fixture.awayTeamName,
+      competitionId: fixture.competitionId,
+      competitionName: fixture.competitionName,
+      season: fixture.season,
+      observedAt: fixture.kickoff,
+      providerMethod: "http-live",
+    });
+
     const bundle: FootballMatchBundle = Object.freeze({
       fixture,
       homeForm,
@@ -263,6 +277,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       players: Object.freeze([...homePlayers, ...awayPlayers]),
       availabilityAbsences,
       lineups,
+      expectedGoals,
     });
 
     this.#cache.set(matchId, bundle);

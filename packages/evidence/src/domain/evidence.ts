@@ -8,6 +8,7 @@ export type EvidenceQuality = "rejected" | "unverified" | "verified";
 /** Source/evidence confidence — not Rule, Projection, or AI confidence (doc 41). */
 export type EvidenceSourceConfidence = "high" | "low" | "medium" | "unknown";
 export type EvidenceType =
+  | "EXPECTED_GOALS"
   | "HEAD_TO_HEAD"
   | "INJURY"
   | "LINEUP"
@@ -92,6 +93,7 @@ const confidenceValues: ReadonlySet<string> = new Set([
   "unknown",
 ]);
 const evidenceTypeValues: ReadonlySet<string> = new Set([
+  "EXPECTED_GOALS",
   "HEAD_TO_HEAD",
   "INJURY",
   "LINEUP",

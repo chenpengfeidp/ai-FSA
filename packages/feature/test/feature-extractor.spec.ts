@@ -315,6 +315,17 @@ describe("FeatureExtractor", () => {
           shotsAgainstPerMatch: side === "home" ? 9 : 13,
           xgForPerMatch: side === "home" ? 1.6 : 1.1,
           xgAgainstPerMatch: side === "home" ? 1.0 : 1.5,
+          advanced: {
+            scope: "fixture",
+            shotsTotal: side === "home" ? 14 : 9,
+            shotsOnTarget: side === "home" ? 6 : 3,
+            possessionPct: side === "home" ? 58 : 42,
+            corners: side === "home" ? 7 : 3,
+            dangerousAttacks: side === "home" ? 52 : 35,
+            yellowCards: side === "home" ? 1 : 3,
+            redCards: 0,
+            fouls: side === "home" ? 10 : 14,
+          },
         },
       });
     const venue = createEvidence({
@@ -399,12 +410,30 @@ describe("FeatureExtractor", () => {
           value: 0.8,
         }),
         expect.objectContaining({
+          name: "attackEfficiencyHome",
+          sourceEvidenceId: "evidence-stats-home",
+        }),
+        expect.objectContaining({
+          name: "possessionHome",
+          value: 58,
+          sourceEvidenceId: "evidence-stats-home",
+        }),
+        expect.objectContaining({
+          name: "chanceCreationAway",
+          sourceEvidenceId: "evidence-stats-away",
+        }),
+        expect.objectContaining({
+          name: "disciplineRiskAway",
+          sourceEvidenceId: "evidence-stats-away",
+        }),
+        expect.objectContaining({
           name: "availabilityPenaltyHome",
           value: 8,
           sourceEvidenceId: "evidence-injury-home",
         }),
       ]),
     );
+    expect(bundle.featureModelVersion).toBe("feature.v2.f12b.advstats");
     expect(
       bundle.features.some((feature) => feature.name === "availabilityPenaltyAway"),
     ).toBe(false);

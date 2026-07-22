@@ -2,6 +2,11 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
+  FootballExpectedGoalsMetrics,
+  FootballExpectedGoalsRecord,
+  FootballExpectedGoalsWindow,
+} from "../domain/football-expected-goals.js";
+import type {
   FootballAdvancedTeamStats,
   FootballAvailabilityAbsence,
   FootballBoardRow,
@@ -269,6 +274,122 @@ function parseLineupPlayer(entry: unknown): FootballLineupPlayer | undefined {
   });
 }
 
+const EXPECTED_GOALS_WINDOWS: ReadonlySet<FootballExpectedGoalsWindow> = new Set([
+  "overall",
+  "home",
+  "away",
+  "recent",
+  "last5",
+  "last10",
+  "fixture",
+]);
+
+function parseOptionalFiniteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function parseExpectedGoalsMetrics(
+  value: unknown,
+): FootballExpectedGoalsMetrics | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const xg = parseOptionalFiniteNumber(value.xg);
+  const xga = parseOptionalFiniteNumber(value.xga);
+  const nonPenaltyXg = parseOptionalFiniteNumber(value.nonPenaltyXg);
+  const nonPenaltyXga = parseOptionalFiniteNumber(value.nonPenaltyXga);
+  const expectedPoints = parseOptionalFiniteNumber(value.expectedPoints);
+  const expectedGoalDifference = parseOptionalFiniteNumber(
+    value.expectedGoalDifference,
+  );
+
+  if (
+    xg === undefined &&
+    xga === undefined &&
+    nonPenaltyXg === undefined &&
+    nonPenaltyXga === undefined &&
+    expectedPoints === undefined &&
+    expectedGoalDifference === undefined
+  ) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    ...(xg === undefined ? {} : { xg }),
+    ...(xga === undefined ? {} : { xga }),
+    ...(nonPenaltyXg === undefined ? {} : { nonPenaltyXg }),
+    ...(nonPenaltyXga === undefined ? {} : { nonPenaltyXga }),
+    ...(expectedPoints === undefined ? {} : { expectedPoints }),
+    ...(expectedGoalDifference === undefined ? {} : { expectedGoalDifference }),
+  });
+}
+
+function parseExpectedGoalsRecord(
+  entry: unknown,
+): FootballExpectedGoalsRecord | undefined {
+  if (!isRecord(entry)) {
+    return undefined;
+  }
+
+  const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+  const teamName = typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+  const teamSide =
+    entry.teamSide === "home" || entry.teamSide === "away"
+      ? entry.teamSide
+      : undefined;
+  const window =
+    typeof entry.window === "string" &&
+    EXPECTED_GOALS_WINDOWS.has(entry.window as FootballExpectedGoalsWindow)
+      ? (entry.window as FootballExpectedGoalsWindow)
+      : undefined;
+  const observedAt =
+    typeof entry.observedAt === "string" && entry.observedAt.trim().length > 0
+      ? entry.observedAt.trim()
+      : undefined;
+  const providerMethod =
+    entry.providerMethod === "http-live" ||
+    entry.providerMethod === "recorded-snapshot"
+      ? entry.providerMethod
+      : undefined;
+  const metrics = parseExpectedGoalsMetrics(entry.metrics);
+
+  if (
+    teamId.length === 0 ||
+    teamName.length === 0 ||
+    teamSide === undefined ||
+    window === undefined ||
+    observedAt === undefined ||
+    providerMethod === undefined ||
+    metrics === undefined
+  ) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    teamId,
+    teamName,
+    teamSide,
+    ...(typeof entry.competitionId === "string" &&
+    entry.competitionId.trim().length > 0
+      ? { competitionId: entry.competitionId.trim() }
+      : {}),
+    ...(typeof entry.competitionName === "string" &&
+    entry.competitionName.trim().length > 0
+      ? { competitionName: entry.competitionName.trim() }
+      : {}),
+    ...(typeof entry.season === "string" && entry.season.trim().length > 0
+      ? { season: entry.season.trim() }
+      : typeof entry.season === "number" && Number.isFinite(entry.season)
+        ? { season: String(entry.season) }
+        : {}),
+    window,
+    metrics,
+    observedAt,
+    providerMethod,
+  });
+}
+
 function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
   if (!isRecord(raw)) {
     return undefined;
@@ -338,6 +459,7 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
     ? raw.availabilityAbsences
     : [];
   const lineupsRaw = Array.isArray(raw.lineups) ? raw.lineups : [];
+  const expectedGoalsRaw = Array.isArray(raw.expectedGoals) ? raw.expectedGoals : [];
 
   return Object.freeze({
     fixture,
@@ -521,6 +643,12 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
         });
 
         return [lineup];
+      }),
+    ),
+    expectedGoals: Object.freeze(
+      expectedGoalsRaw.flatMap((entry) => {
+        const mapped = parseExpectedGoalsRecord(entry);
+        return mapped === undefined ? [] : [mapped];
       }),
     ),
   });

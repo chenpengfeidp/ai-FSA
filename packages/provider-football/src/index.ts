@@ -12,15 +12,19 @@ export type {
   FootballAvailabilityKind,
   FootballBoardRow,
   FootballFixture,
+  FootballFormSplit,
   FootballH2H,
   FootballH2HMeeting,
+  FootballLineupPlayer,
   FootballMatchBundle,
   FootballPlayer,
   FootballProviderMethod,
+  FootballReferee,
   FootballResultCode,
   FootballStandingRow,
   FootballStandings,
   FootballTeamForm,
+  FootballTeamLineup,
   FootballTeamStats,
   FootballVenue,
 } from "./domain/football-models.js";
@@ -53,6 +57,7 @@ export {
 export { mapApiFootballTeamForm } from "./mapper/map-api-football-form.js";
 export { mapApiFootballH2H } from "./mapper/map-api-football-h2h.js";
 export { mapApiFootballInjuriesResponse } from "./mapper/map-api-football-injuries.js";
+export { mapApiFootballLineupsResponse } from "./mapper/map-api-football-lineups.js";
 export { mapApiFootballSquadResponse } from "./mapper/map-api-football-squad.js";
 export { mapApiFootballStandings } from "./mapper/map-api-football-standings.js";
 export { mapApiFootballTeamStats } from "./mapper/map-api-football-stats.js";

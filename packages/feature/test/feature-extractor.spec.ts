@@ -260,6 +260,11 @@ describe("FeatureExtractor", () => {
         results: ["W", "W", "D", "W", "L"],
         goalsFor: [2, 1, 1, 3, 0],
         goalsAgainst: [0, 0, 1, 1, 2],
+        homeSplit: { results: ["W", "W", "D"], window: 3 },
+        awaySplit: { results: ["W", "L"], window: 2 },
+        recentShort: { results: ["W", "W", "D"], window: 3 },
+        goalsScoredPerMatch: 1.4,
+        goalsConcededPerMatch: 0.8,
       },
     });
     const awayForm = createEvidence({
@@ -281,6 +286,11 @@ describe("FeatureExtractor", () => {
         results: ["L", "D", "L", "W", "L"],
         goalsFor: [0, 1, 0, 2, 1],
         goalsAgainst: [2, 1, 3, 1, 2],
+        homeSplit: { results: ["L", "D"], window: 2 },
+        awaySplit: { results: ["L", "W", "L"], window: 3 },
+        recentShort: { results: ["L", "D", "L"], window: 3 },
+        goalsScoredPerMatch: 0.8,
+        goalsConcededPerMatch: 1.8,
       },
     });
     const sideStats = (side: "away" | "home", id: string): Evidence =>
@@ -371,6 +381,22 @@ describe("FeatureExtractor", () => {
         expect.objectContaining({
           name: "recentFormAway",
           sourceEvidenceId: "evidence-form-away",
+        }),
+        expect.objectContaining({
+          name: "formAtHomeHome",
+          sourceEvidenceId: "evidence-form-home",
+        }),
+        expect.objectContaining({
+          name: "formOnRoadAway",
+          sourceEvidenceId: "evidence-form-away",
+        }),
+        expect.objectContaining({
+          name: "goalsScoredRateHome",
+          value: 1.4,
+        }),
+        expect.objectContaining({
+          name: "goalsScoredRateAway",
+          value: 0.8,
         }),
         expect.objectContaining({
           name: "availabilityPenaltyHome",

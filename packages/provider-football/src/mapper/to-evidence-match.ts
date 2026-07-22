@@ -1,4 +1,45 @@
-import type { FootballMatchBundle } from "../domain/football-models.js";
+import type {
+  FootballFormSplit,
+  FootballMatchBundle,
+  FootballTeamForm,
+} from "../domain/football-models.js";
+
+function freezeSplitShape(split: FootballFormSplit | undefined): unknown {
+  if (split === undefined) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    window: split.window,
+    results: split.results,
+    goalsFor: split.goalsFor,
+    goalsAgainst: split.goalsAgainst,
+  });
+}
+
+function toTeamFormShape(form: FootballTeamForm, fixtureKey: string): unknown {
+  return Object.freeze({
+    teamSide: form.teamSide,
+    window: form.window,
+    results: form.results,
+    goalsFor: form.goalsFor,
+    goalsAgainst: form.goalsAgainst,
+    goalsScoredPerMatch: form.goalsScoredPerMatch,
+    goalsConcededPerMatch: form.goalsConcededPerMatch,
+    ...(form.homeSplit === undefined
+      ? {}
+      : { homeSplit: freezeSplitShape(form.homeSplit) }),
+    ...(form.awaySplit === undefined
+      ? {}
+      : { awaySplit: freezeSplitShape(form.awaySplit) }),
+    ...(form.recentShort === undefined
+      ? {}
+      : { recentShort: freezeSplitShape(form.recentShort) }),
+    providerSource: "api-football",
+    providerSourceId: `api-football:${fixtureKey}:form:${form.teamSide}`,
+    providerMethod: form.providerMethod,
+  });
+}
 
 /**
  * Converts a FAS FootballMatchBundle into the shape expected by
@@ -14,6 +55,7 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     headToHead,
     players,
     availabilityAbsences,
+    lineups,
   } = bundle;
   const fixtureKey = fixture.fixtureId;
 
@@ -25,6 +67,25 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     providerSource: "api-football",
     providerSourceId: `api-football:${fixtureKey}:match`,
     providerMethod: fixture.providerMethod,
+    ...(fixture.referee === undefined
+      ? {}
+      : {
+          referee: Object.freeze({
+            name: fixture.referee.name,
+            ...(fixture.referee.country === undefined
+              ? {}
+              : { country: fixture.referee.country }),
+            ...(fixture.referee.league === undefined
+              ? {}
+              : { league: fixture.referee.league }),
+            ...(fixture.referee.statistics === undefined
+              ? {}
+              : { statistics: fixture.referee.statistics }),
+            providerSource: "api-football",
+            providerSourceId: `api-football:${fixtureKey}:referee`,
+            providerMethod: fixture.providerMethod,
+          }),
+        }),
     ...(fixture.venue === undefined
       ? {}
       : {
@@ -79,27 +140,29 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
             ),
           ),
         }),
+    ...(lineups.length === 0
+      ? {}
+      : {
+          lineups: Object.freeze(
+            lineups.map((lineup) =>
+              Object.freeze({
+                teamId: lineup.teamId,
+                teamName: lineup.teamName,
+                teamSide: lineup.teamSide,
+                formation: lineup.formation,
+                startXI: lineup.startXI,
+                substitutes: lineup.substitutes,
+                status: "confirmed",
+                providerSource: "api-football",
+                providerSourceId: `api-football:${fixtureKey}:lineup:${lineup.teamSide}`,
+                providerMethod: lineup.providerMethod,
+              }),
+            ),
+          ),
+        }),
     teamForm: Object.freeze([
-      Object.freeze({
-        teamSide: homeForm.teamSide,
-        window: homeForm.window,
-        results: homeForm.results,
-        goalsFor: homeForm.goalsFor,
-        goalsAgainst: homeForm.goalsAgainst,
-        providerSource: "api-football",
-        providerSourceId: `api-football:${fixtureKey}:form:home`,
-        providerMethod: homeForm.providerMethod,
-      }),
-      Object.freeze({
-        teamSide: awayForm.teamSide,
-        window: awayForm.window,
-        results: awayForm.results,
-        goalsFor: awayForm.goalsFor,
-        goalsAgainst: awayForm.goalsAgainst,
-        providerSource: "api-football",
-        providerSourceId: `api-football:${fixtureKey}:form:away`,
-        providerMethod: awayForm.providerMethod,
-      }),
+      toTeamFormShape(homeForm, fixtureKey),
+      toTeamFormShape(awayForm, fixtureKey),
     ]),
     statistics: Object.freeze([
       Object.freeze({

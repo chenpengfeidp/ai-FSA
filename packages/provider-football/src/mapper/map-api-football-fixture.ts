@@ -1,6 +1,8 @@
 import type {
   FootballFixture,
   FootballProviderMethod,
+  FootballReferee,
+  FootballRefereeStatistics,
   FootballVenue,
 } from "../domain/football-models.js";
 
@@ -73,6 +75,7 @@ export function mapApiFootballFixtureItem(
           name: venueName,
           city: venueCity,
         });
+  const referee = mapReferee(fixture?.referee);
 
   if (
     fixtureIdNum === undefined ||
@@ -102,7 +105,65 @@ export function mapApiFootballFixtureItem(
     awayTeamName: awayName,
     status: mapStatus(shortStatus),
     venue,
+    referee,
     providerMethod,
+  });
+}
+
+/**
+ * Maps fixture.referee when the provider supplies it.
+ * String → identity only. Object fields used only when present (no inference).
+ */
+function mapReferee(raw: unknown): FootballReferee | undefined {
+  if (typeof raw === "string") {
+    const name = asString(raw);
+
+    return name === undefined
+      ? undefined
+      : Object.freeze({
+          name,
+          country: undefined,
+          league: undefined,
+          statistics: undefined,
+        });
+  }
+
+  if (!isRecord(raw)) {
+    return undefined;
+  }
+
+  const name = asString(raw.name) ?? asString(raw.referee);
+
+  if (name === undefined) {
+    return undefined;
+  }
+
+  const country = asString(raw.country) ?? asString(raw.nationality);
+  const league = asString(raw.league) ?? asString(raw.competition);
+  const statsRaw = isRecord(raw.statistics) ? raw.statistics : undefined;
+  const appearances = asNumber(statsRaw?.appearances ?? raw.appearances);
+  const yellowCardsPerMatch = asNumber(
+    statsRaw?.yellowCardsPerMatch ?? raw.yellowCardsPerMatch,
+  );
+  const redCardsPerMatch = asNumber(
+    statsRaw?.redCardsPerMatch ?? raw.redCardsPerMatch,
+  );
+  const statistics: FootballRefereeStatistics | undefined =
+    appearances === undefined &&
+    yellowCardsPerMatch === undefined &&
+    redCardsPerMatch === undefined
+      ? undefined
+      : Object.freeze({
+          appearances,
+          yellowCardsPerMatch,
+          redCardsPerMatch,
+        });
+
+  return Object.freeze({
+    name,
+    country,
+    league,
+    statistics,
   });
 }
 

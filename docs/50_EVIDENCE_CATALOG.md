@@ -40,10 +40,10 @@ Status legend:
 | VENUE | `VENUE` | Active | F1.1B-1 |
 | PLAYER | `PLAYER` | Active | F1.1C-1 (basic identity) |
 | ODDS | `ODDS` | Active (optional path) | Market path |
-| LINEUP | `LINEUP` | Typed unused | → F1.1E |
+| LINEUP | `LINEUP` | Confirmed XI only (F1.1E) | Honest absence when unpublished; never Expected Lineup |
 | WEATHER | `WEATHER` | Typed unused | Future |
 | Expected Lineup | — | **Not supported** | No API-Football Fact endpoint |
-| Referee | — | Deferred | → F1.1F |
+| Referee | `MATCH_INFO.referee` | F1.1E | Identity + optional country/league/statistics when supplied |
 | Player Statistics | — | Deferred | Later |
 
 ---

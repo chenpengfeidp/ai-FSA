@@ -183,6 +183,41 @@ function parseTeamForm(
   const source = provenance?.source ?? "fixture";
   const sourceId = provenance?.sourceId ?? `fixture-${matchId}-form-${teamSide}`;
   const method = provenance?.method ?? "fixture";
+  const homeSplit = parseOptionalFormSplit(value.homeSplit, "homeSplit");
+
+  if (homeSplit !== undefined && !homeSplit.ok) {
+    return homeSplit;
+  }
+
+  const awaySplit = parseOptionalFormSplit(value.awaySplit, "awaySplit");
+
+  if (awaySplit !== undefined && !awaySplit.ok) {
+    return awaySplit;
+  }
+
+  const recentShort = parseOptionalFormSplit(value.recentShort, "recentShort");
+
+  if (recentShort !== undefined && !recentShort.ok) {
+    return recentShort;
+  }
+
+  const goalsScoredPerMatch = parseOptionalRate(
+    value.goalsScoredPerMatch,
+    "goalsScoredPerMatch",
+  );
+
+  if (goalsScoredPerMatch !== undefined && !goalsScoredPerMatch.ok) {
+    return goalsScoredPerMatch;
+  }
+
+  const goalsConcededPerMatch = parseOptionalRate(
+    value.goalsConcededPerMatch,
+    "goalsConcededPerMatch",
+  );
+
+  if (goalsConcededPerMatch !== undefined && !goalsConcededPerMatch.ok) {
+    return goalsConcededPerMatch;
+  }
 
   try {
     return success(
@@ -208,6 +243,21 @@ function parseTeamForm(
           results: results.value,
           goalsFor: goalsFor.value,
           goalsAgainst: goalsAgainst.value,
+          ...(homeSplit === undefined || !homeSplit.ok
+            ? {}
+            : { homeSplit: homeSplit.value }),
+          ...(awaySplit === undefined || !awaySplit.ok
+            ? {}
+            : { awaySplit: awaySplit.value }),
+          ...(recentShort === undefined || !recentShort.ok
+            ? {}
+            : { recentShort: recentShort.value }),
+          ...(goalsScoredPerMatch === undefined || !goalsScoredPerMatch.ok
+            ? {}
+            : { goalsScoredPerMatch: goalsScoredPerMatch.value }),
+          ...(goalsConcededPerMatch === undefined || !goalsConcededPerMatch.ok
+            ? {}
+            : { goalsConcededPerMatch: goalsConcededPerMatch.value }),
         },
       }),
     );
@@ -857,6 +907,21 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(...normalizedAbsences.value);
   }
 
+  if (input.lineups !== undefined) {
+    const normalizedLineups = parseConfirmedLineups(
+      input.lineups,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalizedLineups.ok) {
+      return normalizedLineups;
+    }
+
+    evidences.push(...normalizedLineups.value);
+  }
+
   if (input.odds !== undefined) {
     const normalized = parseOdds(
       input.odds,
@@ -1326,4 +1391,322 @@ function parseAvailabilityAbsences(
   }
 
   return success(Object.freeze(absences));
+}
+
+function parseOptionalRate(
+  value: unknown,
+  field: string,
+): Result<number, EvidenceNormalizationError> | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return failure("INVALID_FIELD", `${field} must be a finite number ≥ 0.`, field);
+  }
+
+  return success(value);
+}
+
+function parseOptionalFormSplit(
+  value: unknown,
+  field: string,
+):
+  | Result<
+      Readonly<{
+        window: number;
+        results: readonly ("D" | "L" | "W")[];
+        goalsFor: readonly number[];
+        goalsAgainst: readonly number[];
+      }>,
+      EvidenceNormalizationError
+    >
+  | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!isRecord(value)) {
+    return failure("INVALID_FIELD", `${field} must be an object.`, field);
+  }
+
+  if (
+    typeof value.window !== "number" ||
+    !Number.isInteger(value.window) ||
+    value.window < 1 ||
+    value.window > 10
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      `${field}.window must be an integer between 1 and 10.`,
+      field,
+    );
+  }
+
+  const results = requireResultCodes(
+    value.results,
+    value.window,
+    `${field}.results`,
+  );
+
+  if (!results.ok) {
+    return results;
+  }
+
+  const goalsFor = requireNonNegativeIntArray(
+    value.goalsFor,
+    value.window,
+    `${field}.goalsFor`,
+  );
+
+  if (!goalsFor.ok) {
+    return goalsFor;
+  }
+
+  const goalsAgainst = requireNonNegativeIntArray(
+    value.goalsAgainst,
+    value.window,
+    `${field}.goalsAgainst`,
+  );
+
+  if (!goalsAgainst.ok) {
+    return goalsAgainst;
+  }
+
+  return success(
+    Object.freeze({
+      window: value.window,
+      results: results.value,
+      goalsFor: goalsFor.value,
+      goalsAgainst: goalsAgainst.value,
+    }),
+  );
+}
+
+function parseLineupPlayers(
+  value: unknown,
+  field: string,
+): Result<
+  readonly Readonly<{
+    playerId: string;
+    name: string;
+    number?: number;
+    position?: string;
+    grid?: string;
+  }>[],
+  EvidenceNormalizationError
+> {
+  if (!Array.isArray(value)) {
+    return failure("INVALID_FIELD", `${field} must be an array.`, field);
+  }
+
+  const players: Array<{
+    playerId: string;
+    name: string;
+    number?: number;
+    position?: string;
+    grid?: string;
+  }> = [];
+
+  for (const entry of value) {
+    if (!isRecord(entry)) {
+      return failure("INVALID_FIELD", `${field} entries must be objects.`, field);
+    }
+
+    if (typeof entry.playerId !== "string" || entry.playerId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "playerId must be a non-empty string.",
+        "playerId",
+      );
+    }
+
+    if (typeof entry.name !== "string" || entry.name.trim().length === 0) {
+      return failure("INVALID_FIELD", "name must be a non-empty string.", "name");
+    }
+
+    const number =
+      entry.number === undefined
+        ? undefined
+        : typeof entry.number === "number" && Number.isFinite(entry.number)
+          ? entry.number
+          : undefined;
+
+    if (entry.number !== undefined && number === undefined) {
+      return failure(
+        "INVALID_FIELD",
+        "number must be a finite number when provided.",
+        "number",
+      );
+    }
+
+    const position =
+      entry.position === undefined
+        ? undefined
+        : typeof entry.position === "string" && entry.position.trim().length > 0
+          ? entry.position.trim()
+          : undefined;
+    const grid =
+      entry.grid === undefined
+        ? undefined
+        : typeof entry.grid === "string" && entry.grid.trim().length > 0
+          ? entry.grid.trim()
+          : undefined;
+
+    players.push(
+      Object.freeze({
+        playerId: entry.playerId.trim(),
+        name: entry.name.trim(),
+        ...(number === undefined ? {} : { number }),
+        ...(position === undefined ? {} : { position }),
+        ...(grid === undefined ? {} : { grid }),
+      }),
+    );
+  }
+
+  return success(Object.freeze(players));
+}
+
+/**
+ * Confirmed lineup Evidence only. Empty provider sheets are omitted upstream;
+ * never invents Expected Lineup.
+ */
+function parseConfirmedLineups(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): Result<readonly Evidence[], EvidenceNormalizationError> {
+  if (!Array.isArray(value)) {
+    return failure("INVALID_FIELD", "lineups must be an array.", "lineups");
+  }
+
+  if (value.length === 0) {
+    return success(Object.freeze([]));
+  }
+
+  const lineups: Evidence[] = [];
+
+  for (const entry of value) {
+    if (!isRecord(entry)) {
+      return failure("INVALID_FIELD", "lineup entry must be an object.", "lineups");
+    }
+
+    if (typeof entry.teamId !== "string" || entry.teamId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "teamId must be a non-empty string.",
+        "teamId",
+      );
+    }
+
+    if (typeof entry.teamName !== "string" || entry.teamName.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "teamName must be a non-empty string.",
+        "teamName",
+      );
+    }
+
+    const teamSide = requireTeamSide(entry.teamSide);
+
+    if (teamSide === undefined) {
+      return failure("INVALID_FIELD", "teamSide must be home or away.", "teamSide");
+    }
+
+    // Only confirmed sheets are accepted — reject any non-confirmed status.
+    if (entry.status !== undefined && entry.status !== "confirmed") {
+      return failure(
+        "INVALID_FIELD",
+        "lineup status must be confirmed when provided.",
+        "status",
+      );
+    }
+
+    const startXI = parseLineupPlayers(entry.startXI, "startXI");
+
+    if (!startXI.ok) {
+      return startXI;
+    }
+
+    if (startXI.value.length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "confirmed lineup requires a non-empty startXI.",
+        "startXI",
+      );
+    }
+
+    const substitutes =
+      entry.substitutes === undefined
+        ? success(Object.freeze([] as const))
+        : parseLineupPlayers(entry.substitutes, "substitutes");
+
+    if (!substitutes.ok) {
+      return substitutes;
+    }
+
+    const formation =
+      entry.formation === undefined
+        ? undefined
+        : typeof entry.formation === "string" && entry.formation.trim().length > 0
+          ? entry.formation.trim()
+          : undefined;
+
+    const provenanceOverlay = parseProviderProvenanceOverlay(entry);
+
+    if (!provenanceOverlay.ok) {
+      return provenanceOverlay;
+    }
+
+    const provenance = provenanceOverlay.value;
+    const source = provenance?.source ?? "fixture";
+    const sourceId = provenance?.sourceId ?? `fixture-${matchId}-lineup-${teamSide}`;
+    const method = provenance?.method ?? "fixture";
+
+    try {
+      lineups.push(
+        createEvidence({
+          id: `evidence-${source}-${matchId}-lineup-${teamSide}`,
+          source,
+          sourceId,
+          type: "LINEUP",
+          matchId: createMatchId(matchId),
+          collectedAt,
+          eventTime,
+          timestamp: collectedAt,
+          freshness: "fresh",
+          confidence: source === "api-football" ? "medium" : "unknown",
+          quality: "unverified",
+          provenance: {
+            collector: "@fas/evidence-normalizer",
+            method,
+          },
+          payload: Object.freeze({
+            teamId: entry.teamId.trim(),
+            teamName: entry.teamName.trim(),
+            teamSide,
+            status: "confirmed",
+            ...(formation === undefined ? {} : { formation }),
+            startXI: startXI.value,
+            substitutes: substitutes.value,
+          }),
+        }),
+      );
+    } catch (error: unknown) {
+      if (
+        error instanceof EvidenceValidationError ||
+        error instanceof MatchValidationError
+      ) {
+        return failure("DOMAIN_VALIDATION_FAILED", error.message);
+      }
+
+      return failure(
+        "UNEXPECTED_ERROR",
+        "LINEUP evidence normalization failed unexpectedly.",
+      );
+    }
+  }
+
+  return success(Object.freeze(lineups));
 }

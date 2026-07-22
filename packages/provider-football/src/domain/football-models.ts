@@ -43,6 +43,43 @@ export interface FootballAvailabilityAbsence {
   readonly providerMethod: FootballProviderMethod;
 }
 
+/**
+ * Referee facts from the fixture payload only (F1.1E).
+ * Never estimate country/league/statistics when the provider omits them.
+ */
+export interface FootballRefereeStatistics {
+  readonly appearances: number | undefined;
+  readonly yellowCardsPerMatch: number | undefined;
+  readonly redCardsPerMatch: number | undefined;
+}
+
+export interface FootballReferee {
+  readonly name: string;
+  readonly country: string | undefined;
+  readonly league: string | undefined;
+  readonly statistics: FootballRefereeStatistics | undefined;
+}
+
+/** Confirmed lineup player row from `/fixtures/lineups` (not Expected Lineup). */
+export interface FootballLineupPlayer {
+  readonly playerId: string;
+  readonly name: string;
+  readonly number: number | undefined;
+  readonly position: string | undefined;
+  readonly grid: string | undefined;
+}
+
+/** Confirmed team lineup sheet. Absent when provider has not published XI. */
+export interface FootballTeamLineup {
+  readonly teamId: string;
+  readonly teamName: string;
+  readonly teamSide: "away" | "home";
+  readonly formation: string | undefined;
+  readonly startXI: readonly FootballLineupPlayer[];
+  readonly substitutes: readonly FootballLineupPlayer[];
+  readonly providerMethod: FootballProviderMethod;
+}
+
 export interface FootballFixture {
   readonly fixtureId: string;
   readonly matchId: string;
@@ -56,10 +93,19 @@ export interface FootballFixture {
   readonly awayTeamName: string;
   readonly status: "SCHEDULED" | "FINISHED" | "OTHER";
   readonly venue: FootballVenue | undefined;
+  readonly referee: FootballReferee | undefined;
   readonly providerMethod: FootballProviderMethod;
 }
 
 export type FootballResultCode = "D" | "L" | "W";
+
+/** Venue-split or short-window form slice derived from finished fixtures. */
+export interface FootballFormSplit {
+  readonly window: number;
+  readonly results: readonly FootballResultCode[];
+  readonly goalsFor: readonly number[];
+  readonly goalsAgainst: readonly number[];
+}
 
 export interface FootballTeamForm {
   readonly teamId: string;
@@ -69,6 +115,14 @@ export interface FootballTeamForm {
   readonly results: readonly FootballResultCode[];
   readonly goalsFor: readonly number[];
   readonly goalsAgainst: readonly number[];
+  /** Form in matches where this team was home (when sample exists). */
+  readonly homeSplit: FootballFormSplit | undefined;
+  /** Form in matches where this team was away (when sample exists). */
+  readonly awaySplit: FootballFormSplit | undefined;
+  readonly goalsScoredPerMatch: number;
+  readonly goalsConcededPerMatch: number;
+  /** Most-recent short window (≤3) when overall window ≥ 3. */
+  readonly recentShort: FootballFormSplit | undefined;
   readonly providerMethod: FootballProviderMethod;
 }
 
@@ -140,6 +194,11 @@ export interface FootballMatchBundle {
    * Empty means honest absence — not “everyone available”.
    */
   readonly availabilityAbsences: readonly FootballAvailabilityAbsence[];
+  /**
+   * Confirmed lineups when `/fixtures/lineups` returns sheets.
+   * Empty means honest absence — never Expected Lineup.
+   */
+  readonly lineups: readonly FootballTeamLineup[];
 }
 
 export interface FootballBoardRow {

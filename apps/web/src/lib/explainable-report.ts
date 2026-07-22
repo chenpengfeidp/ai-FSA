@@ -15,45 +15,67 @@ import type {
   FeatureImportanceItemView,
   GoalRangeId,
   GoalRangeView,
+  LineupPlayerItemView,
+  LineupsContextView,
   MostLikelyScoreView,
   PlayerContextItemView,
   PlayersContextView,
+  RefereeContextView,
   RuleEvaluationItemView,
+  TeamLineupView,
   VenueContextView,
   WinnerPredictionView,
 } from "../types/explainable-report";
 import type { MatchSummary } from "../types/match-center";
 import { formatJsonValue, formatTimestamp } from "./utils";
 
-const FEATURE_LABELS: Readonly<Record<FeatureName, string>> = Object.freeze({
-  asianHandicapLean: "Asian Handicap Lean",
-  asianHandicapLine: "Asian Handicap Line",
-  attackRatingAway: "Away Attack Rating",
-  attackRatingHome: "Home Attack Rating",
-  awayTeam: "Away Team",
-  defenseRatingAway: "Away Defense Rating",
-  defenseRatingHome: "Home Defense Rating",
-  h2hLean: "H2H Lean",
-  h2hSampleSize: "H2H Sample Size",
-  homeAdvantage: "Home Advantage",
-  homeTeam: "Home Team",
-  kickoff: "Kickoff",
-  marketImpliedAway: "Market Implied Away",
-  marketImpliedDraw: "Market Implied Draw",
-  marketImpliedHome: "Market Implied Home",
-  marketLean: "Market Lean",
-  momentumAway: "Away Momentum",
-  momentumHome: "Home Momentum",
-});
+const FEATURE_LABELS: Readonly<Partial<Record<FeatureName, string>>> = Object.freeze(
+  {
+    asianHandicapLean: "Asian Handicap Lean",
+    asianHandicapLine: "Asian Handicap Line",
+    attackRatingAway: "Away Attack Rating",
+    attackRatingHome: "Home Attack Rating",
+    awayTeam: "Away Team",
+    defenseRatingAway: "Away Defense Rating",
+    defenseRatingHome: "Home Defense Rating",
+    formAtHomeAway: "Away Team Form At Home",
+    formAtHomeHome: "Home Team Form At Home",
+    formOnRoadAway: "Away Team Form On Road",
+    formOnRoadHome: "Home Team Form On Road",
+    goalsConcededRateAway: "Away Goals Conceded Rate",
+    goalsConcededRateHome: "Home Goals Conceded Rate",
+    goalsScoredRateAway: "Away Goals Scored Rate",
+    goalsScoredRateHome: "Home Goals Scored Rate",
+    h2hLean: "H2H Lean",
+    h2hSampleSize: "H2H Sample Size",
+    homeAdvantage: "Home Advantage",
+    homeTeam: "Home Team",
+    kickoff: "Kickoff",
+    marketImpliedAway: "Market Implied Away",
+    marketImpliedDraw: "Market Implied Draw",
+    marketImpliedHome: "Market Implied Home",
+    marketLean: "Market Lean",
+    momentumAway: "Away Momentum",
+    momentumHome: "Home Momentum",
+    recentFormAway: "Away Recent Form",
+    recentFormHome: "Home Recent Form",
+    recentFormShortAway: "Away Short-Window Form",
+    recentFormShortHome: "Home Short-Window Form",
+  },
+);
 
 const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
   AWAY_ATTACK_EDGE: "Away Attack Edge",
   AWAY_TEAM_PRESENT: "Away Team Present",
+  AWAY_VENUE_FORM_EDGE: "Away Venue Form Edge",
+  GOALS_SCORED_AWAY_EDGE: "Away Goals Scored Edge",
+  GOALS_SCORED_HOME_EDGE: "Home Goals Scored Edge",
   H2H_SUPPORTS_AWAY: "H2H Supports Away",
   H2H_SUPPORTS_HOME: "H2H Supports Home",
   HOME_ADVANTAGE_MATERIAL: "Material Home Advantage",
   HOME_ATTACK_EDGE: "Home Attack Edge",
   HOME_TEAM_PRESENT: "Home Team Present",
+  HOME_VENUE_FORM_EDGE: "Home Venue Form Edge",
   KICKOFF_PRESENT: "Kickoff Present",
   MARKET_AH_LEAN_AWAY: "Asian Handicap Lean Away",
   MARKET_AH_LEAN_HOME: "Asian Handicap Lean Home",
@@ -301,6 +323,151 @@ function buildAvailabilitySummary(
     injuries,
     suspensions,
     note: "Availability Summary is composed from Injury and Suspension Evidence (not used by Rules or Projection).",
+  });
+}
+
+function buildRefereeContext(evidence: readonly EvidenceDto[]): RefereeContextView {
+  const matchInfo = evidence.find((item) => item.type === "MATCH_INFO");
+  const refereeRaw =
+    matchInfo !== undefined &&
+    typeof matchInfo.payload.referee === "object" &&
+    matchInfo.payload.referee !== null &&
+    !Array.isArray(matchInfo.payload.referee)
+      ? (matchInfo.payload.referee as Record<string, unknown>)
+      : undefined;
+
+  if (refereeRaw === undefined || typeof refereeRaw.name !== "string") {
+    return Object.freeze({
+      available: false,
+      name: null,
+      country: null,
+      league: null,
+      appearances: null,
+      yellowCardsPerMatch: null,
+      redCardsPerMatch: null,
+      providerId: null,
+      source: null,
+      note: "Referee evidence is not available for this match.",
+    });
+  }
+
+  const statistics =
+    typeof refereeRaw.statistics === "object" &&
+    refereeRaw.statistics !== null &&
+    !Array.isArray(refereeRaw.statistics)
+      ? (refereeRaw.statistics as Record<string, unknown>)
+      : undefined;
+
+  return Object.freeze({
+    available: true,
+    name: refereeRaw.name,
+    country: typeof refereeRaw.country === "string" ? refereeRaw.country : null,
+    league: typeof refereeRaw.league === "string" ? refereeRaw.league : null,
+    appearances:
+      typeof statistics?.appearances === "number" ? statistics.appearances : null,
+    yellowCardsPerMatch:
+      typeof statistics?.yellowCardsPerMatch === "number"
+        ? statistics.yellowCardsPerMatch
+        : null,
+    redCardsPerMatch:
+      typeof statistics?.redCardsPerMatch === "number"
+        ? statistics.redCardsPerMatch
+        : null,
+    providerId: matchInfo?.providerId ?? null,
+    source: matchInfo?.source ?? null,
+    note: "Referee facts are taken only from provider-supplied MATCH_INFO fields (no estimation).",
+  });
+}
+
+function mapLineupPlayers(value: unknown): readonly LineupPlayerItemView[] {
+  if (!Array.isArray(value)) {
+    return Object.freeze([]);
+  }
+
+  const players: LineupPlayerItemView[] = [];
+
+  for (const entry of value) {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+      continue;
+    }
+
+    const record = entry as Record<string, unknown>;
+    const playerId =
+      typeof record.playerId === "string" ? record.playerId.trim() : "";
+    const name = typeof record.name === "string" ? record.name.trim() : "";
+
+    if (playerId.length === 0 || name.length === 0) {
+      continue;
+    }
+
+    players.push(
+      Object.freeze({
+        playerId,
+        name,
+        number: typeof record.number === "number" ? record.number : null,
+        position: typeof record.position === "string" ? record.position : null,
+        grid: typeof record.grid === "string" ? record.grid : null,
+      }),
+    );
+  }
+
+  return Object.freeze(players);
+}
+
+function mapTeamLineup(item: EvidenceDto): TeamLineupView | null {
+  if (item.type !== "LINEUP") {
+    return null;
+  }
+
+  const teamSide =
+    item.payload.teamSide === "home" || item.payload.teamSide === "away"
+      ? item.payload.teamSide
+      : null;
+  const teamName =
+    typeof item.payload.teamName === "string" ? item.payload.teamName : null;
+  const startXI = mapLineupPlayers(item.payload.startXI);
+
+  if (teamSide === null || teamName === null || startXI.length === 0) {
+    return null;
+  }
+
+  if (item.payload.status !== undefined && item.payload.status !== "confirmed") {
+    return null;
+  }
+
+  return Object.freeze({
+    teamSide,
+    teamName,
+    formation:
+      typeof item.payload.formation === "string" ? item.payload.formation : null,
+    startXI,
+    substitutes: mapLineupPlayers(item.payload.substitutes),
+    providerId: item.providerId,
+    source: item.source,
+  });
+}
+
+function buildLineupsContext(evidence: readonly EvidenceDto[]): LineupsContextView {
+  const sheets = evidence
+    .map(mapTeamLineup)
+    .filter((item): item is TeamLineupView => item !== null);
+  const home = sheets.find((item) => item.teamSide === "home") ?? null;
+  const away = sheets.find((item) => item.teamSide === "away") ?? null;
+
+  if (home === null && away === null) {
+    return Object.freeze({
+      available: false,
+      home: null,
+      away: null,
+      note: "Confirmed lineup Evidence is not available. Expected Lineup is never fabricated.",
+    });
+  }
+
+  return Object.freeze({
+    available: true,
+    home,
+    away,
+    note: "Confirmed starting XI from LINEUP Evidence only (never Expected Lineup).",
   });
 }
 
@@ -587,7 +754,9 @@ export function buildExplainableReportView(
             : "Insufficient evidence";
 
   const venueContext = buildVenueContext(evidence);
+  const refereeContext = buildRefereeContext(evidence);
   const playersContext = buildPlayersContext(evidence);
+  const lineupsContext = buildLineupsContext(evidence);
   const availabilityContext = buildAvailabilitySummary(evidence);
 
   return Object.freeze({
@@ -600,7 +769,9 @@ export function buildExplainableReportView(
       venueLabel: venueContext.headerLabel,
     }),
     venue: venueContext.venue,
+    referee: refereeContext,
     players: playersContext,
+    lineups: lineupsContext,
     availability: availabilityContext,
     winnerPrediction,
     mostLikelyScore,

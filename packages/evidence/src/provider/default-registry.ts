@@ -18,8 +18,9 @@ function footballCapabilities(): readonly ProviderCapabilityDeclaration[] {
     Object.freeze({
       kind: "referee" as const,
       supported: true,
-      ingestImplemented: false,
-      notes: "Referee name on fixtures; ingest deferred past F1.1A.",
+      ingestImplemented: true,
+      notes:
+        "F1.1E: fixture.referee → MATCH_INFO.referee (identity + optional country/league/statistics).",
     }),
     Object.freeze({
       kind: "venue" as const,
@@ -30,8 +31,9 @@ function footballCapabilities(): readonly ProviderCapabilityDeclaration[] {
     Object.freeze({
       kind: "lineup" as const,
       supported: true,
-      ingestImplemented: false,
-      notes: "Confirmed lineups via /fixtures/lineups; not in F1.1A.",
+      ingestImplemented: true,
+      notes:
+        "F1.1E: /fixtures/lineups → confirmed LINEUP Evidence only (never Expected Lineup).",
     }),
     Object.freeze({
       kind: "injury" as const,
@@ -44,7 +46,8 @@ function footballCapabilities(): readonly ProviderCapabilityDeclaration[] {
       kind: "recent_form" as const,
       supported: true,
       ingestImplemented: true,
-      notes: "Existing TEAM_FORM path from Football Data (F.1).",
+      notes:
+        "F.1 TEAM_FORM + F1.1E home/away splits, goals rates, and short windows.",
     }),
   ]);
 }

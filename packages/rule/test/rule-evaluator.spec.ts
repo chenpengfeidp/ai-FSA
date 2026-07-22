@@ -175,6 +175,10 @@ describe("RuleEvaluator", () => {
       { ruleName: "FORM_HOME_SUPERIOR", status: "INAPPLICABLE", score: 0 },
       { ruleName: "FORM_AWAY_SUPERIOR", status: "INAPPLICABLE", score: 0 },
       { ruleName: "FORM_NEAR_PARITY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "HOME_VENUE_FORM_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "AWAY_VENUE_FORM_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "GOALS_SCORED_HOME_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "GOALS_SCORED_AWAY_EDGE", status: "INAPPLICABLE", score: 0 },
       { ruleName: "DEFENSE_HOME_STABLE", status: "PASS", score: 0.45 },
       { ruleName: "DEFENSE_AWAY_STABLE", status: "FAIL", score: 0 },
       { ruleName: "DEFENSE_HOME_FRAGILE", status: "FAIL", score: 0 },
@@ -310,6 +314,105 @@ describe("RuleEvaluator", () => {
         ruleName: "AVAILABILITY_AWAY_UNKNOWN",
         status: "FAIL",
         channel: "none",
+      },
+    ]);
+  });
+
+  it("evaluates form-decomposition venue and goals-scored edges", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      createFeature({
+        featureId: "feature:evidence-1:formAtHomeHome",
+        matchId: createMatchId("match-1"),
+        name: "formAtHomeHome",
+        value: 80,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:formOnRoadAway",
+        matchId: createMatchId("match-1"),
+        name: "formOnRoadAway",
+        value: 40,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:formAtHomeAway",
+        matchId: createMatchId("match-1"),
+        name: "formAtHomeAway",
+        value: 30,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:formOnRoadHome",
+        matchId: createMatchId("match-1"),
+        name: "formOnRoadHome",
+        value: 50,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:goalsScoredRateHome",
+        matchId: createMatchId("match-1"),
+        name: "goalsScoredRateHome",
+        value: 1.8,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:goalsScoredRateAway",
+        matchId: createMatchId("match-1"),
+        name: "goalsScoredRateAway",
+        value: 0.9,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "HOME_VENUE_FORM_EDGE",
+            "AWAY_VENUE_FORM_EDGE",
+            "GOALS_SCORED_HOME_EDGE",
+            "GOALS_SCORED_AWAY_EDGE",
+          ].includes(result.ruleName),
+        )
+        .map(({ ruleName, status, channel }) => ({
+          ruleName,
+          status,
+          channel,
+        })),
+    ).toEqual([
+      {
+        ruleName: "HOME_VENUE_FORM_EDGE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "AWAY_VENUE_FORM_EDGE",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "GOALS_SCORED_HOME_EDGE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "GOALS_SCORED_AWAY_EDGE",
+        status: "FAIL",
+        channel: "away+",
       },
     ]);
   });

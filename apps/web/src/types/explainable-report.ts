@@ -69,6 +69,44 @@ export interface AvailabilitySummaryView {
   readonly note: string;
 }
 
+export interface RefereeContextView {
+  readonly available: boolean;
+  readonly name: string | null;
+  readonly country: string | null;
+  readonly league: string | null;
+  readonly appearances: number | null;
+  readonly yellowCardsPerMatch: number | null;
+  readonly redCardsPerMatch: number | null;
+  readonly providerId: string | null;
+  readonly source: string | null;
+  readonly note: string;
+}
+
+export interface LineupPlayerItemView {
+  readonly playerId: string;
+  readonly name: string;
+  readonly number: number | null;
+  readonly position: string | null;
+  readonly grid: string | null;
+}
+
+export interface TeamLineupView {
+  readonly teamSide: "away" | "home";
+  readonly teamName: string;
+  readonly formation: string | null;
+  readonly startXI: readonly LineupPlayerItemView[];
+  readonly substitutes: readonly LineupPlayerItemView[];
+  readonly providerId: string;
+  readonly source: string;
+}
+
+export interface LineupsContextView {
+  readonly available: boolean;
+  readonly home: TeamLineupView | null;
+  readonly away: TeamLineupView | null;
+  readonly note: string;
+}
+
 export interface WinnerPredictionView {
   readonly homeTeam: string;
   readonly awayTeam: string;
@@ -157,7 +195,9 @@ export interface FinalRecommendationView {
 export interface ExplainableReportView {
   readonly header: ExplainableMatchHeader;
   readonly venue: VenueContextView;
+  readonly referee: RefereeContextView;
   readonly players: PlayersContextView;
+  readonly lineups: LineupsContextView;
   readonly availability: AvailabilitySummaryView;
   readonly winnerPrediction: WinnerPredictionView;
   readonly mostLikelyScore: MostLikelyScoreView;

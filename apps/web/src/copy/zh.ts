@@ -227,6 +227,30 @@ export const zh = {
     venueHint: "来自 Venue Evidence 的事实场地信息（不进入规则/投影）",
     venueId: (id: string): string => `场地 ID · ${id}`,
     noVenue: "暂无场地证据",
+    referee: "裁判",
+    refereeHint: "仅展示 Provider 提供的裁判事实（不做推断）",
+    refereeStats: (
+      appearances: number | null,
+      yellow: number | null,
+      red: number | null,
+    ): string => {
+      const parts: string[] = [];
+
+      if (appearances !== null) {
+        parts.push(`出场 ${String(appearances)}`);
+      }
+
+      if (yellow !== null) {
+        parts.push(`黄牌/场 ${String(yellow)}`);
+      }
+
+      if (red !== null) {
+        parts.push(`红牌/场 ${String(red)}`);
+      }
+
+      return parts.length > 0 ? parts.join(" · ") : "无统计字段";
+    },
+    noReferee: "暂无裁判证据",
     players: "球员基本信息",
     playersHint: "来自 Player Evidence 的阵容身份（无统计/伤病/评分）",
     playersHome: "主队球员",
@@ -234,6 +258,12 @@ export const zh = {
     playerNumber: (value: number): string => `号码 ${String(value)}`,
     playerId: (id: string): string => `球员 ID · ${id}`,
     noPlayers: "暂无球员证据",
+    lineups: "确认阵容",
+    lineupsHint: "仅展示已确认 LINEUP Evidence；绝不编造预计阵容",
+    lineupsHome: "主队确认阵容",
+    lineupsAway: "客队确认阵容",
+    lineupConfirmed: "已确认",
+    noLineups: "暂无确认阵容证据",
     availability: "出场可用性",
     availabilityHint:
       "来自 Injury / Suspension Evidence 的可用性摘要（不进入规则/投影）",

@@ -18,7 +18,17 @@
           "name": "Seoul World Cup Stadium",
           "city": "Seoul"
         },
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "referee": {
+          "name": "Kim Jong-hyeok",
+          "country": "South Korea",
+          "league": "K League 1",
+          "statistics": {
+            "appearances": 12,
+            "yellowCardsPerMatch": 3.2,
+            "redCardsPerMatch": 0.1
+          }
+        }
       },
       "homeForm": {
         "teamId": "2766",
@@ -28,7 +38,27 @@
         "results": ["W", "D", "W", "L", "W"],
         "goalsFor": [2, 1, 3, 0, 2],
         "goalsAgainst": [0, 1, 1, 2, 1],
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "goalsScoredPerMatch": 1.6,
+        "goalsConcededPerMatch": 1.0,
+        "homeSplit": {
+          "window": 2,
+          "results": ["W", "D"],
+          "goalsFor": [2, 1],
+          "goalsAgainst": [0, 1]
+        },
+        "awaySplit": {
+          "window": 3,
+          "results": ["W", "L", "W"],
+          "goalsFor": [3, 0, 2],
+          "goalsAgainst": [1, 2, 1]
+        },
+        "recentShort": {
+          "window": 3,
+          "results": ["W", "L", "W"],
+          "goalsFor": [3, 0, 2],
+          "goalsAgainst": [1, 2, 1]
+        }
       },
       "awayForm": {
         "teamId": "2765",
@@ -38,7 +68,27 @@
         "results": ["W", "W", "D", "W", "L"],
         "goalsFor": [2, 1, 1, 3, 0],
         "goalsAgainst": [1, 0, 1, 1, 1],
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "goalsScoredPerMatch": 1.4,
+        "goalsConcededPerMatch": 0.8,
+        "homeSplit": {
+          "window": 2,
+          "results": ["W", "W"],
+          "goalsFor": [2, 1],
+          "goalsAgainst": [1, 0]
+        },
+        "awaySplit": {
+          "window": 3,
+          "results": ["D", "W", "L"],
+          "goalsFor": [1, 3, 0],
+          "goalsAgainst": [1, 1, 1]
+        },
+        "recentShort": {
+          "window": 3,
+          "results": ["D", "W", "L"],
+          "goalsFor": [1, 3, 0],
+          "goalsAgainst": [1, 1, 1]
+        }
       },
       "homeStats": {
         "teamId": "2766",
@@ -190,6 +240,226 @@
           "reason": "Suspended 1 match",
           "providerMethod": "recorded-snapshot"
         }
+      ],
+      "lineups": [
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "formation": "4-3-3",
+          "startXI": [
+            {
+              "playerId": "h1",
+              "name": "Home Player 1",
+              "number": 1,
+              "position": "G",
+              "grid": "1:1"
+            },
+            {
+              "playerId": "h2",
+              "name": "Home Player 2",
+              "number": 2,
+              "position": "D",
+              "grid": "1:2"
+            },
+            {
+              "playerId": "h3",
+              "name": "Home Player 3",
+              "number": 3,
+              "position": "D",
+              "grid": "1:3"
+            },
+            {
+              "playerId": "h4",
+              "name": "Home Player 4",
+              "number": 4,
+              "position": "D",
+              "grid": "1:4"
+            },
+            {
+              "playerId": "h5",
+              "name": "Home Player 5",
+              "number": 5,
+              "position": "D",
+              "grid": "2:1"
+            },
+            {
+              "playerId": "h6",
+              "name": "Home Player 6",
+              "number": 6,
+              "position": "M",
+              "grid": "2:2"
+            },
+            {
+              "playerId": "h7",
+              "name": "Home Player 7",
+              "number": 7,
+              "position": "M",
+              "grid": "2:3"
+            },
+            {
+              "playerId": "h8",
+              "name": "Home Player 8",
+              "number": 8,
+              "position": "M",
+              "grid": "2:4"
+            },
+            {
+              "playerId": "h9",
+              "name": "Home Player 9",
+              "number": 9,
+              "position": "F",
+              "grid": "3:1"
+            },
+            {
+              "playerId": "h10",
+              "name": "Home Player 10",
+              "number": 10,
+              "position": "F",
+              "grid": "3:2"
+            },
+            {
+              "playerId": "h11",
+              "name": "Home Player 11",
+              "number": 11,
+              "position": "F",
+              "grid": "3:3"
+            }
+          ],
+          "substitutes": [
+            {
+              "playerId": "hs1",
+              "name": "Home Player 1",
+              "number": 1,
+              "position": "G",
+              "grid": "1:1"
+            },
+            {
+              "playerId": "hs2",
+              "name": "Home Player 2",
+              "number": 2,
+              "position": "D",
+              "grid": "1:2"
+            },
+            {
+              "playerId": "hs3",
+              "name": "Home Player 3",
+              "number": 3,
+              "position": "D",
+              "grid": "1:3"
+            }
+          ],
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "formation": "4-2-3-1",
+          "startXI": [
+            {
+              "playerId": "a1",
+              "name": "Away Player 1",
+              "number": 1,
+              "position": "G",
+              "grid": "1:1"
+            },
+            {
+              "playerId": "a2",
+              "name": "Away Player 2",
+              "number": 2,
+              "position": "D",
+              "grid": "1:2"
+            },
+            {
+              "playerId": "a3",
+              "name": "Away Player 3",
+              "number": 3,
+              "position": "D",
+              "grid": "1:3"
+            },
+            {
+              "playerId": "a4",
+              "name": "Away Player 4",
+              "number": 4,
+              "position": "D",
+              "grid": "1:4"
+            },
+            {
+              "playerId": "a5",
+              "name": "Away Player 5",
+              "number": 5,
+              "position": "D",
+              "grid": "2:1"
+            },
+            {
+              "playerId": "a6",
+              "name": "Away Player 6",
+              "number": 6,
+              "position": "M",
+              "grid": "2:2"
+            },
+            {
+              "playerId": "a7",
+              "name": "Away Player 7",
+              "number": 7,
+              "position": "M",
+              "grid": "2:3"
+            },
+            {
+              "playerId": "a8",
+              "name": "Away Player 8",
+              "number": 8,
+              "position": "M",
+              "grid": "2:4"
+            },
+            {
+              "playerId": "a9",
+              "name": "Away Player 9",
+              "number": 9,
+              "position": "F",
+              "grid": "3:1"
+            },
+            {
+              "playerId": "a10",
+              "name": "Away Player 10",
+              "number": 10,
+              "position": "F",
+              "grid": "3:2"
+            },
+            {
+              "playerId": "a11",
+              "name": "Away Player 11",
+              "number": 11,
+              "position": "F",
+              "grid": "3:3"
+            }
+          ],
+          "substitutes": [
+            {
+              "playerId": "as1",
+              "name": "Away Player 1",
+              "number": 1,
+              "position": "G",
+              "grid": "1:1"
+            },
+            {
+              "playerId": "as2",
+              "name": "Away Player 2",
+              "number": 2,
+              "position": "D",
+              "grid": "1:2"
+            },
+            {
+              "playerId": "as3",
+              "name": "Away Player 3",
+              "number": 3,
+              "position": "D",
+              "grid": "1:3"
+            }
+          ],
+          "providerMethod": "recorded-snapshot"
+        }
       ]
     },
     {
@@ -220,7 +490,27 @@
         "results": ["W", "W", "D", "W"],
         "goalsFor": [2, 3, 1, 1],
         "goalsAgainst": [0, 1, 1, 0],
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "goalsScoredPerMatch": 1.75,
+        "goalsConcededPerMatch": 0.5,
+        "homeSplit": {
+          "window": 2,
+          "results": ["W", "W"],
+          "goalsFor": [2, 3],
+          "goalsAgainst": [0, 1]
+        },
+        "awaySplit": {
+          "window": 2,
+          "results": ["D", "W"],
+          "goalsFor": [1, 1],
+          "goalsAgainst": [1, 0]
+        },
+        "recentShort": {
+          "window": 3,
+          "results": ["W", "D", "W"],
+          "goalsFor": [3, 1, 1],
+          "goalsAgainst": [1, 1, 0]
+        }
       },
       "awayForm": {
         "teamId": "2770",
@@ -230,7 +520,27 @@
         "results": ["L", "D", "W", "L"],
         "goalsFor": [0, 1, 2, 1],
         "goalsAgainst": [2, 1, 0, 3],
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "goalsScoredPerMatch": 1.0,
+        "goalsConcededPerMatch": 1.5,
+        "homeSplit": {
+          "window": 2,
+          "results": ["L", "D"],
+          "goalsFor": [0, 1],
+          "goalsAgainst": [2, 1]
+        },
+        "awaySplit": {
+          "window": 2,
+          "results": ["W", "L"],
+          "goalsFor": [2, 1],
+          "goalsAgainst": [0, 3]
+        },
+        "recentShort": {
+          "window": 3,
+          "results": ["D", "W", "L"],
+          "goalsFor": [1, 2, 1],
+          "goalsAgainst": [1, 0, 3]
+        }
       },
       "homeStats": {
         "teamId": "2768",
@@ -324,7 +634,8 @@
           "photoUrl": "https://media.api-sports.io/football/players/1000024.png",
           "providerMethod": "recorded-snapshot"
         }
-      ]
+      ],
+      "lineups": []
     },
     {
       "fixture": {
@@ -354,7 +665,27 @@
         "results": ["W", "D", "W"],
         "goalsFor": [2, 1, 3],
         "goalsAgainst": [1, 1, 0],
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "goalsScoredPerMatch": 2.0,
+        "goalsConcededPerMatch": 0.6666666666666666,
+        "homeSplit": {
+          "window": 1,
+          "results": ["W"],
+          "goalsFor": [2],
+          "goalsAgainst": [1]
+        },
+        "awaySplit": {
+          "window": 2,
+          "results": ["D", "W"],
+          "goalsFor": [1, 3],
+          "goalsAgainst": [1, 0]
+        },
+        "recentShort": {
+          "window": 3,
+          "results": ["W", "D", "W"],
+          "goalsFor": [2, 1, 3],
+          "goalsAgainst": [1, 1, 0]
+        }
       },
       "awayForm": {
         "teamId": "281",
@@ -364,7 +695,27 @@
         "results": ["L", "W", "D"],
         "goalsFor": [0, 2, 1],
         "goalsAgainst": [2, 1, 1],
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "goalsScoredPerMatch": 1.0,
+        "goalsConcededPerMatch": 1.3333333333333333,
+        "homeSplit": {
+          "window": 1,
+          "results": ["L"],
+          "goalsFor": [0],
+          "goalsAgainst": [2]
+        },
+        "awaySplit": {
+          "window": 2,
+          "results": ["W", "D"],
+          "goalsFor": [2, 1],
+          "goalsAgainst": [1, 1]
+        },
+        "recentShort": {
+          "window": 3,
+          "results": ["L", "W", "D"],
+          "goalsFor": [0, 2, 1],
+          "goalsAgainst": [2, 1, 1]
+        }
       },
       "homeStats": {
         "teamId": "282",
@@ -458,7 +809,8 @@
           "photoUrl": "https://media.api-sports.io/football/players/1000034.png",
           "providerMethod": "recorded-snapshot"
         }
-      ]
+      ],
+      "lineups": []
     }
   ]
 }

@@ -31,11 +31,13 @@ const H2H_N_MIN = 3;
 const TAU_MARKET = 0.08;
 const TAU_FORM = 12;
 const TAU_FORM_NEAR = 6;
+const TAU_FORM_VENUE = 12;
+const TAU_GOALS_RATE = 0.35;
 const TAU_DEFENSE_STABLE = 55;
 const TAU_DEFENSE_FRAGILE = 45;
 const TAU_AVAILABILITY_HIT = 8;
 const TAU_VENUE = 1;
-const RULE_POLICY = "rule.mvp.a05";
+const RULE_POLICY = "rule.mvp.f11e.formdecomp";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -180,6 +182,86 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
         home !== undefined &&
         away !== undefined &&
         Math.abs(home - away) <= TAU_FORM_NEAR
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:home-venue-form-edge:v1",
+    ruleName: "HOME_VENUE_FORM_EDGE",
+    weight: 0.5,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "formAtHomeHome",
+      "formOnRoadAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const homeAtHome = numericValue(features.get("formAtHomeHome"));
+      const awayOnRoad = numericValue(features.get("formOnRoadAway"));
+
+      return (
+        homeAtHome !== undefined &&
+        awayOnRoad !== undefined &&
+        homeAtHome - awayOnRoad >= TAU_FORM_VENUE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:away-venue-form-edge:v1",
+    ruleName: "AWAY_VENUE_FORM_EDGE",
+    weight: 0.5,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "formAtHomeAway",
+      "formOnRoadHome",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const awayAtHome = numericValue(features.get("formAtHomeAway"));
+      const homeOnRoad = numericValue(features.get("formOnRoadHome"));
+
+      return (
+        awayAtHome !== undefined &&
+        homeOnRoad !== undefined &&
+        awayAtHome - homeOnRoad >= TAU_FORM_VENUE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:goals-scored-home-edge:v1",
+    ruleName: "GOALS_SCORED_HOME_EDGE",
+    weight: 0.4,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "goalsScoredRateHome",
+      "goalsScoredRateAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("goalsScoredRateHome"));
+      const away = numericValue(features.get("goalsScoredRateAway"));
+
+      return (
+        home !== undefined && away !== undefined && home - away >= TAU_GOALS_RATE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:goals-scored-away-edge:v1",
+    ruleName: "GOALS_SCORED_AWAY_EDGE",
+    weight: 0.4,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "goalsScoredRateHome",
+      "goalsScoredRateAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("goalsScoredRateHome"));
+      const away = numericValue(features.get("goalsScoredRateAway"));
+
+      return (
+        home !== undefined && away !== undefined && away - home >= TAU_GOALS_RATE
       );
     },
   }) satisfies FootballRuleDefinition,

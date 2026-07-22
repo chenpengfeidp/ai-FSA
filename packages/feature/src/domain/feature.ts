@@ -11,6 +11,14 @@ export type FeatureName =
   | "awayTeam"
   | "defenseRatingAway"
   | "defenseRatingHome"
+  | "formAtHomeAway"
+  | "formAtHomeHome"
+  | "formOnRoadAway"
+  | "formOnRoadHome"
+  | "goalsConcededRateAway"
+  | "goalsConcededRateHome"
+  | "goalsScoredRateAway"
+  | "goalsScoredRateHome"
   | "h2hLean"
   | "h2hSampleSize"
   | "homeAdvantage"
@@ -25,6 +33,8 @@ export type FeatureName =
   | "momentumHome"
   | "recentFormAway"
   | "recentFormHome"
+  | "recentFormShortAway"
+  | "recentFormShortHome"
   | "venueAdvantage";
 
 export interface Feature {
@@ -64,6 +74,14 @@ const featureNames: ReadonlySet<string> = new Set([
   "awayTeam",
   "defenseRatingAway",
   "defenseRatingHome",
+  "formAtHomeAway",
+  "formAtHomeHome",
+  "formOnRoadAway",
+  "formOnRoadHome",
+  "goalsConcededRateAway",
+  "goalsConcededRateHome",
+  "goalsScoredRateAway",
+  "goalsScoredRateHome",
   "h2hLean",
   "h2hSampleSize",
   "homeAdvantage",
@@ -78,6 +96,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "momentumHome",
   "recentFormAway",
   "recentFormHome",
+  "recentFormShortAway",
+  "recentFormShortHome",
   "venueAdvantage",
 ]);
 const isoTimestampPattern =

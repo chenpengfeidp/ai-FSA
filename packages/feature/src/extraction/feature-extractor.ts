@@ -99,6 +99,129 @@ function asFiniteNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+function readFormSplit(
+  value: unknown,
+): Readonly<{ results: readonly ("D" | "L" | "W")[] }> | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const results = asResultCodes((value as { results?: unknown }).results);
+  return results === undefined ? undefined : Object.freeze({ results });
+}
+
+function extractFormDecompositionFeatures(input: {
+  readonly form: Evidence;
+  readonly side: "away" | "home";
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { form, side, matchId, generatedAt } = input;
+
+  if (matchId === undefined) {
+    return emptyFeatures;
+  }
+
+  const features: Feature[] = [];
+  const atHomeName =
+    side === "home" ? ("formAtHomeHome" as const) : ("formAtHomeAway" as const);
+  const onRoadName =
+    side === "home" ? ("formOnRoadHome" as const) : ("formOnRoadAway" as const);
+  const scoredName =
+    side === "home"
+      ? ("goalsScoredRateHome" as const)
+      : ("goalsScoredRateAway" as const);
+  const concededName =
+    side === "home"
+      ? ("goalsConcededRateHome" as const)
+      : ("goalsConcededRateAway" as const);
+  const shortName =
+    side === "home"
+      ? ("recentFormShortHome" as const)
+      : ("recentFormShortAway" as const);
+
+  const homeSplit = readFormSplit(form.payload.homeSplit);
+  const awaySplit = readFormSplit(form.payload.awaySplit);
+  const recentShort = readFormSplit(form.payload.recentShort);
+  const scored = asFiniteNumber(form.payload.goalsScoredPerMatch);
+  const conceded = asFiniteNumber(form.payload.goalsConcededPerMatch);
+
+  if (homeSplit !== undefined) {
+    const score = roundFeature(computeRecentFormScore(homeSplit.results));
+    features.push(
+      createFeature({
+        featureId: featureId(form.id, atHomeName),
+        matchId,
+        name: atHomeName,
+        value: score,
+        explanation: `Home-venue form ${score} from ${homeSplit.results.length} home matches.`,
+        sourceEvidenceId: form.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (awaySplit !== undefined) {
+    const score = roundFeature(computeRecentFormScore(awaySplit.results));
+    features.push(
+      createFeature({
+        featureId: featureId(form.id, onRoadName),
+        matchId,
+        name: onRoadName,
+        value: score,
+        explanation: `Away-venue form ${score} from ${awaySplit.results.length} away matches.`,
+        sourceEvidenceId: form.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (scored !== undefined) {
+    features.push(
+      createFeature({
+        featureId: featureId(form.id, scoredName),
+        matchId,
+        name: scoredName,
+        value: roundFeature(scored),
+        explanation: `Goals scored per match ${roundFeature(scored)} over recent window.`,
+        sourceEvidenceId: form.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (conceded !== undefined) {
+    features.push(
+      createFeature({
+        featureId: featureId(form.id, concededName),
+        matchId,
+        name: concededName,
+        value: roundFeature(conceded),
+        explanation: `Goals conceded per match ${roundFeature(conceded)} over recent window.`,
+        sourceEvidenceId: form.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (recentShort !== undefined) {
+    const score = roundFeature(computeRecentFormScore(recentShort.results));
+    features.push(
+      createFeature({
+        featureId: featureId(form.id, shortName),
+        matchId,
+        name: shortName,
+        value: score,
+        explanation: `Short-window form ${score} from last ${recentShort.results.length} matches.`,
+        sourceEvidenceId: form.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
 function findSideEvidence(
   evidences: readonly Evidence[],
   type: "STATISTICS" | "TEAM_FORM",
@@ -323,6 +446,15 @@ export class FeatureExtractor {
           value: recentForm,
           explanation: `Recent form ${recentForm} from W/D/L window (W=1, D=0.5, L=0).`,
           sourceEvidenceId: side.form.id,
+          generatedAt,
+        }),
+      );
+
+      features.push(
+        ...extractFormDecompositionFeatures({
+          form: side.form,
+          side: side.side,
+          matchId,
           generatedAt,
         }),
       );

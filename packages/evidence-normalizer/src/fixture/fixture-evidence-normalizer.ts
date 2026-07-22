@@ -92,6 +92,71 @@ function parseFixtureInput(
   );
 }
 
+function parseOptionalRefereePayload(input: unknown):
+  | Readonly<{
+      name: string;
+      country?: string;
+      league?: string;
+      statistics?: Readonly<{
+        appearances?: number;
+        yellowCardsPerMatch?: number;
+        redCardsPerMatch?: number;
+      }>;
+    }>
+  | undefined {
+  if (!isRecord(input) || input.referee === undefined) {
+    return undefined;
+  }
+
+  if (!isRecord(input.referee)) {
+    return undefined;
+  }
+
+  const name =
+    typeof input.referee.name === "string" ? input.referee.name.trim() : "";
+
+  if (name.length === 0) {
+    return undefined;
+  }
+
+  const country =
+    typeof input.referee.country === "string" &&
+    input.referee.country.trim().length > 0
+      ? input.referee.country.trim()
+      : undefined;
+  const league =
+    typeof input.referee.league === "string" &&
+    input.referee.league.trim().length > 0
+      ? input.referee.league.trim()
+      : undefined;
+  const statsRaw = isRecord(input.referee.statistics)
+    ? input.referee.statistics
+    : undefined;
+  const statistics =
+    statsRaw === undefined
+      ? undefined
+      : Object.freeze({
+          ...(typeof statsRaw.appearances === "number"
+            ? { appearances: statsRaw.appearances }
+            : {}),
+          ...(typeof statsRaw.yellowCardsPerMatch === "number"
+            ? { yellowCardsPerMatch: statsRaw.yellowCardsPerMatch }
+            : {}),
+          ...(typeof statsRaw.redCardsPerMatch === "number"
+            ? { redCardsPerMatch: statsRaw.redCardsPerMatch }
+            : {}),
+        });
+
+  return Object.freeze({
+    name,
+    ...(country === undefined ? {} : { country }),
+    ...(league === undefined ? {} : { league }),
+    ...(statistics === undefined || Object.keys(statistics).length === 0
+      ? {}
+      : { statistics }),
+  });
+}
+
 function readProviderOverlay(
   input: unknown,
 ): Readonly<{ source: string; sourceId: string; method: string }> | undefined {
@@ -143,6 +208,7 @@ export function normalizeFixtureEvidence(
     const sourceId =
       overlay?.sourceId ?? context.sourceId ?? `fixture-${raw.matchId}`;
     const method = overlay?.method ?? "fixture";
+    const refereePayload = parseOptionalRefereePayload(input);
     const evidence = createEvidence({
       id: context.evidenceId ?? `evidence-${source}-${raw.matchId}`,
       source,
@@ -163,6 +229,7 @@ export function normalizeFixtureEvidence(
         home: raw.home,
         away: raw.away,
         kickoff: raw.kickoff,
+        ...(refereePayload === undefined ? {} : { referee: refereePayload }),
       },
     });
 

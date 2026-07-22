@@ -1,4 +1,5 @@
 import type {
+  FootballFormSplit,
   FootballProviderMethod,
   FootballResultCode,
   FootballTeamForm,
@@ -13,9 +14,41 @@ function asNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
+interface FinishedMatchRow {
+  readonly fixtureId: string;
+  readonly venueSide: "away" | "home";
+  readonly result: FootballResultCode;
+  readonly goalsFor: number;
+  readonly goalsAgainst: number;
+}
+
+function freezeSplit(
+  rows: readonly FinishedMatchRow[],
+): FootballFormSplit | undefined {
+  if (rows.length === 0) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    window: rows.length,
+    results: Object.freeze(rows.map((row) => row.result)),
+    goalsFor: Object.freeze(rows.map((row) => row.goalsFor)),
+    goalsAgainst: Object.freeze(rows.map((row) => row.goalsAgainst)),
+  });
+}
+
+function mean(values: readonly number[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
 /**
  * Builds TeamForm from API-Football `/fixtures?team=&last=` response.
  * Vendor JSON is consumed only inside this mapper.
+ * Overall window stays ≤ maxWindow; venue splits use the fuller finished sample.
  */
 export function mapApiFootballTeamForm(
   body: unknown,
@@ -29,17 +62,13 @@ export function mapApiFootballTeamForm(
 ): FootballTeamForm | undefined {
   const fixtures = mapApiFootballFixturesResponse(body, options.providerMethod);
   const maxWindow = options.maxWindow ?? 5;
-  const results: FootballResultCode[] = [];
-  const goalsFor: number[] = [];
-  const goalsAgainst: number[] = [];
+  const finishedNewestFirst = [...fixtures].filter(
+    (fixture) => fixture.status === "FINISHED",
+  );
 
-  // API returns most-recent first; keep chronological for evidence windows.
-  const finished = [...fixtures]
-    .filter((fixture) => fixture.status === "FINISHED")
-    .slice(0, maxWindow)
-    .reverse();
+  const rowsNewestFirst: FinishedMatchRow[] = [];
 
-  for (const fixture of finished) {
+  for (const fixture of finishedNewestFirst) {
     const isHome = fixture.homeTeamId === options.teamId;
     const isAway = fixture.awayTeamId === options.teamId;
 
@@ -60,30 +89,55 @@ export function mapApiFootballTeamForm(
       continue;
     }
 
-    goalsFor.push(teamGoals);
-    goalsAgainst.push(oppGoals);
+    const result: FootballResultCode =
+      teamGoals > oppGoals ? "W" : teamGoals < oppGoals ? "L" : "D";
 
-    if (teamGoals > oppGoals) {
-      results.push("W");
-    } else if (teamGoals < oppGoals) {
-      results.push("L");
-    } else {
-      results.push("D");
-    }
+    rowsNewestFirst.push(
+      Object.freeze({
+        fixtureId: fixture.fixtureId,
+        venueSide: isHome ? ("home" as const) : ("away" as const),
+        result,
+        goalsFor: teamGoals,
+        goalsAgainst: oppGoals,
+      }),
+    );
   }
 
-  if (results.length === 0) {
+  if (rowsNewestFirst.length === 0) {
     return undefined;
   }
+
+  const overallNewestFirst = rowsNewestFirst.slice(0, maxWindow);
+  // Evidence windows stay chronological (oldest → newest).
+  const overall = [...overallNewestFirst].reverse();
+  const homeSplitRows = [...rowsNewestFirst]
+    .filter((row) => row.venueSide === "home")
+    .slice(0, maxWindow)
+    .reverse();
+  const awaySplitRows = [...rowsNewestFirst]
+    .filter((row) => row.venueSide === "away")
+    .slice(0, maxWindow)
+    .reverse();
+  const shortNewestFirst = overallNewestFirst.slice(0, Math.min(3, overall.length));
+  const recentShort =
+    overall.length >= 3 ? freezeSplit([...shortNewestFirst].reverse()) : undefined;
+
+  const goalsFor = overall.map((row) => row.goalsFor);
+  const goalsAgainst = overall.map((row) => row.goalsAgainst);
 
   return Object.freeze({
     teamId: options.teamId,
     teamName: options.teamName,
     teamSide: options.teamSide,
-    window: results.length,
-    results: Object.freeze(results),
+    window: overall.length,
+    results: Object.freeze(overall.map((row) => row.result)),
     goalsFor: Object.freeze(goalsFor),
     goalsAgainst: Object.freeze(goalsAgainst),
+    homeSplit: freezeSplit(homeSplitRows),
+    awaySplit: freezeSplit(awaySplitRows),
+    goalsScoredPerMatch: mean(goalsFor),
+    goalsConcededPerMatch: mean(goalsAgainst),
+    recentShort,
     providerMethod: options.providerMethod,
   });
 }

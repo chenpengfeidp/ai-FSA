@@ -94,14 +94,14 @@ function createLiveFetch(): typeof fetch {
       );
     }
 
-    if (url.includes("/fixtures?team=10&last=5")) {
+    if (url.includes("/fixtures?team=10&last=10")) {
       return new Response(JSON.stringify(formFixtures(10, 99)), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    if (url.includes("/fixtures?team=20&last=5")) {
+    if (url.includes("/fixtures?team=20&last=10")) {
       return new Response(JSON.stringify(formFixtures(20, 98)), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -170,6 +170,13 @@ function createLiveFetch(): typeof fetch {
       });
     }
 
+    if (url.includes("/fixtures/lineups")) {
+      return new Response(JSON.stringify({ response: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     return new Response("not found", { status: 404 });
   }) as unknown as typeof fetch;
 }
@@ -184,11 +191,15 @@ describe("LiveApiSportsMatchCatalog", () => {
 
     const bundle = await catalog.ensureMatchBundle("football:555001");
     expect(bundle).toBeDefined();
-    expect(bundle?.fixture.matchId).toBe("football:555001");
-    expect(bundle?.homeForm.window).toBeGreaterThan(0);
-    expect(bundle?.awayForm.window).toBeGreaterThan(0);
+    if (bundle === undefined) {
+      return;
+    }
 
-    const normalized = normalizeFixtureEvidenceSet(toEvidenceMatchShape(bundle!), {
+    expect(bundle.fixture.matchId).toBe("football:555001");
+    expect(bundle.homeForm.window).toBeGreaterThan(0);
+    expect(bundle.awayForm.window).toBeGreaterThan(0);
+
+    const normalized = normalizeFixtureEvidenceSet(toEvidenceMatchShape(bundle), {
       collectedAt: "2026-07-17T10:00:00Z",
     });
     expect(normalized.ok).toBe(true);

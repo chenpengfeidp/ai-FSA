@@ -26,6 +26,10 @@ const P1_CHANNEL_RULES = new Set([
   "AWAY_ATTACK_EDGE",
   "FORM_HOME_SUPERIOR",
   "FORM_AWAY_SUPERIOR",
+  "HOME_VENUE_FORM_EDGE",
+  "AWAY_VENUE_FORM_EDGE",
+  "GOALS_SCORED_HOME_EDGE",
+  "GOALS_SCORED_AWAY_EDGE",
   "DEFENSE_HOME_STABLE",
   "DEFENSE_AWAY_STABLE",
   "DEFENSE_HOME_FRAGILE",
@@ -87,6 +91,18 @@ function evidenceCompleteness(evidences: readonly Evidence[]): number {
     evidences.some((evidence) => evidence.type === "VENUE"),
     evidences.some(
       (evidence) => evidence.type === "INJURY" || evidence.type === "SUSPENSION",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "TEAM_FORM" &&
+        evidence.payload.teamSide === "home" &&
+        evidence.payload.homeSplit !== undefined,
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "TEAM_FORM" &&
+        evidence.payload.teamSide === "away" &&
+        evidence.payload.awaySplit !== undefined,
     ),
   ];
   const present = checks.filter(Boolean).length;

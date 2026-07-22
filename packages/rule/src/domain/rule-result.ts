@@ -11,14 +11,18 @@ export type RuleId =
   | "rule:defense-away-stable:v1"
   | "rule:defense-home-fragile:v1"
   | "rule:defense-home-stable:v1"
+  | "rule:away-venue-form-edge:v1"
   | "rule:form-away-superior:v1"
   | "rule:form-home-superior:v1"
   | "rule:form-near-parity:v1"
+  | "rule:goals-scored-away-edge:v1"
+  | "rule:goals-scored-home-edge:v1"
   | "rule:h2h-supports-away:v1"
   | "rule:h2h-supports-home:v1"
   | "rule:home-advantage-material:v1"
   | "rule:home-attack-edge:v1"
   | "rule:home-team-present:v1"
+  | "rule:home-venue-form-edge:v1"
   | "rule:kickoff-present:v1"
   | "rule:market-ah-lean-away:v1"
   | "rule:market-ah-lean-home:v1"
@@ -38,6 +42,7 @@ export type RuleName =
   | "AVAILABILITY_HOME_UNKNOWN"
   | "AWAY_ATTACK_EDGE"
   | "AWAY_TEAM_PRESENT"
+  | "AWAY_VENUE_FORM_EDGE"
   | "DEFENSE_AWAY_FRAGILE"
   | "DEFENSE_AWAY_STABLE"
   | "DEFENSE_HOME_FRAGILE"
@@ -45,11 +50,14 @@ export type RuleName =
   | "FORM_AWAY_SUPERIOR"
   | "FORM_HOME_SUPERIOR"
   | "FORM_NEAR_PARITY"
+  | "GOALS_SCORED_AWAY_EDGE"
+  | "GOALS_SCORED_HOME_EDGE"
   | "H2H_SUPPORTS_AWAY"
   | "H2H_SUPPORTS_HOME"
   | "HOME_ADVANTAGE_MATERIAL"
   | "HOME_ATTACK_EDGE"
   | "HOME_TEAM_PRESENT"
+  | "HOME_VENUE_FORM_EDGE"
   | "KICKOFF_PRESENT"
   | "MARKET_AH_LEAN_AWAY"
   | "MARKET_AH_LEAN_HOME"
@@ -106,6 +114,7 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:availability-home-unknown:v1",
   "rule:away-attack-edge:v1",
   "rule:away-team-present:v1",
+  "rule:away-venue-form-edge:v1",
   "rule:defense-away-fragile:v1",
   "rule:defense-away-stable:v1",
   "rule:defense-home-fragile:v1",
@@ -113,11 +122,14 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:form-away-superior:v1",
   "rule:form-home-superior:v1",
   "rule:form-near-parity:v1",
+  "rule:goals-scored-away-edge:v1",
+  "rule:goals-scored-home-edge:v1",
   "rule:h2h-supports-away:v1",
   "rule:h2h-supports-home:v1",
   "rule:home-advantage-material:v1",
   "rule:home-attack-edge:v1",
   "rule:home-team-present:v1",
+  "rule:home-venue-form-edge:v1",
   "rule:kickoff-present:v1",
   "rule:market-ah-lean-away:v1",
   "rule:market-ah-lean-home:v1",
@@ -137,6 +149,7 @@ const ruleNames: ReadonlySet<string> = new Set([
   "AVAILABILITY_HOME_UNKNOWN",
   "AWAY_ATTACK_EDGE",
   "AWAY_TEAM_PRESENT",
+  "AWAY_VENUE_FORM_EDGE",
   "DEFENSE_AWAY_FRAGILE",
   "DEFENSE_AWAY_STABLE",
   "DEFENSE_HOME_FRAGILE",
@@ -144,11 +157,14 @@ const ruleNames: ReadonlySet<string> = new Set([
   "FORM_AWAY_SUPERIOR",
   "FORM_HOME_SUPERIOR",
   "FORM_NEAR_PARITY",
+  "GOALS_SCORED_AWAY_EDGE",
+  "GOALS_SCORED_HOME_EDGE",
   "H2H_SUPPORTS_AWAY",
   "H2H_SUPPORTS_HOME",
   "HOME_ADVANTAGE_MATERIAL",
   "HOME_ATTACK_EDGE",
   "HOME_TEAM_PRESENT",
+  "HOME_VENUE_FORM_EDGE",
   "KICKOFF_PRESENT",
   "MARKET_AH_LEAN_AWAY",
   "MARKET_AH_LEAN_HOME",

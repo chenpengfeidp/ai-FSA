@@ -20,16 +20,18 @@ describe("ProvidersController (F1.1A)", () => {
     expect(connected).not.toContain("sentiment:stub");
   });
 
-  it("queries capability support without claiming lineup ingest", () => {
+  it("queries capability support including F1.1E lineup and referee ingest", () => {
     const formProviders = controller.byCapability("recent_form");
     expect(
       formProviders.some((provider) => provider.id === "football:api-sports"),
     ).toBe(true);
 
-    const lineup = controller
-      .capabilities("football:api-sports")
-      .find((capability) => capability.kind === "lineup");
+    const capabilities = controller.capabilities("football:api-sports");
+    const lineup = capabilities.find((capability) => capability.kind === "lineup");
+    const referee = capabilities.find((capability) => capability.kind === "referee");
     expect(lineup?.supported).toBe(true);
-    expect(lineup?.ingestImplemented).toBe(false);
+    expect(lineup?.ingestImplemented).toBe(true);
+    expect(referee?.supported).toBe(true);
+    expect(referee?.ingestImplemented).toBe(true);
   });
 });

@@ -15,7 +15,7 @@
         "status": "SCHEDULED",
         "venue": {
           "venueId": "1883",
-          "name": "Wiklöf Holding Arena",
+          "name": "Wikl\u00f6f Holding Arena",
           "city": "Mariehamn"
         },
         "providerMethod": "recorded-snapshot"
@@ -28,7 +28,27 @@
         "results": ["W", "D", "W", "L", "W"],
         "goalsFor": [2, 1, 2, 0, 1],
         "goalsAgainst": [1, 1, 0, 2, 0],
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "goalsScoredPerMatch": 1.2,
+        "goalsConcededPerMatch": 0.8,
+        "homeSplit": {
+          "window": 2,
+          "results": ["W", "D"],
+          "goalsFor": [2, 1],
+          "goalsAgainst": [1, 1]
+        },
+        "awaySplit": {
+          "window": 3,
+          "results": ["W", "L", "W"],
+          "goalsFor": [2, 0, 1],
+          "goalsAgainst": [0, 2, 0]
+        },
+        "recentShort": {
+          "window": 3,
+          "results": ["W", "L", "W"],
+          "goalsFor": [2, 0, 1],
+          "goalsAgainst": [0, 2, 0]
+        }
       },
       "awayForm": {
         "teamId": "1165",
@@ -38,7 +58,27 @@
         "results": ["L", "D", "L", "W", "L"],
         "goalsFor": [0, 1, 1, 2, 0],
         "goalsAgainst": [2, 1, 3, 1, 2],
-        "providerMethod": "recorded-snapshot"
+        "providerMethod": "recorded-snapshot",
+        "goalsScoredPerMatch": 0.8,
+        "goalsConcededPerMatch": 1.8,
+        "homeSplit": {
+          "window": 2,
+          "results": ["L", "D"],
+          "goalsFor": [0, 1],
+          "goalsAgainst": [2, 1]
+        },
+        "awaySplit": {
+          "window": 3,
+          "results": ["L", "W", "L"],
+          "goalsFor": [1, 2, 0],
+          "goalsAgainst": [3, 1, 2]
+        },
+        "recentShort": {
+          "window": 3,
+          "results": ["L", "W", "L"],
+          "goalsFor": [1, 2, 0],
+          "goalsAgainst": [3, 1, 2]
+        }
       },
       "homeStats": {
         "teamId": "1162",
@@ -180,7 +220,8 @@
           "reason": "Suspended 1 match",
           "providerMethod": "recorded-snapshot"
         }
-      ]
+      ],
+      "lineups": []
     }
   ]
 }

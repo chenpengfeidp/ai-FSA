@@ -4,6 +4,7 @@ import { mapApiFootballFixtureItem } from "../mapper/map-api-football-fixture.js
 import { mapApiFootballTeamForm } from "../mapper/map-api-football-form.js";
 import { mapApiFootballH2H } from "../mapper/map-api-football-h2h.js";
 import { mapApiFootballInjuriesResponse } from "../mapper/map-api-football-injuries.js";
+import { mapApiFootballLineupsResponse } from "../mapper/map-api-football-lineups.js";
 import { mapApiFootballSquadResponse } from "../mapper/map-api-football-squad.js";
 import { mapApiFootballStandings } from "../mapper/map-api-football-standings.js";
 import { mapApiFootballTeamStats } from "../mapper/map-api-football-stats.js";
@@ -116,12 +117,14 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       homeSquadBody,
       awaySquadBody,
       injuriesBody,
+      lineupsBody,
     ] = await Promise.all([
+      // last=10 supplies venue-split samples; overall form still caps at 5.
       this.#getJson(
-        `/fixtures?team=${encodeURIComponent(fixture.homeTeamId)}&last=5`,
+        `/fixtures?team=${encodeURIComponent(fixture.homeTeamId)}&last=10`,
       ),
       this.#getJson(
-        `/fixtures?team=${encodeURIComponent(fixture.awayTeamId)}&last=5`,
+        `/fixtures?team=${encodeURIComponent(fixture.awayTeamId)}&last=10`,
       ),
       this.#getJson(
         `/teams/statistics?league=${encodeURIComponent(fixture.competitionId)}&season=${String(fixture.season)}&team=${encodeURIComponent(fixture.homeTeamId)}`,
@@ -142,6 +145,9 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
         `/players/squads?team=${encodeURIComponent(fixture.awayTeamId)}`,
       ),
       this.#getJson(`/injuries?fixture=${encodeURIComponent(fixture.fixtureId)}`),
+      this.#getJson(
+        `/fixtures/lineups?fixture=${encodeURIComponent(fixture.fixtureId)}`,
+      ),
     ]);
 
     const homeForm = mapApiFootballTeamForm(homeFormBody, {
@@ -220,6 +226,13 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       providerMethod: "http-live",
     });
 
+    // Empty lineups → honest absence (never Expected Lineup).
+    const lineups = mapApiFootballLineupsResponse(lineupsBody, {
+      homeTeamId: fixture.homeTeamId,
+      awayTeamId: fixture.awayTeamId,
+      providerMethod: "http-live",
+    });
+
     const bundle: FootballMatchBundle = Object.freeze({
       fixture,
       homeForm,
@@ -230,6 +243,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       standings,
       players: Object.freeze([...homePlayers, ...awayPlayers]),
       availabilityAbsences,
+      lineups,
     });
 
     this.#cache.set(matchId, bundle);

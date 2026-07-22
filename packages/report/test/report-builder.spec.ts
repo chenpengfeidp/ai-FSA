@@ -222,6 +222,29 @@ describe("ReportBuilder", () => {
   });
 });
 
+describe("Intelligence MVP narrative and report seal", () => {
+  it("seals narrative from AnalysisResult without recomputing Projection", () => {
+    const analysis = makeCompletedAnalysis();
+    const report = createReportBuilder().build(analysis);
+
+    expect(report.deterministic).toEqual(analysis.projection);
+    expect(report.scenarios).toEqual(analysis.scenarios);
+    expect(report.intelligenceConfidence).toEqual(analysis.intelligenceConfidence);
+    expect(report.narrative.sections.length).toBeGreaterThan(0);
+    expect(
+      report.narrative.sections.some((section) =>
+        section.body.toLowerCase().includes("recentform"),
+      ),
+    ).toBe(true);
+    expect(report.summary.some((line) => line.startsWith("Most Likely:"))).toBe(
+      true,
+    );
+    expect(
+      report.summary.some((line) => line.startsWith("Prediction Confidence:")),
+    ).toBe(true);
+  });
+});
+
 describe("GenerateMatchReportUseCase", () => {
   it("returns AnalysisReport JSON directly after successful analysis", async () => {
     const analysis = makeCompletedAnalysis();

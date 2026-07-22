@@ -95,6 +95,18 @@ describe("AnalyzeMatchUseCase", () => {
           result.value.projection.pDraw +
           result.value.projection.pAway,
       ).toBeCloseTo(1, 9);
+      expect(result.value.scenarios.mostLikely.slot).toBe("mostLikely");
+      expect(result.value.scenarios.secondLikely.slot).toBe("secondLikely");
+      expect(result.value.scenarios.upset.slot).toBe("upset");
+      expect(typeof result.value.intelligenceConfidence.predictionConfidence).toBe(
+        "number",
+      );
+      expect(
+        result.value.intelligenceConfidence.evidenceCompleteness,
+      ).toBeGreaterThan(0);
+      expect(result.value.features.map(({ name }) => name)).toEqual(
+        expect.arrayContaining(["recentFormHome", "recentFormAway"]),
+      );
     }
   });
 

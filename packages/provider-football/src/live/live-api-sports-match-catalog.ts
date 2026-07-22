@@ -8,15 +8,16 @@ import { mapApiFootballSquadResponse } from "../mapper/map-api-football-squad.js
 import { mapApiFootballStandings } from "../mapper/map-api-football-standings.js";
 import { mapApiFootballTeamStats } from "../mapper/map-api-football-stats.js";
 import { statsFromFormGoals } from "../mapper/stats-from-form.js";
-import {
-  API_SPORTS_FOOTBALL_BASE_URL,
-  type FootballHttpFetch,
-} from "./live-api-sports-football-source.js";
+import { FootballProviderError } from "./football-provider-error.js";
+import { API_SPORTS_FOOTBALL_BASE_URL } from "./live-api-sports-football-source.js";
+import { fetchFootballJson, type FootballHttpFetch } from "./live-football-http.js";
 
 export interface LiveApiSportsMatchCatalogOptions {
   readonly apiKey: string;
   readonly baseUrl?: string;
   readonly fetchImpl?: FootballHttpFetch;
+  readonly timeoutMs?: number;
+  readonly maxRetries?: number;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -37,11 +38,14 @@ function parseFixtureId(matchId: string): string | undefined {
 /**
  * Live MatchLookup catalog: fetches fixture + form + stats + H2H (+ optional standings),
  * maps each response into FAS domain models before any Evidence hand-off.
+ * Transport / incomplete-required failures throw FootballProviderError.
  */
 export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
   readonly #apiKey: string;
   readonly #baseUrl: string;
   readonly #fetchImpl: FootballHttpFetch;
+  readonly #timeoutMs: number;
+  readonly #maxRetries: number;
   readonly #cache = new Map<string, FootballMatchBundle>();
 
   constructor(options: LiveApiSportsMatchCatalogOptions) {
@@ -51,6 +55,8 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       "",
     );
     this.#fetchImpl = options.fetchImpl ?? fetch;
+    this.#timeoutMs = options.timeoutMs ?? 10_000;
+    this.#maxRetries = options.maxRetries ?? 2;
   }
 
   getMatchBundle(matchId: string): FootballMatchBundle | undefined {
@@ -80,18 +86,24 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       `/fixtures?id=${encodeURIComponent(fixtureId)}`,
     );
 
-    if (
-      fixtureBody === undefined ||
-      !isRecord(fixtureBody) ||
-      !Array.isArray(fixtureBody.response)
-    ) {
+    if (!isRecord(fixtureBody) || !Array.isArray(fixtureBody.response)) {
+      throw new FootballProviderError(
+        "INVALID_RESPONSE",
+        `Live football fixture response was invalid for "${matchId}".`,
+      );
+    }
+
+    if (fixtureBody.response.length === 0) {
       return undefined;
     }
 
     const fixture = mapApiFootballFixtureItem(fixtureBody.response[0], "http-live");
 
     if (fixture === undefined) {
-      return undefined;
+      throw new FootballProviderError(
+        "INVALID_RESPONSE",
+        `Live football fixture mapping failed for "${matchId}".`,
+      );
     }
 
     const [
@@ -132,104 +144,81 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       this.#getJson(`/injuries?fixture=${encodeURIComponent(fixture.fixtureId)}`),
     ]);
 
-    const homeForm =
-      homeFormBody !== undefined
-        ? mapApiFootballTeamForm(homeFormBody, {
-            teamId: fixture.homeTeamId,
-            teamName: fixture.homeTeamName,
-            teamSide: "home",
-            providerMethod: "http-live",
-          })
-        : undefined;
-    const awayForm =
-      awayFormBody !== undefined
-        ? mapApiFootballTeamForm(awayFormBody, {
-            teamId: fixture.awayTeamId,
-            teamName: fixture.awayTeamName,
-            teamSide: "away",
-            providerMethod: "http-live",
-          })
-        : undefined;
-    const mappedHomeStats =
-      homeStatsBody !== undefined
-        ? mapApiFootballTeamStats(homeStatsBody, {
-            teamId: fixture.homeTeamId,
-            teamName: fixture.homeTeamName,
-            teamSide: "home",
-            providerMethod: "http-live",
-            ...(homeForm !== undefined ? { windowMatches: homeForm.window } : {}),
-          })
-        : undefined;
-    const mappedAwayStats =
-      awayStatsBody !== undefined
-        ? mapApiFootballTeamStats(awayStatsBody, {
-            teamId: fixture.awayTeamId,
-            teamName: fixture.awayTeamName,
-            teamSide: "away",
-            providerMethod: "http-live",
-            ...(awayForm !== undefined ? { windowMatches: awayForm.window } : {}),
-          })
-        : undefined;
-    const headToHead =
-      h2hBody !== undefined
-        ? mapApiFootballH2H(h2hBody, {
-            homeTeamId: fixture.homeTeamId,
-            awayTeamId: fixture.awayTeamId,
-            providerMethod: "http-live",
-          })
-        : undefined;
+    const homeForm = mapApiFootballTeamForm(homeFormBody, {
+      teamId: fixture.homeTeamId,
+      teamName: fixture.homeTeamName,
+      teamSide: "home",
+      providerMethod: "http-live",
+    });
+    const awayForm = mapApiFootballTeamForm(awayFormBody, {
+      teamId: fixture.awayTeamId,
+      teamName: fixture.awayTeamName,
+      teamSide: "away",
+      providerMethod: "http-live",
+    });
+    const headToHead = mapApiFootballH2H(h2hBody, {
+      homeTeamId: fixture.homeTeamId,
+      awayTeamId: fixture.awayTeamId,
+      providerMethod: "http-live",
+    });
 
     if (
       homeForm === undefined ||
       awayForm === undefined ||
       headToHead === undefined
     ) {
-      return undefined;
+      throw new FootballProviderError(
+        "INCOMPLETE_RESPONSE",
+        `Live football match "${matchId}" is missing required form or H2H Evidence inputs.`,
+      );
     }
+
+    const mappedHomeStats = mapApiFootballTeamStats(homeStatsBody, {
+      teamId: fixture.homeTeamId,
+      teamName: fixture.homeTeamName,
+      teamSide: "home",
+      providerMethod: "http-live",
+      windowMatches: homeForm.window,
+    });
+    const mappedAwayStats = mapApiFootballTeamStats(awayStatsBody, {
+      teamId: fixture.awayTeamId,
+      teamName: fixture.awayTeamName,
+      teamSide: "away",
+      providerMethod: "http-live",
+      windowMatches: awayForm.window,
+    });
 
     const homeStats = mappedHomeStats ?? statsFromFormGoals(homeForm);
     const awayStats = mappedAwayStats ?? statsFromFormGoals(awayForm);
 
-    const standings =
-      standingsBody !== undefined
-        ? mapApiFootballStandings(standingsBody, {
-            competitionId: fixture.competitionId,
-            competitionName: fixture.competitionName,
-            season: fixture.season,
-            providerMethod: "http-live",
-          })
-        : undefined;
+    const standings = mapApiFootballStandings(standingsBody, {
+      competitionId: fixture.competitionId,
+      competitionName: fixture.competitionName,
+      season: fixture.season,
+      providerMethod: "http-live",
+    });
 
-    const homePlayers =
-      homeSquadBody !== undefined
-        ? mapApiFootballSquadResponse(homeSquadBody, {
-            teamId: fixture.homeTeamId,
-            teamName: fixture.homeTeamName,
-            teamSide: "home",
-            providerMethod: "http-live",
-            maxPlayers: 12,
-          })
-        : Object.freeze([]);
-    const awayPlayers =
-      awaySquadBody !== undefined
-        ? mapApiFootballSquadResponse(awaySquadBody, {
-            teamId: fixture.awayTeamId,
-            teamName: fixture.awayTeamName,
-            teamSide: "away",
-            providerMethod: "http-live",
-            maxPlayers: 12,
-          })
-        : Object.freeze([]);
+    const homePlayers = mapApiFootballSquadResponse(homeSquadBody, {
+      teamId: fixture.homeTeamId,
+      teamName: fixture.homeTeamName,
+      teamSide: "home",
+      providerMethod: "http-live",
+      maxPlayers: 12,
+    });
+    const awayPlayers = mapApiFootballSquadResponse(awaySquadBody, {
+      teamId: fixture.awayTeamId,
+      teamName: fixture.awayTeamName,
+      teamSide: "away",
+      providerMethod: "http-live",
+      maxPlayers: 12,
+    });
 
-    // Empty injuries body or empty rows → honest absence (not “all available”).
-    const availabilityAbsences =
-      injuriesBody !== undefined
-        ? mapApiFootballInjuriesResponse(injuriesBody, {
-            homeTeamId: fixture.homeTeamId,
-            awayTeamId: fixture.awayTeamId,
-            providerMethod: "http-live",
-          })
-        : Object.freeze([]);
+    // Empty injuries → honest absence (not “all available”).
+    const availabilityAbsences = mapApiFootballInjuriesResponse(injuriesBody, {
+      homeTeamId: fixture.homeTeamId,
+      awayTeamId: fixture.awayTeamId,
+      providerMethod: "http-live",
+    });
 
     const bundle: FootballMatchBundle = Object.freeze({
       fixture,
@@ -247,23 +236,12 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
     return bundle;
   }
 
-  async #getJson(path: string): Promise<unknown | undefined> {
-    try {
-      const response = await this.#fetchImpl(`${this.#baseUrl}${path}`, {
-        method: "GET",
-        headers: Object.freeze({
-          Accept: "application/json",
-          "x-apisports-key": this.#apiKey,
-        }),
-      });
-
-      if (!response.ok) {
-        return undefined;
-      }
-
-      return await response.json();
-    } catch {
-      return undefined;
-    }
+  async #getJson(path: string): Promise<unknown> {
+    return fetchFootballJson(`${this.#baseUrl}${path}`, {
+      apiKey: this.#apiKey,
+      fetchImpl: this.#fetchImpl,
+      timeoutMs: this.#timeoutMs,
+      maxRetries: this.#maxRetries,
+    });
   }
 }

@@ -5,11 +5,10 @@ import type {
 } from "../domain/football-models.js";
 import type { FootballFixturesSource } from "../domain/ports.js";
 import { mapApiFootballFixturesResponse } from "../mapper/map-api-football-fixture.js";
+import { FootballProviderError } from "./football-provider-error.js";
+import { fetchFootballJson, type FootballHttpFetch } from "./live-football-http.js";
 
-export type FootballHttpFetch = (
-  input: string,
-  init?: RequestInit,
-) => Promise<Response>;
+export type { FootballHttpFetch } from "./live-football-http.js";
 
 export interface LiveApiSportsFootballSourceOptions {
   readonly apiKey: string;
@@ -17,6 +16,8 @@ export interface LiveApiSportsFootballSourceOptions {
   readonly leagueIds?: readonly number[];
   readonly season?: number;
   readonly fetchImpl?: FootballHttpFetch;
+  readonly timeoutMs?: number;
+  readonly maxRetries?: number;
 }
 
 /** API-Sports official host (not RapidAPI). Auth: `x-apisports-key`. */
@@ -25,6 +26,7 @@ export const API_SPORTS_FOOTBALL_BASE_URL = "https://v3.football.api-sports.io";
 /**
  * Live upcoming fixtures. Maps vendor JSON → FootballFixture/BoardRow only;
  * raw response bodies never leave this adapter.
+ * Transport failures throw FootballProviderError (never empty success).
  */
 export class LiveApiSportsFootballSource implements FootballFixturesSource {
   readonly #apiKey: string;
@@ -32,6 +34,8 @@ export class LiveApiSportsFootballSource implements FootballFixturesSource {
   readonly #leagueIds: readonly number[];
   readonly #season: number;
   readonly #fetchImpl: FootballHttpFetch;
+  readonly #timeoutMs: number;
+  readonly #maxRetries: number;
 
   constructor(options: LiveApiSportsFootballSourceOptions) {
     this.#apiKey = options.apiKey;
@@ -45,6 +49,8 @@ export class LiveApiSportsFootballSource implements FootballFixturesSource {
         : DEFAULT_FOOTBALL_LEAGUE_IDS;
     this.#season = options.season ?? new Date().getUTCFullYear();
     this.#fetchImpl = options.fetchImpl ?? fetch;
+    this.#timeoutMs = options.timeoutMs ?? 10_000;
+    this.#maxRetries = options.maxRetries ?? 2;
   }
 
   async listUpcoming(options?: {
@@ -93,24 +99,21 @@ export class LiveApiSportsFootballSource implements FootballFixturesSource {
     url.searchParams.set("from", fromDate);
     url.searchParams.set("to", toDate);
 
-    try {
-      const response = await this.#fetchImpl(url.toString(), {
-        method: "GET",
-        headers: Object.freeze({
-          Accept: "application/json",
-          "x-apisports-key": this.#apiKey,
-        }),
-      });
+    const body = await fetchFootballJson(url.toString(), {
+      apiKey: this.#apiKey,
+      fetchImpl: this.#fetchImpl,
+      timeoutMs: this.#timeoutMs,
+      maxRetries: this.#maxRetries,
+    });
 
-      if (!response.ok) {
-        return Object.freeze([]);
-      }
-
-      const body: unknown = await response.json();
-      return mapApiFootballFixturesResponse(body, "http-live");
-    } catch {
-      return Object.freeze([]);
+    if (body === null || typeof body !== "object") {
+      throw new FootballProviderError(
+        "INVALID_RESPONSE",
+        `Live football fixtures response was invalid for league ${String(leagueId)}.`,
+      );
     }
+
+    return mapApiFootballFixturesResponse(body, "http-live");
   }
 }
 

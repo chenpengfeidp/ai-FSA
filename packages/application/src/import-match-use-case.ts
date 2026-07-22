@@ -73,8 +73,13 @@ export class ImportMatchUseCase {
 
     try {
       providerInput = this.#provider.getMatch(matchId);
-    } catch {
-      return failure("PROVIDER_FAILED", "Match provider lookup failed.");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error && error.message.trim().length > 0
+          ? error.message
+          : "Match provider lookup failed.";
+
+      return failure("PROVIDER_FAILED", message);
     }
 
     if (providerInput === undefined) {

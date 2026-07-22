@@ -31,6 +31,11 @@ export type {
   FootballStandingsSource,
 } from "./domain/ports.js";
 export {
+  FootballProviderError,
+  isFootballProviderError,
+} from "./live/football-provider-error.js";
+export type { FootballProviderErrorCode } from "./live/football-provider-error.js";
+export {
   API_SPORTS_FOOTBALL_BASE_URL,
   LiveApiSportsFootballSource,
 } from "./live/live-api-sports-football-source.js";
@@ -40,6 +45,7 @@ export type {
 } from "./live/live-api-sports-football-source.js";
 export { LiveApiSportsMatchCatalog } from "./live/live-api-sports-match-catalog.js";
 export type { LiveApiSportsMatchCatalogOptions } from "./live/live-api-sports-match-catalog.js";
+export { fetchFootballJson } from "./live/live-football-http.js";
 export {
   mapApiFootballFixtureItem,
   mapApiFootballFixturesResponse,

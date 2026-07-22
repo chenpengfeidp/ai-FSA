@@ -248,7 +248,7 @@ describe("ImportMatchUseCase", () => {
       ok: false,
       error: {
         code: "PROVIDER_FAILED",
-        message: "Match provider lookup failed.",
+        message: "provider unavailable",
       },
     });
     await expect(importFailure.execute("match-example")).resolves.toEqual({

@@ -237,6 +237,8 @@ function createLiveFootballSource(
   return new LiveApiSportsFootballSource({
     apiKey,
     baseUrl: footballProvider.baseUrl,
+    timeoutMs: footballProvider.timeoutMs,
+    maxRetries: footballProvider.maxRetries,
     ...(footballProvider.leagueIds !== undefined
       ? { leagueIds: footballProvider.leagueIds }
       : {}),

@@ -86,6 +86,8 @@ function createFootballLookup(footballProvider: FootballDataProviderConfig): {
     const catalog = new LiveApiSportsMatchCatalog({
       apiKey,
       baseUrl: footballProvider.baseUrl,
+      timeoutMs: footballProvider.timeoutMs,
+      maxRetries: footballProvider.maxRetries,
     });
     const asyncProvider = new AsyncFootballMatchProvider(catalog);
 

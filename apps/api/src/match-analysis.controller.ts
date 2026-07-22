@@ -25,7 +25,8 @@ import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 // biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
 import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
 // biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
-import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
+import { liveFootballProviderFailure } from "./live-football-provider-failure.js";
+import type { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
 
 class MatchAnalysisRequestDto {
   @ApiProperty({
@@ -69,7 +70,19 @@ export class MatchAnalysisController {
     const matchId = body.matchId;
     await this.scoresPrimer.ensureScores();
     await this.upcomingBoard.listUpcoming();
-    await this.footballPrimer.ensureMatch(matchId);
+
+    try {
+      await this.footballPrimer.ensureMatch(matchId);
+    } catch (error: unknown) {
+      const failure = liveFootballProviderFailure(error);
+
+      if (failure !== undefined) {
+        return failure;
+      }
+
+      throw error;
+    }
+
     await this.oddsPrimer.ensurePreMatch1x2(matchId);
     return await this.generateMatchReport.execute(createMatchId(matchId));
   }

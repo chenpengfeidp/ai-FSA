@@ -24,7 +24,8 @@ import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 // biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
 import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
 // biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
-import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
+import { liveFootballProviderFailure } from "./live-football-provider-failure.js";
+import type { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
 
 @ApiTags("Analysis")
 @ApiExtraModels(AnalysisReportDto, AnalysisEndpointErrorResponseDto)
@@ -62,7 +63,19 @@ export class AnalysisController {
     await this.scoresPrimer.ensureScores();
     // Populate odds-event shells used by EnrichedMatchProvider for odds:* ids.
     await this.upcomingBoard.listUpcoming(); // primes event shells for odds:* ids
-    await this.footballPrimer.ensureMatch(matchId);
+
+    try {
+      await this.footballPrimer.ensureMatch(matchId);
+    } catch (error: unknown) {
+      const failure = liveFootballProviderFailure(error);
+
+      if (failure !== undefined) {
+        return failure;
+      }
+
+      throw error;
+    }
+
     await this.oddsPrimer.ensurePreMatch1x2(matchId);
     return await this.generateMatchReport.execute(createMatchId(matchId));
   }

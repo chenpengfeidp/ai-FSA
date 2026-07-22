@@ -24,9 +24,9 @@ import { FootballMatchPrimerBridge } from "./football-match-primer.bridge.js";
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 // biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
 import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
-// biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
 import { liveFootballProviderFailure } from "./live-football-provider-failure.js";
-import type { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
+// biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
+import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
 
 class MatchAnalysisRequestDto {
   @ApiProperty({

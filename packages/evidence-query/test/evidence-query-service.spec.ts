@@ -126,6 +126,7 @@ describe("EvidenceQueryService", () => {
     const repository: EvidenceRepository = {
       findAll: () => Promise.reject(new Error("repository unavailable")),
       findById: () => Promise.reject(new Error("repository unavailable")),
+      findByMatch: () => Promise.reject(new Error("repository unavailable")),
       save: (item) => Promise.resolve(item),
     };
     const service = new EvidenceQueryService(repository);

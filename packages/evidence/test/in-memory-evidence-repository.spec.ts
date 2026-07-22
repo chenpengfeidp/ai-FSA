@@ -45,6 +45,36 @@ describe("InMemoryEvidenceRepository", () => {
     expect(Object.isFrozen(snapshot)).toBe(true);
   });
 
+  it("loads evidence by match id", async () => {
+    const repository = new InMemoryEvidenceRepository();
+    const other = createEvidence({
+      id: "evidence-repository-other-match",
+      source: "fixture",
+      sourceId: "fixture-repository-002",
+      type: "VENUE",
+      matchId: createMatchId("match-other"),
+      collectedAt: "2026-07-16T15:00:00.000Z",
+      eventTime: "2026-07-16T14:55:00.000Z",
+      freshness: "fresh",
+      quality: "verified",
+      provenance: {
+        collector: "@fas/evidence",
+        method: "fixture",
+      },
+      payload: {
+        observation: "other-match",
+      },
+    });
+
+    await repository.save(evidence);
+    await repository.save(other);
+
+    const byMatch = await repository.findByMatch(createMatchId("match-example"));
+
+    expect(byMatch).toEqual([evidence]);
+    expect(Object.isFrozen(byMatch)).toBe(true);
+  });
+
   it("does not overwrite immutable evidence identities", async () => {
     const repository = new InMemoryEvidenceRepository();
     await repository.save(evidence);

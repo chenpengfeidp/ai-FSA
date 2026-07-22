@@ -199,6 +199,25 @@ export class PrismaEvidenceRepository implements EvidenceRepository {
       : toDomainEvidence(envelope, row.match.externalKey);
   }
 
+  async findByMatch(
+    matchId: NonNullable<Evidence["matchId"]>,
+  ): Promise<readonly Evidence[]> {
+    const rows = await this.#client.evidenceItem.findMany({
+      where: { match: { externalKey: matchId } },
+      include: { match: true },
+      orderBy: { observedAt: "desc" },
+    });
+
+    return Object.freeze(
+      rows.flatMap((row) => {
+        const envelope = parseEnvelope(row.valueJson);
+        return envelope === undefined
+          ? []
+          : [toDomainEvidence(envelope, row.match.externalKey)];
+      }),
+    );
+  }
+
   async save(evidence: Evidence): Promise<Evidence> {
     if (evidence.matchId === undefined) {
       throw new Error("PostgreSQL Evidence persistence requires Evidence.matchId.");

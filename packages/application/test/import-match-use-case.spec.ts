@@ -192,6 +192,7 @@ describe("ImportMatchUseCase", () => {
     const repository: EvidenceRepository = {
       findAll: () => Promise.resolve([]),
       findById: () => Promise.resolve(undefined),
+      findByMatch: () => Promise.resolve([]),
       save: () => Promise.reject(new Error("repository unavailable")),
     };
     const pipeline = new EvidenceImportPipeline(

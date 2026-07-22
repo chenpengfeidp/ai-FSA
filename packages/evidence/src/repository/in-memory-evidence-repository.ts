@@ -15,6 +15,18 @@ export class InMemoryEvidenceRepository implements EvidenceRepository {
     return Promise.resolve(this.#evidenceById.get(id));
   }
 
+  findByMatch(
+    matchId: NonNullable<Evidence["matchId"]>,
+  ): Promise<readonly Evidence[]> {
+    return Promise.resolve(
+      Object.freeze(
+        [...this.#evidenceById.values()].filter(
+          (evidence) => evidence.matchId === matchId,
+        ),
+      ),
+    );
+  }
+
   save(evidence: Evidence): Promise<Evidence> {
     if (this.#evidenceById.has(evidence.id)) {
       return Promise.reject(new DuplicateEvidenceError(evidence.id));

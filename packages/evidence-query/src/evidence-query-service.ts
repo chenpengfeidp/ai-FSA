@@ -45,8 +45,16 @@ export class EvidenceQueryService {
     }
   }
 
-  findByMatch(matchId: MatchId): Promise<EvidenceQueryResult<readonly Evidence[]>> {
-    return this.#queryAll((evidence) => evidence.matchId === matchId);
+  async findByMatch(
+    matchId: MatchId,
+  ): Promise<EvidenceQueryResult<readonly Evidence[]>> {
+    try {
+      return success(
+        Object.freeze([...(await this.#repository.findByMatch(matchId))]),
+      );
+    } catch {
+      return repositoryFailure();
+    }
   }
 
   findByType(type: EvidenceType): Promise<EvidenceQueryResult<readonly Evidence[]>> {

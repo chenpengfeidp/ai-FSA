@@ -1,5 +1,9 @@
 // biome-ignore lint/style/useImportType: NestJS uses the service class as constructor metadata.
-import { type CreateEvidenceInput, EvidenceService } from "@fas/evidence";
+import {
+  type CreateEvidenceInput,
+  DuplicateEvidenceError,
+  EvidenceService,
+} from "@fas/evidence";
 import { createMatchId } from "@fas/match";
 import { Injectable, type OnModuleInit } from "@nestjs/common";
 
@@ -30,6 +34,15 @@ export class EvidenceExampleInitializer implements OnModuleInit {
   constructor(private readonly evidenceService: EvidenceService) {}
 
   async onModuleInit(): Promise<void> {
-    await this.evidenceService.record(exampleEvidenceInput);
+    try {
+      await this.evidenceService.record(exampleEvidenceInput);
+    } catch (error: unknown) {
+      // Postgres mode survives process restart; bootstrap Evidence is insert-once.
+      if (error instanceof DuplicateEvidenceError) {
+        return;
+      }
+
+      throw error;
+    }
   }
 }

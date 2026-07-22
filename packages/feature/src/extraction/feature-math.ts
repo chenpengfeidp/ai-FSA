@@ -206,6 +206,41 @@ export function computeDisciplineRisk(
 }
 
 /**
+ * F1.3B Attack Quality in [0, 100] from provider Expected Goals (xG).
+ * Honest absence when xG is unavailable — never estimate from shots.
+ */
+export function computeXgAttackQuality(xg: number): number {
+  return clamp(100 * (xg / BASELINE_XG_FOR), 0, 100);
+}
+
+/**
+ * F1.3B Defensive Quality in [0, 100] from provider Expected Goals Against (xGA).
+ * Higher means stronger defense (fewer expected goals conceded).
+ */
+export function computeXgDefenseQuality(xga: number): number {
+  return clamp(100 * (BASELINE_XG_AGAINST / Math.max(xga, 0.01)), 0, 100);
+}
+
+/**
+ * F1.3B signed xG dominance: home xG minus away xG (provider values only).
+ */
+export function computeXgDominance(homeXg: number, awayXg: number): number {
+  return roundFeature(homeXg - awayXg);
+}
+
+/**
+ * F1.3B Finishing Efficiency in [0, 100].
+ * 50 = finishing in line with xG; above 50 = goals exceed xG.
+ * Honest absence when either goals rate or xG is missing.
+ */
+export function computeFinishingEfficiency(
+  goalsPerMatch: number,
+  xg: number,
+): number {
+  return clamp(50 + 25 * (goalsPerMatch - xg), 0, 100);
+}
+
+/**
  * Head-to-head lean from meetings oriented to the current fixture.
  * Positive favors the current home side. Shrinks toward 0 with small samples.
  */

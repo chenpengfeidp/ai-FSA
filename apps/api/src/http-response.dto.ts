@@ -274,7 +274,7 @@ export class RuleResultDto {
 }
 
 export class DeterministicProjectionDto {
-  @ApiProperty({ example: "projection.v2.slice1" })
+  @ApiProperty({ example: "projection.v2.f13b.xg" })
   declare readonly projectionModelVersion: string;
 
   @ApiProperty({ example: "match-example" })

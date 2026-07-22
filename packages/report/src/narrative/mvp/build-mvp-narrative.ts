@@ -121,6 +121,13 @@ export function buildMvpIntelligenceNarrative(
   const chanceAway = numericFeature(analysis.features, "chanceCreationAway");
   const disciplineHome = numericFeature(analysis.features, "disciplineRiskHome");
   const disciplineAway = numericFeature(analysis.features, "disciplineRiskAway");
+  const xgAttackHome = numericFeature(analysis.features, "xgAttackQualityHome");
+  const xgAttackAway = numericFeature(analysis.features, "xgAttackQualityAway");
+  const xgDefenseHome = numericFeature(analysis.features, "xgDefenseQualityHome");
+  const xgDefenseAway = numericFeature(analysis.features, "xgDefenseQualityAway");
+  const xgDominance = numericFeature(analysis.features, "xgDominance");
+  const finishingHome = numericFeature(analysis.features, "finishingEfficiencyHome");
+  const finishingAway = numericFeature(analysis.features, "finishingEfficiencyAway");
 
   const overview = [
     `${homeTeam} vs ${awayTeam}: Most Likely is ${most.label} (${formatPct(most.probability)}).`,
@@ -139,6 +146,7 @@ export function buildMvpIntelligenceNarrative(
     `RecentForm: recentFormHome=${formHome ?? "n/a"} vs recentFormAway=${formAway ?? "n/a"}.`,
     `FormDecomposition: homeAtHome=${formAtHomeHome ?? "n/a"} vs awayOnRoad=${formOnRoadAway ?? "n/a"}; goalsScoredRate home=${goalsScoredHome ?? "n/a"} away=${goalsScoredAway ?? "n/a"}.`,
     `AdvancedStatsFeatures (derived, not raw Evidence): attackEfficiency home=${attackEffHome ?? "n/a"} away=${attackEffAway ?? "n/a"}; possession home=${possessionHome ?? "n/a"} away=${possessionAway ?? "n/a"}; chanceCreation home=${chanceHome ?? "n/a"} away=${chanceAway ?? "n/a"}; disciplineRisk home=${disciplineHome ?? "n/a"} away=${disciplineAway ?? "n/a"}.`,
+    `ExpectedGoalsFeatures (derived from EXPECTED_GOALS Evidence): xgAttackQuality home=${xgAttackHome ?? "n/a"} away=${xgAttackAway ?? "n/a"}; xgDefenseQuality home=${xgDefenseHome ?? "n/a"} away=${xgDefenseAway ?? "n/a"}; xgDominance=${xgDominance ?? "n/a"}; finishingEfficiency home=${finishingHome ?? "n/a"} away=${finishingAway ?? "n/a"}.`,
   ].join(" ");
 
   const riskRules = analysis.ruleResults.filter(

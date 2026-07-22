@@ -201,6 +201,12 @@ describe("RuleEvaluator", () => {
         status: "INAPPLICABLE",
         score: 0,
       },
+      { ruleName: "XG_ATTACK_HOME_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "XG_ATTACK_AWAY_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "XG_DEFENSIVE_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "XG_DEFENSIVE_AWAY_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "XG_DOMINANCE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "XG_DOMINANCE_AWAY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "DISCIPLINE_AWAY_RISK", status: "INAPPLICABLE", score: 0 },
       { ruleName: "DISCIPLINE_HOME_RISK", status: "INAPPLICABLE", score: 0 },
       { ruleName: "DEFENSE_HOME_STABLE", status: "PASS", score: 0.45 },
@@ -515,6 +521,46 @@ describe("RuleEvaluator", () => {
         sourceEvidenceId: "evidence-1",
         generatedAt: "2026-07-17T10:00:00Z",
       }),
+      createFeature({
+        featureId: "feature:evidence-1:xgAttackQualityHome",
+        matchId: createMatchId("match-1"),
+        name: "xgAttackQualityHome",
+        value: 75,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:xgAttackQualityAway",
+        matchId: createMatchId("match-1"),
+        name: "xgAttackQualityAway",
+        value: 55,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:xgDefenseQualityHome",
+        matchId: createMatchId("match-1"),
+        name: "xgDefenseQualityHome",
+        value: 70,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:xgDefenseQualityAway",
+        matchId: createMatchId("match-1"),
+        name: "xgDefenseQualityAway",
+        value: 50,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:xgDominance",
+        matchId: createMatchId("match-1"),
+        name: "xgDominance",
+        value: 0.35,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
     ]);
 
     expect(
@@ -529,6 +575,12 @@ describe("RuleEvaluator", () => {
             "CHANCE_CREATION_AWAY_EDGE",
             "DISCIPLINE_AWAY_RISK",
             "DISCIPLINE_HOME_RISK",
+            "XG_ATTACK_HOME_EDGE",
+            "XG_ATTACK_AWAY_EDGE",
+            "XG_DEFENSIVE_EDGE",
+            "XG_DEFENSIVE_AWAY_EDGE",
+            "XG_DOMINANCE",
+            "XG_DOMINANCE_AWAY",
           ].includes(result.ruleName),
         )
         .map(({ ruleName, status, channel }) => ({
@@ -568,6 +620,36 @@ describe("RuleEvaluator", () => {
         channel: "away+",
       },
       {
+        ruleName: "XG_ATTACK_HOME_EDGE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "XG_ATTACK_AWAY_EDGE",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "XG_DEFENSIVE_EDGE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "XG_DEFENSIVE_AWAY_EDGE",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "XG_DOMINANCE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "XG_DOMINANCE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
         ruleName: "DISCIPLINE_AWAY_RISK",
         status: "PASS",
         channel: "home+",
@@ -578,6 +660,34 @@ describe("RuleEvaluator", () => {
         channel: "away+",
       },
     ]);
+  });
+
+  it("marks xG Rules INAPPLICABLE when xG Features are absent", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "XG_ATTACK_HOME_EDGE",
+            "XG_ATTACK_AWAY_EDGE",
+            "XG_DEFENSIVE_EDGE",
+            "XG_DEFENSIVE_AWAY_EDGE",
+            "XG_DOMINANCE",
+            "XG_DOMINANCE_AWAY",
+          ].includes(result.ruleName),
+        )
+        .every((result) => result.status === "INAPPLICABLE"),
+    ).toBe(true);
   });
 
   it("evaluates Asian handicap market rules when AH lean is present", () => {

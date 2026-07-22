@@ -5,7 +5,7 @@
 | Purpose | Track which Evidence / product surfaces are wired in the private V1 path |
 | Authority | Complements domain Evidence types; does **not** replace Architecture Freeze or doc 41 |
 | Roadmap | [`docs/40_PRODUCT_ROADMAP.md`](./40_PRODUCT_ROADMAP.md) |
-| Last updated | 2026-07-22 (after Sprint **F1.3A**) |
+| Last updated | 2026-07-22 (after Sprint **F1.3B**) |
 
 Status legend:
 
@@ -36,7 +36,7 @@ Status legend:
 | MATCH_INFO | `MATCH_INFO` | Active | F.1 |
 | TEAM_FORM | `TEAM_FORM` | Active | F.1 |
 | STATISTICS | `STATISTICS` | Active | F.1 (team) + F1.2a optional advanced (SoT/possession/corners/cards/…); STATISTICS xG fields remain zero until F1.3B |
-| EXPECTED_GOALS | `EXPECTED_GOALS` | Active | F1.3A Evidence only; provider xG/xGA windows; never estimated from shots; not Features/Rules/Projection |
+| EXPECTED_GOALS | `EXPECTED_GOALS` | Active | F1.3A Evidence + F1.3B Feature/Rule/Confidence/Projection consume; never estimated from shots |
 | HEAD_TO_HEAD | `HEAD_TO_HEAD` | Active | F.1 |
 | VENUE | `VENUE` | Active | F1.1B-1 |
 | PLAYER | `PLAYER` | Active | F1.1C-1 (basic identity) |

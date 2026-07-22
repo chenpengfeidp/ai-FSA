@@ -37,11 +37,14 @@ const TAU_ATTACK_EFFICIENCY = 8;
 const TAU_POSSESSION = 8;
 const TAU_CHANCE_CREATION = 8;
 const TAU_DISCIPLINE_RISK = 8;
+const TAU_XG_ATTACK = 8;
+const TAU_XG_DEFENSE = 8;
+const TAU_XG_DOMINANCE = 0.2;
 const TAU_DEFENSE_STABLE = 55;
 const TAU_DEFENSE_FRAGILE = 45;
 const TAU_AVAILABILITY_HIT = 8;
 const TAU_VENUE = 1;
-const RULE_POLICY = "rule.mvp.f12b.advstats";
+const RULE_POLICY = "rule.mvp.f13b.xg";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -389,6 +392,112 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
         away !== undefined &&
         away - home >= TAU_CHANCE_CREATION
       );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:xg-attack-home-edge:v1",
+    ruleName: "XG_ATTACK_HOME_EDGE",
+    weight: 0.55,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "xgAttackQualityHome",
+      "xgAttackQualityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("xgAttackQualityHome"));
+      const away = numericValue(features.get("xgAttackQualityAway"));
+
+      return (
+        home !== undefined && away !== undefined && home - away >= TAU_XG_ATTACK
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:xg-attack-away-edge:v1",
+    ruleName: "XG_ATTACK_AWAY_EDGE",
+    weight: 0.55,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "xgAttackQualityHome",
+      "xgAttackQualityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("xgAttackQualityHome"));
+      const away = numericValue(features.get("xgAttackQualityAway"));
+
+      return (
+        home !== undefined && away !== undefined && away - home >= TAU_XG_ATTACK
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:xg-defensive-edge:v1",
+    ruleName: "XG_DEFENSIVE_EDGE",
+    weight: 0.5,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "xgDefenseQualityHome",
+      "xgDefenseQualityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("xgDefenseQualityHome"));
+      const away = numericValue(features.get("xgDefenseQualityAway"));
+
+      return (
+        home !== undefined && away !== undefined && home - away >= TAU_XG_DEFENSE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:xg-defensive-away-edge:v1",
+    ruleName: "XG_DEFENSIVE_AWAY_EDGE",
+    weight: 0.5,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "xgDefenseQualityHome",
+      "xgDefenseQualityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("xgDefenseQualityHome"));
+      const away = numericValue(features.get("xgDefenseQualityAway"));
+
+      return (
+        home !== undefined && away !== undefined && away - home >= TAU_XG_DEFENSE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:xg-dominance:v1",
+    ruleName: "XG_DOMINANCE",
+    weight: 0.5,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "xgDominance",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const dominance = numericValue(features.get("xgDominance"));
+
+      return dominance !== undefined && dominance >= TAU_XG_DOMINANCE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:xg-dominance-away:v1",
+    ruleName: "XG_DOMINANCE_AWAY",
+    weight: 0.5,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "xgDominance",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const dominance = numericValue(features.get("xgDominance"));
+
+      return dominance !== undefined && dominance <= -TAU_XG_DOMINANCE;
     },
   }) satisfies FootballRuleDefinition,
   Object.freeze({

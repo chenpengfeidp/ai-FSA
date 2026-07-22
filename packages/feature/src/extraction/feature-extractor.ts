@@ -14,12 +14,16 @@ import {
   computeChanceCreation,
   computeDefenseRating,
   computeDisciplineRisk,
+  computeFinishingEfficiency,
   computeH2hLean,
   computeImpliedProbabilities,
   computeMarketLean,
   computeMomentum,
   computePossessionDominance,
   computeRecentFormScore,
+  computeXgAttackQuality,
+  computeXgDefenseQuality,
+  computeXgDominance,
   DEFAULT_HOME_ADVANTAGE,
   roundFeature,
   VENUE_ADVANTAGE_SCORE,
@@ -353,6 +357,236 @@ function extractAdvancedStatisticsFeatures(input: {
   return Object.freeze(features);
 }
 
+const EXPECTED_GOALS_WINDOW_PRIORITY = Object.freeze([
+  "overall",
+  "last10",
+  "last5",
+  "recent",
+  "fixture",
+] as const);
+
+function readExpectedGoalsMetric(
+  payload: Evidence["payload"],
+  metric: "xg" | "xga",
+): number | undefined {
+  const metricsRaw = payload.metrics;
+
+  if (
+    typeof metricsRaw !== "object" ||
+    metricsRaw === null ||
+    Array.isArray(metricsRaw)
+  ) {
+    return undefined;
+  }
+
+  const value = (metricsRaw as Record<string, unknown>)[metric];
+  return asFiniteNumber(value);
+}
+
+/**
+ * Prefer season/rolling windows, then fixture. Venue-specific windows
+ * (home/away) are used only when they match the team side.
+ */
+function selectExpectedGoalsMetric(
+  evidences: readonly Evidence[],
+  side: "away" | "home",
+  metric: "xg" | "xga",
+): Readonly<{ value: number; evidenceId: string; window: string }> | undefined {
+  const sideRecords = evidences.filter(
+    (evidence) =>
+      evidence.type === "EXPECTED_GOALS" && evidence.payload.teamSide === side,
+  );
+
+  if (sideRecords.length === 0) {
+    return undefined;
+  }
+
+  const venueWindow = side;
+  const priority = [...EXPECTED_GOALS_WINDOW_PRIORITY, venueWindow];
+
+  for (const window of priority) {
+    const match = sideRecords.find((evidence) => evidence.payload.window === window);
+
+    if (match === undefined) {
+      continue;
+    }
+
+    const value = readExpectedGoalsMetric(match.payload, metric);
+
+    if (value !== undefined) {
+      return Object.freeze({
+        value,
+        evidenceId: match.id,
+        window: String(match.payload.window),
+      });
+    }
+  }
+
+  for (const evidence of sideRecords) {
+    const value = readExpectedGoalsMetric(evidence.payload, metric);
+
+    if (value !== undefined) {
+      return Object.freeze({
+        value,
+        evidenceId: evidence.id,
+        window: String(evidence.payload.window ?? "unknown"),
+      });
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * F1.3B: derived football Features from EXPECTED_GOALS Evidence only.
+ * Never invents missing provider xG/xGA.
+ */
+function extractExpectedGoalsFeatures(input: {
+  readonly evidences: readonly Evidence[];
+  readonly homeForm: Evidence | undefined;
+  readonly awayForm: Evidence | undefined;
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { evidences, homeForm, awayForm, matchId, generatedAt } = input;
+
+  if (matchId === undefined) {
+    return emptyFeatures;
+  }
+
+  const features: Feature[] = [];
+  const homeXg = selectExpectedGoalsMetric(evidences, "home", "xg");
+  const awayXg = selectExpectedGoalsMetric(evidences, "away", "xg");
+  const homeXga = selectExpectedGoalsMetric(evidences, "home", "xga");
+  const awayXga = selectExpectedGoalsMetric(evidences, "away", "xga");
+
+  if (homeXg !== undefined) {
+    const quality = roundFeature(computeXgAttackQuality(homeXg.value));
+    features.push(
+      createFeature({
+        featureId: featureId(homeXg.evidenceId, "xgAttackQualityHome"),
+        matchId,
+        name: "xgAttackQualityHome",
+        value: quality,
+        explanation: `Attack quality ${quality} from EXPECTED_GOALS xG=${homeXg.value} (window=${homeXg.window}; Evidence ${homeXg.evidenceId}).`,
+        sourceEvidenceId: homeXg.evidenceId,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (awayXg !== undefined) {
+    const quality = roundFeature(computeXgAttackQuality(awayXg.value));
+    features.push(
+      createFeature({
+        featureId: featureId(awayXg.evidenceId, "xgAttackQualityAway"),
+        matchId,
+        name: "xgAttackQualityAway",
+        value: quality,
+        explanation: `Attack quality ${quality} from EXPECTED_GOALS xG=${awayXg.value} (window=${awayXg.window}; Evidence ${awayXg.evidenceId}).`,
+        sourceEvidenceId: awayXg.evidenceId,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (homeXga !== undefined) {
+    const quality = roundFeature(computeXgDefenseQuality(homeXga.value));
+    features.push(
+      createFeature({
+        featureId: featureId(homeXga.evidenceId, "xgDefenseQualityHome"),
+        matchId,
+        name: "xgDefenseQualityHome",
+        value: quality,
+        explanation: `Defensive quality ${quality} from EXPECTED_GOALS xGA=${homeXga.value} (window=${homeXga.window}; Evidence ${homeXga.evidenceId}).`,
+        sourceEvidenceId: homeXga.evidenceId,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (awayXga !== undefined) {
+    const quality = roundFeature(computeXgDefenseQuality(awayXga.value));
+    features.push(
+      createFeature({
+        featureId: featureId(awayXga.evidenceId, "xgDefenseQualityAway"),
+        matchId,
+        name: "xgDefenseQualityAway",
+        value: quality,
+        explanation: `Defensive quality ${quality} from EXPECTED_GOALS xGA=${awayXga.value} (window=${awayXga.window}; Evidence ${awayXga.evidenceId}).`,
+        sourceEvidenceId: awayXga.evidenceId,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (homeXg !== undefined && awayXg !== undefined) {
+    const dominance = computeXgDominance(homeXg.value, awayXg.value);
+    features.push(
+      createFeature({
+        featureId: featureId(homeXg.evidenceId, "xgDominance"),
+        matchId,
+        name: "xgDominance",
+        value: dominance,
+        explanation: `xG dominance ${dominance} = home xG ${homeXg.value} minus away xG ${awayXg.value} (provider Expected Goals only).`,
+        sourceEvidenceId: homeXg.evidenceId,
+        generatedAt,
+      }),
+    );
+  }
+
+  const finishingSides = [
+    {
+      side: "home" as const,
+      form: homeForm,
+      xg: homeXg,
+      name: "finishingEfficiencyHome" as const,
+    },
+    {
+      side: "away" as const,
+      form: awayForm,
+      xg: awayXg,
+      name: "finishingEfficiencyAway" as const,
+    },
+  ];
+
+  for (const side of finishingSides) {
+    if (side.form === undefined || side.xg === undefined) {
+      continue;
+    }
+
+    const goalsRate =
+      asFiniteNumber(side.form.payload.goalsScoredPerMatch) ??
+      (() => {
+        const goalsFor = asNumberArray(side.form.payload.goalsFor);
+        return goalsFor === undefined || goalsFor.length === 0
+          ? undefined
+          : goalsFor.reduce((sum, value) => sum + value, 0) / goalsFor.length;
+      })();
+
+    if (goalsRate === undefined) {
+      continue;
+    }
+
+    const finishing = roundFeature(
+      computeFinishingEfficiency(goalsRate, side.xg.value),
+    );
+    features.push(
+      createFeature({
+        featureId: featureId(side.xg.evidenceId, side.name),
+        matchId,
+        name: side.name,
+        value: finishing,
+        explanation: `Finishing efficiency ${finishing} from goalsPerMatch=${goalsRate} vs xG=${side.xg.value} (Evidence ${side.xg.evidenceId} + ${side.form.id}).`,
+        sourceEvidenceId: side.xg.evidenceId,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
 function findSideEvidence(
   evidences: readonly Evidence[],
   type: "STATISTICS" | "TEAM_FORM",
@@ -489,6 +723,16 @@ export class FeatureExtractor {
 
     let missingFootballEvidence = false;
 
+    features.push(
+      ...extractExpectedGoalsFeatures({
+        evidences,
+        homeForm,
+        awayForm,
+        matchId,
+        generatedAt,
+      }),
+    );
+
     for (const side of sides) {
       if (side.stats !== undefined) {
         features.push(
@@ -509,8 +753,13 @@ export class FeatureExtractor {
       const windowMatches = asFiniteNumber(side.stats.payload.windowMatches);
       const shotsFor = asFiniteNumber(side.stats.payload.shotsForPerMatch);
       const shotsAgainst = asFiniteNumber(side.stats.payload.shotsAgainstPerMatch);
-      const xgFor = asFiniteNumber(side.stats.payload.xgForPerMatch);
-      const xgAgainst = asFiniteNumber(side.stats.payload.xgAgainstPerMatch);
+      const statsXgFor = asFiniteNumber(side.stats.payload.xgForPerMatch);
+      const statsXgAgainst = asFiniteNumber(side.stats.payload.xgAgainstPerMatch);
+      const trueXgFor = selectExpectedGoalsMetric(evidences, side.side, "xg");
+      const trueXgAgainst = selectExpectedGoalsMetric(evidences, side.side, "xga");
+      // Prefer provider EXPECTED_GOALS when present; never invent from shots.
+      const xgFor = trueXgFor?.value ?? statsXgFor;
+      const xgAgainst = trueXgAgainst?.value ?? statsXgAgainst;
       const goalsFor = asNumberArray(side.form.payload.goalsFor);
       const goalsAgainst = asNumberArray(side.form.payload.goalsAgainst);
       const results = asResultCodes(side.form.payload.results);

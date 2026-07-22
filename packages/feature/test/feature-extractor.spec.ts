@@ -433,9 +433,237 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.f12b.advstats");
+    expect(bundle.featureModelVersion).toBe("feature.v2.f13b.xg");
     expect(
       bundle.features.some((feature) => feature.name === "availabilityPenaltyAway"),
+    ).toBe(false);
+  });
+
+  it("extracts xG Features from EXPECTED_GOALS Evidence without fabricating", () => {
+    const matchInfo = makeEvidence();
+    const matchId = createMatchId("match-1");
+    const homeForm = createEvidence({
+      id: "evidence-form-home",
+      source: "fixture",
+      sourceId: "fixture-match-1-form-home",
+      type: "TEAM_FORM",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "home",
+        results: ["W", "W", "D", "W", "L"],
+        goalsFor: [2, 1, 1, 3, 0],
+        goalsAgainst: [0, 0, 1, 1, 2],
+        goalsScoredPerMatch: 1.4,
+        goalsConcededPerMatch: 0.8,
+      },
+    });
+    const awayForm = createEvidence({
+      id: "evidence-form-away",
+      source: "fixture",
+      sourceId: "fixture-match-1-form-away",
+      type: "TEAM_FORM",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "away",
+        results: ["L", "D", "L", "W", "L"],
+        goalsFor: [0, 1, 0, 2, 1],
+        goalsAgainst: [2, 1, 3, 1, 2],
+        goalsScoredPerMatch: 0.8,
+        goalsConcededPerMatch: 1.8,
+      },
+    });
+    const sideStats = (side: "away" | "home", id: string): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "STATISTICS",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          teamSide: side,
+          windowMatches: 5,
+          shotsForPerMatch: side === "home" ? 14 : 10,
+          shotsAgainstPerMatch: side === "home" ? 9 : 13,
+          xgForPerMatch: 0,
+          xgAgainstPerMatch: 0,
+        },
+      });
+    const expectedGoals = (
+      side: "away" | "home",
+      id: string,
+      xg: number,
+      xga: number,
+    ): Evidence =>
+      createEvidence({
+        id,
+        source: "api-football",
+        sourceId: `${id}-source`,
+        type: "EXPECTED_GOALS",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "recorded-snapshot",
+        },
+        payload: {
+          teamId: side === "home" ? "10" : "20",
+          teamName: side === "home" ? "Home FC" : "Away FC",
+          teamSide: side,
+          window: "overall",
+          metrics: { xg, xga },
+          observedAt: "2026-08-01T19:30:00Z",
+        },
+      });
+
+    const bundle = new FeatureExtractor().extractBundle([
+      matchInfo,
+      homeForm,
+      awayForm,
+      sideStats("home", "evidence-stats-home"),
+      sideStats("away", "evidence-stats-away"),
+      expectedGoals("home", "evidence-xg-home", 1.6, 1.0),
+      expectedGoals("away", "evidence-xg-away", 1.1, 1.5),
+    ]);
+
+    expect(bundle.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "xgAttackQualityHome",
+          sourceEvidenceId: "evidence-xg-home",
+        }),
+        expect.objectContaining({
+          name: "xgAttackQualityAway",
+          sourceEvidenceId: "evidence-xg-away",
+        }),
+        expect.objectContaining({
+          name: "xgDefenseQualityHome",
+          sourceEvidenceId: "evidence-xg-home",
+        }),
+        expect.objectContaining({
+          name: "xgDominance",
+          value: 0.5,
+        }),
+        expect.objectContaining({
+          name: "finishingEfficiencyHome",
+          sourceEvidenceId: "evidence-xg-home",
+        }),
+      ]),
+    );
+    expect(bundle.featureModelVersion).toBe("feature.v2.f13b.xg");
+  });
+
+  it("keeps xG Features absent when EXPECTED_GOALS Evidence is missing", () => {
+    const matchInfo = makeEvidence();
+    const matchId = createMatchId("match-1");
+    const homeForm = createEvidence({
+      id: "evidence-form-home",
+      source: "fixture",
+      sourceId: "fixture-match-1-form-home",
+      type: "TEAM_FORM",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "home",
+        results: ["W"],
+        goalsFor: [1],
+        goalsAgainst: [0],
+      },
+    });
+    const awayForm = createEvidence({
+      id: "evidence-form-away",
+      source: "fixture",
+      sourceId: "fixture-match-1-form-away",
+      type: "TEAM_FORM",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "away",
+        results: ["L"],
+        goalsFor: [0],
+        goalsAgainst: [1],
+      },
+    });
+    const sideStats = (side: "away" | "home", id: string): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "STATISTICS",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          teamSide: side,
+          windowMatches: 1,
+          shotsForPerMatch: 10,
+          shotsAgainstPerMatch: 10,
+          xgForPerMatch: 0,
+          xgAgainstPerMatch: 0,
+        },
+      });
+
+    const bundle = new FeatureExtractor().extractBundle([
+      matchInfo,
+      homeForm,
+      awayForm,
+      sideStats("home", "evidence-stats-home"),
+      sideStats("away", "evidence-stats-away"),
+    ]);
+
+    expect(bundle.features.some((feature) => feature.name.startsWith("xg"))).toBe(
+      false,
+    );
+    expect(
+      bundle.features.some((feature) =>
+        feature.name.startsWith("finishingEfficiency"),
+      ),
     ).toBe(false);
   });
 

@@ -22,6 +22,8 @@ export type FeatureName =
   | "defenseRatingHome"
   | "disciplineRiskAway"
   | "disciplineRiskHome"
+  | "finishingEfficiencyAway"
+  | "finishingEfficiencyHome"
   | "formAtHomeAway"
   | "formAtHomeHome"
   | "formOnRoadAway"
@@ -48,7 +50,12 @@ export type FeatureName =
   | "recentFormHome"
   | "recentFormShortAway"
   | "recentFormShortHome"
-  | "venueAdvantage";
+  | "venueAdvantage"
+  | "xgAttackQualityAway"
+  | "xgAttackQualityHome"
+  | "xgDefenseQualityAway"
+  | "xgDefenseQualityHome"
+  | "xgDominance";
 
 export interface FeatureDto {
   readonly featureId: string;
@@ -86,7 +93,13 @@ export type RuleName =
   | "MOMENTUM_AWAY"
   | "MOMENTUM_HOME"
   | "POSSESSION_AWAY_EDGE"
-  | "POSSESSION_HOME_EDGE";
+  | "POSSESSION_HOME_EDGE"
+  | "XG_ATTACK_AWAY_EDGE"
+  | "XG_ATTACK_HOME_EDGE"
+  | "XG_DEFENSIVE_AWAY_EDGE"
+  | "XG_DEFENSIVE_EDGE"
+  | "XG_DOMINANCE"
+  | "XG_DOMINANCE_AWAY";
 
 export type RuleStatus = "FAIL" | "INAPPLICABLE" | "PASS";
 

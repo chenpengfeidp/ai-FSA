@@ -38,6 +38,12 @@ const P1_CHANNEL_RULES = new Set([
   "CHANCE_CREATION_AWAY_EDGE",
   "DISCIPLINE_AWAY_RISK",
   "DISCIPLINE_HOME_RISK",
+  "XG_ATTACK_HOME_EDGE",
+  "XG_ATTACK_AWAY_EDGE",
+  "XG_DEFENSIVE_EDGE",
+  "XG_DEFENSIVE_AWAY_EDGE",
+  "XG_DOMINANCE",
+  "XG_DOMINANCE_AWAY",
   "DEFENSE_HOME_STABLE",
   "DEFENSE_AWAY_STABLE",
   "DEFENSE_HOME_FRAGILE",
@@ -124,10 +130,64 @@ function evidenceCompleteness(evidences: readonly Evidence[]): number {
         evidence.payload.teamSide === "away" &&
         evidence.payload.advanced !== undefined,
     ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "EXPECTED_GOALS" && evidence.payload.teamSide === "home",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "EXPECTED_GOALS" && evidence.payload.teamSide === "away",
+    ),
   ];
   const present = checks.filter(Boolean).length;
 
   return roundScore((present / checks.length) * 100);
+}
+
+/**
+ * F1.3B: boost agreement when Expected Goals and Advanced Statistics
+ * support the same football conclusion (same channel).
+ */
+function xgAdvancedAgreementBonus(ruleResults: readonly RuleResult[]): number {
+  const passed = new Set(
+    ruleResults
+      .filter((rule) => rule.status === "PASS")
+      .map((rule) => rule.ruleName),
+  );
+
+  let bonus = 0;
+
+  if (
+    passed.has("XG_ATTACK_HOME_EDGE") &&
+    (passed.has("ATTACK_EFFICIENCY_HOME_EDGE") ||
+      passed.has("CHANCE_CREATION_HOME_EDGE"))
+  ) {
+    bonus += 4;
+  }
+
+  if (
+    passed.has("XG_ATTACK_AWAY_EDGE") &&
+    (passed.has("ATTACK_EFFICIENCY_AWAY_EDGE") ||
+      passed.has("CHANCE_CREATION_AWAY_EDGE"))
+  ) {
+    bonus += 4;
+  }
+
+  if (
+    passed.has("XG_DOMINANCE") &&
+    (passed.has("ATTACK_EFFICIENCY_HOME_EDGE") || passed.has("POSSESSION_HOME_EDGE"))
+  ) {
+    bonus += 2;
+  }
+
+  if (
+    passed.has("XG_DOMINANCE_AWAY") &&
+    (passed.has("ATTACK_EFFICIENCY_AWAY_EDGE") || passed.has("POSSESSION_AWAY_EDGE"))
+  ) {
+    bonus += 2;
+  }
+
+  return Math.min(bonus, 8);
 }
 
 function ruleAgreement(ruleResults: readonly RuleResult[]): {
@@ -170,6 +230,8 @@ export function computeIntelligenceConfidence(input: {
   const matchId = createMatchId(input.matchId);
   const completeness = evidenceCompleteness(input.evidenceSet);
   const { agreement, contradictionPenalty } = ruleAgreement(input.ruleResults);
+  const agreementBonus = xgAdvancedAgreementBonus(input.ruleResults);
+  const boostedAgreement = roundScore(clamp(agreement + agreementBonus, 0, 100));
   const concentration = input.scenarios.mostLikely.probability * 100;
   const availabilityUnknown = input.ruleResults.some(
     (rule) =>
@@ -184,7 +246,7 @@ export function computeIntelligenceConfidence(input: {
   let predictionConfidence = roundScore(
     clamp(
       0.35 * completeness +
-        0.35 * agreement +
+        0.35 * boostedAgreement +
         0.3 * concentration -
         contradictionPenalty,
       0,
@@ -241,6 +303,27 @@ export function computeIntelligenceConfidence(input: {
     );
   }
 
+  const hasXgHome = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "EXPECTED_GOALS" && evidence.payload.teamSide === "home",
+  );
+  const hasXgAway = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "EXPECTED_GOALS" && evidence.payload.teamSide === "away",
+  );
+
+  if (!hasXgHome || !hasXgAway) {
+    limitations.push(
+      "EXPECTED_GOALS Evidence incomplete; xG attack/defense/dominance Features may be absent (never estimated from shots).",
+    );
+  }
+
+  if (agreementBonus > 0) {
+    limitations.push(
+      `xG and Advanced Statistics agreement bonus +${String(agreementBonus)} applied when both support the same football conclusion.`,
+    );
+  }
+
   if (input.scenarios.residualMass > 0.05) {
     limitations.push(
       `Scenario trio residual mass ${input.scenarios.residualMass.toFixed(3)} outside top covered worlds.`,
@@ -257,7 +340,7 @@ export function computeIntelligenceConfidence(input: {
       confidenceBand,
       upsetRisk,
       evidenceCompleteness: completeness,
-      ruleAgreement: agreement,
+      ruleAgreement: boostedAgreement,
       limitations: frozenLimitations,
     }),
   );
@@ -269,7 +352,7 @@ export function computeIntelligenceConfidence(input: {
     confidenceBand,
     upsetRisk,
     evidenceCompleteness: completeness,
-    ruleAgreement: agreement,
+    ruleAgreement: boostedAgreement,
     limitations: frozenLimitations,
     checksum,
   });

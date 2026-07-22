@@ -17,6 +17,8 @@ export type FeatureName =
   | "defenseRatingHome"
   | "disciplineRiskAway"
   | "disciplineRiskHome"
+  | "finishingEfficiencyAway"
+  | "finishingEfficiencyHome"
   | "formAtHomeAway"
   | "formAtHomeHome"
   | "formOnRoadAway"
@@ -43,7 +45,12 @@ export type FeatureName =
   | "recentFormHome"
   | "recentFormShortAway"
   | "recentFormShortHome"
-  | "venueAdvantage";
+  | "venueAdvantage"
+  | "xgAttackQualityAway"
+  | "xgAttackQualityHome"
+  | "xgDefenseQualityAway"
+  | "xgDefenseQualityHome"
+  | "xgDominance";
 
 export interface Feature {
   readonly featureId: string;
@@ -88,6 +95,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "defenseRatingHome",
   "disciplineRiskAway",
   "disciplineRiskHome",
+  "finishingEfficiencyAway",
+  "finishingEfficiencyHome",
   "formAtHomeAway",
   "formAtHomeHome",
   "formOnRoadAway",
@@ -115,6 +124,11 @@ const featureNames: ReadonlySet<string> = new Set([
   "recentFormShortAway",
   "recentFormShortHome",
   "venueAdvantage",
+  "xgAttackQualityAway",
+  "xgAttackQualityHome",
+  "xgDefenseQualityAway",
+  "xgDefenseQualityHome",
+  "xgDominance",
 ]);
 const isoTimestampPattern =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;

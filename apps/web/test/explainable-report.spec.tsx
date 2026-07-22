@@ -98,7 +98,7 @@ const report: AnalysisReportDto = {
     },
   ],
   deterministic: {
-    projectionModelVersion: "projection.v2.slice1",
+    projectionModelVersion: "projection.v2.f13b.xg",
     matchId: "match-example-1",
     lambdaHome: 1.8,
     lambdaAway: 1.1,

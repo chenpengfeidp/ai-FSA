@@ -49,6 +49,8 @@ const FEATURE_LABELS: Readonly<Partial<Record<FeatureName, string>>> = Object.fr
     defenseRatingHome: "Home Defense Rating",
     disciplineRiskAway: "Away Discipline Risk (derived)",
     disciplineRiskHome: "Home Discipline Risk (derived)",
+    finishingEfficiencyAway: "Away Finishing Efficiency (derived)",
+    finishingEfficiencyHome: "Home Finishing Efficiency (derived)",
     formAtHomeAway: "Away Team Form At Home",
     formAtHomeHome: "Home Team Form At Home",
     formOnRoadAway: "Away Team Form On Road",
@@ -74,6 +76,11 @@ const FEATURE_LABELS: Readonly<Partial<Record<FeatureName, string>>> = Object.fr
     recentFormHome: "Home Recent Form",
     recentFormShortAway: "Away Short-Window Form",
     recentFormShortHome: "Home Short-Window Form",
+    xgAttackQualityAway: "Away Attack Quality xG (derived)",
+    xgAttackQualityHome: "Home Attack Quality xG (derived)",
+    xgDefenseQualityAway: "Away Defensive Quality xGA (derived)",
+    xgDefenseQualityHome: "Home Defensive Quality xGA (derived)",
+    xgDominance: "xG Dominance (derived)",
   },
 );
 
@@ -104,6 +111,12 @@ const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
   MOMENTUM_HOME: "Home Momentum Edge",
   POSSESSION_AWAY_EDGE: "Away Possession Edge",
   POSSESSION_HOME_EDGE: "Home Possession Edge",
+  XG_ATTACK_AWAY_EDGE: "Away xG Attack Edge",
+  XG_ATTACK_HOME_EDGE: "Home xG Attack Edge",
+  XG_DEFENSIVE_AWAY_EDGE: "Away xG Defensive Edge",
+  XG_DEFENSIVE_EDGE: "Home xG Defensive Edge",
+  XG_DOMINANCE: "Home xG Dominance",
+  XG_DOMINANCE_AWAY: "Away xG Dominance",
 });
 
 const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({

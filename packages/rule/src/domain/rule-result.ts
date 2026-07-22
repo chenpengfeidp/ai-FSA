@@ -41,7 +41,13 @@ export type RuleId =
   | "rule:signals-aligned-away:v1"
   | "rule:signals-aligned-home:v1"
   | "rule:venue-supports-home:v1"
-  | "rule:venue-unavailable:v1";
+  | "rule:venue-unavailable:v1"
+  | "rule:xg-attack-away-edge:v1"
+  | "rule:xg-attack-home-edge:v1"
+  | "rule:xg-defensive-away-edge:v1"
+  | "rule:xg-defensive-edge:v1"
+  | "rule:xg-dominance-away:v1"
+  | "rule:xg-dominance:v1";
 
 export type RuleName =
   | "AVAILABILITY_AWAY_HIT"
@@ -84,7 +90,13 @@ export type RuleName =
   | "SIGNALS_ALIGNED_AWAY"
   | "SIGNALS_ALIGNED_HOME"
   | "VENUE_SUPPORTS_HOME"
-  | "VENUE_UNAVAILABLE";
+  | "VENUE_UNAVAILABLE"
+  | "XG_ATTACK_AWAY_EDGE"
+  | "XG_ATTACK_HOME_EDGE"
+  | "XG_DEFENSIVE_AWAY_EDGE"
+  | "XG_DEFENSIVE_EDGE"
+  | "XG_DOMINANCE"
+  | "XG_DOMINANCE_AWAY";
 
 export type RuleStatus = "FAIL" | "INAPPLICABLE" | "PASS";
 
@@ -165,6 +177,12 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:signals-aligned-home:v1",
   "rule:venue-supports-home:v1",
   "rule:venue-unavailable:v1",
+  "rule:xg-attack-away-edge:v1",
+  "rule:xg-attack-home-edge:v1",
+  "rule:xg-defensive-away-edge:v1",
+  "rule:xg-defensive-edge:v1",
+  "rule:xg-dominance-away:v1",
+  "rule:xg-dominance:v1",
 ]);
 const ruleNames: ReadonlySet<string> = new Set([
   "ATTACK_EFFICIENCY_AWAY_EDGE",
@@ -208,6 +226,12 @@ const ruleNames: ReadonlySet<string> = new Set([
   "SIGNALS_ALIGNED_HOME",
   "VENUE_SUPPORTS_HOME",
   "VENUE_UNAVAILABLE",
+  "XG_ATTACK_AWAY_EDGE",
+  "XG_ATTACK_HOME_EDGE",
+  "XG_DEFENSIVE_AWAY_EDGE",
+  "XG_DEFENSIVE_EDGE",
+  "XG_DOMINANCE",
+  "XG_DOMINANCE_AWAY",
 ]);
 const ruleStatuses: ReadonlySet<string> = new Set(["FAIL", "INAPPLICABLE", "PASS"]);
 const ruleChannels: ReadonlySet<string> = new Set(["away+", "home+", "none"]);

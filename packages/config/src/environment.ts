@@ -34,6 +34,10 @@ export interface FootballDataProviderConfig {
   readonly baseUrl: string;
   /** API-Football league ids; undefined → provider default catalog. */
   readonly leagueIds: readonly number[] | undefined;
+  /** Per-request timeout for live API-Football HTTP calls (ms). */
+  readonly timeoutMs: number;
+  /** Extra attempts after the first live HTTP failure (0 = single try). */
+  readonly maxRetries: number;
 }
 
 export interface CalibrationConfig {
@@ -120,6 +124,15 @@ const apiFootballBaseUrlSchema = z
 
 const footballDataLeagueIdsSchema = z.string().optional();
 
+const apiFootballTimeoutMsSchema = z.coerce
+  .number()
+  .int()
+  .min(1000)
+  .max(120_000)
+  .default(10_000);
+
+const apiFootballMaxRetriesSchema = z.coerce.number().int().min(0).max(5).default(2);
+
 const calibrationArtifactModeSchema = z
   .enum(["identity", "population_demo_v1"])
   .default("population_demo_v1");
@@ -152,6 +165,8 @@ const apiEnvironmentSchema = z
     API_FOOTBALL_KEY: apiFootballKeySchema,
     API_FOOTBALL_BASE_URL: apiFootballBaseUrlSchema,
     FOOTBALL_DATA_LEAGUE_IDS: footballDataLeagueIdsSchema,
+    API_FOOTBALL_TIMEOUT_MS: apiFootballTimeoutMsSchema,
+    API_FOOTBALL_MAX_RETRIES: apiFootballMaxRetriesSchema,
     CALIBRATION_ARTIFACT: calibrationArtifactModeSchema,
     DATABASE_URL: databaseUrlSchema,
     DATABASE_CLIENT_MODE: databaseClientModeSchema,
@@ -279,6 +294,17 @@ function issueDetails(variable: string): Readonly<{
         code: "INVALID_FOOTBALL_DATA_LEAGUE_IDS",
         message:
           "FOOTBALL_DATA_LEAGUE_IDS must be a comma-separated list of positive integers.",
+      };
+    case "API_FOOTBALL_TIMEOUT_MS":
+      return {
+        code: "INVALID_API_FOOTBALL_TIMEOUT_MS",
+        message:
+          "API_FOOTBALL_TIMEOUT_MS must be an integer from 1000 through 120000.",
+      };
+    case "API_FOOTBALL_MAX_RETRIES":
+      return {
+        code: "INVALID_API_FOOTBALL_MAX_RETRIES",
+        message: "API_FOOTBALL_MAX_RETRIES must be an integer from 0 through 5.",
       };
     case "CALIBRATION_ARTIFACT":
       return {
@@ -450,6 +476,8 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
           : undefined,
       baseUrl: parsed.API_FOOTBALL_BASE_URL,
       leagueIds,
+      timeoutMs: parsed.API_FOOTBALL_TIMEOUT_MS,
+      maxRetries: parsed.API_FOOTBALL_MAX_RETRIES,
     }),
     calibration: Object.freeze({
       artifactMode: parsed.CALIBRATION_ARTIFACT,

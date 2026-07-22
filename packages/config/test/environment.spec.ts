@@ -39,6 +39,8 @@ describe("@fas/config environment loading", () => {
         apiKey: undefined,
         baseUrl: "https://v3.football.api-sports.io",
         leagueIds: undefined,
+        timeoutMs: 10_000,
+        maxRetries: 2,
       },
       calibration: {
         artifactMode: "population_demo_v1",
@@ -91,6 +93,8 @@ describe("@fas/config environment loading", () => {
         apiKey: undefined,
         baseUrl: "https://v3.football.api-sports.io",
         leagueIds: undefined,
+        timeoutMs: 10_000,
+        maxRetries: 2,
       },
       calibration: {
         artifactMode: "population_demo_v1",
@@ -140,6 +144,8 @@ describe("@fas/config environment loading", () => {
         apiKey: undefined,
         baseUrl: "https://v3.football.api-sports.io",
         leagueIds: undefined,
+        timeoutMs: 10_000,
+        maxRetries: 2,
       },
       calibration: {
         artifactMode: "identity",
@@ -166,7 +172,42 @@ describe("@fas/config environment loading", () => {
       apiKey: "football-key",
       baseUrl: "https://v3.football.api-sports.io",
       leagueIds: [292, 98],
+      timeoutMs: 10_000,
+      maxRetries: 2,
     });
+  });
+
+  it("loads live football timeout and retry overrides", () => {
+    expect(
+      loadApiConfig({
+        FOOTBALL_DATA_PROVIDER_MODE: "live",
+        API_FOOTBALL_KEY: "football-key",
+        API_FOOTBALL_TIMEOUT_MS: "15000",
+        API_FOOTBALL_MAX_RETRIES: "1",
+      }).footballDataProvider,
+    ).toMatchObject({
+      timeoutMs: 15_000,
+      maxRetries: 1,
+    });
+  });
+
+  it("rejects invalid API_FOOTBALL_TIMEOUT_MS", () => {
+    const error = captureConfigurationError(() =>
+      loadApiConfig({
+        FOOTBALL_DATA_PROVIDER_MODE: "live",
+        API_FOOTBALL_KEY: "football-key",
+        API_FOOTBALL_TIMEOUT_MS: "50",
+      }),
+    );
+
+    expect(error.issues).toEqual([
+      {
+        variable: "API_FOOTBALL_TIMEOUT_MS",
+        code: "INVALID_API_FOOTBALL_TIMEOUT_MS",
+        message:
+          "API_FOOTBALL_TIMEOUT_MS must be an integer from 1000 through 120000.",
+      },
+    ]);
   });
 
   it("rejects live football data mode without API_FOOTBALL_KEY", () => {

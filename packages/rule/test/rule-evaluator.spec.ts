@@ -199,6 +199,121 @@ describe("RuleEvaluator", () => {
     ]);
   });
 
+  it("evaluates venue, form, and availability rules for the intelligence MVP", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      createFeature({
+        featureId: "feature:evidence-1:recentFormHome",
+        matchId: createMatchId("match-1"),
+        name: "recentFormHome",
+        value: 80,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:recentFormAway",
+        matchId: createMatchId("match-1"),
+        name: "recentFormAway",
+        value: 40,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:venueAdvantage",
+        matchId: createMatchId("match-1"),
+        name: "venueAdvantage",
+        value: 8,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:availabilityPenaltyHome",
+        matchId: createMatchId("match-1"),
+        name: "availabilityPenaltyHome",
+        value: 16,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:availabilityPenaltyAway",
+        matchId: createMatchId("match-1"),
+        name: "availabilityPenaltyAway",
+        value: 0,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "FORM_HOME_SUPERIOR",
+            "FORM_AWAY_SUPERIOR",
+            "VENUE_SUPPORTS_HOME",
+            "VENUE_UNAVAILABLE",
+            "AVAILABILITY_HOME_HIT",
+            "AVAILABILITY_AWAY_HIT",
+            "AVAILABILITY_HOME_UNKNOWN",
+            "AVAILABILITY_AWAY_UNKNOWN",
+          ].includes(result.ruleName),
+        )
+        .map(({ ruleName, status, channel }) => ({
+          ruleName,
+          status,
+          channel,
+        })),
+    ).toEqual([
+      {
+        ruleName: "FORM_HOME_SUPERIOR",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "FORM_AWAY_SUPERIOR",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "VENUE_SUPPORTS_HOME",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "VENUE_UNAVAILABLE",
+        status: "FAIL",
+        channel: "none",
+      },
+      {
+        ruleName: "AVAILABILITY_HOME_HIT",
+        status: "PASS",
+        channel: "away+",
+      },
+      {
+        ruleName: "AVAILABILITY_AWAY_HIT",
+        status: "FAIL",
+        channel: "home+",
+      },
+      {
+        ruleName: "AVAILABILITY_HOME_UNKNOWN",
+        status: "FAIL",
+        channel: "none",
+      },
+      {
+        ruleName: "AVAILABILITY_AWAY_UNKNOWN",
+        status: "FAIL",
+        channel: "none",
+      },
+    ]);
+  });
+
   it("evaluates Asian handicap market rules when AH lean is present", () => {
     const results = new RuleEvaluator().evaluate([
       ...allFeatures(),

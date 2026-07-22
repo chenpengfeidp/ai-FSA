@@ -238,6 +238,152 @@ describe("FeatureExtractor", () => {
     );
   });
 
+  it("extracts venueAdvantage, recentForm, and availabilityPenalty for the intelligence MVP", () => {
+    const matchId = createMatchId("match-1");
+    const matchInfo = makeEvidence();
+    const homeForm = createEvidence({
+      id: "evidence-form-home",
+      source: "fixture",
+      sourceId: "fixture-match-1-form-home",
+      type: "TEAM_FORM",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "home",
+        results: ["W", "W", "D", "W", "L"],
+        goalsFor: [2, 1, 1, 3, 0],
+        goalsAgainst: [0, 0, 1, 1, 2],
+      },
+    });
+    const awayForm = createEvidence({
+      id: "evidence-form-away",
+      source: "fixture",
+      sourceId: "fixture-match-1-form-away",
+      type: "TEAM_FORM",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "away",
+        results: ["L", "D", "L", "W", "L"],
+        goalsFor: [0, 1, 0, 2, 1],
+        goalsAgainst: [2, 1, 3, 1, 2],
+      },
+    });
+    const sideStats = (side: "away" | "home", id: string): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "STATISTICS",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          teamSide: side,
+          windowMatches: 5,
+          shotsForPerMatch: side === "home" ? 14 : 10,
+          shotsAgainstPerMatch: side === "home" ? 9 : 13,
+          xgForPerMatch: side === "home" ? 1.6 : 1.1,
+          xgAgainstPerMatch: side === "home" ? 1.0 : 1.5,
+        },
+      });
+    const venue = createEvidence({
+      id: "evidence-venue",
+      source: "fixture",
+      sourceId: "fixture-match-1-venue",
+      type: "VENUE",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        name: "Test Stadium",
+        city: "Test City",
+      },
+    });
+    const injury = createEvidence({
+      id: "evidence-injury-home",
+      source: "fixture",
+      sourceId: "fixture-match-1-injury-home",
+      type: "INJURY",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        teamSide: "home",
+        playerName: "Player A",
+        status: "out",
+      },
+    });
+
+    const bundle = new FeatureExtractor().extractBundle([
+      matchInfo,
+      homeForm,
+      awayForm,
+      sideStats("home", "evidence-stats-home"),
+      sideStats("away", "evidence-stats-away"),
+      venue,
+      injury,
+    ]);
+
+    expect(bundle.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "venueAdvantage",
+          value: 8,
+          sourceEvidenceId: "evidence-venue",
+        }),
+        expect.objectContaining({
+          name: "recentFormHome",
+          sourceEvidenceId: "evidence-form-home",
+        }),
+        expect.objectContaining({
+          name: "recentFormAway",
+          sourceEvidenceId: "evidence-form-away",
+        }),
+        expect.objectContaining({
+          name: "availabilityPenaltyHome",
+          value: 8,
+          sourceEvidenceId: "evidence-injury-home",
+        }),
+      ]),
+    );
+    expect(
+      bundle.features.some((feature) => feature.name === "availabilityPenaltyAway"),
+    ).toBe(false);
+  });
+
   it("extracts h2hLean and h2hSampleSize from HEAD_TO_HEAD evidence", () => {
     const matchInfo = makeEvidence();
     const headToHead = createEvidence({

@@ -1,11 +1,42 @@
 import { describe, expect, it } from "vitest";
 import {
   computeAsianHandicapLean,
+  computeAvailabilityPenalty,
   computeH2hLean,
   computeImpliedProbabilities,
   computeMarketLean,
+  computeRecentFormScore,
   shrink,
+  VENUE_ADVANTAGE_SCORE,
 } from "../src/extraction/feature-math.js";
+
+describe("intelligence MVP feature math", () => {
+  it("scores recent form from W/D/L in [0, 100]", () => {
+    expect(computeRecentFormScore(["W", "W", "W", "W", "W"])).toBe(100);
+    expect(computeRecentFormScore(["L", "L", "L", "L", "L"])).toBe(0);
+    expect(computeRecentFormScore(["W", "D", "L", "W", "D"])).toBe(60);
+    expect(computeRecentFormScore([])).toBe(0);
+  });
+
+  it("computes availability penalty from injury and suspension counts", () => {
+    expect(computeAvailabilityPenalty({ injuryCount: 1, suspensionCount: 0 })).toBe(
+      8,
+    );
+    expect(computeAvailabilityPenalty({ injuryCount: 0, suspensionCount: 1 })).toBe(
+      10,
+    );
+    expect(computeAvailabilityPenalty({ injuryCount: 2, suspensionCount: 1 })).toBe(
+      26,
+    );
+    expect(
+      computeAvailabilityPenalty({ injuryCount: 10, suspensionCount: 10 }),
+    ).toBe(40);
+  });
+
+  it("exposes a fixed venue advantage score when VENUE Evidence is present", () => {
+    expect(VENUE_ADVANTAGE_SCORE).toBe(8);
+  });
+});
 
 describe("computeH2hLean", () => {
   it("returns 0 for an empty meeting list", () => {

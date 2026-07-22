@@ -7,6 +7,8 @@ import type {
 } from "../types/analysis";
 import type { EvidenceDto, EvidenceType } from "../types/evidence";
 import type {
+  AdvancedStatisticsContextView,
+  AdvancedTeamStatisticsView,
   AvailabilityAbsenceItemView,
   AvailabilitySummaryView,
   ConfidenceLevel,
@@ -447,6 +449,88 @@ function mapTeamLineup(item: EvidenceDto): TeamLineupView | null {
   });
 }
 
+function optionalNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function mapAdvancedTeamStatistics(
+  item: EvidenceDto,
+): AdvancedTeamStatisticsView | null {
+  if (item.type !== "STATISTICS") {
+    return null;
+  }
+
+  const teamSide =
+    item.payload.teamSide === "home" || item.payload.teamSide === "away"
+      ? item.payload.teamSide
+      : null;
+
+  if (teamSide === null) {
+    return null;
+  }
+
+  const advancedRaw =
+    typeof item.payload.advanced === "object" &&
+    item.payload.advanced !== null &&
+    !Array.isArray(item.payload.advanced)
+      ? (item.payload.advanced as Record<string, unknown>)
+      : undefined;
+
+  if (
+    advancedRaw === undefined ||
+    (advancedRaw.scope !== "fixture" && advancedRaw.scope !== "season-average")
+  ) {
+    return null;
+  }
+
+  return Object.freeze({
+    teamSide,
+    scope: advancedRaw.scope,
+    shotsTotal: optionalNumber(advancedRaw.shotsTotal),
+    shotsOnTarget: optionalNumber(advancedRaw.shotsOnTarget),
+    shotsOffTarget: optionalNumber(advancedRaw.shotsOffTarget),
+    possessionPct: optionalNumber(advancedRaw.possessionPct),
+    corners: optionalNumber(advancedRaw.corners),
+    yellowCards: optionalNumber(advancedRaw.yellowCards),
+    redCards: optionalNumber(advancedRaw.redCards),
+    attacks: optionalNumber(advancedRaw.attacks),
+    dangerousAttacks: optionalNumber(advancedRaw.dangerousAttacks),
+    fouls: optionalNumber(advancedRaw.fouls),
+    saves: optionalNumber(advancedRaw.saves),
+    passingAccuracyPct: optionalNumber(advancedRaw.passingAccuracyPct),
+    shotsForPerMatch: optionalNumber(item.payload.shotsForPerMatch),
+    shotsAgainstPerMatch: optionalNumber(item.payload.shotsAgainstPerMatch),
+    providerId: item.providerId,
+    source: item.source,
+  });
+}
+
+function buildAdvancedStatisticsContext(
+  evidence: readonly EvidenceDto[],
+): AdvancedStatisticsContextView {
+  const rows = evidence
+    .map(mapAdvancedTeamStatistics)
+    .filter((item): item is AdvancedTeamStatisticsView => item !== null);
+  const home = rows.find((item) => item.teamSide === "home") ?? null;
+  const away = rows.find((item) => item.teamSide === "away") ?? null;
+
+  if (home === null && away === null) {
+    return Object.freeze({
+      available: false,
+      home: null,
+      away: null,
+      note: "Advanced STATISTICS Evidence is not available for this match (honest absence).",
+    });
+  }
+
+  return Object.freeze({
+    available: true,
+    home,
+    away,
+    note: "Advanced statistics are provider measurements only (F1.2a Evidence; not used by Rules or Projection).",
+  });
+}
+
 function buildLineupsContext(evidence: readonly EvidenceDto[]): LineupsContextView {
   const sheets = evidence
     .map(mapTeamLineup)
@@ -757,6 +841,7 @@ export function buildExplainableReportView(
   const refereeContext = buildRefereeContext(evidence);
   const playersContext = buildPlayersContext(evidence);
   const lineupsContext = buildLineupsContext(evidence);
+  const advancedStatisticsContext = buildAdvancedStatisticsContext(evidence);
   const availabilityContext = buildAvailabilitySummary(evidence);
 
   return Object.freeze({
@@ -772,6 +857,7 @@ export function buildExplainableReportView(
     referee: refereeContext,
     players: playersContext,
     lineups: lineupsContext,
+    advancedStatistics: advancedStatisticsContext,
     availability: availabilityContext,
     winnerPrediction,
     mostLikelyScore,

@@ -10,6 +10,7 @@ import { FinalRecommendation } from "./final-recommendation";
 import { PredictionHero } from "./prediction-hero";
 import { ReasoningSection } from "./reasoning-section";
 import { RuleEvaluationSection } from "./rule-evaluation-section";
+import { AdvancedStatisticsContextSection } from "./advanced-statistics-context";
 import { AvailabilityContextSection } from "./availability-context";
 import { LineupContextSection } from "./lineup-context";
 import { PlayersContextSection } from "./player-context";
@@ -57,6 +58,10 @@ export function ExplainableMatchReport({
 
       <WorkspaceSection id="lineups">
         <LineupContextSection lineups={view.lineups} />
+      </WorkspaceSection>
+
+      <WorkspaceSection id="advanced-statistics">
+        <AdvancedStatisticsContextSection statistics={view.advancedStatistics} />
       </WorkspaceSection>
 
       <WorkspaceSection id="availability">

@@ -100,7 +100,22 @@
         "xgForPerMatch": 0,
         "xgAgainstPerMatch": 0,
         "providerMethod": "recorded-snapshot",
-        "statsBasis": "shots"
+        "statsBasis": "shots",
+        "advanced": {
+          "scope": "fixture",
+          "shotsTotal": 14,
+          "shotsOnTarget": 6,
+          "shotsOffTarget": 5,
+          "possessionPct": 54,
+          "corners": 7,
+          "yellowCards": 2,
+          "redCards": 0,
+          "attacks": 98,
+          "dangerousAttacks": 52,
+          "fouls": 11,
+          "saves": 3,
+          "passingAccuracyPct": 82
+        }
       },
       "awayStats": {
         "teamId": "2765",
@@ -112,7 +127,22 @@
         "xgForPerMatch": 0,
         "xgAgainstPerMatch": 0,
         "providerMethod": "recorded-snapshot",
-        "statsBasis": "shots"
+        "statsBasis": "shots",
+        "advanced": {
+          "scope": "fixture",
+          "shotsTotal": 11,
+          "shotsOnTarget": 4,
+          "shotsOffTarget": 5,
+          "possessionPct": 46,
+          "corners": 4,
+          "yellowCards": 3,
+          "redCards": 0,
+          "attacks": 86,
+          "dangerousAttacks": 41,
+          "fouls": 14,
+          "saves": 5,
+          "passingAccuracyPct": 78
+        }
       },
       "headToHead": {
         "homeTeamId": "2766",

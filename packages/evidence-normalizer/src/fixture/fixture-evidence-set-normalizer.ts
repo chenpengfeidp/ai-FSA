@@ -276,6 +276,104 @@ function parseTeamForm(
   }
 }
 
+type AdvancedStatisticsPayload = Readonly<{
+  scope: "fixture" | "season-average";
+  shotsTotal?: number;
+  shotsOnTarget?: number;
+  shotsOffTarget?: number;
+  possessionPct?: number;
+  corners?: number;
+  yellowCards?: number;
+  redCards?: number;
+  attacks?: number;
+  dangerousAttacks?: number;
+  fouls?: number;
+  saves?: number;
+  passingAccuracyPct?: number;
+}>;
+
+function parseOptionalNonNegativeNumber(
+  value: unknown,
+  field: string,
+): Result<number | undefined, EvidenceNormalizationError> {
+  if (value === undefined) {
+    return success(undefined);
+  }
+
+  return requireNonNegativeNumber(value, field);
+}
+
+/**
+ * F1.2a: optional advanced STATISTICS measurements.
+ * Absent object → honest absence. Present object must declare scope.
+ * Never invent metrics; only copy provider-supplied non-negative numbers.
+ */
+function parseOptionalAdvancedStatistics(
+  value: unknown,
+): Result<AdvancedStatisticsPayload | undefined, EvidenceNormalizationError> {
+  if (value === undefined) {
+    return success(undefined);
+  }
+
+  if (!isRecord(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "advanced statistics must be an object when present.",
+      "advanced",
+    );
+  }
+
+  if (value.scope !== "fixture" && value.scope !== "season-average") {
+    return failure(
+      "INVALID_FIELD",
+      'advanced.scope must be "fixture" or "season-average".',
+      "advanced.scope",
+    );
+  }
+
+  const metricFields = [
+    "shotsTotal",
+    "shotsOnTarget",
+    "shotsOffTarget",
+    "possessionPct",
+    "corners",
+    "yellowCards",
+    "redCards",
+    "attacks",
+    "dangerousAttacks",
+    "fouls",
+    "saves",
+    "passingAccuracyPct",
+  ] as const;
+
+  const metrics: {
+    -readonly [K in (typeof metricFields)[number]]?: number;
+  } = {};
+
+  for (const field of metricFields) {
+    const parsed = parseOptionalNonNegativeNumber(value[field], `advanced.${field}`);
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    if (parsed.value !== undefined) {
+      metrics[field] = parsed.value;
+    }
+  }
+
+  if (Object.keys(metrics).length === 0) {
+    return success(undefined);
+  }
+
+  return success(
+    Object.freeze({
+      scope: value.scope,
+      ...metrics,
+    }),
+  );
+}
+
 function parseStatistics(
   value: unknown,
   matchId: string,
@@ -332,6 +430,12 @@ function parseStatistics(
     numbers[field] = parsed.value;
   }
 
+  const advanced = parseOptionalAdvancedStatistics(value.advanced);
+
+  if (!advanced.ok) {
+    return advanced;
+  }
+
   const provenanceOverlay = parseProviderProvenanceOverlay(value);
 
   if (!provenanceOverlay.ok) {
@@ -369,6 +473,7 @@ function parseStatistics(
           teamSide,
           windowMatches: value.windowMatches,
           ...numbers,
+          ...(advanced.value === undefined ? {} : { advanced: advanced.value }),
         },
       }),
     );

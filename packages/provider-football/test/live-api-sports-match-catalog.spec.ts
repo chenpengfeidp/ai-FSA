@@ -116,8 +116,40 @@ function createLiveFetch(): typeof fetch {
             shots: {
               on: { total: 20 },
               total: { total: 50 },
+              against: { total: 40 },
+            },
+            cards: {
+              yellow: { total: 10 },
+              red: { total: 1 },
             },
           },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    if (url.includes("/fixtures/statistics")) {
+      return new Response(
+        JSON.stringify({
+          response: [
+            {
+              team: { id: 10, name: "Home FC" },
+              statistics: [
+                { type: "Total Shots", value: 12 },
+                { type: "Shots on Goal", value: 5 },
+                { type: "Ball Possession", value: "58%" },
+                { type: "Corner Kicks", value: 6 },
+              ],
+            },
+            {
+              team: { id: 20, name: "Away FC" },
+              statistics: [
+                { type: "Total Shots", value: 8 },
+                { type: "Shots on Goal", value: 2 },
+                { type: "Ball Possession", value: "42%" },
+              ],
+            },
+          ],
         }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       );
@@ -198,6 +230,9 @@ describe("LiveApiSportsMatchCatalog", () => {
     expect(bundle.fixture.matchId).toBe("football:555001");
     expect(bundle.homeForm.window).toBeGreaterThan(0);
     expect(bundle.awayForm.window).toBeGreaterThan(0);
+    expect(bundle.homeStats.advanced?.scope).toBe("fixture");
+    expect(bundle.homeStats.advanced?.shotsOnTarget).toBe(5);
+    expect(bundle.homeStats.advanced?.possessionPct).toBe(58);
 
     const normalized = normalizeFixtureEvidenceSet(toEvidenceMatchShape(bundle), {
       collectedAt: "2026-07-17T10:00:00Z",

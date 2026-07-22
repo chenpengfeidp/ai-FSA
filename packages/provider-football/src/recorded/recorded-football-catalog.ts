@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
+  FootballAdvancedTeamStats,
   FootballAvailabilityAbsence,
   FootballBoardRow,
   FootballFormSplit,
@@ -85,6 +86,66 @@ function parseFormSplit(value: unknown): FootballFormSplit | undefined {
     results: Object.freeze(results),
     goalsFor: Object.freeze(goalsFor),
     goalsAgainst: Object.freeze(goalsAgainst),
+  });
+}
+
+function optionalFinite(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function parseAdvancedStats(value: unknown): FootballAdvancedTeamStats | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const scope =
+    value.scope === "fixture" || value.scope === "season-average"
+      ? value.scope
+      : undefined;
+
+  if (scope === undefined) {
+    return undefined;
+  }
+
+  const advanced = Object.freeze({
+    scope,
+    shotsTotal: optionalFinite(value.shotsTotal),
+    shotsOnTarget: optionalFinite(value.shotsOnTarget),
+    shotsOffTarget: optionalFinite(value.shotsOffTarget),
+    possessionPct: optionalFinite(value.possessionPct),
+    corners: optionalFinite(value.corners),
+    yellowCards: optionalFinite(value.yellowCards),
+    redCards: optionalFinite(value.redCards),
+    attacks: optionalFinite(value.attacks),
+    dangerousAttacks: optionalFinite(value.dangerousAttacks),
+    fouls: optionalFinite(value.fouls),
+    saves: optionalFinite(value.saves),
+    passingAccuracyPct: optionalFinite(value.passingAccuracyPct),
+  });
+
+  const hasAny = [
+    advanced.shotsTotal,
+    advanced.shotsOnTarget,
+    advanced.shotsOffTarget,
+    advanced.possessionPct,
+    advanced.corners,
+    advanced.yellowCards,
+    advanced.redCards,
+    advanced.attacks,
+    advanced.dangerousAttacks,
+    advanced.fouls,
+    advanced.saves,
+    advanced.passingAccuracyPct,
+  ].some((entry) => entry !== undefined);
+
+  return hasAny ? advanced : undefined;
+}
+
+function enrichTeamStats(raw: FootballTeamStats): FootballTeamStats {
+  const record = raw as unknown as FootballTeamStats & Record<string, unknown>;
+  return Object.freeze({
+    ...raw,
+    advanced: parseAdvancedStats(record.advanced),
   });
 }
 
@@ -282,8 +343,8 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
     fixture,
     homeForm,
     awayForm,
-    homeStats: Object.freeze({ ...homeStats }),
-    awayStats: Object.freeze({ ...awayStats }),
+    homeStats: enrichTeamStats(homeStats),
+    awayStats: enrichTeamStats(awayStats),
     headToHead: Object.freeze({ ...headToHead }),
     standings: standings === undefined ? undefined : Object.freeze({ ...standings }),
     players: Object.freeze(

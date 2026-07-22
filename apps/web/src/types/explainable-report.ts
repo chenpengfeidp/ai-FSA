@@ -107,6 +107,36 @@ export interface LineupsContextView {
   readonly note: string;
 }
 
+export type AdvancedStatsScope = "fixture" | "season-average";
+
+export interface AdvancedTeamStatisticsView {
+  readonly teamSide: "away" | "home";
+  readonly scope: AdvancedStatsScope;
+  readonly shotsTotal: number | null;
+  readonly shotsOnTarget: number | null;
+  readonly shotsOffTarget: number | null;
+  readonly possessionPct: number | null;
+  readonly corners: number | null;
+  readonly yellowCards: number | null;
+  readonly redCards: number | null;
+  readonly attacks: number | null;
+  readonly dangerousAttacks: number | null;
+  readonly fouls: number | null;
+  readonly saves: number | null;
+  readonly passingAccuracyPct: number | null;
+  readonly shotsForPerMatch: number | null;
+  readonly shotsAgainstPerMatch: number | null;
+  readonly providerId: string;
+  readonly source: string;
+}
+
+export interface AdvancedStatisticsContextView {
+  readonly available: boolean;
+  readonly home: AdvancedTeamStatisticsView | null;
+  readonly away: AdvancedTeamStatisticsView | null;
+  readonly note: string;
+}
+
 export interface WinnerPredictionView {
   readonly homeTeam: string;
   readonly awayTeam: string;
@@ -198,6 +228,7 @@ export interface ExplainableReportView {
   readonly referee: RefereeContextView;
   readonly players: PlayersContextView;
   readonly lineups: LineupsContextView;
+  readonly advancedStatistics: AdvancedStatisticsContextView;
   readonly availability: AvailabilitySummaryView;
   readonly winnerPrediction: WinnerPredictionView;
   readonly mostLikelyScore: MostLikelyScoreView;

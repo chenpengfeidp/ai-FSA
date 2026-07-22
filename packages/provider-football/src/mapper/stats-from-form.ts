@@ -27,5 +27,7 @@ export function statsFromFormGoals(form: FootballTeamForm): FootballTeamStats {
     xgAgainstPerMatch: 0,
     providerMethod: form.providerMethod,
     statsBasis: "goals-proxy-fallback" as const,
+    // Goals-proxy must not invent advanced statistics.
+    advanced: undefined,
   });
 }

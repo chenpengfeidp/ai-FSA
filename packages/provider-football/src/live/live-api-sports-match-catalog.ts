@@ -7,7 +7,11 @@ import { mapApiFootballInjuriesResponse } from "../mapper/map-api-football-injur
 import { mapApiFootballLineupsResponse } from "../mapper/map-api-football-lineups.js";
 import { mapApiFootballSquadResponse } from "../mapper/map-api-football-squad.js";
 import { mapApiFootballStandings } from "../mapper/map-api-football-standings.js";
-import { mapApiFootballTeamStats } from "../mapper/map-api-football-stats.js";
+import { mapApiFootballFixtureStatistics } from "../mapper/map-api-football-fixture-statistics.js";
+import {
+  mapApiFootballTeamStats,
+  withAdvancedStats,
+} from "../mapper/map-api-football-stats.js";
 import { statsFromFormGoals } from "../mapper/stats-from-form.js";
 import { FootballProviderError } from "./football-provider-error.js";
 import { API_SPORTS_FOOTBALL_BASE_URL } from "./live-api-sports-football-source.js";
@@ -118,6 +122,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       awaySquadBody,
       injuriesBody,
       lineupsBody,
+      fixtureStatsBody,
     ] = await Promise.all([
       // last=10 supplies venue-split samples; overall form still caps at 5.
       this.#getJson(
@@ -147,6 +152,10 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       this.#getJson(`/injuries?fixture=${encodeURIComponent(fixture.fixtureId)}`),
       this.#getJson(
         `/fixtures/lineups?fixture=${encodeURIComponent(fixture.fixtureId)}`,
+      ),
+      // Pre-match often empty → honest absence for advanced metrics.
+      this.#getJson(
+        `/fixtures/statistics?fixture=${encodeURIComponent(fixture.fixtureId)}`,
       ),
     ]);
 
@@ -194,8 +203,18 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       windowMatches: awayForm.window,
     });
 
-    const homeStats = mappedHomeStats ?? statsFromFormGoals(homeForm);
-    const awayStats = mappedAwayStats ?? statsFromFormGoals(awayForm);
+    const fixtureAdvanced = mapApiFootballFixtureStatistics(fixtureStatsBody, {
+      homeTeamId: fixture.homeTeamId,
+      awayTeamId: fixture.awayTeamId,
+    });
+    const homeStats = withAdvancedStats(
+      mappedHomeStats ?? statsFromFormGoals(homeForm),
+      fixtureAdvanced?.home,
+    );
+    const awayStats = withAdvancedStats(
+      mappedAwayStats ?? statsFromFormGoals(awayForm),
+      fixtureAdvanced?.away,
+    );
 
     const standings = mapApiFootballStandings(standingsBody, {
       competitionId: fixture.competitionId,

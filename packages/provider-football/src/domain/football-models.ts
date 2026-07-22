@@ -127,8 +127,32 @@ export interface FootballTeamForm {
 }
 
 /**
+ * Optional advanced team statistics (F1.2a).
+ * Only provider-supplied metrics are present; missing keys mean honest absence.
+ * Never fabricate Expected / estimated values.
+ */
+export type FootballAdvancedStatsScope = "fixture" | "season-average";
+
+export interface FootballAdvancedTeamStats {
+  readonly scope: FootballAdvancedStatsScope;
+  readonly shotsTotal: number | undefined;
+  readonly shotsOnTarget: number | undefined;
+  readonly shotsOffTarget: number | undefined;
+  readonly possessionPct: number | undefined;
+  readonly corners: number | undefined;
+  readonly yellowCards: number | undefined;
+  readonly redCards: number | undefined;
+  readonly attacks: number | undefined;
+  readonly dangerousAttacks: number | undefined;
+  readonly fouls: number | undefined;
+  readonly saves: number | undefined;
+  readonly passingAccuracyPct: number | undefined;
+}
+
+/**
  * Team aggregate stats for evidence STATISTICS.
- * xG fields may be zero / unavailable in F.1 (true xG is F.1.1).
+ * Base shots/xG fields remain F.1-compatible; advanced is F1.2a optional.
+ * True provider xG remains F1.3 — xG fields may stay zero / unavailable.
  */
 export interface FootballTeamStats {
   readonly teamId: string;
@@ -141,6 +165,8 @@ export interface FootballTeamStats {
   readonly xgAgainstPerMatch: number;
   readonly providerMethod: FootballProviderMethod;
   readonly statsBasis: "shots" | "goals-proxy-fallback";
+  /** Advanced measurements when the provider supplies any of them. */
+  readonly advanced: FootballAdvancedTeamStats | undefined;
 }
 
 export interface FootballH2HMeeting {

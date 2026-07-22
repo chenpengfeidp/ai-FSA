@@ -1,8 +1,66 @@
 import type {
+  FootballAdvancedTeamStats,
   FootballFormSplit,
   FootballMatchBundle,
   FootballTeamForm,
+  FootballTeamStats,
 } from "../domain/football-models.js";
+
+function freezeAdvancedShape(
+  advanced: FootballAdvancedTeamStats | undefined,
+): unknown {
+  if (advanced === undefined) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    scope: advanced.scope,
+    ...(advanced.shotsTotal === undefined
+      ? {}
+      : { shotsTotal: advanced.shotsTotal }),
+    ...(advanced.shotsOnTarget === undefined
+      ? {}
+      : { shotsOnTarget: advanced.shotsOnTarget }),
+    ...(advanced.shotsOffTarget === undefined
+      ? {}
+      : { shotsOffTarget: advanced.shotsOffTarget }),
+    ...(advanced.possessionPct === undefined
+      ? {}
+      : { possessionPct: advanced.possessionPct }),
+    ...(advanced.corners === undefined ? {} : { corners: advanced.corners }),
+    ...(advanced.yellowCards === undefined
+      ? {}
+      : { yellowCards: advanced.yellowCards }),
+    ...(advanced.redCards === undefined ? {} : { redCards: advanced.redCards }),
+    ...(advanced.attacks === undefined ? {} : { attacks: advanced.attacks }),
+    ...(advanced.dangerousAttacks === undefined
+      ? {}
+      : { dangerousAttacks: advanced.dangerousAttacks }),
+    ...(advanced.fouls === undefined ? {} : { fouls: advanced.fouls }),
+    ...(advanced.saves === undefined ? {} : { saves: advanced.saves }),
+    ...(advanced.passingAccuracyPct === undefined
+      ? {}
+      : { passingAccuracyPct: advanced.passingAccuracyPct }),
+  });
+}
+
+function toStatisticsShape(stats: FootballTeamStats, fixtureKey: string): unknown {
+  const advanced = freezeAdvancedShape(stats.advanced);
+
+  return Object.freeze({
+    teamSide: stats.teamSide,
+    windowMatches: stats.windowMatches,
+    shotsForPerMatch: stats.shotsForPerMatch,
+    shotsAgainstPerMatch: stats.shotsAgainstPerMatch,
+    xgForPerMatch: stats.xgForPerMatch,
+    xgAgainstPerMatch: stats.xgAgainstPerMatch,
+    providerSource: "api-football",
+    providerSourceId: `api-football:${fixtureKey}:stats:${stats.teamSide}:${stats.statsBasis}`,
+    providerMethod: stats.providerMethod,
+    statsBasis: stats.statsBasis,
+    ...(advanced === undefined ? {} : { advanced }),
+  });
+}
 
 function freezeSplitShape(split: FootballFormSplit | undefined): unknown {
   if (split === undefined) {
@@ -165,30 +223,8 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
       toTeamFormShape(awayForm, fixtureKey),
     ]),
     statistics: Object.freeze([
-      Object.freeze({
-        teamSide: homeStats.teamSide,
-        windowMatches: homeStats.windowMatches,
-        shotsForPerMatch: homeStats.shotsForPerMatch,
-        shotsAgainstPerMatch: homeStats.shotsAgainstPerMatch,
-        xgForPerMatch: homeStats.xgForPerMatch,
-        xgAgainstPerMatch: homeStats.xgAgainstPerMatch,
-        providerSource: "api-football",
-        providerSourceId: `api-football:${fixtureKey}:stats:home:${homeStats.statsBasis}`,
-        providerMethod: homeStats.providerMethod,
-        statsBasis: homeStats.statsBasis,
-      }),
-      Object.freeze({
-        teamSide: awayStats.teamSide,
-        windowMatches: awayStats.windowMatches,
-        shotsForPerMatch: awayStats.shotsForPerMatch,
-        shotsAgainstPerMatch: awayStats.shotsAgainstPerMatch,
-        xgForPerMatch: awayStats.xgForPerMatch,
-        xgAgainstPerMatch: awayStats.xgAgainstPerMatch,
-        providerSource: "api-football",
-        providerSourceId: `api-football:${fixtureKey}:stats:away:${awayStats.statsBasis}`,
-        providerMethod: awayStats.providerMethod,
-        statsBasis: awayStats.statsBasis,
-      }),
+      toStatisticsShape(homeStats, fixtureKey),
+      toStatisticsShape(awayStats, fixtureKey),
     ]),
     headToHead: Object.freeze({
       sampleSize: headToHead.sampleSize,

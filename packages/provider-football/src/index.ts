@@ -8,6 +8,8 @@ export {
   FootballMatchProvider,
 } from "./composite/football-match-provider.js";
 export type {
+  FootballAdvancedStatsScope,
+  FootballAdvancedTeamStats,
   FootballAvailabilityAbsence,
   FootballAvailabilityKind,
   FootballBoardRow,
@@ -55,12 +57,16 @@ export {
   mapApiFootballFixturesResponse,
 } from "./mapper/map-api-football-fixture.js";
 export { mapApiFootballTeamForm } from "./mapper/map-api-football-form.js";
+export { mapApiFootballFixtureStatistics } from "./mapper/map-api-football-fixture-statistics.js";
 export { mapApiFootballH2H } from "./mapper/map-api-football-h2h.js";
 export { mapApiFootballInjuriesResponse } from "./mapper/map-api-football-injuries.js";
 export { mapApiFootballLineupsResponse } from "./mapper/map-api-football-lineups.js";
 export { mapApiFootballSquadResponse } from "./mapper/map-api-football-squad.js";
 export { mapApiFootballStandings } from "./mapper/map-api-football-standings.js";
-export { mapApiFootballTeamStats } from "./mapper/map-api-football-stats.js";
+export {
+  mapApiFootballTeamStats,
+  withAdvancedStats,
+} from "./mapper/map-api-football-stats.js";
 export { mapBoardRowToUpcomingFixture } from "./mapper/map-board-row-to-upcoming.js";
 export type { FootballUpcomingFixtureRow } from "./mapper/map-board-row-to-upcoming.js";
 export { mapBundleToBoardRow } from "./mapper/map-bundle-to-board-row.js";

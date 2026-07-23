@@ -50,7 +50,7 @@ const report: AnalysisReportDto = {
   features: [],
   rules: [],
   deterministic: {
-    projectionModelVersion: "projection.v2.i1b.context",
+    projectionModelVersion: "projection.v2.i2b.market",
     matchId: "match-example-1",
     lambdaHome: 1.5,
     lambdaAway: 1.2,

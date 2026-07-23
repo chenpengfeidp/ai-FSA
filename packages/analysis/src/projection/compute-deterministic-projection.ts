@@ -346,6 +346,22 @@ export function computeDeterministicMatchProjection(input: {
     );
   }
 
+  const marketIntelPassed = input.ruleResults.some(
+    (rule) =>
+      rule.status === "PASS" &&
+      (rule.ruleName === "MARKET_CONSENSUS" ||
+        rule.ruleName === "STEAM_MOVE" ||
+        rule.ruleName === "REVERSE_LINE_MOVEMENT" ||
+        rule.ruleName === "MARKET_VOLATILITY" ||
+        rule.ruleName === "SHARP_SUPPORT"),
+  );
+
+  if (marketIntelPassed) {
+    limitations.push(
+      "Market Intelligence findings (I2B) are supporting signals only; they do not blend into 1X2 or override Football Intelligence.",
+    );
+  }
+
   const usesGoalsProxyStatistics = [...input.featureBundle.features.values()].some(
     (feature) => feature.sourceEvidenceId.includes("stats-goals-proxy"),
   );

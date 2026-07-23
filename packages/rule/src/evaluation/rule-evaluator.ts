@@ -45,11 +45,16 @@ const TAU_FATIGUE = 50;
 const TAU_HOME_STABILITY = 70;
 const TAU_ROTATION_PRESSURE = 20;
 const TAU_KNOCKOUT_CONTEXT = 50;
+const TAU_MARKET_CONSENSUS = 0.08;
+const TAU_STEAM_MOVE = 0.15;
+const TAU_REVERSE_LINE_MOVEMENT = 0.1;
+const TAU_MARKET_VOLATILITY = 25;
+const TAU_SHARP_SUPPORT = 0.5;
 const TAU_DEFENSE_STABLE = 55;
 const TAU_DEFENSE_FRAGILE = 45;
 const TAU_AVAILABILITY_HIT = 8;
 const TAU_VENUE = 1;
-const RULE_POLICY = "rule.mvp.i1b.context";
+const RULE_POLICY = "rule.mvp.i2b.market";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -1011,6 +1016,82 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
       const lean = numericValue(features.get("asianHandicapLean"));
 
       return lean !== undefined && lean <= -TAU_MARKET;
+    },
+  }) satisfies FootballRuleDefinition,
+  // I2B Market Intelligence — findings only; never enter football softmax.
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:market-consensus:v1",
+    ruleName: "MARKET_CONSENSUS",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "marketConsensus",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const consensus = numericValue(features.get("marketConsensus"));
+
+      return consensus !== undefined && Math.abs(consensus) >= TAU_MARKET_CONSENSUS;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:steam-move:v1",
+    ruleName: "STEAM_MOVE",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "steamMove",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const steam = numericValue(features.get("steamMove"));
+
+      return steam !== undefined && Math.abs(steam) >= TAU_STEAM_MOVE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:reverse-line-movement:v1",
+    ruleName: "REVERSE_LINE_MOVEMENT",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "reverseLineMovement",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const rlm = numericValue(features.get("reverseLineMovement"));
+
+      return rlm !== undefined && Math.abs(rlm) >= TAU_REVERSE_LINE_MOVEMENT;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:market-volatility:v1",
+    ruleName: "MARKET_VOLATILITY",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "marketVolatility",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const volatility = numericValue(features.get("marketVolatility"));
+
+      return volatility !== undefined && volatility >= TAU_MARKET_VOLATILITY;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:sharp-support:v1",
+    ruleName: "SHARP_SUPPORT",
+    weight: 1,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "sharpSupport",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const sharp = numericValue(features.get("sharpSupport"));
+
+      return sharp !== undefined && Math.abs(sharp) >= TAU_SHARP_SUPPORT;
     },
   }) satisfies FootballRuleDefinition,
 ]);

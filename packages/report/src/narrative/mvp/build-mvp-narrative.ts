@@ -135,6 +135,14 @@ export function buildMvpIntelligenceNarrative(
   const rotationHome = numericFeature(analysis.features, "rotationPressureHome");
   const rotationAway = numericFeature(analysis.features, "rotationPressureAway");
   const knockoutContext = numericFeature(analysis.features, "knockoutContext");
+  const marketConsensus = numericFeature(analysis.features, "marketConsensus");
+  const steamMove = numericFeature(analysis.features, "steamMove");
+  const reverseLineMovement = numericFeature(
+    analysis.features,
+    "reverseLineMovement",
+  );
+  const marketVolatility = numericFeature(analysis.features, "marketVolatility");
+  const sharpSupport = numericFeature(analysis.features, "sharpSupport");
 
   const overview = [
     `${homeTeam} vs ${awayTeam}: Most Likely is ${most.label} (${formatPct(most.probability)}).`,
@@ -155,6 +163,7 @@ export function buildMvpIntelligenceNarrative(
     `AdvancedStatsFeatures (derived, not raw Evidence): attackEfficiency home=${attackEffHome ?? "n/a"} away=${attackEffAway ?? "n/a"}; possession home=${possessionHome ?? "n/a"} away=${possessionAway ?? "n/a"}; chanceCreation home=${chanceHome ?? "n/a"} away=${chanceAway ?? "n/a"}; disciplineRisk home=${disciplineHome ?? "n/a"} away=${disciplineAway ?? "n/a"}.`,
     `ExpectedGoalsFeatures (derived from EXPECTED_GOALS Evidence): xgAttackQuality home=${xgAttackHome ?? "n/a"} away=${xgAttackAway ?? "n/a"}; xgDefenseQuality home=${xgDefenseHome ?? "n/a"} away=${xgDefenseAway ?? "n/a"}; xgDominance=${xgDominance ?? "n/a"}; finishingEfficiency home=${finishingHome ?? "n/a"} away=${finishingAway ?? "n/a"}.`,
     `MatchContextFeatures (derived from MATCH_CONTEXT Evidence): fatigueIndex home=${fatigueHome ?? "n/a"} away=${fatigueAway ?? "n/a"}; scheduleAdvantage=${scheduleAdvantage ?? "n/a"}; homeStability=${homeStability ?? "n/a"}; rotationPressure home=${rotationHome ?? "n/a"} away=${rotationAway ?? "n/a"}; knockoutContext=${knockoutContext ?? "n/a"}.`,
+    `MarketIntelligenceFeatures (derived from ODDS Evidence; supporting only): marketConsensus=${marketConsensus ?? "n/a"}; steamMove=${steamMove ?? "n/a"}; reverseLineMovement=${reverseLineMovement ?? "n/a"}; marketVolatility=${marketVolatility ?? "n/a"}; sharpSupport=${sharpSupport ?? "n/a"}.`,
   ].join(" ");
 
   const riskRules = analysis.ruleResults.filter(

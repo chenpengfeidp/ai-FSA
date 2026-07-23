@@ -36,22 +36,27 @@ export type FeatureName =
   | "homeTeam"
   | "kickoff"
   | "knockoutContext"
+  | "marketConsensus"
   | "marketImpliedAway"
   | "marketImpliedDraw"
   | "marketImpliedHome"
   | "marketLean"
+  | "marketVolatility"
   | "momentum"
   | "momentumAway"
   | "momentumHome"
-  | "possessionHome"
   | "possessionAway"
+  | "possessionHome"
   | "recentFormAway"
   | "recentFormHome"
   | "recentFormShortAway"
   | "recentFormShortHome"
+  | "reverseLineMovement"
   | "rotationPressureAway"
   | "rotationPressureHome"
   | "scheduleAdvantage"
+  | "sharpSupport"
+  | "steamMove"
   | "venueAdvantage"
   | "xgAttackQualityAway"
   | "xgAttackQualityHome"
@@ -121,10 +126,12 @@ const featureNames: ReadonlySet<string> = new Set([
   "homeTeam",
   "kickoff",
   "knockoutContext",
+  "marketConsensus",
   "marketImpliedAway",
   "marketImpliedDraw",
   "marketImpliedHome",
   "marketLean",
+  "marketVolatility",
   "momentum",
   "momentumAway",
   "momentumHome",
@@ -134,9 +141,12 @@ const featureNames: ReadonlySet<string> = new Set([
   "recentFormHome",
   "recentFormShortAway",
   "recentFormShortHome",
+  "reverseLineMovement",
   "rotationPressureAway",
   "rotationPressureHome",
   "scheduleAdvantage",
+  "sharpSupport",
+  "steamMove",
   "venueAdvantage",
   "xgAttackQualityAway",
   "xgAttackQualityHome",

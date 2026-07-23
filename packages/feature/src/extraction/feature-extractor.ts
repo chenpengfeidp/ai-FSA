@@ -20,12 +20,17 @@ import {
   computeHomeStability,
   computeImpliedProbabilities,
   computeKnockoutContext,
+  computeMarketConsensus,
   computeMarketLean,
+  computeMarketVolatility,
   computeMomentum,
   computePossessionDominance,
   computeRecentFormScore,
+  computeReverseLineMovement,
   computeRotationPressure,
   computeScheduleAdvantage,
+  computeSharpSupport,
+  computeSteamMove,
   computeXgAttackQuality,
   computeXgDefenseQuality,
   computeXgDominance,
@@ -862,6 +867,187 @@ function extractMatchContextFeatures(input: {
   return Object.freeze(features);
 }
 
+/**
+ * I2B: derived Market Intelligence Features from ODDS Evidence only.
+ * Omit Feature (→ Rule INAPPLICABLE) when required movement / public / sharp facts are absent.
+ */
+function extractMarketIntelligenceFeatures(input: {
+  readonly evidences: readonly Evidence[];
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { evidences, matchId, generatedAt } = input;
+
+  if (matchId === undefined) {
+    return Object.freeze([]);
+  }
+
+  const oddsEvidence = evidences.find((evidence) => evidence.type === "ODDS");
+
+  if (oddsEvidence === undefined) {
+    return Object.freeze([]);
+  }
+
+  const payload = oddsEvidence.payload;
+  const features: Feature[] = [];
+  const homeOdds = asFiniteNumber(payload.homeOdds);
+  const drawOdds = asFiniteNumber(payload.drawOdds);
+  const awayOdds = asFiniteNumber(payload.awayOdds);
+
+  let marketLean: number | undefined;
+  let asianHandicapLean: number | undefined;
+
+  if (
+    homeOdds !== undefined &&
+    drawOdds !== undefined &&
+    awayOdds !== undefined &&
+    homeOdds > 1 &&
+    drawOdds > 1 &&
+    awayOdds > 1
+  ) {
+    marketLean = roundFeature(computeMarketLean({ homeOdds, drawOdds, awayOdds }));
+  }
+
+  const asianHandicapHomeOdds = asFiniteNumber(payload.asianHandicapHomeOdds);
+  const asianHandicapAwayOdds = asFiniteNumber(payload.asianHandicapAwayOdds);
+
+  if (
+    asianHandicapHomeOdds !== undefined &&
+    asianHandicapAwayOdds !== undefined &&
+    asianHandicapHomeOdds > 1 &&
+    asianHandicapAwayOdds > 1
+  ) {
+    asianHandicapLean = roundFeature(
+      computeAsianHandicapLean({
+        asianHandicapHomeOdds,
+        asianHandicapAwayOdds,
+      }),
+    );
+  }
+
+  const leans = [marketLean, asianHandicapLean].filter(
+    (lean): lean is number => lean !== undefined,
+  );
+  const consensus = computeMarketConsensus(leans);
+
+  if (consensus !== undefined) {
+    const value = roundFeature(consensus);
+    features.push(
+      createFeature({
+        featureId: featureId(oddsEvidence.id, "marketConsensus"),
+        matchId,
+        name: "marketConsensus",
+        value,
+        explanation: `Market consensus ${value} from ${String(leans.length)} directional market leans (1X2/AH); opposing leans → 0.`,
+        sourceEvidenceId: oddsEvidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const handicapMovement = asFiniteNumber(payload.handicapMovement);
+  const oddsMovementHome = asFiniteNumber(payload.oddsMovementHome);
+  const oddsMovementDraw = asFiniteNumber(payload.oddsMovementDraw);
+  const oddsMovementAway = asFiniteNumber(payload.oddsMovementAway);
+  const overUnderLineMovement = asFiniteNumber(payload.overUnderLineMovement);
+
+  const steam = computeSteamMove({
+    ...(handicapMovement === undefined ? {} : { handicapMovement }),
+    ...(oddsMovementHome === undefined ? {} : { oddsMovementHome }),
+    ...(oddsMovementAway === undefined ? {} : { oddsMovementAway }),
+  });
+
+  if (steam !== undefined) {
+    const value = roundFeature(steam);
+    features.push(
+      createFeature({
+        featureId: featureId(oddsEvidence.id, "steamMove"),
+        matchId,
+        name: "steamMove",
+        value,
+        explanation: `Steam move ${value} from provider-supplied handicap/odds movement only (positive → home).`,
+        sourceEvidenceId: oddsEvidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const publicBettingHomePct = asFiniteNumber(payload.publicBettingHomePct);
+  const publicBettingAwayPct = asFiniteNumber(payload.publicBettingAwayPct);
+  const reverseLine = computeReverseLineMovement({
+    ...(publicBettingHomePct === undefined ? {} : { publicBettingHomePct }),
+    ...(publicBettingAwayPct === undefined ? {} : { publicBettingAwayPct }),
+    ...(handicapMovement === undefined ? {} : { handicapMovement }),
+    ...(oddsMovementHome === undefined ? {} : { oddsMovementHome }),
+  });
+
+  if (reverseLine !== undefined) {
+    const value = roundFeature(reverseLine);
+    features.push(
+      createFeature({
+        featureId: featureId(oddsEvidence.id, "reverseLineMovement"),
+        matchId,
+        name: "reverseLineMovement",
+        value,
+        explanation: `Reverse line movement ${value} requires public betting % and line movement (never inferred).`,
+        sourceEvidenceId: oddsEvidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const volatility = computeMarketVolatility({
+    ...(oddsMovementHome === undefined ? {} : { oddsMovementHome }),
+    ...(oddsMovementDraw === undefined ? {} : { oddsMovementDraw }),
+    ...(oddsMovementAway === undefined ? {} : { oddsMovementAway }),
+    ...(handicapMovement === undefined ? {} : { handicapMovement }),
+    ...(overUnderLineMovement === undefined ? {} : { overUnderLineMovement }),
+  });
+
+  if (volatility !== undefined) {
+    const value = roundFeature(volatility);
+    features.push(
+      createFeature({
+        featureId: featureId(oddsEvidence.id, "marketVolatility"),
+        matchId,
+        name: "marketVolatility",
+        value,
+        explanation: `Market volatility ${value} from magnitude of provider movement samples only (not tick frequency).`,
+        sourceEvidenceId: oddsEvidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const sharpMoneyIndicator =
+    typeof payload.sharpMoneyIndicator === "boolean" ||
+    typeof payload.sharpMoneyIndicator === "string"
+      ? payload.sharpMoneyIndicator
+      : undefined;
+  const sharp = computeSharpSupport({
+    ...(sharpMoneyIndicator === undefined ? {} : { sharpMoneyIndicator }),
+    ...(marketLean === undefined ? {} : { marketLean }),
+    ...(asianHandicapLean === undefined ? {} : { asianHandicapLean }),
+  });
+
+  if (sharp !== undefined) {
+    const value = roundFeature(sharp);
+    features.push(
+      createFeature({
+        featureId: featureId(oddsEvidence.id, "sharpSupport"),
+        matchId,
+        name: "sharpSupport",
+        value,
+        explanation: `Sharp support ${value} only when provider sharp indicator is present; direction from market lean.`,
+        sourceEvidenceId: oddsEvidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
 function findSideEvidence(
   evidences: readonly Evidence[],
   type: "STATISTICS" | "TEAM_FORM",
@@ -1010,6 +1196,14 @@ export class FeatureExtractor {
 
     features.push(
       ...extractMatchContextFeatures({
+        evidences,
+        matchId,
+        generatedAt,
+      }),
+    );
+
+    features.push(
+      ...extractMarketIntelligenceFeatures({
         evidences,
         matchId,
         generatedAt,

@@ -335,7 +335,7 @@ export const zh = {
     contextNo: "否",
     marketEvidence: "盘口与市场证据",
     marketEvidenceHint:
-      "原始 ODDS / Market Evidence（Provider 盘口事实）。支持证据，不直接驱动 Football Intelligence；I2A 不含 Market Features",
+      "原始 ODDS / Market Evidence（Provider 盘口事实）。衍生 Market Intelligence Features 见特征重要性；叙事仅引用 Rule 输出；市场不覆盖 Football Intelligence",
     noMarketEvidence: "暂无盘口与市场证据",
     marketSummary: "市场摘要",
     marketNoSelectionMetrics: "市场选择记录存在，但无可展示指标。",
@@ -404,7 +404,7 @@ export const zh = {
       `步骤 ${String(step)} · ${timestamp}`,
     featureImportance: "特征重要性",
     featureImportanceHint:
-      "派生足球特征（含 xG / 高级统计 / 比赛情境；非原始 Evidence）——正向与负向信号以颜色区分；原始 xG / 比赛情境 / 盘口见对应 Evidence 区",
+      "派生特征（含 xG / 高级统计 / 比赛情境 / Market Intelligence；非原始 Evidence）——正向与负向信号以颜色区分；原始盘口见 Market Evidence 区",
     noFeatures: "暂无特征",
     noFeaturesDescription: "本场比赛未提取任何特征。",
     positive: "正向",

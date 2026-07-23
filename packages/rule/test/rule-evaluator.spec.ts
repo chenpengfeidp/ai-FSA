@@ -237,6 +237,11 @@ describe("RuleEvaluator", () => {
       { ruleName: "MARKET_LEAN_AWAY", status: "FAIL", score: 0 },
       { ruleName: "MARKET_AH_LEAN_HOME", status: "INAPPLICABLE", score: 0 },
       { ruleName: "MARKET_AH_LEAN_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "MARKET_CONSENSUS", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "STEAM_MOVE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "REVERSE_LINE_MOVEMENT", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "MARKET_VOLATILITY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "SHARP_SUPPORT", status: "INAPPLICABLE", score: 0 },
     ]);
   });
 
@@ -845,6 +850,117 @@ describe("RuleEvaluator", () => {
             "HOME_STABILITY",
             "ROTATION_PRESSURE",
             "KNOCKOUT_CONTEXT",
+          ].includes(result.ruleName),
+        )
+        .every((result) => result.status === "INAPPLICABLE"),
+    ).toBe(true);
+  });
+
+  it("evaluates Market Intelligence Rules as findings-only channel none", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      makeFeature("marketLean"),
+      createFeature({
+        featureId: "feature:evidence-1:marketConsensus",
+        matchId: createMatchId("match-1"),
+        name: "marketConsensus",
+        value: 0.2,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:steamMove",
+        matchId: createMatchId("match-1"),
+        name: "steamMove",
+        value: 0.4,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:reverseLineMovement",
+        matchId: createMatchId("match-1"),
+        name: "reverseLineMovement",
+        value: -0.3,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:marketVolatility",
+        matchId: createMatchId("match-1"),
+        name: "marketVolatility",
+        value: 40,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:sharpSupport",
+        matchId: createMatchId("match-1"),
+        name: "sharpSupport",
+        value: 0.6,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+    ]);
+
+    expect(results).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ruleName: "MARKET_CONSENSUS",
+          status: "PASS",
+          channel: "none",
+        }),
+        expect.objectContaining({
+          ruleName: "STEAM_MOVE",
+          status: "PASS",
+          channel: "none",
+        }),
+        expect.objectContaining({
+          ruleName: "REVERSE_LINE_MOVEMENT",
+          status: "PASS",
+          channel: "none",
+        }),
+        expect.objectContaining({
+          ruleName: "MARKET_VOLATILITY",
+          status: "PASS",
+          channel: "none",
+        }),
+        expect.objectContaining({
+          ruleName: "SHARP_SUPPORT",
+          status: "PASS",
+          channel: "none",
+        }),
+      ]),
+    );
+  });
+
+  it("marks Market Intelligence Rules INAPPLICABLE when Features are absent", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "MARKET_CONSENSUS",
+            "STEAM_MOVE",
+            "REVERSE_LINE_MOVEMENT",
+            "MARKET_VOLATILITY",
+            "SHARP_SUPPORT",
           ].includes(result.ruleName),
         )
         .every((result) => result.status === "INAPPLICABLE"),

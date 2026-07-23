@@ -234,8 +234,114 @@ describe("FeatureExtractor", () => {
           name: "asianHandicapLean",
           sourceEvidenceId: "evidence-odds-ah",
         }),
+        expect.objectContaining({
+          name: "marketConsensus",
+          sourceEvidenceId: "evidence-odds-ah",
+        }),
       ]),
     );
+    expect(bundle.features.some((feature) => feature.name === "steamMove")).toBe(
+      false,
+    );
+    expect(
+      bundle.features.some((feature) => feature.name === "reverseLineMovement"),
+    ).toBe(false);
+    expect(bundle.features.some((feature) => feature.name === "sharpSupport")).toBe(
+      false,
+    );
+  });
+
+  it("extracts Market Intelligence Features from ODDS depth without fabricating", () => {
+    const matchInfo = makeEvidence();
+    const odds = createEvidence({
+      id: "evidence-odds-depth",
+      source: "the-odds-api",
+      sourceId: "evt:pinnacle:h2h+spreads+totals",
+      type: "ODDS",
+      matchId: createMatchId("match-1"),
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "recorded-snapshot",
+      },
+      payload: {
+        homeOdds: 1.55,
+        drawOdds: 4.2,
+        awayOdds: 5.8,
+        observedAt: "2026-07-18T12:00:00Z",
+        asianHandicapLine: -0.75,
+        asianHandicapHomeOdds: 1.75,
+        asianHandicapAwayOdds: 2.2,
+        oddsMovementHome: -0.15,
+        oddsMovementAway: 0.8,
+        handicapMovement: -0.25,
+        overUnderLineMovement: 0,
+        publicBettingHomePct: 62,
+        publicBettingAwayPct: 20,
+        sharpMoneyIndicator: true,
+      },
+    });
+    const bundle = new FeatureExtractor().extractBundle([matchInfo, odds]);
+
+    expect(bundle.featureModelVersion).toBe("feature.v2.i2b.market");
+    expect(bundle.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "marketConsensus" }),
+        expect.objectContaining({ name: "steamMove" }),
+        expect.objectContaining({ name: "reverseLineMovement" }),
+        expect.objectContaining({ name: "marketVolatility" }),
+        expect.objectContaining({ name: "sharpSupport" }),
+      ]),
+    );
+
+    const steam = bundle.features.find((feature) => feature.name === "steamMove");
+    const rlm = bundle.features.find(
+      (feature) => feature.name === "reverseLineMovement",
+    );
+    const sharp = bundle.features.find((feature) => feature.name === "sharpSupport");
+
+    expect(Number(steam?.value)).toBeGreaterThan(0);
+    // Public on home with line also toward home → no RLM
+    expect(Number(rlm?.value)).toBe(0);
+    expect(Number(sharp?.value)).toBeGreaterThan(0);
+  });
+
+  it("extracts reverse line movement when public and line move opposite", () => {
+    const matchInfo = makeEvidence();
+    const odds = createEvidence({
+      id: "evidence-odds-rlm",
+      source: "the-odds-api",
+      sourceId: "evt:pinnacle:h2h+spreads",
+      type: "ODDS",
+      matchId: createMatchId("match-1"),
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "recorded-snapshot",
+      },
+      payload: {
+        homeOdds: 1.55,
+        drawOdds: 4.2,
+        awayOdds: 5.8,
+        observedAt: "2026-07-18T12:00:00Z",
+        publicBettingHomePct: 70,
+        publicBettingAwayPct: 15,
+        handicapMovement: 0.25,
+        oddsMovementHome: 0.2,
+      },
+    });
+    const bundle = new FeatureExtractor().extractBundle([matchInfo, odds]);
+    const rlm = bundle.features.find(
+      (feature) => feature.name === "reverseLineMovement",
+    );
+
+    expect(Number(rlm?.value)).toBeLessThan(0);
   });
 
   it("extracts venueAdvantage, recentForm, and availabilityPenalty for the intelligence MVP", () => {
@@ -433,7 +539,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.i1b.context");
+    expect(bundle.featureModelVersion).toBe("feature.v2.i2b.market");
     expect(
       bundle.features.some((feature) => feature.name === "availabilityPenaltyAway"),
     ).toBe(false);
@@ -576,7 +682,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.i1b.context");
+    expect(bundle.featureModelVersion).toBe("feature.v2.i2b.market");
   });
 
   it("keeps xG Features absent when EXPECTED_GOALS Evidence is missing", () => {
@@ -782,7 +888,7 @@ describe("FeatureExtractor", () => {
         expect.objectContaining({ name: "knockoutContext", value: 0 }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.i1b.context");
+    expect(bundle.featureModelVersion).toBe("feature.v2.i2b.market");
   });
 
   it("keeps Context Features absent when MATCH_CONTEXT Evidence is missing", () => {

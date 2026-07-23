@@ -409,3 +409,188 @@ export function computeAsianHandicapLean(input: {
 
   return clamp(rawHome / sum - rawAway / sum, -1, 1);
 }
+
+const STEAM_ODDS_SCALE = 0.3;
+const STEAM_HANDICAP_SCALE = 0.25;
+const VOLATILITY_SCALE = 0.5;
+const PUBLIC_BETTING_THRESHOLD_PCT = 55;
+
+/**
+ * Agreement across available directional market leans (I2B).
+ * Requires ≥2 leans; opposing signs → 0 (no consensus); never invents sources.
+ */
+export function computeMarketConsensus(
+  leans: readonly number[],
+): number | undefined {
+  if (leans.length < 2) {
+    return undefined;
+  }
+
+  const nonzeroSigns = leans
+    .map((lean) => Math.sign(lean))
+    .filter((sign) => sign !== 0);
+
+  if (nonzeroSigns.length >= 2) {
+    const first = nonzeroSigns[0];
+    if (first === undefined || nonzeroSigns.some((sign) => sign !== first)) {
+      return 0;
+    }
+  }
+
+  return clamp(mean(leans), -1, 1);
+}
+
+/**
+ * Signed steam from provider-supplied movement only.
+ * Positive = steam toward home; negative = toward away.
+ */
+export function computeSteamMove(input: {
+  readonly handicapMovement?: number;
+  readonly oddsMovementHome?: number;
+  readonly oddsMovementAway?: number;
+}): number | undefined {
+  const components: number[] = [];
+
+  if (input.handicapMovement !== undefined) {
+    components.push(clamp(-input.handicapMovement / STEAM_HANDICAP_SCALE, -1, 1));
+  }
+
+  if (input.oddsMovementHome !== undefined) {
+    components.push(clamp(-input.oddsMovementHome / STEAM_ODDS_SCALE, -1, 1));
+  }
+
+  if (input.oddsMovementAway !== undefined) {
+    components.push(clamp(input.oddsMovementAway / STEAM_ODDS_SCALE, -1, 1));
+  }
+
+  if (components.length === 0) {
+    return undefined;
+  }
+
+  return clamp(mean(components), -1, 1);
+}
+
+/**
+ * Reverse line movement only when public betting % and line movement both exist.
+ * Positive = sharp/home side vs public away; negative = sharp/away vs public home.
+ */
+export function computeReverseLineMovement(input: {
+  readonly publicBettingHomePct?: number;
+  readonly publicBettingAwayPct?: number;
+  readonly handicapMovement?: number;
+  readonly oddsMovementHome?: number;
+}): number | undefined {
+  const pubHome = input.publicBettingHomePct;
+  const pubAway = input.publicBettingAwayPct;
+
+  if (pubHome === undefined && pubAway === undefined) {
+    return undefined;
+  }
+
+  const hasMove =
+    input.handicapMovement !== undefined || input.oddsMovementHome !== undefined;
+
+  if (!hasMove) {
+    return undefined;
+  }
+
+  const lineTowardHome =
+    (input.handicapMovement !== undefined && input.handicapMovement < 0) ||
+    (input.oddsMovementHome !== undefined && input.oddsMovementHome < 0);
+  const lineTowardAway =
+    (input.handicapMovement !== undefined && input.handicapMovement > 0) ||
+    (input.oddsMovementHome !== undefined && input.oddsMovementHome > 0);
+
+  if (
+    pubHome !== undefined &&
+    pubHome >= PUBLIC_BETTING_THRESHOLD_PCT &&
+    lineTowardAway
+  ) {
+    return clamp(-(pubHome - 50) / 50, -1, 1);
+  }
+
+  if (
+    pubAway !== undefined &&
+    pubAway >= PUBLIC_BETTING_THRESHOLD_PCT &&
+    lineTowardHome
+  ) {
+    return clamp((pubAway - 50) / 50, -1, 1);
+  }
+
+  return 0;
+}
+
+/**
+ * Magnitude-based volatility from available movement samples only.
+ * Does not invent tick frequency when the provider supplies only open→current.
+ */
+export function computeMarketVolatility(input: {
+  readonly oddsMovementHome?: number;
+  readonly oddsMovementDraw?: number;
+  readonly oddsMovementAway?: number;
+  readonly handicapMovement?: number;
+  readonly overUnderLineMovement?: number;
+}): number | undefined {
+  const magnitudes: number[] = [];
+
+  for (const value of [
+    input.oddsMovementHome,
+    input.oddsMovementDraw,
+    input.oddsMovementAway,
+  ]) {
+    if (value !== undefined) {
+      magnitudes.push(Math.abs(value));
+    }
+  }
+
+  if (input.handicapMovement !== undefined) {
+    magnitudes.push(Math.abs(input.handicapMovement) * 1.5);
+  }
+
+  if (input.overUnderLineMovement !== undefined) {
+    magnitudes.push(Math.abs(input.overUnderLineMovement) * 1.5);
+  }
+
+  if (magnitudes.length === 0) {
+    return undefined;
+  }
+
+  return clamp((mean(magnitudes) / VOLATILITY_SCALE) * 100, 0, 100);
+}
+
+/**
+ * Sharp support only when the provider supplies a sharp indicator.
+ * Direction follows marketLean (preferred) or asianHandicapLean.
+ */
+export function computeSharpSupport(input: {
+  readonly sharpMoneyIndicator?: boolean | string;
+  readonly marketLean?: number;
+  readonly asianHandicapLean?: number;
+}): number | undefined {
+  if (input.sharpMoneyIndicator === undefined) {
+    return undefined;
+  }
+
+  const sharp =
+    input.sharpMoneyIndicator === true ||
+    (typeof input.sharpMoneyIndicator === "string" &&
+      ["1", "sharp", "true", "yes"].includes(
+        input.sharpMoneyIndicator.trim().toLowerCase(),
+      ));
+
+  if (!sharp) {
+    return 0;
+  }
+
+  const lean = input.marketLean ?? input.asianHandicapLean;
+
+  if (lean === undefined) {
+    return undefined;
+  }
+
+  if (lean === 0) {
+    return 0;
+  }
+
+  return clamp(Math.sign(lean) * Math.max(Math.abs(lean), 0.5), -1, 1);
+}

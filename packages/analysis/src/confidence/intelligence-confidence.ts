@@ -232,6 +232,78 @@ function intelligenceAgreementBonus(ruleResults: readonly RuleResult[]): number 
   return Math.min(bonus, 8);
 }
 
+/**
+ * I2B: Market Intelligence is supporting only.
+ * Boost when market lean aligns with football P1; penalize strong disagreement.
+ */
+function marketFootballAlignment(ruleResults: readonly RuleResult[]): {
+  readonly bonus: number;
+  readonly penalty: number;
+} {
+  const passed = new Set(
+    ruleResults
+      .filter((rule) => rule.status === "PASS")
+      .map((rule) => rule.ruleName),
+  );
+  const p1 = ruleResults.filter(
+    (rule) => P1_CHANNEL_RULES.has(rule.ruleName) && rule.status === "PASS",
+  );
+  const homeWeight = p1
+    .filter((rule) => rule.channel === "home+")
+    .reduce((sum, rule) => sum + rule.weight, 0);
+  const awayWeight = p1
+    .filter((rule) => rule.channel === "away+")
+    .reduce((sum, rule) => sum + rule.weight, 0);
+
+  const footballHome = homeWeight > awayWeight && homeWeight > 0;
+  const footballAway = awayWeight > homeWeight && awayWeight > 0;
+  const marketHome =
+    passed.has("MARKET_LEAN_HOME") || passed.has("MARKET_AH_LEAN_HOME");
+  const marketAway =
+    passed.has("MARKET_LEAN_AWAY") || passed.has("MARKET_AH_LEAN_AWAY");
+  const marketIntel =
+    passed.has("MARKET_CONSENSUS") ||
+    passed.has("STEAM_MOVE") ||
+    passed.has("SHARP_SUPPORT") ||
+    passed.has("REVERSE_LINE_MOVEMENT");
+
+  let bonus = 0;
+  let penalty = 0;
+
+  if (footballHome && marketHome) {
+    bonus += 3;
+    if (marketIntel) {
+      bonus += 2;
+    }
+  }
+
+  if (footballAway && marketAway) {
+    bonus += 3;
+    if (marketIntel) {
+      bonus += 2;
+    }
+  }
+
+  if (footballHome && marketAway) {
+    penalty += 5;
+    if (marketIntel) {
+      penalty += 2;
+    }
+  }
+
+  if (footballAway && marketHome) {
+    penalty += 5;
+    if (marketIntel) {
+      penalty += 2;
+    }
+  }
+
+  return Object.freeze({
+    bonus: Math.min(bonus, 6),
+    penalty: Math.min(penalty, 8),
+  });
+}
+
 function ruleAgreement(ruleResults: readonly RuleResult[]): {
   readonly agreement: number;
   readonly contradictionPenalty: number;
@@ -273,7 +345,10 @@ export function computeIntelligenceConfidence(input: {
   const completeness = evidenceCompleteness(input.evidenceSet);
   const { agreement, contradictionPenalty } = ruleAgreement(input.ruleResults);
   const agreementBonus = intelligenceAgreementBonus(input.ruleResults);
-  const boostedAgreement = roundScore(clamp(agreement + agreementBonus, 0, 100));
+  const marketAlignment = marketFootballAlignment(input.ruleResults);
+  const boostedAgreement = roundScore(
+    clamp(agreement + agreementBonus + marketAlignment.bonus, 0, 100),
+  );
   const concentration = input.scenarios.mostLikely.probability * 100;
   const availabilityUnknown = input.ruleResults.some(
     (rule) =>
@@ -290,7 +365,8 @@ export function computeIntelligenceConfidence(input: {
       0.35 * completeness +
         0.35 * boostedAgreement +
         0.3 * concentration -
-        contradictionPenalty,
+        contradictionPenalty -
+        marketAlignment.penalty,
       0,
       100,
     ),
@@ -375,9 +451,29 @@ export function computeIntelligenceConfidence(input: {
     );
   }
 
+  const hasOdds = input.evidenceSet.some((evidence) => evidence.type === "ODDS");
+
+  if (!hasOdds) {
+    limitations.push(
+      "ODDS Evidence absent; Market Intelligence Features may be INAPPLICABLE (never estimated).",
+    );
+  }
+
   if (agreementBonus > 0) {
     limitations.push(
       `Evidence agreement bonus +${String(agreementBonus)} applied when Match Context, xG, and/or Advanced Statistics support the same football conclusion.`,
+    );
+  }
+
+  if (marketAlignment.bonus > 0) {
+    limitations.push(
+      `Market alignment bonus +${String(marketAlignment.bonus)} when Market Intelligence supports the same football conclusion (supporting only).`,
+    );
+  }
+
+  if (marketAlignment.penalty > 0) {
+    limitations.push(
+      `Market disagreement penalty −${String(marketAlignment.penalty)} when Market Intelligence conflicts with football lean (Market does not override Football).`,
     );
   }
 

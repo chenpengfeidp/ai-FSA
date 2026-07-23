@@ -1,7 +1,7 @@
 import { createMatchId, type MatchId } from "@fas/match";
 import type { Feature } from "./feature.js";
 
-export const FEATURE_MODEL_VERSION = "feature.v2.i1b.context";
+export const FEATURE_MODEL_VERSION = "feature.v2.i2b.market";
 
 export type FeatureBundleStatus =
   | "blocked"

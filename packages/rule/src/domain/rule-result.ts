@@ -36,8 +36,13 @@ export type RuleId =
   | "rule:knockout-context:v1"
   | "rule:market-ah-lean-away:v1"
   | "rule:market-ah-lean-home:v1"
+  | "rule:market-consensus:v1"
   | "rule:market-lean-away:v1"
   | "rule:market-lean-home:v1"
+  | "rule:market-volatility:v1"
+  | "rule:reverse-line-movement:v1"
+  | "rule:sharp-support:v1"
+  | "rule:steam-move:v1"
   | "rule:momentum-away:v1"
   | "rule:momentum-home:v1"
   | "rule:possession-away-edge:v1"
@@ -92,8 +97,13 @@ export type RuleName =
   | "KNOCKOUT_CONTEXT"
   | "MARKET_AH_LEAN_AWAY"
   | "MARKET_AH_LEAN_HOME"
+  | "MARKET_CONSENSUS"
   | "MARKET_LEAN_AWAY"
   | "MARKET_LEAN_HOME"
+  | "MARKET_VOLATILITY"
+  | "REVERSE_LINE_MOVEMENT"
+  | "SHARP_SUPPORT"
+  | "STEAM_MOVE"
   | "MOMENTUM_AWAY"
   | "MOMENTUM_HOME"
   | "POSSESSION_AWAY_EDGE"
@@ -185,8 +195,13 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:knockout-context:v1",
   "rule:market-ah-lean-away:v1",
   "rule:market-ah-lean-home:v1",
+  "rule:market-consensus:v1",
   "rule:market-lean-away:v1",
   "rule:market-lean-home:v1",
+  "rule:market-volatility:v1",
+  "rule:reverse-line-movement:v1",
+  "rule:sharp-support:v1",
+  "rule:steam-move:v1",
   "rule:momentum-away:v1",
   "rule:momentum-home:v1",
   "rule:possession-away-edge:v1",
@@ -241,8 +256,13 @@ const ruleNames: ReadonlySet<string> = new Set([
   "KNOCKOUT_CONTEXT",
   "MARKET_AH_LEAN_AWAY",
   "MARKET_AH_LEAN_HOME",
+  "MARKET_CONSENSUS",
   "MARKET_LEAN_AWAY",
   "MARKET_LEAN_HOME",
+  "MARKET_VOLATILITY",
+  "REVERSE_LINE_MOVEMENT",
+  "SHARP_SUPPORT",
+  "STEAM_MOVE",
   "MOMENTUM_AWAY",
   "MOMENTUM_HOME",
   "POSSESSION_AWAY_EDGE",

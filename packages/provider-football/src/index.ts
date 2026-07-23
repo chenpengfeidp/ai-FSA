@@ -14,6 +14,7 @@ export type {
   FootballAvailabilityKind,
   FootballBoardRow,
   FootballCompetitionKind,
+  FootballCompletedScore,
   FootballExpectedGoalsMetrics,
   FootballExpectedGoalsRecord,
   FootballExpectedGoalsSide,

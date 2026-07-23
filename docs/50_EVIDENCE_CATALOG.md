@@ -34,6 +34,7 @@ Status legend:
 | Catalog id | Evidence type / surface | Status | Delivery |
 |---|---|---|---|
 | MATCH_INFO | `MATCH_INFO` | Active | F.1 |
+| MATCH_RESULT | `MATCH_RESULT` | Active | A1 actual FT outcome (score/winner/totalGoals/competition/status + provenance); evaluation only — never Feature/Projection input |
 | TEAM_FORM | `TEAM_FORM` | Active | F.1 |
 | STATISTICS | `STATISTICS` | Active | F.1 (team) + F1.2a optional advanced (SoT/possession/corners/cards/…); STATISTICS xG fields remain zero until F1.3B |
 | EXPECTED_GOALS | `EXPECTED_GOALS` | Active | F1.3A Evidence + F1.3B Feature/Rule/Confidence/Projection consume; never estimated from shots |

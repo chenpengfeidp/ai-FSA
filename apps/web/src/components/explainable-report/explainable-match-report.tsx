@@ -19,6 +19,7 @@ import { LineupContextSection } from "./lineup-context";
 import { PlayersContextSection } from "./player-context";
 import { RefereeContextSection } from "./referee-context";
 import { VenueContextSection } from "./venue-context";
+import { EvaluationSection } from "./evaluation-section";
 import { WinnerPredictionCard } from "./winner-prediction-card";
 import { WorkspaceSection } from "./workspace-section";
 
@@ -44,6 +45,11 @@ export function ExplainableMatchReport({
         />
         <WinnerPredictionCard prediction={view.winnerPrediction} />
       </WorkspaceSection>
+
+      <EvaluationSection
+        actualResult={report.actualResult}
+        evaluation={report.evaluation}
+      />
 
       <ReasoningSection />
 

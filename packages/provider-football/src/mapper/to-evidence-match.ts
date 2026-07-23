@@ -216,6 +216,21 @@ function toTeamFormShape(form: FootballTeamForm, fixtureKey: string): unknown {
  * Converts a FAS FootballMatchBundle into the shape expected by
  * FixtureEvidenceNormalizer / ImportMatchUseCase (never vendor JSON).
  */
+function winnerFromScore(
+  homeGoals: number,
+  awayGoals: number,
+): "away" | "draw" | "home" {
+  if (homeGoals > awayGoals) {
+    return "home";
+  }
+
+  if (homeGoals < awayGoals) {
+    return "away";
+  }
+
+  return "draw";
+}
+
 export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
   const {
     fixture,
@@ -231,6 +246,7 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     matchContext,
   } = bundle;
   const fixtureKey = fixture.fixtureId;
+  const completedScore = fixture.completedScore;
 
   return Object.freeze({
     matchId: fixture.matchId,
@@ -240,6 +256,26 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     providerSource: "api-football",
     providerSourceId: `api-football:${fixtureKey}:match`,
     providerMethod: fixture.providerMethod,
+    ...(fixture.status === "FINISHED" && completedScore !== undefined
+      ? {
+          matchResult: Object.freeze({
+            homeGoals: completedScore.homeGoals,
+            awayGoals: completedScore.awayGoals,
+            winner: winnerFromScore(
+              completedScore.homeGoals,
+              completedScore.awayGoals,
+            ),
+            totalGoals: completedScore.homeGoals + completedScore.awayGoals,
+            competitionId: fixture.competitionId,
+            competitionName: fixture.competitionName,
+            matchStatus: "FINISHED" as const,
+            providerSource: "api-football",
+            providerSourceId: `api-football:${fixtureKey}:result`,
+            providerMethod: fixture.providerMethod,
+            observedAt: fixture.kickoff,
+          }),
+        }
+      : {}),
     ...(fixture.referee === undefined
       ? {}
       : {

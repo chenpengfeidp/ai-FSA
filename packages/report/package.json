@@ -24,7 +24,8 @@
     "@fas/feature": "workspace:*",
     "@fas/match": "workspace:*",
     "@fas/prompt": "workspace:*",
-    "@fas/rule": "workspace:*"
+    "@fas/rule": "workspace:*",
+    "@fas/statistics": "workspace:*"
   },
   "devDependencies": {
     "@fas/evidence": "workspace:*",

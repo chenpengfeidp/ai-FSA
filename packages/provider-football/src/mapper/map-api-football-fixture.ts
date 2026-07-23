@@ -49,7 +49,7 @@ export function mapApiFootballFixtureItem(
   const teams = isRecord(item.teams) ? item.teams : undefined;
   const home = teams !== undefined && isRecord(teams.home) ? teams.home : undefined;
   const away = teams !== undefined && isRecord(teams.away) ? teams.away : undefined;
-  const status =
+  const statusRaw =
     fixture !== undefined && isRecord(fixture.status) ? fixture.status : undefined;
 
   const fixtureIdNum = asNumber(fixture?.id);
@@ -61,7 +61,7 @@ export function mapApiFootballFixtureItem(
   const homeName = asString(home?.name);
   const awayName = asString(away?.name);
   const competitionName = asString(league?.name) ?? "Unknown";
-  const shortStatus = asString(status?.short);
+  const shortStatus = asString(statusRaw?.short);
   const venueRaw =
     fixture !== undefined && isRecord(fixture.venue) ? fixture.venue : undefined;
   const venueName = asString(venueRaw?.name);
@@ -91,6 +91,20 @@ export function mapApiFootballFixtureItem(
   }
 
   const fixtureId = String(fixtureIdNum);
+  const status = mapStatus(shortStatus);
+  const goals = isRecord(item.goals) ? item.goals : undefined;
+  const homeGoals = asNumber(goals?.home);
+  const awayGoals = asNumber(goals?.away);
+  const completedScore =
+    status === "FINISHED" &&
+    homeGoals !== undefined &&
+    awayGoals !== undefined &&
+    Number.isInteger(homeGoals) &&
+    Number.isInteger(awayGoals) &&
+    homeGoals >= 0 &&
+    awayGoals >= 0
+      ? Object.freeze({ homeGoals, awayGoals })
+      : undefined;
 
   return Object.freeze({
     fixtureId,
@@ -103,7 +117,8 @@ export function mapApiFootballFixtureItem(
     homeTeamName: homeName,
     awayTeamId: String(awayId),
     awayTeamName: awayName,
-    status: mapStatus(shortStatus),
+    status,
+    completedScore,
     venue,
     referee,
     providerMethod,

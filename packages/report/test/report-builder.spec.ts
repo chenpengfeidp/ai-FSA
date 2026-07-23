@@ -192,6 +192,8 @@ describe("ReportBuilder", () => {
     ]);
     expect(report.scenarios.mostLikely.slot).toBe("mostLikely");
     expect(report.intelligenceConfidence.policyVersion).toBe("confidence.mvp.a05");
+    expect(report.actualResult).toBeUndefined();
+    expect(report.evaluation).toBeUndefined();
   });
 
   it("returns a deeply immutable report", () => {

@@ -7,6 +7,7 @@ const evidenceTypes = [
   "LINEUP",
   "MATCH_CONTEXT",
   "MATCH_INFO",
+  "MATCH_RESULT",
   "NEWS",
   "ODDS",
   "PLAYER",
@@ -483,6 +484,22 @@ export class AnalysisReportDto {
 
   @ApiProperty({ type: () => NarrativeDraftDto })
   declare readonly narrative: NarrativeDraftDto;
+
+  @ApiPropertyOptional({
+    description:
+      "Actual FT match outcome when MATCH_RESULT Evidence is present. Separate from Prediction.",
+    type: "object",
+    additionalProperties: true,
+  })
+  declare readonly actualResult?: Readonly<Record<string, unknown>>;
+
+  @ApiPropertyOptional({
+    description:
+      "Deterministic prediction evaluation overlay. Measurement only — never mutates Projection.",
+    type: "object",
+    additionalProperties: true,
+  })
+  declare readonly evaluation?: Readonly<Record<string, unknown>>;
 }
 
 export class AnalysisErrorCauseDto {

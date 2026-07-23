@@ -1,7 +1,12 @@
 import type { NarrativeGenerator } from "@fas/ai-provider";
-import type { AnalysisResult, DeterministicMatchProjection } from "@fas/analysis";
+import {
+  buildSealedPredictionInput,
+  type AnalysisResult,
+  type DeterministicMatchProjection,
+} from "@fas/analysis";
 import type { Feature } from "@fas/feature";
 import type { RuleResult } from "@fas/rule";
+import { evaluatePrediction, findActualMatchResult } from "@fas/statistics";
 import {
   createAnalysisReport,
   type AnalysisReport,
@@ -87,6 +92,16 @@ export class ReportBuilder {
     // NarrativeGenerator remains injected for composition-root compatibility.
     void this.#narrativeGenerator;
 
+    const actualResult = findActualMatchResult(analysis.evidenceSet);
+    const evaluation =
+      actualResult === undefined
+        ? undefined
+        : evaluatePrediction({
+            prediction: buildSealedPredictionInput(analysis),
+            actual: actualResult,
+            evaluatedAt: analysis.generatedAt,
+          });
+
     return createAnalysisReport({
       reportId,
       matchId: analysis.matchId,
@@ -98,6 +113,8 @@ export class ReportBuilder {
       scenarios: analysis.scenarios,
       intelligenceConfidence: analysis.intelligenceConfidence,
       narrative: buildMvpIntelligenceNarrative(analysis, reportId),
+      ...(actualResult === undefined ? {} : { actualResult }),
+      ...(evaluation === undefined ? {} : { evaluation }),
     });
   }
 }

@@ -8,6 +8,7 @@ import {
 
 const evidenceTypes = [
   "MATCH_INFO",
+  "MATCH_RESULT",
   "ODDS",
   "TEAM_FORM",
   "HEAD_TO_HEAD",

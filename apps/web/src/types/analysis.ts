@@ -194,6 +194,67 @@ export interface NarrativeDraftDto {
   readonly generatedAt: string;
 }
 
+export type MatchWinnerDto = "away" | "draw" | "home";
+
+export interface ActualMatchResultDto {
+  readonly matchId: string;
+  readonly homeGoals: number;
+  readonly awayGoals: number;
+  readonly winner: MatchWinnerDto;
+  readonly totalGoals: number;
+  readonly competitionId?: string;
+  readonly competitionName?: string;
+  readonly matchStatus: "FINISHED";
+  readonly providerId: string;
+  readonly providerSourceId: string;
+  readonly providerMethod: string;
+  readonly observedAt: string;
+}
+
+export interface EvaluationMetricsDto {
+  readonly winnerHit: boolean;
+  readonly scoreHit: boolean;
+  readonly goalHit: boolean;
+  readonly goalRangeHit: boolean;
+  readonly predictedWinner: MatchWinnerDto;
+  readonly predictedGoalRange: "range01" | "range23" | "range4Plus";
+  readonly actualGoalRange: "range01" | "range23" | "range4Plus";
+  readonly scenarioHit: Readonly<{
+    mostLikely: boolean;
+    alternative: boolean;
+    upset: boolean;
+    anyScoreline: boolean;
+    mostLikelyWinner: boolean;
+  }>;
+  readonly confidenceCorrectness: "correct" | "incorrect" | "not_claimed";
+  readonly ruleCoverage: Readonly<{
+    applicable: number;
+    pass: number;
+    fail: number;
+    inapplicable: number;
+    agreementRatio: number;
+  }>;
+  readonly featureCoverage: Readonly<{
+    present: number;
+    corePresent: number;
+    coreExpected: number;
+    coverageRatio: number;
+  }>;
+  readonly paperUnitReturn: number;
+  readonly paperMetricDisclaimer: string;
+}
+
+export interface PredictionEvaluationDto {
+  readonly evaluationModelVersion: string;
+  readonly matchId: string;
+  readonly evaluatedAt: string;
+  readonly status: "excluded" | "scored";
+  readonly exclusionReason?: string;
+  readonly projectionChecksum: string;
+  readonly projectionModelVersion: string;
+  readonly metrics?: EvaluationMetricsDto;
+}
+
 export interface AnalysisReportDto {
   readonly reportId: string;
   readonly matchId: string;
@@ -203,6 +264,8 @@ export interface AnalysisReportDto {
   readonly rules: readonly RuleResultDto[];
   readonly deterministic: DeterministicProjectionDto;
   readonly narrative: NarrativeDraftDto;
+  readonly actualResult?: ActualMatchResultDto;
+  readonly evaluation?: PredictionEvaluationDto;
 }
 
 export interface BackendErrorDto {

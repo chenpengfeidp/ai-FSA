@@ -14,6 +14,7 @@ export type EvidenceType =
   | "LINEUP"
   | "MATCH_CONTEXT"
   | "MATCH_INFO"
+  | "MATCH_RESULT"
   | "NEWS"
   | "ODDS"
   | "PLAYER"
@@ -100,6 +101,7 @@ const evidenceTypeValues: ReadonlySet<string> = new Set([
   "LINEUP",
   "MATCH_CONTEXT",
   "MATCH_INFO",
+  "MATCH_RESULT",
   "NEWS",
   "ODDS",
   "PLAYER",

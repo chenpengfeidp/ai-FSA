@@ -32,3 +32,64 @@ export type {
   CalibrationOutcome,
   CalibrationPopulationRow,
 } from "./domain/calibration-population.js";
+
+export {
+  createActualMatchResult,
+  ActualMatchResultValidationError,
+} from "./domain/actual-match-result.js";
+export type {
+  ActualMatchResult,
+  ActualMatchStatus,
+  CreateActualMatchResultInput,
+  MatchWinner,
+} from "./domain/actual-match-result.js";
+
+export {
+  createPredictionEvaluationRecord,
+  EVALUATION_MODEL_VERSION,
+  PredictionEvaluationValidationError,
+} from "./domain/prediction-evaluation.js";
+export type {
+  ConfidenceCorrectness,
+  CreatePredictionEvaluationRecordInput,
+  EvaluationMetrics,
+  EvaluationStatus,
+  FeatureCoverageMetrics,
+  GoalRangeBucket,
+  PredictionEvaluationRecord,
+  RuleCoverageMetrics,
+  ScenarioHitMetrics,
+  SealedGoalRange,
+  SealedPredictionInput,
+  SealedRuleSnapshot,
+  SealedScenario,
+  SealedScoreline,
+} from "./domain/prediction-evaluation.js";
+
+export {
+  CORE_EVALUATION_FEATURE_NAMES,
+  evaluatePrediction,
+  goalRangeBucket,
+  predictedGoalRangeBucket,
+  predictedWinnerFromProbs,
+  PredictionEvaluationError,
+} from "./evaluation/evaluate-prediction.js";
+export type { EvaluatePredictionInput } from "./evaluation/evaluate-prediction.js";
+
+export {
+  findActualMatchResult,
+  mapActualMatchResultFromEvidence,
+  ActualMatchResultMappingError,
+} from "./evaluation/map-actual-match-result.js";
+
+export {
+  EVALUATION_POPULATION_DEMO_V1,
+  loadEvaluationDemoPopulationRows,
+  scoreEvaluationPopulation,
+  summarizeEvaluationPopulation,
+  EvaluationPopulationError,
+} from "./evaluation/evaluation-population.js";
+export type {
+  EvaluationPopulationRow,
+  EvaluationPopulationSummary,
+} from "./evaluation/evaluation-population.js";

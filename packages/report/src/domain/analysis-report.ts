@@ -7,6 +7,7 @@ import type { NarrativeDraft } from "@fas/ai-provider";
 import type { Feature } from "@fas/feature";
 import { createMatchId, type MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
+import type { ActualMatchResult, PredictionEvaluationRecord } from "@fas/statistics";
 
 export interface AnalysisReport {
   readonly reportId: string;
@@ -19,6 +20,10 @@ export interface AnalysisReport {
   readonly scenarios: ScenarioSet;
   readonly intelligenceConfidence: IntelligenceConfidence;
   readonly narrative: NarrativeDraft;
+  /** Actual FT outcome when MATCH_RESULT Evidence is present — never alters Prediction. */
+  readonly actualResult?: ActualMatchResult;
+  /** Deterministic evaluation overlay — measurement only. */
+  readonly evaluation?: PredictionEvaluationRecord;
 }
 
 export interface CreateAnalysisReportInput {
@@ -32,6 +37,8 @@ export interface CreateAnalysisReportInput {
   readonly scenarios: ScenarioSet;
   readonly intelligenceConfidence: IntelligenceConfidence;
   readonly narrative: NarrativeDraft;
+  readonly actualResult?: ActualMatchResult;
+  readonly evaluation?: PredictionEvaluationRecord;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -132,6 +139,18 @@ export function createAnalysisReport(
     throw new AnalysisReportValidationError("narrative.sections must not be empty.");
   }
 
+  if (input.actualResult !== undefined && input.actualResult.matchId !== matchId) {
+    throw new AnalysisReportValidationError(
+      "actualResult must reference the AnalysisReport MatchId.",
+    );
+  }
+
+  if (input.evaluation !== undefined && input.evaluation.matchId !== matchId) {
+    throw new AnalysisReportValidationError(
+      "evaluation must reference the AnalysisReport MatchId.",
+    );
+  }
+
   return Object.freeze({
     reportId: requireNonEmpty(input.reportId, "reportId"),
     matchId,
@@ -148,5 +167,9 @@ export function createAnalysisReport(
         input.narrative.sections.map((section) => Object.freeze({ ...section })),
       ),
     }),
+    ...(input.actualResult === undefined
+      ? {}
+      : { actualResult: input.actualResult }),
+    ...(input.evaluation === undefined ? {} : { evaluation: input.evaluation }),
   });
 }

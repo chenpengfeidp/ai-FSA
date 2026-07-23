@@ -568,8 +568,38 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
   }
 
   const referee = parseReferee(fixtureRaw.referee);
+  const statusRaw = fixtureRaw.status;
+  const status: FootballFixture["status"] =
+    statusRaw === "FINISHED" || statusRaw === "OTHER" || statusRaw === "SCHEDULED"
+      ? statusRaw
+      : "OTHER";
+  const completedScoreRaw = isRecord(fixtureRaw.completedScore)
+    ? fixtureRaw.completedScore
+    : undefined;
+  const homeGoals =
+    completedScoreRaw !== undefined &&
+    typeof completedScoreRaw.homeGoals === "number"
+      ? completedScoreRaw.homeGoals
+      : undefined;
+  const awayGoals =
+    completedScoreRaw !== undefined &&
+    typeof completedScoreRaw.awayGoals === "number"
+      ? completedScoreRaw.awayGoals
+      : undefined;
+  const completedScore =
+    status === "FINISHED" &&
+    homeGoals !== undefined &&
+    awayGoals !== undefined &&
+    Number.isInteger(homeGoals) &&
+    Number.isInteger(awayGoals) &&
+    homeGoals >= 0 &&
+    awayGoals >= 0
+      ? Object.freeze({ homeGoals, awayGoals })
+      : undefined;
   const fixture: FootballFixture = Object.freeze({
     ...(fixtureRaw as unknown as FootballFixture),
+    status,
+    completedScore,
     referee,
   });
   const homeFormRecord = homeFormRaw as unknown as FootballTeamForm &

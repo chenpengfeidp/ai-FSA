@@ -97,6 +97,12 @@ export interface FootballTeamLineup {
   readonly providerMethod: FootballProviderMethod;
 }
 
+/** Full-time score when the provider reports a finished fixture. */
+export interface FootballCompletedScore {
+  readonly homeGoals: number;
+  readonly awayGoals: number;
+}
+
 export interface FootballFixture {
   readonly fixtureId: string;
   readonly matchId: string;
@@ -109,6 +115,11 @@ export interface FootballFixture {
   readonly awayTeamId: string;
   readonly awayTeamName: string;
   readonly status: "SCHEDULED" | "FINISHED" | "OTHER";
+  /**
+   * Present only when status is FINISHED and the provider supplied FT goals.
+   * Never invent scores for SCHEDULED / OTHER fixtures.
+   */
+  readonly completedScore: FootballCompletedScore | undefined;
   readonly venue: FootballVenue | undefined;
   readonly referee: FootballReferee | undefined;
   readonly providerMethod: FootballProviderMethod;

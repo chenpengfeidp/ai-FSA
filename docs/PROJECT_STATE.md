@@ -2,15 +2,15 @@
 
 ## Snapshot
 
-- Last updated: 2026-07-23
+- Last updated: 2026-07-19
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **Architecture Freeze v0.3** review complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
+- Current task status: **A1 Prediction Evaluation** complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **R1** Architecture Freeze Review (v0.3) complete — no production code; integrity verified after Intelligence MVP
-- Last completed delivery: Sprint **R1** (`docs/reviews/v0.3_ARCHITECTURE_FREEZE_REVIEW.md`); prior I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
-- Demo: recorded cassette `football:100001` includes full xG windows + Match Context; odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`
-- Next authorized work: **A1 Prediction Evaluation**
+- Current sprint: **A1** Prediction Evaluation Framework complete
+- Last completed delivery: Sprint **A1** (`docs/sprints/A1/A1_PREDICTION_EVALUATION_COMPLETION_REPORT.md`); prior R1, I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
+- Demo: recorded cassette `football:100001` includes full xG windows + Match Context; odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`; evaluation demo population in `@fas/statistics`
+- Next authorized work: **A2 Calibration**
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
@@ -48,14 +48,14 @@ Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
   → Web Match Center / Session / Workspace / Library
 ```
 
-Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG Evidence is **F1.3A** (`EXPECTED_GOALS`); Feature/Rule/Confidence/Projection consume is **F1.3B** (`feature.v2.f13b.xg` / `rule.mvp.f13b.xg` / `projection.v2.f13b.xg`). Match Context Evidence is **I1A** (`MATCH_CONTEXT`); Feature/Rule/Confidence/Projection consume is **I1B** (`feature.v2.i1b.context` / `rule.mvp.i1b.context` / `projection.v2.i1b.context`). Odds & Market Evidence depth is **I2A** (extended `ODDS` payload + Workspace/Report); Market Intelligence Feature/Rule/Confidence/Projection supporting consume is **I2B** (`feature.v2.i2b.market` / `rule.mvp.i2b.market` / `projection.v2.i2b.market`; Market Rules `channel: none`).
+Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG Evidence is **F1.3A** (`EXPECTED_GOALS`); Feature/Rule/Confidence/Projection consume is **F1.3B** (`feature.v2.f13b.xg` / `rule.mvp.f13b.xg` / `projection.v2.f13b.xg`). Match Context Evidence is **I1A** (`MATCH_CONTEXT`); Feature/Rule/Confidence/Projection consume is **I1B** (`feature.v2.i1b.context` / `rule.mvp.i1b.context` / `projection.v2.i1b.context`). Odds & Market Evidence depth is **I2A** (extended `ODDS` payload + Workspace/Report); Market Intelligence Feature/Rule/Confidence/Projection supporting consume is **I2B** (`feature.v2.i2b.market` / `rule.mvp.i2b.market` / `projection.v2.i2b.market`; Market Rules `channel: none`). Prediction Evaluation is **A1** (`MATCH_RESULT` Evidence + `@fas/statistics` `evaluatePrediction`; Report/Workspace Actual + Evaluation overlays; never mutates sealed Projection).
 
 Implemented packages used by the slice (non-exhaustive):
 
 - `@fas/match`, `@fas/evidence`, `@fas/evidence-normalizer`, `@fas/evidence-import`, `@fas/evidence-query`
 - `@fas/provider-fixture`, `@fas/provider-football`, `@fas/provider-odds`, `@fas/application`
 - `@fas/feature`, `@fas/rule`, `@fas/analysis`, `@fas/report`
-- `@fas/statistics` (pinned `population_demo_v1` frequency-ratio candidate by default; identity still selectable; no match-run training)
+- `@fas/statistics` (pinned `population_demo_v1` frequency-ratio candidate by default; identity still selectable; no match-run training; A1 prediction evaluation + demo evaluation population)
 - `@fas/prompt` (sealed-context composition; no retrieval / no network)
 - `@fas/ai-provider` (`LocalDeterministicNarrativeAdapter` only; no provider SDK)
 
@@ -81,6 +81,7 @@ Domain (private demo):
 
 - Match Center, analysis session pacing UI, explainable workspace, analysis library (`/reports`)
 - Workspace maps sealed projection / narrative; does not recompute λ, 1X2, confidence, or recommendations
+- Workspace separates **Prediction** / **Actual Result** (`MATCH_RESULT`) / **Evaluation** (A1 measurement overlay; never mutates Projection)
 
 ### Worker
 
@@ -230,17 +231,17 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. B.1/B.2/C.1/C.2/A.1/P.1/P.2/ZH-1 path is implemented with default offline recorded + memory Evidence.
+No numbered sprint is active. Intelligence MVP + A1 Prediction Evaluation are implemented with default offline recorded + memory Evidence.
 
 Recommended follow-ons (ordered):
 
-1. Follow **`docs/40_PRODUCT_ROADMAP.md`**: next product sprint **F1.1** (then F1.2 → F1.3 → A1 → A2 → K1/C1/S1/R1 → v1.0 → v2.0);
+1. Follow **`docs/40_PRODUCT_ROADMAP.md`**: next product sprint **A2 Calibration** (then K1/C1/S1/R1 → v1.0 → v2.0 as authorized);
 2. Keep Odds as optional market layer only; do not re-merge schedule ownership into Odds;
 3. Compose migrate automation / postgres-mode smoke evidence (platform companion);
 4. Do not start a sprint without citing doc 40 Sprint id;
 5. Later product items only as listed in doc 40 (no ad-hoc engine invention).
 
-Recently delivered: Architecture Freeze Review **v0.3** (`docs/reviews/v0.3_ARCHITECTURE_FREEZE_REVIEW.md`); Intelligence MVP (F1.2–I2B); prior Freeze v0.2; F.1 Football Data Provider; Match Center; ZH-2; `docs/PROJECT_INDEX.md`.
+Recently delivered: **A1** Prediction Evaluation (`docs/sprints/A1/A1_PREDICTION_EVALUATION_COMPLETION_REPORT.md`); Architecture Freeze Review **v0.3**; Intelligence MVP (F1.2–I2B); prior Freeze v0.2; F.1 Football Data Provider; Match Center; ZH-2; `docs/PROJECT_INDEX.md`.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

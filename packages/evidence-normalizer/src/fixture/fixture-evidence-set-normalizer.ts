@@ -1785,7 +1785,236 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(normalized.value);
   }
 
+  if (input.matchResult !== undefined) {
+    const normalized = parseMatchResult(
+      input.matchResult,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalized.ok) {
+      return normalized;
+    }
+
+    evidences.push(normalized.value);
+  }
+
   return success(Object.freeze(evidences));
+}
+
+/**
+ * A1: optional actual match outcome Evidence.
+ * Absent → honest absence (pre-match / unfinished). Never invent FT scores.
+ */
+function parseMatchResult(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  _eventTime: string,
+): EvidenceNormalizationResult {
+  void _eventTime;
+
+  if (!isRecord(value)) {
+    return failure("INVALID_FIELD", "matchResult must be an object.", "matchResult");
+  }
+
+  const homeGoals = requireNonNegativeInteger(
+    value.homeGoals,
+    "matchResult.homeGoals",
+  );
+
+  if (!homeGoals.ok) {
+    return homeGoals;
+  }
+
+  const awayGoals = requireNonNegativeInteger(
+    value.awayGoals,
+    "matchResult.awayGoals",
+  );
+
+  if (!awayGoals.ok) {
+    return awayGoals;
+  }
+
+  const winner =
+    value.winner === "home" || value.winner === "draw" || value.winner === "away"
+      ? value.winner
+      : undefined;
+
+  if (winner === undefined) {
+    return failure(
+      "INVALID_FIELD",
+      'matchResult.winner must be "home", "draw", or "away".',
+      "matchResult.winner",
+    );
+  }
+
+  const expectedWinner =
+    homeGoals.value > awayGoals.value
+      ? "home"
+      : homeGoals.value < awayGoals.value
+        ? "away"
+        : "draw";
+
+  if (winner !== expectedWinner) {
+    return failure(
+      "INVALID_FIELD",
+      "matchResult.winner must match homeGoals/awayGoals.",
+      "matchResult.winner",
+    );
+  }
+
+  const totalGoals = requireNonNegativeInteger(
+    value.totalGoals,
+    "matchResult.totalGoals",
+  );
+
+  if (!totalGoals.ok) {
+    return totalGoals;
+  }
+
+  if (totalGoals.value !== homeGoals.value + awayGoals.value) {
+    return failure(
+      "INVALID_FIELD",
+      "matchResult.totalGoals must equal homeGoals + awayGoals.",
+      "matchResult.totalGoals",
+    );
+  }
+
+  if (value.matchStatus !== "FINISHED") {
+    return failure(
+      "INVALID_FIELD",
+      'matchResult.matchStatus must be "FINISHED".',
+      "matchResult.matchStatus",
+    );
+  }
+
+  if (
+    typeof value.observedAt !== "string" ||
+    value.observedAt.trim().length === 0 ||
+    Number.isNaN(Date.parse(value.observedAt))
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "matchResult.observedAt must be a valid ISO 8601 timestamp.",
+      "matchResult.observedAt",
+    );
+  }
+
+  const provenanceOverlay = parseProviderProvenanceOverlay(value);
+
+  if (!provenanceOverlay.ok) {
+    return provenanceOverlay;
+  }
+
+  const competitionId =
+    value.competitionId === undefined || value.competitionId === null
+      ? undefined
+      : typeof value.competitionId === "string" &&
+          value.competitionId.trim().length > 0
+        ? value.competitionId.trim()
+        : undefined;
+
+  if (
+    value.competitionId !== undefined &&
+    value.competitionId !== null &&
+    competitionId === undefined
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "matchResult.competitionId must be a non-empty string when present.",
+      "matchResult.competitionId",
+    );
+  }
+
+  const competitionName =
+    value.competitionName === undefined || value.competitionName === null
+      ? undefined
+      : typeof value.competitionName === "string" &&
+          value.competitionName.trim().length > 0
+        ? value.competitionName.trim()
+        : undefined;
+
+  if (
+    value.competitionName !== undefined &&
+    value.competitionName !== null &&
+    competitionName === undefined
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "matchResult.competitionName must be a non-empty string when present.",
+      "matchResult.competitionName",
+    );
+  }
+
+  const source = provenanceOverlay.value?.source ?? "fixture";
+  const sourceId = provenanceOverlay.value?.sourceId ?? `fixture-${matchId}-result`;
+  const method = provenanceOverlay.value?.method ?? "fixture";
+
+  try {
+    return success(
+      createEvidence({
+        id: `evidence-${source}-${matchId}-result`,
+        source,
+        sourceId,
+        type: "MATCH_RESULT",
+        matchId: createMatchId(matchId),
+        collectedAt,
+        eventTime: value.observedAt.trim(),
+        timestamp: collectedAt,
+        freshness: "fresh",
+        confidence: source === "api-football" ? "medium" : "unknown",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method,
+        },
+        payload: {
+          homeGoals: homeGoals.value,
+          awayGoals: awayGoals.value,
+          winner,
+          totalGoals: totalGoals.value,
+          matchStatus: "FINISHED",
+          ...(competitionId === undefined ? {} : { competitionId }),
+          ...(competitionName === undefined ? {} : { competitionName }),
+          observedAt: value.observedAt.trim(),
+        },
+      }),
+    );
+  } catch (error: unknown) {
+    if (
+      error instanceof EvidenceValidationError ||
+      error instanceof MatchValidationError
+    ) {
+      return failure("DOMAIN_VALIDATION_FAILED", error.message);
+    }
+
+    return failure(
+      "UNEXPECTED_ERROR",
+      "MATCH_RESULT evidence normalization failed unexpectedly.",
+    );
+  }
+}
+
+function requireNonNegativeInteger(
+  value: unknown,
+  field: string,
+): Result<number, EvidenceNormalizationError> {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    !Number.isInteger(value) ||
+    value < 0
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      `${field} must be a non-negative integer.`,
+      field,
+    );
+  }
+
+  return success(value);
 }
 
 function parseVenue(

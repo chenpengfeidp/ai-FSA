@@ -20,11 +20,13 @@ const fixture: FootballFixture = Object.freeze({
   awayTeamId: "20",
   awayTeamName: "Away FC",
   status: "SCHEDULED",
+  completedScore: undefined,
   venue: Object.freeze({
     venueId: "1",
     name: "Live Stadium",
     city: "Seoul",
   }),
+  referee: undefined,
   providerMethod: "http-live",
 });
 

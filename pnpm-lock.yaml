@@ -519,6 +519,9 @@ importers:
       '@fas/rule':
         specifier: workspace:*
         version: link:../rule
+      '@fas/statistics':
+        specifier: workspace:*
+        version: link:../statistics
     devDependencies:
       '@fas/evidence':
         specifier: workspace:*

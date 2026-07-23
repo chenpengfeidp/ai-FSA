@@ -65,3 +65,9 @@ export {
 } from "./projection/projection-math.js";
 export { resolvePinnedCalibrationArtifact } from "@fas/statistics";
 export type { CalibrationArtifactMode } from "@fas/statistics";
+export { buildSealedPredictionInput } from "./evaluation/build-sealed-prediction-input.js";
+export { EvaluatePredictionUseCase } from "./use-case/evaluate-prediction-use-case.js";
+export type {
+  EvaluatePredictionCommand,
+  EvaluatePredictionResult,
+} from "./use-case/evaluate-prediction-use-case.js";

@@ -21,12 +21,12 @@
 | 平台 P.1 / P.2 | **已落地**（`/health/ready`；Evidence 可选 postgres） |
 | UI 中文 ZH-1 / ZH-2 | **已落地**（比赛中心/会话 + 工作区/报告/资料库） |
 | Football Data ≠ Odds（F.1） | **已落地**（`@fas/provider-football`；Match Center 主源；Odds 为可选赔率层） |
-| Architecture Freeze | **v0.2**（Report narrative DI；pipeline depcruise；Odds vendor DTO 非公共契约） |
+| Architecture Freeze | **v0.3**（v0.2 管线复审通过；见 `docs/reviews/v0.3_ARCHITECTURE_FREEZE_REVIEW.md`） |
 | 交付阶段 | **产品研发**（架构设计阶段关闭；见 `AGENTS.md` Project Governance Rule） |
-| 真 xG（路线图 **Sprint F1.3**） | **未做**（F.1 可用 shots-based STATISTICS；goals-proxy 仅 Odds 回退路径） |
+| Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** 私有环境确定性闭环已通；架构冻结 v0.2；下一步 **Sprint F1.1**（`docs/40_PRODUCT_ROADMAP.md`）。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
+一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；下一步 **A1 Prediction Evaluation**（`docs/40_PRODUCT_ROADMAP.md` / `PROJECT_STATE`）。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
 
 ---
 
@@ -222,6 +222,7 @@ Match Center (web)
 | ZH-1 / ZH-2 | 中文 chrome | `apps/web/src/copy/zh.ts` |
 | F.1 (landed) | `@fas/provider-football`；Match Center 事实源与 Odds 拆分 | `VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` |
 | Freeze v0.2 | Report DI + pipeline depcruise + docs sync | `PROJECT_STATE.md` |
+| Freeze Review v0.3 | Intelligence MVP 管线完整性复审 | `docs/reviews/v0.3_ARCHITECTURE_FREEZE_REVIEW.md` |
 
 ---
 
@@ -239,13 +240,13 @@ Match Center (web)
 
 ## 8. 推荐下一步（与 PROJECT_STATE / 路线图一致）
 
-产品顺序以 [`docs/40_PRODUCT_ROADMAP.md`](./40_PRODUCT_ROADMAP.md) 为准：
+产品顺序以 [`docs/40_PRODUCT_ROADMAP.md`](./40_PRODUCT_ROADMAP.md) 与 [`docs/PROJECT_STATE.md`](./PROJECT_STATE.md) 为准：
 
-1. **Sprint F1.1** — 继续 Lineup / Referee / 更丰富 Form（**F1.1A** + **F1.1B-1 Venue** + **F1.1C-1 Player** + **F1.1D Availability** 已落地）  
+1. **A1 Prediction Evaluation** — 冻结人口上评估 sealed projections（当前下一步）  
+2. **A2** — Calibration productization（A1 之后）  
+3. 其后按 doc 40：K1 / C1 / … → v1.0 → v2.0  
 
-2. **Sprint F1.2** — Advanced match statistics  
-3. **Sprint F1.3** — xG / xGA / shot map（注意：路线图已重新定义 F1.1≠xG）  
-4. 其后 A1 → A2 → K1 / C1 / S1 / R1 → v1.0 → v2.0  
+历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3  
 
 平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 

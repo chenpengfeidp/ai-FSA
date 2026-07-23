@@ -5,14 +5,14 @@
 - Last updated: 2026-07-23
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **Architecture Freeze v0.2** holding; F.1 landed; product roadmap is `docs/40_PRODUCT_ROADMAP.md`
+- Current task status: **Architecture Freeze v0.3** review complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **I2B** Market Intelligence delivered (Features → Rules → Confidence → Projection supporting path; channel none)
-- Last completed delivery: Sprint **I2B** Market Intelligence (`docs/sprints/I2/I2B_MARKET_INTELLIGENCE_COMPLETION_REPORT.md`); prior I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
+- Current sprint: **R1** Architecture Freeze Review (v0.3) complete — no production code; integrity verified after Intelligence MVP
+- Last completed delivery: Sprint **R1** (`docs/reviews/v0.3_ARCHITECTURE_FREEZE_REVIEW.md`); prior I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
 - Demo: recorded cassette `football:100001` includes full xG windows + Match Context; odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`
-- Next authorized work: **Architecture Freeze Review (v0.3)**, then **A1 Prediction Evaluation**
+- Next authorized work: **A1 Prediction Evaluation**
 - Release status: Pre-release; private trusted environment only; not production
-- Architecture freeze: **v0.2** (stable for long-term feature work inside frozen boundaries)
+- Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
 - Project Governance Rule: no new Architecture docs / Engines without defect or capability gap; Sprint → code+tests+validation first; every Sprint cites doc 40 with I/O + acceptance + completion report
 - Document map for AI/onboarding: `docs/PROJECT_INDEX.md`
@@ -240,7 +240,7 @@ Recommended follow-ons (ordered):
 4. Do not start a sprint without citing doc 40 Sprint id;
 5. Later product items only as listed in doc 40 (no ad-hoc engine invention).
 
-Recently delivered: Architecture Freeze v0.2; F.1 Football Data Provider; Match Center date filter; multi-league odds/scores; ZH-2; `docs/PROJECT_INDEX.md`.
+Recently delivered: Architecture Freeze Review **v0.3** (`docs/reviews/v0.3_ARCHITECTURE_FREEZE_REVIEW.md`); Intelligence MVP (F1.2–I2B); prior Freeze v0.2; F.1 Football Data Provider; Match Center; ZH-2; `docs/PROJECT_INDEX.md`.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

@@ -4,6 +4,7 @@
  */
 
 import type { FootballExpectedGoalsRecord } from "./football-expected-goals.js";
+import type { FootballMatchContextRecord } from "./football-match-context.js";
 
 export type { FootballExpectedGoalsRecord } from "./football-expected-goals.js";
 export type {
@@ -11,6 +12,13 @@ export type {
   FootballExpectedGoalsSide,
   FootballExpectedGoalsWindow,
 } from "./football-expected-goals.js";
+export type { FootballMatchContextRecord } from "./football-match-context.js";
+export type {
+  FootballCompetitionKind,
+  FootballMatchContextMetrics,
+  FootballMatchContextSide,
+  FootballMatchLeg,
+} from "./football-match-context.js";
 
 export type FootballProviderMethod = "http-live" | "recorded-snapshot";
 
@@ -240,6 +248,11 @@ export interface FootballMatchBundle {
    * Empty means honest absence — never estimate from shots/goals.
    */
   readonly expectedGoals: readonly FootballExpectedGoalsRecord[];
+  /**
+   * Match Context records (I1A Evidence only).
+   * Empty means honest absence — never invent rest/travel/knockout facts.
+   */
+  readonly matchContext: readonly FootballMatchContextRecord[];
 }
 
 export interface FootballBoardRow {

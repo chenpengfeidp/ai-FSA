@@ -37,6 +37,7 @@ Status legend:
 | TEAM_FORM | `TEAM_FORM` | Active | F.1 |
 | STATISTICS | `STATISTICS` | Active | F.1 (team) + F1.2a optional advanced (SoT/possession/corners/cards/…); STATISTICS xG fields remain zero until F1.3B |
 | EXPECTED_GOALS | `EXPECTED_GOALS` | Active | F1.3A Evidence + F1.3B Feature/Rule/Confidence/Projection consume; never estimated from shots |
+| MATCH_CONTEXT | `MATCH_CONTEXT` | Active | I1A Evidence only (rest/congestion/home-away/travel posture/competition meta); no Features yet (I1B) |
 | HEAD_TO_HEAD | `HEAD_TO_HEAD` | Active | F.1 |
 | VENUE | `VENUE` | Active | F1.1B-1 |
 | PLAYER | `PLAYER` | Active | F1.1C-1 (basic identity) |

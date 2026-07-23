@@ -22,6 +22,8 @@ import type {
   GoalRangeView,
   LineupPlayerItemView,
   LineupsContextView,
+  MatchContextEvidenceView,
+  MatchContextRecordView,
   MostLikelyScoreView,
   PlayerContextItemView,
   PlayersContextView,
@@ -124,6 +126,7 @@ const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
   HEAD_TO_HEAD: "Head-to-head",
   INJURY: "Injury",
   LINEUP: "Lineup",
+  MATCH_CONTEXT: "Match Context",
   MATCH_INFO: "Match information",
   NEWS: "News",
   ODDS: "Odds",
@@ -655,6 +658,112 @@ function buildExpectedGoalsContext(
   });
 }
 
+function optionalBoolean(value: unknown): boolean | null {
+  return typeof value === "boolean" ? value : null;
+}
+
+function optionalSide(value: unknown): "away" | "home" | null {
+  return value === "home" || value === "away" ? value : null;
+}
+
+function optionalLeg(value: unknown): "first" | "second" | null {
+  return value === "first" || value === "second" ? value : null;
+}
+
+function mapMatchContextRecord(item: EvidenceDto): MatchContextRecordView | null {
+  if (item.type !== "MATCH_CONTEXT") {
+    return null;
+  }
+
+  const teamSide =
+    item.payload.teamSide === "home" || item.payload.teamSide === "away"
+      ? item.payload.teamSide
+      : null;
+  const teamName =
+    typeof item.payload.teamName === "string" ? item.payload.teamName : null;
+  const observedAt =
+    typeof item.payload.observedAt === "string" ? item.payload.observedAt : null;
+  const metricsRaw =
+    typeof item.payload.metrics === "object" &&
+    item.payload.metrics !== null &&
+    !Array.isArray(item.payload.metrics)
+      ? (item.payload.metrics as Record<string, unknown>)
+      : null;
+
+  if (
+    teamSide === null ||
+    teamName === null ||
+    observedAt === null ||
+    metricsRaw === null
+  ) {
+    return null;
+  }
+
+  return Object.freeze({
+    teamSide,
+    teamName,
+    competitionName:
+      typeof item.payload.competitionName === "string"
+        ? item.payload.competitionName
+        : null,
+    season: typeof item.payload.season === "string" ? item.payload.season : null,
+    observedAt,
+    metrics: Object.freeze({
+      restDays: optionalNumber(metricsRaw.restDays),
+      daysSinceLastMatch: optionalNumber(metricsRaw.daysSinceLastMatch),
+      daysUntilNextMatch: optionalNumber(metricsRaw.daysUntilNextMatch),
+      matchesInLast7Days: optionalNumber(metricsRaw.matchesInLast7Days),
+      matchesInLast14Days: optionalNumber(metricsRaw.matchesInLast14Days),
+      fixtureCongestion: optionalNumber(metricsRaw.fixtureCongestion),
+      homeAwayContext: optionalSide(metricsRaw.homeAwayContext),
+      travelContext: optionalSide(metricsRaw.travelContext),
+      venueCity:
+        typeof metricsRaw.venueCity === "string" ? metricsRaw.venueCity : null,
+      competitionKind:
+        typeof metricsRaw.competitionKind === "string"
+          ? metricsRaw.competitionKind
+          : null,
+      competitionTypeLabel:
+        typeof metricsRaw.competitionTypeLabel === "string"
+          ? metricsRaw.competitionTypeLabel
+          : null,
+      isKnockout: optionalBoolean(metricsRaw.isKnockout),
+      roundLabel:
+        typeof metricsRaw.roundLabel === "string" ? metricsRaw.roundLabel : null,
+      leg: optionalLeg(metricsRaw.leg),
+      aggregateScore:
+        typeof metricsRaw.aggregateScore === "string"
+          ? metricsRaw.aggregateScore
+          : null,
+    }),
+    providerId: item.providerId,
+    source: item.source,
+    provenanceMethod: item.provenance.method,
+  });
+}
+
+function buildMatchContextEvidence(
+  evidence: readonly EvidenceDto[],
+): MatchContextEvidenceView {
+  const records = evidence
+    .map(mapMatchContextRecord)
+    .filter((item): item is MatchContextRecordView => item !== null);
+
+  if (records.length === 0) {
+    return Object.freeze({
+      available: false,
+      records: Object.freeze([]),
+      note: "Match Context Evidence is not available for this match (honest absence). Never estimated or inferred.",
+    });
+  }
+
+  return Object.freeze({
+    available: true,
+    records: Object.freeze(records),
+    note: "Match Context is raw Evidence only (I1A). No Context Features, Rules, Confidence, or Projection yet.",
+  });
+}
+
 function buildLineupsContext(evidence: readonly EvidenceDto[]): LineupsContextView {
   const sheets = evidence
     .map(mapTeamLineup)
@@ -967,6 +1076,7 @@ export function buildExplainableReportView(
   const lineupsContext = buildLineupsContext(evidence);
   const advancedStatisticsContext = buildAdvancedStatisticsContext(evidence);
   const expectedGoalsContext = buildExpectedGoalsContext(evidence);
+  const matchContextEvidence = buildMatchContextEvidence(evidence);
   const availabilityContext = buildAvailabilitySummary(evidence);
 
   return Object.freeze({
@@ -984,6 +1094,7 @@ export function buildExplainableReportView(
     lineups: lineupsContext,
     advancedStatistics: advancedStatisticsContext,
     expectedGoals: expectedGoalsContext,
+    matchContext: matchContextEvidence,
     availability: availabilityContext,
     winnerPrediction,
     mostLikelyScore,

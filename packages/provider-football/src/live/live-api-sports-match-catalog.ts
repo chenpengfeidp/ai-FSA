@@ -10,6 +10,10 @@ import { mapApiFootballStandings } from "../mapper/map-api-football-standings.js
 import { mapApiFootballFixtureExpectedGoals } from "../mapper/map-api-football-expected-goals.js";
 import { mapApiFootballFixtureStatistics } from "../mapper/map-api-football-fixture-statistics.js";
 import {
+  mapApiFootballMatchContext,
+  readApiFootballFixtureContextMeta,
+} from "../mapper/map-api-football-match-context.js";
+import {
   mapApiFootballTeamStats,
   withAdvancedStats,
 } from "../mapper/map-api-football-stats.js";
@@ -103,7 +107,8 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       return undefined;
     }
 
-    const fixture = mapApiFootballFixtureItem(fixtureBody.response[0], "http-live");
+    const fixtureItem = fixtureBody.response[0];
+    const fixture = mapApiFootballFixtureItem(fixtureItem, "http-live");
 
     if (fixture === undefined) {
       throw new FootballProviderError(
@@ -112,9 +117,13 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       );
     }
 
+    const fixtureContextMeta = readApiFootballFixtureContextMeta(fixtureItem);
+
     const [
       homeFormBody,
       awayFormBody,
+      homeNextBody,
+      awayNextBody,
       homeStatsBody,
       awayStatsBody,
       h2hBody,
@@ -131,6 +140,13 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       ),
       this.#getJson(
         `/fixtures?team=${encodeURIComponent(fixture.awayTeamId)}&last=10`,
+      ),
+      // next=5 supplies days-until-next-match when the provider returns rows.
+      this.#getJson(
+        `/fixtures?team=${encodeURIComponent(fixture.homeTeamId)}&next=5`,
+      ),
+      this.#getJson(
+        `/fixtures?team=${encodeURIComponent(fixture.awayTeamId)}&next=5`,
       ),
       this.#getJson(
         `/teams/statistics?league=${encodeURIComponent(fixture.competitionId)}&season=${String(fixture.season)}&team=${encodeURIComponent(fixture.homeTeamId)}`,
@@ -266,6 +282,25 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       providerMethod: "http-live",
     });
 
+    // Match Context from provider schedule samples + fixture competition meta.
+    const matchContext = mapApiFootballMatchContext({
+      fixture,
+      homePastFixturesBody: homeFormBody,
+      awayPastFixturesBody: awayFormBody,
+      homeNextFixturesBody: homeNextBody,
+      awayNextFixturesBody: awayNextBody,
+      ...(fixtureContextMeta.competitionTypeLabel === undefined
+        ? {}
+        : { competitionTypeLabel: fixtureContextMeta.competitionTypeLabel }),
+      ...(fixtureContextMeta.roundLabel === undefined
+        ? {}
+        : { roundLabel: fixtureContextMeta.roundLabel }),
+      ...(fixtureContextMeta.aggregateScore === undefined
+        ? {}
+        : { aggregateScore: fixtureContextMeta.aggregateScore }),
+      providerMethod: "http-live",
+    });
+
     const bundle: FootballMatchBundle = Object.freeze({
       fixture,
       homeForm,
@@ -278,6 +313,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       availabilityAbsences,
       lineups,
       expectedGoals,
+      matchContext,
     });
 
     this.#cache.set(matchId, bundle);

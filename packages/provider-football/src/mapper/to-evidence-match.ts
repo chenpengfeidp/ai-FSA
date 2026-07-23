@@ -1,4 +1,5 @@
 import type { FootballExpectedGoalsRecord } from "../domain/football-expected-goals.js";
+import type { FootballMatchContextRecord } from "../domain/football-match-context.js";
 import type {
   FootballAdvancedTeamStats,
   FootballFormSplit,
@@ -48,6 +49,72 @@ function toExpectedGoalsShape(
     observedAt: record.observedAt,
     providerSource: "api-football",
     providerSourceId: `api-football:${fixtureKey}:xg:${record.teamSide}:${record.window}`,
+    providerMethod: record.providerMethod,
+  });
+}
+
+function freezeMatchContextMetrics(
+  metrics: FootballMatchContextRecord["metrics"],
+): unknown {
+  return Object.freeze({
+    ...(metrics.restDays === undefined ? {} : { restDays: metrics.restDays }),
+    ...(metrics.daysSinceLastMatch === undefined
+      ? {}
+      : { daysSinceLastMatch: metrics.daysSinceLastMatch }),
+    ...(metrics.daysUntilNextMatch === undefined
+      ? {}
+      : { daysUntilNextMatch: metrics.daysUntilNextMatch }),
+    ...(metrics.matchesInLast7Days === undefined
+      ? {}
+      : { matchesInLast7Days: metrics.matchesInLast7Days }),
+    ...(metrics.matchesInLast14Days === undefined
+      ? {}
+      : { matchesInLast14Days: metrics.matchesInLast14Days }),
+    ...(metrics.fixtureCongestion === undefined
+      ? {}
+      : { fixtureCongestion: metrics.fixtureCongestion }),
+    ...(metrics.homeAwayContext === undefined
+      ? {}
+      : { homeAwayContext: metrics.homeAwayContext }),
+    ...(metrics.travelContext === undefined
+      ? {}
+      : { travelContext: metrics.travelContext }),
+    ...(metrics.venueCity === undefined ? {} : { venueCity: metrics.venueCity }),
+    ...(metrics.competitionKind === undefined
+      ? {}
+      : { competitionKind: metrics.competitionKind }),
+    ...(metrics.competitionTypeLabel === undefined
+      ? {}
+      : { competitionTypeLabel: metrics.competitionTypeLabel }),
+    ...(metrics.isKnockout === undefined ? {} : { isKnockout: metrics.isKnockout }),
+    ...(metrics.roundLabel === undefined ? {} : { roundLabel: metrics.roundLabel }),
+    ...(metrics.leg === undefined ? {} : { leg: metrics.leg }),
+    ...(metrics.aggregateScore === undefined
+      ? {}
+      : { aggregateScore: metrics.aggregateScore }),
+  });
+}
+
+function toMatchContextShape(
+  record: FootballMatchContextRecord,
+  fixtureKey: string,
+): unknown {
+  return Object.freeze({
+    teamId: record.teamId,
+    teamName: record.teamName,
+    teamSide: record.teamSide,
+    matchId: record.matchId,
+    ...(record.competitionId === undefined
+      ? {}
+      : { competitionId: record.competitionId }),
+    ...(record.competitionName === undefined
+      ? {}
+      : { competitionName: record.competitionName }),
+    ...(record.season === undefined ? {} : { season: record.season }),
+    metrics: freezeMatchContextMetrics(record.metrics),
+    observedAt: record.observedAt,
+    providerSource: "api-football",
+    providerSourceId: `api-football:${fixtureKey}:context:${record.teamSide}`,
     providerMethod: record.providerMethod,
   });
 }
@@ -161,6 +228,7 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     availabilityAbsences,
     lineups,
     expectedGoals,
+    matchContext,
   } = bundle;
   const fixtureKey = fixture.fixtureId;
 
@@ -270,6 +338,13 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
       : {
           expectedGoals: Object.freeze(
             expectedGoals.map((record) => toExpectedGoalsShape(record, fixtureKey)),
+          ),
+        }),
+    ...(matchContext.length === 0
+      ? {}
+      : {
+          matchContext: Object.freeze(
+            matchContext.map((record) => toMatchContextShape(record, fixtureKey)),
           ),
         }),
     teamForm: Object.freeze([

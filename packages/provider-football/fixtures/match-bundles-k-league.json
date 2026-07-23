@@ -710,6 +710,60 @@
           "observedAt": "2026-07-19T10:30:00+00:00",
           "providerMethod": "recorded-snapshot"
         }
+      ],
+      "matchContext": [
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "matchId": "football:100001",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "metrics": {
+            "restDays": 6,
+            "daysSinceLastMatch": 6,
+            "daysUntilNextMatch": 4,
+            "matchesInLast7Days": 1,
+            "matchesInLast14Days": 2,
+            "fixtureCongestion": 1,
+            "homeAwayContext": "home",
+            "travelContext": "home",
+            "venueCity": "Seoul",
+            "competitionKind": "league",
+            "competitionTypeLabel": "League",
+            "isKnockout": false,
+            "roundLabel": "Regular Season - 24"
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "matchId": "football:100001",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "metrics": {
+            "restDays": 3,
+            "daysSinceLastMatch": 3,
+            "daysUntilNextMatch": 7,
+            "matchesInLast7Days": 2,
+            "matchesInLast14Days": 3,
+            "fixtureCongestion": 2,
+            "homeAwayContext": "away",
+            "travelContext": "away",
+            "venueCity": "Seoul",
+            "competitionKind": "league",
+            "competitionTypeLabel": "League",
+            "isKnockout": false,
+            "roundLabel": "Regular Season - 24"
+          },
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerMethod": "recorded-snapshot"
+        }
       ]
     },
     {

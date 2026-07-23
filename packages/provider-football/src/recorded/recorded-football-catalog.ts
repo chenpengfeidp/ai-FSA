@@ -7,6 +7,12 @@ import type {
   FootballExpectedGoalsWindow,
 } from "../domain/football-expected-goals.js";
 import type {
+  FootballCompetitionKind,
+  FootballMatchContextMetrics,
+  FootballMatchContextRecord,
+  FootballMatchLeg,
+} from "../domain/football-match-context.js";
+import type {
   FootballAdvancedTeamStats,
   FootballAvailabilityAbsence,
   FootballBoardRow,
@@ -390,6 +396,154 @@ function parseExpectedGoalsRecord(
   });
 }
 
+function parseOptionalNonNegativeInt(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
+    ? value
+    : undefined;
+}
+
+function parseMatchContextMetrics(
+  value: unknown,
+): FootballMatchContextMetrics | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const restDays = parseOptionalNonNegativeInt(value.restDays);
+  const daysSinceLastMatch = parseOptionalNonNegativeInt(value.daysSinceLastMatch);
+  const daysUntilNextMatch = parseOptionalNonNegativeInt(value.daysUntilNextMatch);
+  const matchesInLast7Days = parseOptionalNonNegativeInt(value.matchesInLast7Days);
+  const matchesInLast14Days = parseOptionalNonNegativeInt(value.matchesInLast14Days);
+  const fixtureCongestion = parseOptionalNonNegativeInt(value.fixtureCongestion);
+  const homeAwayContext =
+    value.homeAwayContext === "home" || value.homeAwayContext === "away"
+      ? value.homeAwayContext
+      : undefined;
+  const travelContext =
+    value.travelContext === "home" || value.travelContext === "away"
+      ? value.travelContext
+      : undefined;
+  const venueCity =
+    typeof value.venueCity === "string" && value.venueCity.trim().length > 0
+      ? value.venueCity.trim()
+      : undefined;
+  const competitionKind =
+    value.competitionKind === "cup" ||
+    value.competitionKind === "friendly" ||
+    value.competitionKind === "league" ||
+    value.competitionKind === "other"
+      ? (value.competitionKind as FootballCompetitionKind)
+      : undefined;
+  const competitionTypeLabel =
+    typeof value.competitionTypeLabel === "string" &&
+    value.competitionTypeLabel.trim().length > 0
+      ? value.competitionTypeLabel.trim()
+      : undefined;
+  const isKnockout =
+    typeof value.isKnockout === "boolean" ? value.isKnockout : undefined;
+  const roundLabel =
+    typeof value.roundLabel === "string" && value.roundLabel.trim().length > 0
+      ? value.roundLabel.trim()
+      : undefined;
+  const leg =
+    value.leg === "first" || value.leg === "second"
+      ? (value.leg as FootballMatchLeg)
+      : undefined;
+  const aggregateScore =
+    typeof value.aggregateScore === "string" &&
+    value.aggregateScore.trim().length > 0
+      ? value.aggregateScore.trim()
+      : undefined;
+
+  const metrics: FootballMatchContextMetrics = Object.freeze({
+    ...(restDays === undefined ? {} : { restDays }),
+    ...(daysSinceLastMatch === undefined ? {} : { daysSinceLastMatch }),
+    ...(daysUntilNextMatch === undefined ? {} : { daysUntilNextMatch }),
+    ...(matchesInLast7Days === undefined ? {} : { matchesInLast7Days }),
+    ...(matchesInLast14Days === undefined ? {} : { matchesInLast14Days }),
+    ...(fixtureCongestion === undefined ? {} : { fixtureCongestion }),
+    ...(homeAwayContext === undefined ? {} : { homeAwayContext }),
+    ...(travelContext === undefined ? {} : { travelContext }),
+    ...(venueCity === undefined ? {} : { venueCity }),
+    ...(competitionKind === undefined ? {} : { competitionKind }),
+    ...(competitionTypeLabel === undefined ? {} : { competitionTypeLabel }),
+    ...(isKnockout === undefined ? {} : { isKnockout }),
+    ...(roundLabel === undefined ? {} : { roundLabel }),
+    ...(leg === undefined ? {} : { leg }),
+    ...(aggregateScore === undefined ? {} : { aggregateScore }),
+  });
+
+  if (Object.keys(metrics).length === 0) {
+    return undefined;
+  }
+
+  return metrics;
+}
+
+function parseMatchContextRecord(
+  entry: unknown,
+): FootballMatchContextRecord | undefined {
+  if (!isRecord(entry)) {
+    return undefined;
+  }
+
+  const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+  const teamName = typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+  const teamSide =
+    entry.teamSide === "home" || entry.teamSide === "away"
+      ? entry.teamSide
+      : undefined;
+  const matchId =
+    typeof entry.matchId === "string" && entry.matchId.trim().length > 0
+      ? entry.matchId.trim()
+      : undefined;
+  const observedAt =
+    typeof entry.observedAt === "string" && entry.observedAt.trim().length > 0
+      ? entry.observedAt.trim()
+      : undefined;
+  const providerMethod =
+    entry.providerMethod === "http-live" ||
+    entry.providerMethod === "recorded-snapshot"
+      ? entry.providerMethod
+      : undefined;
+  const metrics = parseMatchContextMetrics(entry.metrics);
+
+  if (
+    teamId.length === 0 ||
+    teamName.length === 0 ||
+    teamSide === undefined ||
+    matchId === undefined ||
+    observedAt === undefined ||
+    providerMethod === undefined ||
+    metrics === undefined
+  ) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    teamId,
+    teamName,
+    teamSide,
+    matchId,
+    ...(typeof entry.competitionId === "string" &&
+    entry.competitionId.trim().length > 0
+      ? { competitionId: entry.competitionId.trim() }
+      : {}),
+    ...(typeof entry.competitionName === "string" &&
+    entry.competitionName.trim().length > 0
+      ? { competitionName: entry.competitionName.trim() }
+      : {}),
+    ...(typeof entry.season === "string" && entry.season.trim().length > 0
+      ? { season: entry.season.trim() }
+      : typeof entry.season === "number" && Number.isFinite(entry.season)
+        ? { season: String(entry.season) }
+        : {}),
+    metrics,
+    observedAt,
+    providerMethod,
+  });
+}
+
 function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
   if (!isRecord(raw)) {
     return undefined;
@@ -460,6 +614,7 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
     : [];
   const lineupsRaw = Array.isArray(raw.lineups) ? raw.lineups : [];
   const expectedGoalsRaw = Array.isArray(raw.expectedGoals) ? raw.expectedGoals : [];
+  const matchContextRaw = Array.isArray(raw.matchContext) ? raw.matchContext : [];
 
   return Object.freeze({
     fixture,
@@ -648,6 +803,12 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
     expectedGoals: Object.freeze(
       expectedGoalsRaw.flatMap((entry) => {
         const mapped = parseExpectedGoalsRecord(entry);
+        return mapped === undefined ? [] : [mapped];
+      }),
+    ),
+    matchContext: Object.freeze(
+      matchContextRaw.flatMap((entry) => {
+        const mapped = parseMatchContextRecord(entry);
         return mapped === undefined ? [] : [mapped];
       }),
     ),

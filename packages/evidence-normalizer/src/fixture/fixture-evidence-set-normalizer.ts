@@ -1042,6 +1042,21 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(...normalizedExpectedGoals.value);
   }
 
+  if (input.matchContext !== undefined) {
+    const normalizedMatchContext = parseMatchContext(
+      input.matchContext,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalizedMatchContext.ok) {
+      return normalizedMatchContext;
+    }
+
+    evidences.push(...normalizedMatchContext.value);
+  }
+
   if (input.odds !== undefined) {
     const normalized = parseOdds(
       input.odds,
@@ -2069,6 +2084,382 @@ function parseExpectedGoals(
       return failure(
         "UNEXPECTED_ERROR",
         "EXPECTED_GOALS evidence normalization failed unexpectedly.",
+      );
+    }
+  }
+
+  return success(Object.freeze(records));
+}
+
+function parseOptionalNonNegativeInteger(
+  value: unknown,
+  field: string,
+): Result<number | undefined, EvidenceNormalizationError> {
+  if (value === undefined) {
+    return success(undefined);
+  }
+
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
+    return failure(
+      "INVALID_FIELD",
+      `${field} must be a non-negative integer.`,
+      field,
+    );
+  }
+
+  return success(value);
+}
+
+function parseOptionalNonEmptyString(
+  value: unknown,
+  field: string,
+): Result<string | undefined, EvidenceNormalizationError> {
+  if (value === undefined) {
+    return success(undefined);
+  }
+
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return failure(
+      "INVALID_FIELD",
+      `${field} must be a non-empty string when present.`,
+      field,
+    );
+  }
+
+  return success(value.trim());
+}
+
+/**
+ * I1A: optional Match Context Evidence records.
+ * Absent array → honest absence. Never invent rest/travel/knockout facts.
+ */
+function parseMatchContextMetrics(
+  value: unknown,
+): Result<
+  Readonly<Record<string, boolean | number | string>>,
+  EvidenceNormalizationError
+> {
+  if (value === undefined) {
+    return failure(
+      "INVALID_FIELD",
+      "matchContext.metrics is required when a record is present.",
+      "matchContext.metrics",
+    );
+  }
+
+  if (!isRecord(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "matchContext.metrics must be an object.",
+      "matchContext.metrics",
+    );
+  }
+
+  const metrics: {
+    restDays?: number;
+    daysSinceLastMatch?: number;
+    daysUntilNextMatch?: number;
+    matchesInLast7Days?: number;
+    matchesInLast14Days?: number;
+    fixtureCongestion?: number;
+    homeAwayContext?: string;
+    travelContext?: string;
+    venueCity?: string;
+    competitionKind?: string;
+    competitionTypeLabel?: string;
+    isKnockout?: boolean;
+    roundLabel?: string;
+    leg?: string;
+    aggregateScore?: string;
+  } = {};
+
+  const integerFields = [
+    "restDays",
+    "daysSinceLastMatch",
+    "daysUntilNextMatch",
+    "matchesInLast7Days",
+    "matchesInLast14Days",
+    "fixtureCongestion",
+  ] as const;
+
+  for (const field of integerFields) {
+    const parsed = parseOptionalNonNegativeInteger(
+      value[field],
+      `matchContext.metrics.${field}`,
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    if (parsed.value !== undefined) {
+      metrics[field] = parsed.value;
+    }
+  }
+
+  if (value.homeAwayContext !== undefined) {
+    if (value.homeAwayContext !== "home" && value.homeAwayContext !== "away") {
+      return failure(
+        "INVALID_FIELD",
+        'matchContext.metrics.homeAwayContext must be "home" or "away".',
+        "matchContext.metrics.homeAwayContext",
+      );
+    }
+
+    metrics.homeAwayContext = value.homeAwayContext;
+  }
+
+  if (value.travelContext !== undefined) {
+    if (value.travelContext !== "home" && value.travelContext !== "away") {
+      return failure(
+        "INVALID_FIELD",
+        'matchContext.metrics.travelContext must be "home" or "away".',
+        "matchContext.metrics.travelContext",
+      );
+    }
+
+    metrics.travelContext = value.travelContext;
+  }
+
+  const venueCity = parseOptionalNonEmptyString(
+    value.venueCity,
+    "matchContext.metrics.venueCity",
+  );
+
+  if (!venueCity.ok) {
+    return venueCity;
+  }
+
+  if (venueCity.value !== undefined) {
+    metrics.venueCity = venueCity.value;
+  }
+
+  if (value.competitionKind !== undefined) {
+    if (
+      value.competitionKind !== "cup" &&
+      value.competitionKind !== "friendly" &&
+      value.competitionKind !== "league" &&
+      value.competitionKind !== "other"
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        'matchContext.metrics.competitionKind must be "cup"|"friendly"|"league"|"other".',
+        "matchContext.metrics.competitionKind",
+      );
+    }
+
+    metrics.competitionKind = value.competitionKind;
+  }
+
+  const competitionTypeLabel = parseOptionalNonEmptyString(
+    value.competitionTypeLabel,
+    "matchContext.metrics.competitionTypeLabel",
+  );
+
+  if (!competitionTypeLabel.ok) {
+    return competitionTypeLabel;
+  }
+
+  if (competitionTypeLabel.value !== undefined) {
+    metrics.competitionTypeLabel = competitionTypeLabel.value;
+  }
+
+  if (value.isKnockout !== undefined) {
+    if (typeof value.isKnockout !== "boolean") {
+      return failure(
+        "INVALID_FIELD",
+        "matchContext.metrics.isKnockout must be a boolean when present.",
+        "matchContext.metrics.isKnockout",
+      );
+    }
+
+    metrics.isKnockout = value.isKnockout;
+  }
+
+  const roundLabel = parseOptionalNonEmptyString(
+    value.roundLabel,
+    "matchContext.metrics.roundLabel",
+  );
+
+  if (!roundLabel.ok) {
+    return roundLabel;
+  }
+
+  if (roundLabel.value !== undefined) {
+    metrics.roundLabel = roundLabel.value;
+  }
+
+  if (value.leg !== undefined) {
+    if (value.leg !== "first" && value.leg !== "second") {
+      return failure(
+        "INVALID_FIELD",
+        'matchContext.metrics.leg must be "first" or "second".',
+        "matchContext.metrics.leg",
+      );
+    }
+
+    metrics.leg = value.leg;
+  }
+
+  const aggregateScore = parseOptionalNonEmptyString(
+    value.aggregateScore,
+    "matchContext.metrics.aggregateScore",
+  );
+
+  if (!aggregateScore.ok) {
+    return aggregateScore;
+  }
+
+  if (aggregateScore.value !== undefined) {
+    metrics.aggregateScore = aggregateScore.value;
+  }
+
+  if (Object.keys(metrics).length === 0) {
+    return failure(
+      "INVALID_FIELD",
+      "matchContext.metrics must include at least one provider metric.",
+      "matchContext.metrics",
+    );
+  }
+
+  return success(Object.freeze(metrics));
+}
+
+function parseMatchContext(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): Result<readonly Evidence[], EvidenceNormalizationError> {
+  if (!Array.isArray(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "matchContext must be an array.",
+      "matchContext",
+    );
+  }
+
+  const records: Evidence[] = [];
+
+  for (const entry of value) {
+    if (!isRecord(entry)) {
+      return failure(
+        "INVALID_FIELD",
+        "matchContext entry must be an object.",
+        "matchContext",
+      );
+    }
+
+    const teamSide = requireTeamSide(entry.teamSide);
+
+    if (teamSide === undefined) {
+      return failure(
+        "INVALID_FIELD",
+        'matchContext.teamSide must be "home" or "away".',
+        "matchContext.teamSide",
+      );
+    }
+
+    if (typeof entry.teamId !== "string" || entry.teamId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "matchContext.teamId must be a non-empty string.",
+        "matchContext.teamId",
+      );
+    }
+
+    if (typeof entry.teamName !== "string" || entry.teamName.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "matchContext.teamName must be a non-empty string.",
+        "matchContext.teamName",
+      );
+    }
+
+    if (
+      typeof entry.observedAt !== "string" ||
+      entry.observedAt.trim().length === 0
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "matchContext.observedAt must be a non-empty string.",
+        "matchContext.observedAt",
+      );
+    }
+
+    const metrics = parseMatchContextMetrics(entry.metrics);
+
+    if (!metrics.ok) {
+      return metrics;
+    }
+
+    const provenanceOverlay = parseProviderProvenanceOverlay(entry);
+
+    if (!provenanceOverlay.ok) {
+      return provenanceOverlay;
+    }
+
+    const provenance = provenanceOverlay.value;
+    const source = provenance?.source ?? "fixture";
+    const sourceId =
+      provenance?.sourceId ?? `fixture-${matchId}-context-${teamSide}`;
+    const method = provenance?.method ?? "fixture";
+
+    try {
+      records.push(
+        createEvidence({
+          id: `evidence-${source}-${matchId}-context-${teamSide}`,
+          source,
+          sourceId,
+          type: "MATCH_CONTEXT",
+          matchId: createMatchId(matchId),
+          collectedAt,
+          eventTime,
+          timestamp: collectedAt,
+          freshness: "fresh",
+          confidence: source === "api-football" ? "medium" : "unknown",
+          quality: "unverified",
+          provenance: {
+            collector: "@fas/evidence-normalizer",
+            method,
+          },
+          payload: Object.freeze({
+            teamId: entry.teamId.trim(),
+            teamName: entry.teamName.trim(),
+            teamSide,
+            contextType: "match_context",
+            ...(typeof entry.matchId === "string" && entry.matchId.trim().length > 0
+              ? { matchId: entry.matchId.trim() }
+              : { matchId }),
+            ...(typeof entry.competitionId === "string" &&
+            entry.competitionId.trim().length > 0
+              ? { competitionId: entry.competitionId.trim() }
+              : {}),
+            ...(typeof entry.competitionName === "string" &&
+            entry.competitionName.trim().length > 0
+              ? { competitionName: entry.competitionName.trim() }
+              : {}),
+            ...(typeof entry.season === "string" && entry.season.trim().length > 0
+              ? { season: entry.season.trim() }
+              : typeof entry.season === "number" && Number.isFinite(entry.season)
+                ? { season: String(entry.season) }
+                : {}),
+            metrics: metrics.value,
+            observedAt: entry.observedAt.trim(),
+          }),
+        }),
+      );
+    } catch (error: unknown) {
+      if (
+        error instanceof EvidenceValidationError ||
+        error instanceof MatchValidationError
+      ) {
+        return failure("DOMAIN_VALIDATION_FAILED", error.message);
+      }
+
+      return failure(
+        "UNEXPECTED_ERROR",
+        "MATCH_CONTEXT evidence normalization failed unexpectedly.",
       );
     }
   }

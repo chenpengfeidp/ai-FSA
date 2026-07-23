@@ -21,6 +21,7 @@ const evidenceTypes = [
   "PLAYER",
   "SUSPENSION",
   "EXPECTED_GOALS",
+  "MATCH_CONTEXT",
 ] as const satisfies ReadonlyArray<EvidenceType>;
 
 const validInput = {

@@ -174,6 +174,42 @@ export interface ExpectedGoalsContextView {
   readonly note: string;
 }
 
+export interface MatchContextMetricsView {
+  readonly restDays: number | null;
+  readonly daysSinceLastMatch: number | null;
+  readonly daysUntilNextMatch: number | null;
+  readonly matchesInLast7Days: number | null;
+  readonly matchesInLast14Days: number | null;
+  readonly fixtureCongestion: number | null;
+  readonly homeAwayContext: "away" | "home" | null;
+  readonly travelContext: "away" | "home" | null;
+  readonly venueCity: string | null;
+  readonly competitionKind: string | null;
+  readonly competitionTypeLabel: string | null;
+  readonly isKnockout: boolean | null;
+  readonly roundLabel: string | null;
+  readonly leg: "first" | "second" | null;
+  readonly aggregateScore: string | null;
+}
+
+export interface MatchContextRecordView {
+  readonly teamSide: "away" | "home";
+  readonly teamName: string;
+  readonly competitionName: string | null;
+  readonly season: string | null;
+  readonly observedAt: string;
+  readonly metrics: MatchContextMetricsView;
+  readonly providerId: string;
+  readonly source: string;
+  readonly provenanceMethod: string;
+}
+
+export interface MatchContextEvidenceView {
+  readonly available: boolean;
+  readonly records: readonly MatchContextRecordView[];
+  readonly note: string;
+}
+
 export interface WinnerPredictionView {
   readonly homeTeam: string;
   readonly awayTeam: string;
@@ -267,6 +303,7 @@ export interface ExplainableReportView {
   readonly lineups: LineupsContextView;
   readonly advancedStatistics: AdvancedStatisticsContextView;
   readonly expectedGoals: ExpectedGoalsContextView;
+  readonly matchContext: MatchContextEvidenceView;
   readonly availability: AvailabilitySummaryView;
   readonly winnerPrediction: WinnerPredictionView;
   readonly mostLikelyScore: MostLikelyScoreView;

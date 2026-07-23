@@ -22,7 +22,13 @@ function fixtureItem(options: {
       status: { short: options.status ?? "NS" },
       venue: { id: 1, name: "Live Stadium", city: "City" },
     },
-    league: { id: 292, name: "K League 1", season: 2026 },
+    league: {
+      id: 292,
+      name: "K League 1",
+      season: 2026,
+      type: "League",
+      round: "Regular Season - 1",
+    },
     teams: {
       home: { id: options.homeId, name: "Home FC" },
       away: { id: options.awayId, name: "Away FC" },
@@ -35,48 +41,117 @@ function fixtureItem(options: {
 }
 
 function formFixtures(teamId: number, opponentId: number): unknown {
+  const dates = [
+    "2026-07-14T10:00:00+00:00",
+    "2026-07-10T10:00:00+00:00",
+    "2026-07-06T10:00:00+00:00",
+    "2026-07-02T10:00:00+00:00",
+    "2026-06-28T10:00:00+00:00",
+  ] as const;
+
   return {
     response: [
-      fixtureItem({
-        id: 9001,
-        homeId: teamId,
-        awayId: opponentId,
-        status: "FT",
-        homeGoals: 2,
-        awayGoals: 0,
-      }),
-      fixtureItem({
-        id: 9002,
-        homeId: opponentId,
-        awayId: teamId,
-        status: "FT",
-        homeGoals: 1,
-        awayGoals: 1,
-      }),
-      fixtureItem({
-        id: 9003,
-        homeId: teamId,
-        awayId: opponentId,
-        status: "FT",
-        homeGoals: 1,
-        awayGoals: 0,
-      }),
-      fixtureItem({
-        id: 9004,
-        homeId: teamId,
-        awayId: opponentId,
-        status: "FT",
-        homeGoals: 0,
-        awayGoals: 2,
-      }),
-      fixtureItem({
-        id: 9005,
-        homeId: opponentId,
-        awayId: teamId,
-        status: "FT",
-        homeGoals: 0,
-        awayGoals: 3,
-      }),
+      {
+        ...fixtureItem({
+          id: 9001,
+          homeId: teamId,
+          awayId: opponentId,
+          status: "FT",
+          homeGoals: 2,
+          awayGoals: 0,
+        }),
+        fixture: {
+          id: 9001,
+          date: dates[0],
+          status: { short: "FT" },
+          venue: { id: 1, name: "Live Stadium", city: "City" },
+        },
+      },
+      {
+        ...fixtureItem({
+          id: 9002,
+          homeId: opponentId,
+          awayId: teamId,
+          status: "FT",
+          homeGoals: 1,
+          awayGoals: 1,
+        }),
+        fixture: {
+          id: 9002,
+          date: dates[1],
+          status: { short: "FT" },
+          venue: { id: 1, name: "Live Stadium", city: "City" },
+        },
+      },
+      {
+        ...fixtureItem({
+          id: 9003,
+          homeId: teamId,
+          awayId: opponentId,
+          status: "FT",
+          homeGoals: 1,
+          awayGoals: 0,
+        }),
+        fixture: {
+          id: 9003,
+          date: dates[2],
+          status: { short: "FT" },
+          venue: { id: 1, name: "Live Stadium", city: "City" },
+        },
+      },
+      {
+        ...fixtureItem({
+          id: 9004,
+          homeId: teamId,
+          awayId: opponentId,
+          status: "FT",
+          homeGoals: 0,
+          awayGoals: 2,
+        }),
+        fixture: {
+          id: 9004,
+          date: dates[3],
+          status: { short: "FT" },
+          venue: { id: 1, name: "Live Stadium", city: "City" },
+        },
+      },
+      {
+        ...fixtureItem({
+          id: 9005,
+          homeId: opponentId,
+          awayId: teamId,
+          status: "FT",
+          homeGoals: 0,
+          awayGoals: 3,
+        }),
+        fixture: {
+          id: 9005,
+          date: dates[4],
+          status: { short: "FT" },
+          venue: { id: 1, name: "Live Stadium", city: "City" },
+        },
+      },
+    ],
+  };
+}
+
+function nextFixtures(teamId: number, opponentId: number): unknown {
+  return {
+    response: [
+      {
+        ...fixtureItem({
+          id: 9101,
+          homeId: teamId,
+          awayId: opponentId,
+          status: "NS",
+        }),
+        fixture: {
+          id: 9101,
+          date: "2026-07-24T10:00:00+00:00",
+          status: { short: "NS" },
+          venue: { id: 1, name: "Live Stadium", city: "City" },
+        },
+      },
     ],
   };
 }
@@ -103,6 +178,20 @@ function createLiveFetch(): typeof fetch {
 
     if (url.includes("/fixtures?team=20&last=10")) {
       return new Response(JSON.stringify(formFixtures(20, 98)), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (url.includes("/fixtures?team=10&next=5")) {
+      return new Response(JSON.stringify(nextFixtures(10, 99)), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (url.includes("/fixtures?team=20&next=5")) {
+      return new Response(JSON.stringify(nextFixtures(20, 98)), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
@@ -233,11 +322,19 @@ describe("LiveApiSportsMatchCatalog", () => {
     expect(bundle.homeStats.advanced?.scope).toBe("fixture");
     expect(bundle.homeStats.advanced?.shotsOnTarget).toBe(5);
     expect(bundle.homeStats.advanced?.possessionPct).toBe(58);
+    expect(bundle.matchContext).toHaveLength(2);
+    expect(bundle.matchContext[0]?.metrics.restDays).toBeGreaterThan(0);
+    expect(bundle.matchContext[0]?.metrics.competitionKind).toBe("league");
 
     const normalized = normalizeFixtureEvidenceSet(toEvidenceMatchShape(bundle), {
       collectedAt: "2026-07-17T10:00:00Z",
     });
     expect(normalized.ok).toBe(true);
+    if (normalized.ok) {
+      expect(normalized.value.some((item) => item.type === "MATCH_CONTEXT")).toBe(
+        true,
+      );
+    }
   });
 
   it("returns undefined for unknown fixture ids without fabricating Evidence", async () => {

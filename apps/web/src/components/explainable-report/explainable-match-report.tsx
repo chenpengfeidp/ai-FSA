@@ -13,6 +13,7 @@ import { RuleEvaluationSection } from "./rule-evaluation-section";
 import { AdvancedStatisticsContextSection } from "./advanced-statistics-context";
 import { AvailabilityContextSection } from "./availability-context";
 import { ExpectedGoalsContextSection } from "./expected-goals-context";
+import { MatchContextEvidenceSection } from "./match-context-evidence";
 import { LineupContextSection } from "./lineup-context";
 import { PlayersContextSection } from "./player-context";
 import { RefereeContextSection } from "./referee-context";
@@ -67,6 +68,10 @@ export function ExplainableMatchReport({
 
       <WorkspaceSection id="expected-goals">
         <ExpectedGoalsContextSection expectedGoals={view.expectedGoals} />
+      </WorkspaceSection>
+
+      <WorkspaceSection id="match-context">
+        <MatchContextEvidenceSection matchContext={view.matchContext} />
       </WorkspaceSection>
 
       <WorkspaceSection id="availability">

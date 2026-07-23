@@ -207,6 +207,13 @@ describe("RuleEvaluator", () => {
       { ruleName: "XG_DEFENSIVE_AWAY_EDGE", status: "INAPPLICABLE", score: 0 },
       { ruleName: "XG_DOMINANCE", status: "INAPPLICABLE", score: 0 },
       { ruleName: "XG_DOMINANCE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "REST_ADVANTAGE_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "REST_ADVANTAGE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "FATIGUE_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "FATIGUE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "HOME_STABILITY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "ROTATION_PRESSURE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "KNOCKOUT_CONTEXT", status: "INAPPLICABLE", score: 0 },
       { ruleName: "DISCIPLINE_AWAY_RISK", status: "INAPPLICABLE", score: 0 },
       { ruleName: "DISCIPLINE_HOME_RISK", status: "INAPPLICABLE", score: 0 },
       { ruleName: "DEFENSE_HOME_STABLE", status: "PASS", score: 0.45 },
@@ -684,6 +691,160 @@ describe("RuleEvaluator", () => {
             "XG_DEFENSIVE_AWAY_EDGE",
             "XG_DOMINANCE",
             "XG_DOMINANCE_AWAY",
+          ].includes(result.ruleName),
+        )
+        .every((result) => result.status === "INAPPLICABLE"),
+    ).toBe(true);
+  });
+
+  it("evaluates Match Context Rules from Context Features", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      createFeature({
+        featureId: "feature:evidence-1:scheduleAdvantage",
+        matchId: createMatchId("match-1"),
+        name: "scheduleAdvantage",
+        value: 3.5,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:fatigueIndexHome",
+        matchId: createMatchId("match-1"),
+        name: "fatigueIndexHome",
+        value: 20,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:fatigueIndexAway",
+        matchId: createMatchId("match-1"),
+        name: "fatigueIndexAway",
+        value: 55,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:homeStability",
+        matchId: createMatchId("match-1"),
+        name: "homeStability",
+        value: 100,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:rotationPressureHome",
+        matchId: createMatchId("match-1"),
+        name: "rotationPressureHome",
+        value: 25,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:rotationPressureAway",
+        matchId: createMatchId("match-1"),
+        name: "rotationPressureAway",
+        value: 50,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:knockoutContext",
+        matchId: createMatchId("match-1"),
+        name: "knockoutContext",
+        value: 0,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "REST_ADVANTAGE_HOME",
+            "REST_ADVANTAGE_AWAY",
+            "FATIGUE_HOME",
+            "FATIGUE_AWAY",
+            "HOME_STABILITY",
+            "ROTATION_PRESSURE",
+            "KNOCKOUT_CONTEXT",
+          ].includes(result.ruleName),
+        )
+        .map(({ ruleName, status, channel }) => ({
+          ruleName,
+          status,
+          channel,
+        })),
+    ).toEqual([
+      {
+        ruleName: "REST_ADVANTAGE_HOME",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "REST_ADVANTAGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "FATIGUE_HOME",
+        status: "FAIL",
+        channel: "away+",
+      },
+      {
+        ruleName: "FATIGUE_AWAY",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "HOME_STABILITY",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "ROTATION_PRESSURE",
+        status: "PASS",
+        channel: "home+",
+      },
+      {
+        ruleName: "KNOCKOUT_CONTEXT",
+        status: "FAIL",
+        channel: "none",
+      },
+    ]);
+  });
+
+  it("marks Context Rules INAPPLICABLE when Context Features are absent", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "REST_ADVANTAGE_HOME",
+            "REST_ADVANTAGE_AWAY",
+            "FATIGUE_HOME",
+            "FATIGUE_AWAY",
+            "HOME_STABILITY",
+            "ROTATION_PRESSURE",
+            "KNOCKOUT_CONTEXT",
           ].includes(result.ruleName),
         )
         .every((result) => result.status === "INAPPLICABLE"),

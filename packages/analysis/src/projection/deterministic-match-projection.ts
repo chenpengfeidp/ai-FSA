@@ -1,6 +1,6 @@
 import { createMatchId, type MatchId } from "@fas/match";
 
-export const PROJECTION_MODEL_VERSION = "projection.v2.f13b.xg";
+export const PROJECTION_MODEL_VERSION = "projection.v2.i1b.context";
 export const XG_MODEL_VERSION = "xg.v2.slice1";
 export const PROBABILITY_MODEL_VERSION = "independent_poisson.v1";
 export const CONFIDENCE_MODEL_VERSION = "confidence.v2.slice1";

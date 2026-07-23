@@ -17,6 +17,8 @@ export type FeatureName =
   | "defenseRatingHome"
   | "disciplineRiskAway"
   | "disciplineRiskHome"
+  | "fatigueIndexAway"
+  | "fatigueIndexHome"
   | "finishingEfficiencyAway"
   | "finishingEfficiencyHome"
   | "formAtHomeAway"
@@ -30,8 +32,10 @@ export type FeatureName =
   | "h2hLean"
   | "h2hSampleSize"
   | "homeAdvantage"
+  | "homeStability"
   | "homeTeam"
   | "kickoff"
+  | "knockoutContext"
   | "marketImpliedAway"
   | "marketImpliedDraw"
   | "marketImpliedHome"
@@ -45,6 +49,9 @@ export type FeatureName =
   | "recentFormHome"
   | "recentFormShortAway"
   | "recentFormShortHome"
+  | "rotationPressureAway"
+  | "rotationPressureHome"
+  | "scheduleAdvantage"
   | "venueAdvantage"
   | "xgAttackQualityAway"
   | "xgAttackQualityHome"
@@ -95,6 +102,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "defenseRatingHome",
   "disciplineRiskAway",
   "disciplineRiskHome",
+  "fatigueIndexAway",
+  "fatigueIndexHome",
   "finishingEfficiencyAway",
   "finishingEfficiencyHome",
   "formAtHomeAway",
@@ -108,8 +117,10 @@ const featureNames: ReadonlySet<string> = new Set([
   "h2hLean",
   "h2hSampleSize",
   "homeAdvantage",
+  "homeStability",
   "homeTeam",
   "kickoff",
+  "knockoutContext",
   "marketImpliedAway",
   "marketImpliedDraw",
   "marketImpliedHome",
@@ -123,6 +134,9 @@ const featureNames: ReadonlySet<string> = new Set([
   "recentFormHome",
   "recentFormShortAway",
   "recentFormShortHome",
+  "rotationPressureAway",
+  "rotationPressureHome",
+  "scheduleAdvantage",
   "venueAdvantage",
   "xgAttackQualityAway",
   "xgAttackQualityHome",

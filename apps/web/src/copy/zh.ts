@@ -307,7 +307,7 @@ export const zh = {
     xgMetricExpectedGoalDifference: "期望净胜球",
     matchContext: "比赛情境",
     matchContextHint:
-      "原始 MATCH_CONTEXT Evidence（Provider 赛程/赛事事实）。本冲刺不衍生 Context Features；特征区仅含既有派生 Intelligence",
+      "原始 MATCH_CONTEXT Evidence（Provider 赛程/赛事事实）。衍生疲劳/赛程/轮换 Features 见特征重要性；叙事仅引用 Rule 输出",
     noMatchContext: "暂无比赛情境证据",
     contextHome: "主队情境",
     contextAway: "客队情境",
@@ -353,7 +353,7 @@ export const zh = {
       `步骤 ${String(step)} · ${timestamp}`,
     featureImportance: "特征重要性",
     featureImportanceHint:
-      "派生足球特征（含 xG / 高级统计；非原始 Evidence）——正向与负向信号以颜色区分；原始 xG / 比赛情境见对应 Evidence 区（I1A 尚无 Context Features）",
+      "派生足球特征（含 xG / 高级统计 / 比赛情境；非原始 Evidence）——正向与负向信号以颜色区分；原始 xG / 比赛情境见对应 Evidence 区",
     noFeatures: "暂无特征",
     noFeaturesDescription: "本场比赛未提取任何特征。",
     positive: "正向",

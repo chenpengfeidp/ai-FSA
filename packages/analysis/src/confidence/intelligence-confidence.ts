@@ -44,6 +44,12 @@ const P1_CHANNEL_RULES = new Set([
   "XG_DEFENSIVE_AWAY_EDGE",
   "XG_DOMINANCE",
   "XG_DOMINANCE_AWAY",
+  "REST_ADVANTAGE_HOME",
+  "REST_ADVANTAGE_AWAY",
+  "FATIGUE_HOME",
+  "FATIGUE_AWAY",
+  "HOME_STABILITY",
+  "ROTATION_PRESSURE",
   "DEFENSE_HOME_STABLE",
   "DEFENSE_AWAY_STABLE",
   "DEFENSE_HOME_FRAGILE",
@@ -138,6 +144,14 @@ function evidenceCompleteness(evidences: readonly Evidence[]): number {
       (evidence) =>
         evidence.type === "EXPECTED_GOALS" && evidence.payload.teamSide === "away",
     ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "MATCH_CONTEXT" && evidence.payload.teamSide === "home",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "MATCH_CONTEXT" && evidence.payload.teamSide === "away",
+    ),
   ];
   const present = checks.filter(Boolean).length;
 
@@ -145,10 +159,10 @@ function evidenceCompleteness(evidences: readonly Evidence[]): number {
 }
 
 /**
- * F1.3B: boost agreement when Expected Goals and Advanced Statistics
- * support the same football conclusion (same channel).
+ * F1.3B / I1B: boost agreement when Expected Goals, Advanced Statistics,
+ * and/or Match Context support the same football conclusion (same channel).
  */
-function xgAdvancedAgreementBonus(ruleResults: readonly RuleResult[]): number {
+function intelligenceAgreementBonus(ruleResults: readonly RuleResult[]): number {
   const passed = new Set(
     ruleResults
       .filter((rule) => rule.status === "PASS")
@@ -185,6 +199,34 @@ function xgAdvancedAgreementBonus(ruleResults: readonly RuleResult[]): number {
     (passed.has("ATTACK_EFFICIENCY_AWAY_EDGE") || passed.has("POSSESSION_AWAY_EDGE"))
   ) {
     bonus += 2;
+  }
+
+  const homeContextSupport =
+    passed.has("REST_ADVANTAGE_HOME") ||
+    passed.has("FATIGUE_AWAY") ||
+    passed.has("ROTATION_PRESSURE") ||
+    passed.has("HOME_STABILITY");
+  const awayContextSupport =
+    passed.has("REST_ADVANTAGE_AWAY") || passed.has("FATIGUE_HOME");
+
+  if (
+    homeContextSupport &&
+    (passed.has("XG_ATTACK_HOME_EDGE") ||
+      passed.has("XG_DOMINANCE") ||
+      passed.has("ATTACK_EFFICIENCY_HOME_EDGE") ||
+      passed.has("CHANCE_CREATION_HOME_EDGE"))
+  ) {
+    bonus += 3;
+  }
+
+  if (
+    awayContextSupport &&
+    (passed.has("XG_ATTACK_AWAY_EDGE") ||
+      passed.has("XG_DOMINANCE_AWAY") ||
+      passed.has("ATTACK_EFFICIENCY_AWAY_EDGE") ||
+      passed.has("CHANCE_CREATION_AWAY_EDGE"))
+  ) {
+    bonus += 3;
   }
 
   return Math.min(bonus, 8);
@@ -230,7 +272,7 @@ export function computeIntelligenceConfidence(input: {
   const matchId = createMatchId(input.matchId);
   const completeness = evidenceCompleteness(input.evidenceSet);
   const { agreement, contradictionPenalty } = ruleAgreement(input.ruleResults);
-  const agreementBonus = xgAdvancedAgreementBonus(input.ruleResults);
+  const agreementBonus = intelligenceAgreementBonus(input.ruleResults);
   const boostedAgreement = roundScore(clamp(agreement + agreementBonus, 0, 100));
   const concentration = input.scenarios.mostLikely.probability * 100;
   const availabilityUnknown = input.ruleResults.some(
@@ -318,9 +360,24 @@ export function computeIntelligenceConfidence(input: {
     );
   }
 
+  const hasContextHome = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "MATCH_CONTEXT" && evidence.payload.teamSide === "home",
+  );
+  const hasContextAway = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "MATCH_CONTEXT" && evidence.payload.teamSide === "away",
+  );
+
+  if (!hasContextHome || !hasContextAway) {
+    limitations.push(
+      "MATCH_CONTEXT Evidence incomplete; fatigue / schedule / rotation Features may be absent (never estimated).",
+    );
+  }
+
   if (agreementBonus > 0) {
     limitations.push(
-      `xG and Advanced Statistics agreement bonus +${String(agreementBonus)} applied when both support the same football conclusion.`,
+      `Evidence agreement bonus +${String(agreementBonus)} applied when Match Context, xG, and/or Advanced Statistics support the same football conclusion.`,
     );
   }
 

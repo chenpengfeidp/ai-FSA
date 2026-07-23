@@ -128,6 +128,13 @@ export function buildMvpIntelligenceNarrative(
   const xgDominance = numericFeature(analysis.features, "xgDominance");
   const finishingHome = numericFeature(analysis.features, "finishingEfficiencyHome");
   const finishingAway = numericFeature(analysis.features, "finishingEfficiencyAway");
+  const fatigueHome = numericFeature(analysis.features, "fatigueIndexHome");
+  const fatigueAway = numericFeature(analysis.features, "fatigueIndexAway");
+  const scheduleAdvantage = numericFeature(analysis.features, "scheduleAdvantage");
+  const homeStability = numericFeature(analysis.features, "homeStability");
+  const rotationHome = numericFeature(analysis.features, "rotationPressureHome");
+  const rotationAway = numericFeature(analysis.features, "rotationPressureAway");
+  const knockoutContext = numericFeature(analysis.features, "knockoutContext");
 
   const overview = [
     `${homeTeam} vs ${awayTeam}: Most Likely is ${most.label} (${formatPct(most.probability)}).`,
@@ -147,6 +154,7 @@ export function buildMvpIntelligenceNarrative(
     `FormDecomposition: homeAtHome=${formAtHomeHome ?? "n/a"} vs awayOnRoad=${formOnRoadAway ?? "n/a"}; goalsScoredRate home=${goalsScoredHome ?? "n/a"} away=${goalsScoredAway ?? "n/a"}.`,
     `AdvancedStatsFeatures (derived, not raw Evidence): attackEfficiency home=${attackEffHome ?? "n/a"} away=${attackEffAway ?? "n/a"}; possession home=${possessionHome ?? "n/a"} away=${possessionAway ?? "n/a"}; chanceCreation home=${chanceHome ?? "n/a"} away=${chanceAway ?? "n/a"}; disciplineRisk home=${disciplineHome ?? "n/a"} away=${disciplineAway ?? "n/a"}.`,
     `ExpectedGoalsFeatures (derived from EXPECTED_GOALS Evidence): xgAttackQuality home=${xgAttackHome ?? "n/a"} away=${xgAttackAway ?? "n/a"}; xgDefenseQuality home=${xgDefenseHome ?? "n/a"} away=${xgDefenseAway ?? "n/a"}; xgDominance=${xgDominance ?? "n/a"}; finishingEfficiency home=${finishingHome ?? "n/a"} away=${finishingAway ?? "n/a"}.`,
+    `MatchContextFeatures (derived from MATCH_CONTEXT Evidence): fatigueIndex home=${fatigueHome ?? "n/a"} away=${fatigueAway ?? "n/a"}; scheduleAdvantage=${scheduleAdvantage ?? "n/a"}; homeStability=${homeStability ?? "n/a"}; rotationPressure home=${rotationHome ?? "n/a"} away=${rotationAway ?? "n/a"}; knockoutContext=${knockoutContext ?? "n/a"}.`,
   ].join(" ");
 
   const riskRules = analysis.ruleResults.filter(

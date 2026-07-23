@@ -14,13 +14,18 @@ import {
   computeChanceCreation,
   computeDefenseRating,
   computeDisciplineRisk,
+  computeFatigueIndex,
   computeFinishingEfficiency,
   computeH2hLean,
+  computeHomeStability,
   computeImpliedProbabilities,
+  computeKnockoutContext,
   computeMarketLean,
   computeMomentum,
   computePossessionDominance,
   computeRecentFormScore,
+  computeRotationPressure,
+  computeScheduleAdvantage,
   computeXgAttackQuality,
   computeXgDefenseQuality,
   computeXgDominance,
@@ -587,6 +592,276 @@ function extractExpectedGoalsFeatures(input: {
   return Object.freeze(features);
 }
 
+function readMatchContextMetrics(payload: Evidence["payload"]): Readonly<{
+  restDays?: number;
+  matchesInLast7Days?: number;
+  matchesInLast14Days?: number;
+  fixtureCongestion?: number;
+  homeAwayContext?: "away" | "home";
+  isKnockout?: boolean;
+  leg?: "first" | "second";
+  aggregateScore?: string;
+}> {
+  const metricsRaw = payload.metrics;
+
+  if (
+    typeof metricsRaw !== "object" ||
+    metricsRaw === null ||
+    Array.isArray(metricsRaw)
+  ) {
+    return Object.freeze({});
+  }
+
+  const metrics = metricsRaw as Record<string, unknown>;
+  const restDays = asFiniteNumber(metrics.restDays);
+  const matchesInLast7Days =
+    asFiniteNumber(metrics.matchesInLast7Days) ??
+    asFiniteNumber(metrics.fixtureCongestion);
+  const matchesInLast14Days = asFiniteNumber(metrics.matchesInLast14Days);
+  const fixtureCongestion = asFiniteNumber(metrics.fixtureCongestion);
+  const homeAwayContext =
+    metrics.homeAwayContext === "home" || metrics.homeAwayContext === "away"
+      ? metrics.homeAwayContext
+      : undefined;
+  const isKnockout =
+    typeof metrics.isKnockout === "boolean" ? metrics.isKnockout : undefined;
+  const leg =
+    metrics.leg === "first" || metrics.leg === "second" ? metrics.leg : undefined;
+  const aggregateScore =
+    typeof metrics.aggregateScore === "string" &&
+    metrics.aggregateScore.trim().length > 0
+      ? metrics.aggregateScore.trim()
+      : undefined;
+
+  return Object.freeze({
+    ...(restDays === undefined ? {} : { restDays }),
+    ...(matchesInLast7Days === undefined ? {} : { matchesInLast7Days }),
+    ...(matchesInLast14Days === undefined ? {} : { matchesInLast14Days }),
+    ...(fixtureCongestion === undefined ? {} : { fixtureCongestion }),
+    ...(homeAwayContext === undefined ? {} : { homeAwayContext }),
+    ...(isKnockout === undefined ? {} : { isKnockout }),
+    ...(leg === undefined ? {} : { leg }),
+    ...(aggregateScore === undefined ? {} : { aggregateScore }),
+  });
+}
+
+function findMatchContextEvidence(
+  evidences: readonly Evidence[],
+  side: "away" | "home",
+): Evidence | undefined {
+  return evidences.find(
+    (evidence) =>
+      evidence.type === "MATCH_CONTEXT" && evidence.payload.teamSide === side,
+  );
+}
+
+/**
+ * I1B: derived football Features from MATCH_CONTEXT Evidence only.
+ * Never invents rest, congestion, travel distance, or knockout facts.
+ */
+function extractMatchContextFeatures(input: {
+  readonly evidences: readonly Evidence[];
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { evidences, matchId, generatedAt } = input;
+
+  if (matchId === undefined) {
+    return emptyFeatures;
+  }
+
+  const homeEvidence = findMatchContextEvidence(evidences, "home");
+  const awayEvidence = findMatchContextEvidence(evidences, "away");
+  const homeMetrics =
+    homeEvidence === undefined
+      ? undefined
+      : readMatchContextMetrics(homeEvidence.payload);
+  const awayMetrics =
+    awayEvidence === undefined
+      ? undefined
+      : readMatchContextMetrics(awayEvidence.payload);
+  const features: Feature[] = [];
+
+  const congestionFor = (
+    metrics: ReturnType<typeof readMatchContextMetrics>,
+  ): number | undefined => metrics.matchesInLast7Days ?? metrics.fixtureCongestion;
+
+  if (
+    homeEvidence !== undefined &&
+    homeMetrics !== undefined &&
+    homeMetrics.restDays !== undefined
+  ) {
+    const congestion = congestionFor(homeMetrics);
+
+    if (congestion !== undefined) {
+      const fatigue = roundFeature(
+        computeFatigueIndex({
+          restDays: homeMetrics.restDays,
+          matchesInLast7Days: congestion,
+          ...(homeMetrics.matchesInLast14Days === undefined
+            ? {}
+            : { matchesInLast14Days: homeMetrics.matchesInLast14Days }),
+        }),
+      );
+      features.push(
+        createFeature({
+          featureId: featureId(homeEvidence.id, "fatigueIndexHome"),
+          matchId,
+          name: "fatigueIndexHome",
+          value: fatigue,
+          explanation: `Fatigue index ${fatigue} from MATCH_CONTEXT restDays=${homeMetrics.restDays}, matchesInLast7Days=${congestion} (Evidence ${homeEvidence.id}).`,
+          sourceEvidenceId: homeEvidence.id,
+          generatedAt,
+        }),
+      );
+    }
+  }
+
+  if (
+    awayEvidence !== undefined &&
+    awayMetrics !== undefined &&
+    awayMetrics.restDays !== undefined
+  ) {
+    const congestion = congestionFor(awayMetrics);
+
+    if (congestion !== undefined) {
+      const fatigue = roundFeature(
+        computeFatigueIndex({
+          restDays: awayMetrics.restDays,
+          matchesInLast7Days: congestion,
+          ...(awayMetrics.matchesInLast14Days === undefined
+            ? {}
+            : { matchesInLast14Days: awayMetrics.matchesInLast14Days }),
+        }),
+      );
+      features.push(
+        createFeature({
+          featureId: featureId(awayEvidence.id, "fatigueIndexAway"),
+          matchId,
+          name: "fatigueIndexAway",
+          value: fatigue,
+          explanation: `Fatigue index ${fatigue} from MATCH_CONTEXT restDays=${awayMetrics.restDays}, matchesInLast7Days=${congestion} (Evidence ${awayEvidence.id}).`,
+          sourceEvidenceId: awayEvidence.id,
+          generatedAt,
+        }),
+      );
+    }
+  }
+
+  if (
+    homeEvidence !== undefined &&
+    awayEvidence !== undefined &&
+    homeMetrics?.restDays !== undefined &&
+    awayMetrics?.restDays !== undefined
+  ) {
+    const homeCongestion = congestionFor(homeMetrics);
+    const awayCongestion = congestionFor(awayMetrics);
+    const advantage = computeScheduleAdvantage({
+      homeRestDays: homeMetrics.restDays,
+      awayRestDays: awayMetrics.restDays,
+      ...(homeCongestion === undefined
+        ? {}
+        : { homeMatchesInLast7Days: homeCongestion }),
+      ...(awayCongestion === undefined
+        ? {}
+        : { awayMatchesInLast7Days: awayCongestion }),
+    });
+    features.push(
+      createFeature({
+        featureId: featureId(homeEvidence.id, "scheduleAdvantage"),
+        matchId,
+        name: "scheduleAdvantage",
+        value: advantage,
+        explanation: `Schedule advantage ${advantage} from relative rest/congestion (Evidence ${homeEvidence.id} + ${awayEvidence.id}).`,
+        sourceEvidenceId: homeEvidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (homeEvidence !== undefined && homeMetrics?.homeAwayContext !== undefined) {
+    const stability = computeHomeStability(homeMetrics.homeAwayContext);
+    features.push(
+      createFeature({
+        featureId: featureId(homeEvidence.id, "homeStability"),
+        matchId,
+        name: "homeStability",
+        value: stability,
+        explanation: `Home stability ${stability} from MATCH_CONTEXT homeAwayContext=${homeMetrics.homeAwayContext} (Evidence ${homeEvidence.id}).`,
+        sourceEvidenceId: homeEvidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (homeEvidence !== undefined && homeMetrics !== undefined) {
+    const homeCongestion = congestionFor(homeMetrics);
+
+    if (homeCongestion !== undefined) {
+      const pressure = roundFeature(computeRotationPressure(homeCongestion));
+      features.push(
+        createFeature({
+          featureId: featureId(homeEvidence.id, "rotationPressureHome"),
+          matchId,
+          name: "rotationPressureHome",
+          value: pressure,
+          explanation: `Rotation pressure ${pressure} from MATCH_CONTEXT fixture congestion (Evidence ${homeEvidence.id}).`,
+          sourceEvidenceId: homeEvidence.id,
+          generatedAt,
+        }),
+      );
+    }
+  }
+
+  if (awayEvidence !== undefined && awayMetrics !== undefined) {
+    const awayCongestion = congestionFor(awayMetrics);
+
+    if (awayCongestion !== undefined) {
+      const pressure = roundFeature(computeRotationPressure(awayCongestion));
+      features.push(
+        createFeature({
+          featureId: featureId(awayEvidence.id, "rotationPressureAway"),
+          matchId,
+          name: "rotationPressureAway",
+          value: pressure,
+          explanation: `Rotation pressure ${pressure} from MATCH_CONTEXT fixture congestion (Evidence ${awayEvidence.id}).`,
+          sourceEvidenceId: awayEvidence.id,
+          generatedAt,
+        }),
+      );
+    }
+  }
+
+  const knockoutSource = homeEvidence ?? awayEvidence;
+  const knockoutMetrics =
+    homeMetrics?.isKnockout !== undefined
+      ? homeMetrics
+      : awayMetrics?.isKnockout !== undefined
+        ? awayMetrics
+        : undefined;
+
+  if (knockoutSource !== undefined && knockoutMetrics?.isKnockout !== undefined) {
+    const knockout = computeKnockoutContext({
+      isKnockout: knockoutMetrics.isKnockout,
+      ...(knockoutMetrics.leg === undefined ? {} : { leg: knockoutMetrics.leg }),
+      hasAggregateScore: knockoutMetrics.aggregateScore !== undefined,
+    });
+    features.push(
+      createFeature({
+        featureId: featureId(knockoutSource.id, "knockoutContext"),
+        matchId,
+        name: "knockoutContext",
+        value: knockout,
+        explanation: `Knockout context ${knockout} from MATCH_CONTEXT isKnockout=${String(knockoutMetrics.isKnockout)}${knockoutMetrics.leg === undefined ? "" : `, leg=${knockoutMetrics.leg}`} (Evidence ${knockoutSource.id}).`,
+        sourceEvidenceId: knockoutSource.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
 function findSideEvidence(
   evidences: readonly Evidence[],
   type: "STATISTICS" | "TEAM_FORM",
@@ -728,6 +1003,14 @@ export class FeatureExtractor {
         evidences,
         homeForm,
         awayForm,
+        matchId,
+        generatedAt,
+      }),
+    );
+
+    features.push(
+      ...extractMatchContextFeatures({
+        evidences,
         matchId,
         generatedAt,
       }),

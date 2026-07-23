@@ -40,11 +40,16 @@ const TAU_DISCIPLINE_RISK = 8;
 const TAU_XG_ATTACK = 8;
 const TAU_XG_DEFENSE = 8;
 const TAU_XG_DOMINANCE = 0.2;
+const TAU_REST_ADVANTAGE = 2;
+const TAU_FATIGUE = 50;
+const TAU_HOME_STABILITY = 70;
+const TAU_ROTATION_PRESSURE = 20;
+const TAU_KNOCKOUT_CONTEXT = 50;
 const TAU_DEFENSE_STABLE = 55;
 const TAU_DEFENSE_FRAGILE = 45;
 const TAU_AVAILABILITY_HIT = 8;
 const TAU_VENUE = 1;
-const RULE_POLICY = "rule.mvp.f13b.xg";
+const RULE_POLICY = "rule.mvp.i1b.context";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -498,6 +503,117 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
       const dominance = numericValue(features.get("xgDominance"));
 
       return dominance !== undefined && dominance <= -TAU_XG_DOMINANCE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:rest-advantage-home:v1",
+    ruleName: "REST_ADVANTAGE_HOME",
+    weight: 0.45,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "scheduleAdvantage",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const advantage = numericValue(features.get("scheduleAdvantage"));
+
+      return advantage !== undefined && advantage >= TAU_REST_ADVANTAGE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:rest-advantage-away:v1",
+    ruleName: "REST_ADVANTAGE_AWAY",
+    weight: 0.45,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "scheduleAdvantage",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const advantage = numericValue(features.get("scheduleAdvantage"));
+
+      return advantage !== undefined && advantage <= -TAU_REST_ADVANTAGE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:fatigue-home:v1",
+    ruleName: "FATIGUE_HOME",
+    weight: 0.4,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "fatigueIndexHome",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const fatigue = numericValue(features.get("fatigueIndexHome"));
+
+      return fatigue !== undefined && fatigue >= TAU_FATIGUE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:fatigue-away:v1",
+    ruleName: "FATIGUE_AWAY",
+    weight: 0.4,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "fatigueIndexAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const fatigue = numericValue(features.get("fatigueIndexAway"));
+
+      return fatigue !== undefined && fatigue >= TAU_FATIGUE;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:home-stability:v1",
+    ruleName: "HOME_STABILITY",
+    weight: 0.35,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "homeStability",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const stability = numericValue(features.get("homeStability"));
+
+      return stability !== undefined && stability >= TAU_HOME_STABILITY;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:rotation-pressure:v1",
+    ruleName: "ROTATION_PRESSURE",
+    weight: 0.35,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "rotationPressureHome",
+      "rotationPressureAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("rotationPressureHome"));
+      const away = numericValue(features.get("rotationPressureAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_ROTATION_PRESSURE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:knockout-context:v1",
+    ruleName: "KNOCKOUT_CONTEXT",
+    weight: 0.25,
+    channel: "none",
+    requiredFeatures: Object.freeze([
+      "knockoutContext",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const knockout = numericValue(features.get("knockoutContext"));
+
+      return knockout !== undefined && knockout >= TAU_KNOCKOUT_CONTEXT;
     },
   }) satisfies FootballRuleDefinition,
   Object.freeze({

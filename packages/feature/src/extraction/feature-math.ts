@@ -241,6 +241,95 @@ export function computeFinishingEfficiency(
 }
 
 /**
+ * I1B Fatigue Index in [0, 100] from Match Context schedule facts.
+ * Higher = more fatigued. Never invents missing rest/congestion.
+ */
+export function computeFatigueIndex(input: {
+  readonly restDays: number;
+  readonly matchesInLast7Days: number;
+  readonly matchesInLast14Days?: number;
+}): number {
+  const restComponent = clamp(100 * (1 - input.restDays / 7), 0, 100);
+  const congestionComponent = clamp(input.matchesInLast7Days * 25, 0, 100);
+
+  if (input.matchesInLast14Days === undefined) {
+    return clamp(0.5 * restComponent + 0.5 * congestionComponent, 0, 100);
+  }
+
+  const frequencyComponent = clamp(input.matchesInLast14Days * 12.5, 0, 100);
+
+  return clamp(
+    0.4 * restComponent + 0.4 * congestionComponent + 0.2 * frequencyComponent,
+    0,
+    100,
+  );
+}
+
+/**
+ * I1B signed Schedule Advantage: positive favors the home side
+ * (more rest and/or less congestion than the opponent).
+ */
+export function computeScheduleAdvantage(input: {
+  readonly homeRestDays: number;
+  readonly awayRestDays: number;
+  readonly homeMatchesInLast7Days?: number;
+  readonly awayMatchesInLast7Days?: number;
+}): number {
+  const restDiff = input.homeRestDays - input.awayRestDays;
+  const homeCongestion = input.homeMatchesInLast7Days;
+  const awayCongestion = input.awayMatchesInLast7Days;
+
+  if (homeCongestion === undefined || awayCongestion === undefined) {
+    return roundFeature(restDiff);
+  }
+
+  return roundFeature(restDiff + 0.5 * (awayCongestion - homeCongestion));
+}
+
+/**
+ * I1B Home Stability in [0, 100] from home/away context posture.
+ * Present only when the home side's MATCH_CONTEXT declares homeAwayContext.
+ */
+export function computeHomeStability(homeAwayContext: "away" | "home"): number {
+  return homeAwayContext === "home" ? 100 : 35;
+}
+
+/**
+ * I1B Rotation Pressure in [0, 100] from fixture congestion count.
+ */
+export function computeRotationPressure(matchesInLast7Days: number): number {
+  return clamp(matchesInLast7Days * 25, 0, 100);
+}
+
+/**
+ * I1B Knockout Context score in [0, 100].
+ * 0 = non-knockout when explicitly known; higher for knockout legs.
+ */
+export function computeKnockoutContext(input: {
+  readonly isKnockout: boolean;
+  readonly leg?: "first" | "second";
+  readonly hasAggregateScore: boolean;
+}): number {
+  if (!input.isKnockout) {
+    return 0;
+  }
+
+  let score = 50;
+
+  if (input.leg === "first") {
+    score = 60;
+  } else if (input.leg === "second") {
+    score = 75;
+  }
+
+  if (input.hasAggregateScore) {
+    score += 10;
+  }
+
+  return clamp(score, 0, 100);
+}
+
+/**
  * Head-to-head lean from meetings oriented to the current fixture.
  * Positive favors the current home side. Shrinks toward 0 with small samples.
  */

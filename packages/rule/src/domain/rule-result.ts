@@ -18,6 +18,8 @@ export type RuleId =
   | "rule:defense-home-stable:v1"
   | "rule:discipline-away-risk:v1"
   | "rule:discipline-home-risk:v1"
+  | "rule:fatigue-away:v1"
+  | "rule:fatigue-home:v1"
   | "rule:form-away-superior:v1"
   | "rule:form-home-superior:v1"
   | "rule:form-near-parity:v1"
@@ -27,9 +29,11 @@ export type RuleId =
   | "rule:h2h-supports-home:v1"
   | "rule:home-advantage-material:v1"
   | "rule:home-attack-edge:v1"
+  | "rule:home-stability:v1"
   | "rule:home-team-present:v1"
   | "rule:home-venue-form-edge:v1"
   | "rule:kickoff-present:v1"
+  | "rule:knockout-context:v1"
   | "rule:market-ah-lean-away:v1"
   | "rule:market-ah-lean-home:v1"
   | "rule:market-lean-away:v1"
@@ -38,6 +42,9 @@ export type RuleId =
   | "rule:momentum-home:v1"
   | "rule:possession-away-edge:v1"
   | "rule:possession-home-edge:v1"
+  | "rule:rest-advantage-away:v1"
+  | "rule:rest-advantage-home:v1"
+  | "rule:rotation-pressure:v1"
   | "rule:signals-aligned-away:v1"
   | "rule:signals-aligned-home:v1"
   | "rule:venue-supports-home:v1"
@@ -67,6 +74,8 @@ export type RuleName =
   | "DEFENSE_HOME_STABLE"
   | "DISCIPLINE_AWAY_RISK"
   | "DISCIPLINE_HOME_RISK"
+  | "FATIGUE_AWAY"
+  | "FATIGUE_HOME"
   | "FORM_AWAY_SUPERIOR"
   | "FORM_HOME_SUPERIOR"
   | "FORM_NEAR_PARITY"
@@ -76,9 +85,11 @@ export type RuleName =
   | "H2H_SUPPORTS_HOME"
   | "HOME_ADVANTAGE_MATERIAL"
   | "HOME_ATTACK_EDGE"
+  | "HOME_STABILITY"
   | "HOME_TEAM_PRESENT"
   | "HOME_VENUE_FORM_EDGE"
   | "KICKOFF_PRESENT"
+  | "KNOCKOUT_CONTEXT"
   | "MARKET_AH_LEAN_AWAY"
   | "MARKET_AH_LEAN_HOME"
   | "MARKET_LEAN_AWAY"
@@ -87,6 +98,9 @@ export type RuleName =
   | "MOMENTUM_HOME"
   | "POSSESSION_AWAY_EDGE"
   | "POSSESSION_HOME_EDGE"
+  | "REST_ADVANTAGE_AWAY"
+  | "REST_ADVANTAGE_HOME"
+  | "ROTATION_PRESSURE"
   | "SIGNALS_ALIGNED_AWAY"
   | "SIGNALS_ALIGNED_HOME"
   | "VENUE_SUPPORTS_HOME"
@@ -153,6 +167,8 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:defense-home-stable:v1",
   "rule:discipline-away-risk:v1",
   "rule:discipline-home-risk:v1",
+  "rule:fatigue-away:v1",
+  "rule:fatigue-home:v1",
   "rule:form-away-superior:v1",
   "rule:form-home-superior:v1",
   "rule:form-near-parity:v1",
@@ -162,9 +178,11 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:h2h-supports-home:v1",
   "rule:home-advantage-material:v1",
   "rule:home-attack-edge:v1",
+  "rule:home-stability:v1",
   "rule:home-team-present:v1",
   "rule:home-venue-form-edge:v1",
   "rule:kickoff-present:v1",
+  "rule:knockout-context:v1",
   "rule:market-ah-lean-away:v1",
   "rule:market-ah-lean-home:v1",
   "rule:market-lean-away:v1",
@@ -173,6 +191,9 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:momentum-home:v1",
   "rule:possession-away-edge:v1",
   "rule:possession-home-edge:v1",
+  "rule:rest-advantage-away:v1",
+  "rule:rest-advantage-home:v1",
+  "rule:rotation-pressure:v1",
   "rule:signals-aligned-away:v1",
   "rule:signals-aligned-home:v1",
   "rule:venue-supports-home:v1",
@@ -202,6 +223,8 @@ const ruleNames: ReadonlySet<string> = new Set([
   "DEFENSE_HOME_STABLE",
   "DISCIPLINE_AWAY_RISK",
   "DISCIPLINE_HOME_RISK",
+  "FATIGUE_AWAY",
+  "FATIGUE_HOME",
   "FORM_AWAY_SUPERIOR",
   "FORM_HOME_SUPERIOR",
   "FORM_NEAR_PARITY",
@@ -211,9 +234,11 @@ const ruleNames: ReadonlySet<string> = new Set([
   "H2H_SUPPORTS_HOME",
   "HOME_ADVANTAGE_MATERIAL",
   "HOME_ATTACK_EDGE",
+  "HOME_STABILITY",
   "HOME_TEAM_PRESENT",
   "HOME_VENUE_FORM_EDGE",
   "KICKOFF_PRESENT",
+  "KNOCKOUT_CONTEXT",
   "MARKET_AH_LEAN_AWAY",
   "MARKET_AH_LEAN_HOME",
   "MARKET_LEAN_AWAY",
@@ -222,6 +247,9 @@ const ruleNames: ReadonlySet<string> = new Set([
   "MOMENTUM_HOME",
   "POSSESSION_AWAY_EDGE",
   "POSSESSION_HOME_EDGE",
+  "REST_ADVANTAGE_AWAY",
+  "REST_ADVANTAGE_HOME",
+  "ROTATION_PRESSURE",
   "SIGNALS_ALIGNED_AWAY",
   "SIGNALS_ALIGNED_HOME",
   "VENUE_SUPPORTS_HOME",

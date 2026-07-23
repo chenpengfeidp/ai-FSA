@@ -433,7 +433,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.f13b.xg");
+    expect(bundle.featureModelVersion).toBe("feature.v2.i1b.context");
     expect(
       bundle.features.some((feature) => feature.name === "availabilityPenaltyAway"),
     ).toBe(false);
@@ -576,7 +576,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.f13b.xg");
+    expect(bundle.featureModelVersion).toBe("feature.v2.i1b.context");
   });
 
   it("keeps xG Features absent when EXPECTED_GOALS Evidence is missing", () => {
@@ -663,6 +663,197 @@ describe("FeatureExtractor", () => {
     expect(
       bundle.features.some((feature) =>
         feature.name.startsWith("finishingEfficiency"),
+      ),
+    ).toBe(false);
+  });
+
+  it("extracts Context Features from MATCH_CONTEXT Evidence without fabricating", () => {
+    const matchInfo = makeEvidence();
+    const matchId = createMatchId("match-1");
+    const sideForm = (side: "away" | "home", id: string): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "TEAM_FORM",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          teamSide: side,
+          results: ["W"],
+          goalsFor: [1],
+          goalsAgainst: [0],
+        },
+      });
+    const sideStats = (side: "away" | "home", id: string): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "STATISTICS",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          teamSide: side,
+          windowMatches: 1,
+          shotsForPerMatch: 10,
+          shotsAgainstPerMatch: 10,
+          xgForPerMatch: 0,
+          xgAgainstPerMatch: 0,
+        },
+      });
+    const sideContext = (
+      side: "away" | "home",
+      id: string,
+      metrics: Record<string, unknown>,
+    ): Evidence =>
+      createEvidence({
+        id,
+        source: "api-football",
+        sourceId: `${id}-source`,
+        type: "MATCH_CONTEXT",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "recorded-snapshot",
+        },
+        payload: {
+          teamId: side === "home" ? "10" : "20",
+          teamName: side === "home" ? "Home" : "Away",
+          teamSide: side,
+          contextType: "match_context",
+          matchId: "match-1",
+          metrics,
+          observedAt: "2026-08-01T19:30:00Z",
+        },
+      });
+
+    const bundle = new FeatureExtractor().extractBundle([
+      matchInfo,
+      sideForm("home", "evidence-form-home"),
+      sideForm("away", "evidence-form-away"),
+      sideStats("home", "evidence-stats-home"),
+      sideStats("away", "evidence-stats-away"),
+      sideContext("home", "evidence-context-home", {
+        restDays: 6,
+        matchesInLast7Days: 1,
+        matchesInLast14Days: 2,
+        fixtureCongestion: 1,
+        homeAwayContext: "home",
+        isKnockout: false,
+        roundLabel: "Regular Season - 24",
+      }),
+      sideContext("away", "evidence-context-away", {
+        restDays: 3,
+        matchesInLast7Days: 2,
+        matchesInLast14Days: 3,
+        fixtureCongestion: 2,
+        homeAwayContext: "away",
+        isKnockout: false,
+      }),
+    ]);
+
+    expect(bundle.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "fatigueIndexHome" }),
+        expect.objectContaining({ name: "fatigueIndexAway" }),
+        expect.objectContaining({ name: "scheduleAdvantage", value: 3.5 }),
+        expect.objectContaining({ name: "homeStability", value: 100 }),
+        expect.objectContaining({ name: "rotationPressureHome", value: 25 }),
+        expect.objectContaining({ name: "rotationPressureAway", value: 50 }),
+        expect.objectContaining({ name: "knockoutContext", value: 0 }),
+      ]),
+    );
+    expect(bundle.featureModelVersion).toBe("feature.v2.i1b.context");
+  });
+
+  it("keeps Context Features absent when MATCH_CONTEXT Evidence is missing", () => {
+    const matchInfo = makeEvidence();
+    const matchId = createMatchId("match-1");
+    const sideForm = (side: "away" | "home", id: string): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "TEAM_FORM",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          teamSide: side,
+          results: ["W"],
+          goalsFor: [1],
+          goalsAgainst: [0],
+        },
+      });
+    const sideStats = (side: "away" | "home", id: string): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "STATISTICS",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          teamSide: side,
+          windowMatches: 1,
+          shotsForPerMatch: 10,
+          shotsAgainstPerMatch: 10,
+          xgForPerMatch: 0,
+          xgAgainstPerMatch: 0,
+        },
+      });
+
+    const bundle = new FeatureExtractor().extractBundle([
+      matchInfo,
+      sideForm("home", "evidence-form-home"),
+      sideForm("away", "evidence-form-away"),
+      sideStats("home", "evidence-stats-home"),
+      sideStats("away", "evidence-stats-away"),
+    ]);
+
+    expect(
+      bundle.features.some((feature) =>
+        [
+          "fatigueIndexHome",
+          "fatigueIndexAway",
+          "scheduleAdvantage",
+          "homeStability",
+          "rotationPressureHome",
+          "rotationPressureAway",
+          "knockoutContext",
+        ].includes(feature.name),
       ),
     ).toBe(false);
   });

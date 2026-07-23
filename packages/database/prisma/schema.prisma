@@ -140,3 +140,29 @@ model EvidenceItem {
   @@index([matchId, evidenceType, metricKey, observedAt(sort: Desc)])
   @@map("evidence_items")
 }
+
+/// A1.5 append-only Evaluation History (domain MatchId string, not Match UUID FK).
+model EvaluationHistoryItem {
+  id                     String   @id @db.Uuid
+  historyId              String   @unique @map("history_id")
+  matchId                String   @map("match_id")
+  competitionId          String?  @map("competition_id")
+  competitionName        String?  @map("competition_name")
+  season                 String
+  matchDate              DateTime @map("match_date") @db.Timestamptz(3)
+  homeTeam               String   @map("home_team")
+  awayTeam               String   @map("away_team")
+  featureModelVersion    String   @map("feature_model_version")
+  ruleSetVersion         String   @map("rule_set_version")
+  projectionModelVersion String   @map("projection_model_version")
+  evaluationModelVersion String   @map("evaluation_model_version")
+  recordedAt             DateTime @map("recorded_at") @db.Timestamptz(3)
+  contentSha256          String   @map("content_sha256") @db.Char(64)
+  recordJson             Json     @map("record_json")
+
+  @@index([matchId, recordedAt(sort: Desc)])
+  @@index([competitionId, season, matchDate])
+  @@index([season, matchDate])
+  @@index([matchDate])
+  @@map("evaluation_history_items")
+}

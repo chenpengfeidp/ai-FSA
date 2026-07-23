@@ -1,6 +1,17 @@
-import type { AnalysisResult, AnalyzeMatchResult } from "@fas/analysis";
+import {
+  buildSealedPredictionInput,
+  extractMatchContextForHistory,
+  type AnalysisResult,
+  type AnalyzeMatchResult,
+} from "@fas/analysis";
 import type { MatchId } from "@fas/match";
+import {
+  buildEvaluationHistoryRecord,
+  type EvaluationHistoryRecord,
+  type EvaluationHistoryRepository,
+} from "@fas/statistics";
 import type { AnalysisReport } from "../domain/analysis-report.js";
+import { createAnalysisReport } from "../domain/analysis-report.js";
 
 type AnalysisFailure = Extract<AnalyzeMatchResult, { ok: false }>;
 
@@ -12,7 +23,10 @@ export interface AnalysisReportBuilder {
   build(analysis: AnalysisResult): AnalysisReport;
 }
 
-export type ReportGenerationErrorCode = "ANALYSIS_FAILED" | "REPORT_BUILD_FAILED";
+export type ReportGenerationErrorCode =
+  | "ANALYSIS_FAILED"
+  | "EVALUATION_HISTORY_FAILED"
+  | "REPORT_BUILD_FAILED";
 
 export interface ReportGenerationError {
   readonly code: ReportGenerationErrorCode;
@@ -39,16 +53,51 @@ function failure(
   });
 }
 
+async function persistAndLoadHistory(
+  analysis: AnalysisResult,
+  report: AnalysisReport,
+  repository: EvaluationHistoryRepository,
+): Promise<readonly EvaluationHistoryRecord[]> {
+  const evaluation = report.evaluation;
+  const actualResult = report.actualResult;
+  const matchContext = extractMatchContextForHistory(analysis);
+
+  if (
+    evaluation === undefined ||
+    evaluation.status !== "scored" ||
+    actualResult === undefined ||
+    matchContext === undefined
+  ) {
+    return repository.findByMatch(analysis.matchId);
+  }
+
+  const historyRecord = buildEvaluationHistoryRecord({
+    predictionSnapshot: buildSealedPredictionInput(analysis),
+    actualResult,
+    evaluation,
+    homeTeam: matchContext.homeTeam,
+    awayTeam: matchContext.awayTeam,
+    matchDate: matchContext.matchDate,
+    recordedAt: analysis.generatedAt,
+  });
+
+  await repository.save(historyRecord);
+  return repository.findByMatch(analysis.matchId);
+}
+
 export class GenerateMatchReportUseCase {
   readonly #analyzeMatch: AnalyzeMatchOperation;
   readonly #reportBuilder: AnalysisReportBuilder;
+  readonly #evaluationHistoryRepository: EvaluationHistoryRepository | undefined;
 
   constructor(
     analyzeMatch: AnalyzeMatchOperation,
     reportBuilder: AnalysisReportBuilder,
+    evaluationHistoryRepository?: EvaluationHistoryRepository,
   ) {
     this.#analyzeMatch = analyzeMatch;
     this.#reportBuilder = reportBuilder;
+    this.#evaluationHistoryRepository = evaluationHistoryRepository;
   }
 
   async execute(matchId: MatchId): Promise<GenerateMatchReportResult> {
@@ -64,12 +113,55 @@ export class GenerateMatchReportUseCase {
       return analysis;
     }
 
+    let report: AnalysisReport;
+
     try {
-      return this.#reportBuilder.build(analysis.value);
+      report = this.#reportBuilder.build(analysis.value);
     } catch {
       return failure(
         "REPORT_BUILD_FAILED",
         "Analysis report generation failed unexpectedly.",
+      );
+    }
+
+    if (this.#evaluationHistoryRepository === undefined) {
+      return report;
+    }
+
+    try {
+      const evaluationHistory = await persistAndLoadHistory(
+        analysis.value,
+        report,
+        this.#evaluationHistoryRepository,
+      );
+
+      if (evaluationHistory.length === 0) {
+        return report;
+      }
+
+      return createAnalysisReport({
+        reportId: report.reportId,
+        matchId: report.matchId,
+        generatedAt: report.generatedAt,
+        summary: report.summary,
+        features: report.features,
+        rules: report.rules,
+        deterministic: report.deterministic,
+        scenarios: report.scenarios,
+        intelligenceConfidence: report.intelligenceConfidence,
+        narrative: report.narrative,
+        ...(report.actualResult === undefined
+          ? {}
+          : { actualResult: report.actualResult }),
+        ...(report.evaluation === undefined
+          ? {}
+          : { evaluation: report.evaluation }),
+        evaluationHistory,
+      });
+    } catch {
+      return failure(
+        "EVALUATION_HISTORY_FAILED",
+        "Evaluation History persistence failed unexpectedly.",
       );
     }
   }

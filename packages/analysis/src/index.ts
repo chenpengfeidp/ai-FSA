@@ -66,6 +66,8 @@ export {
 export { resolvePinnedCalibrationArtifact } from "@fas/statistics";
 export type { CalibrationArtifactMode } from "@fas/statistics";
 export { buildSealedPredictionInput } from "./evaluation/build-sealed-prediction-input.js";
+export { extractMatchContextForHistory } from "./evaluation/extract-match-context-for-history.js";
+export type { MatchContextForHistory } from "./evaluation/extract-match-context-for-history.js";
 export { EvaluatePredictionUseCase } from "./use-case/evaluate-prediction-use-case.js";
 export type {
   EvaluatePredictionCommand,

@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 Prediction Evaluation** 已完成；下一步 **A2 Calibration**（`docs/40_PRODUCT_ROADMAP.md` / `PROJECT_STATE`）。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
+一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 / A1.5 Evaluation History** 已完成；下一步 **A2 Calibration**（`docs/40_PRODUCT_ROADMAP.md` / `PROJECT_STATE`）。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
 
 ---
 
@@ -243,7 +243,8 @@ Match Center (web)
 产品顺序以 [`docs/40_PRODUCT_ROADMAP.md`](./40_PRODUCT_ROADMAP.md) 与 [`docs/PROJECT_STATE.md`](./PROJECT_STATE.md) 为准：
 
 1. **A1 Prediction Evaluation** — 已完成（`docs/sprints/A1/A1_PREDICTION_EVALUATION_COMPLETION_REPORT.md`）  
-2. **A2** — Calibration productization（当前下一步）  
+2. **A1.5 Evaluation Platform Foundation** — 已完成（`docs/sprints/A1/A1.5_EVALUATION_PLATFORM_FOUNDATION_COMPLETION_REPORT.md`）  
+3. **A2** — Calibration productization（当前下一步；消费 Evaluation History）  
 3. 其后按 doc 40：K1 / C1 / … → v1.0 → v2.0  
 
 历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3  

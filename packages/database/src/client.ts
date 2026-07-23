@@ -1,8 +1,10 @@
 import type { EvidenceRepository } from "@fas/evidence";
+import type { EvaluationHistoryRepository } from "@fas/statistics";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaEvidenceRepository } from "./prisma-evidence-repository.js";
+import { PrismaEvaluationHistoryRepository } from "./prisma-evaluation-history-repository.js";
 
 export interface DatabaseClientLifecycle {
   connect(): Promise<void>;
@@ -14,6 +16,7 @@ export interface DatabaseClientLifecycle {
 export interface FasDatabaseHandle {
   readonly lifecycle: DatabaseClientLifecycle;
   readonly evidenceRepository: EvidenceRepository;
+  readonly evaluationHistoryRepository: EvaluationHistoryRepository;
 }
 
 function createPrismaClient(connectionString: string): PrismaClient {
@@ -48,6 +51,7 @@ export function createFasDatabase(connectionString: string): FasDatabaseHandle {
   return Object.freeze({
     lifecycle: toLifecycle(client),
     evidenceRepository: new PrismaEvidenceRepository(client),
+    evaluationHistoryRepository: new PrismaEvaluationHistoryRepository(client),
   });
 }
 

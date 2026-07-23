@@ -17,19 +17,28 @@ import type { MatchLookup } from "@fas/provider-odds";
 import { LocalDeterministicNarrativeAdapter } from "@fas/ai-provider";
 import { GenerateMatchReportUseCase, ReportBuilder } from "@fas/report";
 import { RuleEvaluator } from "@fas/rule";
+import type { EvaluationHistoryRepository } from "@fas/statistics";
 import { Module } from "@nestjs/common";
 import { AnalysisController } from "./analysis.controller.js";
 import { MatchAnalysisController } from "./match-analysis.controller.js";
 import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
-import { matchProviderToken } from "./evidence.tokens.js";
+import { EvaluationHistoryController } from "./evaluation-history.controller.js";
+import { EvaluationHistoryRepositoryBridge } from "./evaluation-history-repository.bridge.js";
+import {
+  evaluationHistoryRepositoryToken,
+  matchProviderToken,
+} from "./evidence.tokens.js";
 import { ImportController } from "./import.controller.js";
 import { MatchesController } from "./matches.controller.js";
 import { ProvidersController } from "./providers.controller.js";
 import { FootballMatchPrimerBridge } from "./football-match-primer.bridge.js";
 import { createMatchProviderWiring } from "./match-provider.factory.js";
 import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
-import { createApiEvidenceRepository } from "./runtime-database.js";
+import {
+  createApiEvaluationHistoryRepository,
+  createApiEvidenceRepository,
+} from "./runtime-database.js";
 import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
 import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
 import { createUpcomingMatchesBoard } from "./upcoming-matches.factory.js";
@@ -57,6 +66,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     AnalysisController,
     MatchAnalysisController,
     EvidenceController,
+    EvaluationHistoryController,
     ProvidersController,
     ImportController,
     MatchesController,
@@ -65,6 +75,19 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     {
       provide: evidenceRepositoryToken,
       useFactory: (): EvidenceRepository => createApiEvidenceRepository(),
+    },
+    {
+      provide: evaluationHistoryRepositoryToken,
+      useFactory: (): EvaluationHistoryRepository =>
+        createApiEvaluationHistoryRepository(),
+    },
+    {
+      provide: EvaluationHistoryRepositoryBridge,
+      inject: [evaluationHistoryRepositoryToken],
+      useFactory: (
+        repository: EvaluationHistoryRepository,
+      ): EvaluationHistoryRepositoryBridge =>
+        new EvaluationHistoryRepositoryBridge(repository),
     },
     {
       provide: EvidenceService,
@@ -153,12 +176,17 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     },
     {
       provide: GenerateMatchReportUseCase,
-      inject: [AnalyzeMatchUseCase, ReportBuilder],
+      inject: [AnalyzeMatchUseCase, ReportBuilder, evaluationHistoryRepositoryToken],
       useFactory: (
         analyzeMatch: AnalyzeMatchUseCase,
         reportBuilder: ReportBuilder,
+        evaluationHistoryRepository: EvaluationHistoryRepository,
       ): GenerateMatchReportUseCase =>
-        new GenerateMatchReportUseCase(analyzeMatch, reportBuilder),
+        new GenerateMatchReportUseCase(
+          analyzeMatch,
+          reportBuilder,
+          evaluationHistoryRepository,
+        ),
     },
     EvidenceExampleInitializer,
   ],

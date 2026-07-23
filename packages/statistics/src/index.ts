@@ -93,3 +93,23 @@ export type {
   EvaluationPopulationRow,
   EvaluationPopulationSummary,
 } from "./evaluation/evaluation-population.js";
+
+export {
+  createEvaluationHistoryRecord,
+  EVALUATION_HISTORY_SCHEMA_VERSION,
+  EvaluationHistoryValidationError,
+} from "./domain/evaluation-history.js";
+export type {
+  CreateEvaluationHistoryRecordInput,
+  EvaluationHistoryRecord,
+} from "./domain/evaluation-history.js";
+
+export { buildEvaluationHistoryRecord } from "./evaluation/build-evaluation-history-record.js";
+export type { BuildEvaluationHistoryRecordInput } from "./evaluation/build-evaluation-history-record.js";
+
+export { DuplicateEvaluationHistoryError } from "./repository/evaluation-history-repository.js";
+export type {
+  EvaluationHistoryQuery,
+  EvaluationHistoryRepository,
+} from "./repository/evaluation-history-repository.js";
+export { InMemoryEvaluationHistoryRepository } from "./repository/in-memory-evaluation-history-repository.js";

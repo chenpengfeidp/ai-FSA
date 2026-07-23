@@ -7,7 +7,11 @@ import type { NarrativeDraft } from "@fas/ai-provider";
 import type { Feature } from "@fas/feature";
 import { createMatchId, type MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
-import type { ActualMatchResult, PredictionEvaluationRecord } from "@fas/statistics";
+import type {
+  ActualMatchResult,
+  EvaluationHistoryRecord,
+  PredictionEvaluationRecord,
+} from "@fas/statistics";
 
 export interface AnalysisReport {
   readonly reportId: string;
@@ -24,6 +28,8 @@ export interface AnalysisReport {
   readonly actualResult?: ActualMatchResult;
   /** Deterministic evaluation overlay — measurement only. */
   readonly evaluation?: PredictionEvaluationRecord;
+  /** Read-only Evaluation History for this match (A1.5). */
+  readonly evaluationHistory?: readonly EvaluationHistoryRecord[];
 }
 
 export interface CreateAnalysisReportInput {
@@ -39,6 +45,7 @@ export interface CreateAnalysisReportInput {
   readonly narrative: NarrativeDraft;
   readonly actualResult?: ActualMatchResult;
   readonly evaluation?: PredictionEvaluationRecord;
+  readonly evaluationHistory?: readonly EvaluationHistoryRecord[];
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -151,6 +158,12 @@ export function createAnalysisReport(
     );
   }
 
+  if (input.evaluationHistory?.some((record) => record.matchId !== matchId)) {
+    throw new AnalysisReportValidationError(
+      "evaluationHistory entries must reference the AnalysisReport MatchId.",
+    );
+  }
+
   return Object.freeze({
     reportId: requireNonEmpty(input.reportId, "reportId"),
     matchId,
@@ -171,5 +184,10 @@ export function createAnalysisReport(
       ? {}
       : { actualResult: input.actualResult }),
     ...(input.evaluation === undefined ? {} : { evaluation: input.evaluation }),
+    ...(input.evaluationHistory === undefined
+      ? {}
+      : {
+          evaluationHistory: Object.freeze([...input.evaluationHistory]),
+        }),
   });
 }

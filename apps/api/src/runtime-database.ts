@@ -7,8 +7,13 @@ import {
   type FasDatabaseHandle,
 } from "@fas/database";
 import { type EvidenceRepository, InMemoryEvidenceRepository } from "@fas/evidence";
+import {
+  type EvaluationHistoryRepository,
+  InMemoryEvaluationHistoryRepository,
+} from "@fas/statistics";
 
 let cachedPostgres: FasDatabaseHandle | undefined;
+let cachedMemoryEvaluationHistory: EvaluationHistoryRepository | undefined;
 
 function getPostgresDatabase(): FasDatabaseHandle {
   if (cachedPostgres !== undefined) {
@@ -46,4 +51,23 @@ export function createApiEvidenceRepository(): EvidenceRepository {
   }
 
   return new InMemoryEvidenceRepository();
+}
+
+/**
+ * Evaluation History repository (A1.5).
+ * Follows EVIDENCE_REPOSITORY_MODE: memory (process-local) or postgres.
+ * Memory mode is shared for the Nest process so history survives across analyzes.
+ */
+export function createApiEvaluationHistoryRepository(): EvaluationHistoryRepository {
+  const config = loadApiConfig();
+
+  if (config.evidenceRepository.mode === "postgres") {
+    return getPostgresDatabase().evaluationHistoryRepository;
+  }
+
+  if (cachedMemoryEvaluationHistory === undefined) {
+    cachedMemoryEvaluationHistory = new InMemoryEvaluationHistoryRepository();
+  }
+
+  return cachedMemoryEvaluationHistory;
 }

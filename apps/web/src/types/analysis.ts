@@ -255,6 +255,27 @@ export interface PredictionEvaluationDto {
   readonly metrics?: EvaluationMetricsDto;
 }
 
+export interface EvaluationHistoryRecordDto {
+  readonly historyId: string;
+  readonly matchId: string;
+  readonly competitionId?: string;
+  readonly competitionName?: string;
+  readonly season: string;
+  readonly matchDate: string;
+  readonly homeTeam: string;
+  readonly awayTeam: string;
+  readonly featureModelVersion: string;
+  readonly ruleSetVersion: string;
+  readonly projectionModelVersion: string;
+  readonly evaluationModelVersion: string;
+  readonly recordedAt: string;
+  readonly confidence: Readonly<{
+    predictionConfidence: number;
+    confidenceBand: "high" | "low" | "medium" | "very_high";
+  }>;
+  readonly evaluation: PredictionEvaluationDto;
+}
+
 export interface AnalysisReportDto {
   readonly reportId: string;
   readonly matchId: string;
@@ -266,6 +287,7 @@ export interface AnalysisReportDto {
   readonly narrative: NarrativeDraftDto;
   readonly actualResult?: ActualMatchResultDto;
   readonly evaluation?: PredictionEvaluationDto;
+  readonly evaluationHistory?: readonly EvaluationHistoryRecordDto[];
 }
 
 export interface BackendErrorDto {

@@ -500,6 +500,15 @@ export class AnalysisReportDto {
     additionalProperties: true,
   })
   declare readonly evaluation?: Readonly<Record<string, unknown>>;
+
+  @ApiPropertyOptional({
+    description:
+      "Read-only Evaluation History rows for this match (A1.5). Append-only; never mutates Prediction.",
+    isArray: true,
+    type: "object",
+    additionalProperties: true,
+  })
+  declare readonly evaluationHistory?: readonly Readonly<Record<string, unknown>>[];
 }
 
 export class AnalysisErrorCauseDto {

@@ -210,6 +210,72 @@ export interface MatchContextEvidenceView {
   readonly note: string;
 }
 
+export type MarketTypeView = "asian_handicap" | "european_1x2" | "over_under";
+
+export type MarketSelectionView =
+  | "asian_away"
+  | "asian_home"
+  | "away"
+  | "draw"
+  | "home"
+  | "over"
+  | "under";
+
+export interface MarketEvidenceRecordView {
+  readonly marketType: MarketTypeView;
+  readonly selection: MarketSelectionView;
+  readonly line: number | null;
+  readonly openingValue: number | null;
+  readonly currentValue: number | null;
+  readonly closingValue: number | null;
+  readonly movement: number | null;
+  readonly lineMovement: number | null;
+  readonly observedAt: string;
+  readonly marketSource: string | null;
+}
+
+export interface MarketEvidenceSummaryView {
+  readonly observedAt: string;
+  readonly marketSource: string | null;
+  readonly homeOdds: number | null;
+  readonly drawOdds: number | null;
+  readonly awayOdds: number | null;
+  readonly asianHandicapLine: number | null;
+  readonly asianHandicapHomeOdds: number | null;
+  readonly asianHandicapAwayOdds: number | null;
+  readonly overUnderLine: number | null;
+  readonly overOdds: number | null;
+  readonly underOdds: number | null;
+  readonly openingHomeOdds: number | null;
+  readonly openingDrawOdds: number | null;
+  readonly openingAwayOdds: number | null;
+  readonly closingHomeOdds: number | null;
+  readonly closingDrawOdds: number | null;
+  readonly closingAwayOdds: number | null;
+  readonly oddsMovementHome: number | null;
+  readonly oddsMovementDraw: number | null;
+  readonly oddsMovementAway: number | null;
+  readonly asianHandicapOpeningLine: number | null;
+  readonly handicapMovement: number | null;
+  readonly overUnderOpeningLine: number | null;
+  readonly overUnderLineMovement: number | null;
+  readonly publicBettingHomePct: number | null;
+  readonly publicBettingDrawPct: number | null;
+  readonly publicBettingAwayPct: number | null;
+  readonly bettingVolume: number | null;
+  readonly sharpMoneyIndicator: boolean | string | null;
+}
+
+export interface MarketEvidenceView {
+  readonly available: boolean;
+  readonly summary: MarketEvidenceSummaryView | null;
+  readonly markets: readonly MarketEvidenceRecordView[];
+  readonly providerId: string | null;
+  readonly source: string | null;
+  readonly provenanceMethod: string | null;
+  readonly note: string;
+}
+
 export interface WinnerPredictionView {
   readonly homeTeam: string;
   readonly awayTeam: string;
@@ -304,6 +370,7 @@ export interface ExplainableReportView {
   readonly advancedStatistics: AdvancedStatisticsContextView;
   readonly expectedGoals: ExpectedGoalsContextView;
   readonly matchContext: MatchContextEvidenceView;
+  readonly marketEvidence: MarketEvidenceView;
   readonly availability: AvailabilitySummaryView;
   readonly winnerPrediction: WinnerPredictionView;
   readonly mostLikelyScore: MostLikelyScoreView;

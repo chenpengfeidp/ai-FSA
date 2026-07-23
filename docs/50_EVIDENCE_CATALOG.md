@@ -41,7 +41,7 @@ Status legend:
 | HEAD_TO_HEAD | `HEAD_TO_HEAD` | Active | F.1 |
 | VENUE | `VENUE` | Active | F1.1B-1 |
 | PLAYER | `PLAYER` | Active | F1.1C-1 (basic identity) |
-| ODDS | `ODDS` | Active (optional path) | Market path |
+| ODDS | `ODDS` | Active (optional path) | I2A Market Evidence (1X2 / AH / O/U + optional opening/closing/movement/public/volume/sharp when provider-supplied); supporting evidence only — no Market Features in I2A |
 | LINEUP | `LINEUP` | Confirmed XI only (F1.1E) | Honest absence when unpublished; never Expected Lineup |
 | WEATHER | `WEATHER` | Typed unused | Future |
 | Expected Lineup | — | **Not supported** | No API-Football Fact endpoint |

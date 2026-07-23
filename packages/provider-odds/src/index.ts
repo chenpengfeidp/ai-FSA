@@ -10,6 +10,10 @@ export type { MatchLookup } from "./composite/composite-match-provider.js";
 export { EnrichedMatchProvider } from "./composite/enriched-match-provider.js";
 export { NoopOddsSnapshotPrimer } from "./domain/pre-match-odds.js";
 export type {
+  MarketDepthSnapshot,
+  MarketEvidenceRecord,
+  MarketSelection,
+  MarketType,
   OddsProviderMethod,
   OddsSnapshotPrimer,
   OddsSnapshotSource,

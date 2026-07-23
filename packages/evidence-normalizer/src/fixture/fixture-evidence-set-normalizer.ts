@@ -706,6 +706,590 @@ function parseAsianHandicapFields(
   );
 }
 
+interface OverUnderFields {
+  readonly overUnderLine: number;
+  readonly overOdds: number;
+  readonly underOdds: number;
+}
+
+function parseOverUnderFields(
+  value: Record<string, unknown>,
+): Result<OverUnderFields | undefined, EvidenceNormalizationError> {
+  const hasLine = "overUnderLine" in value;
+  const hasOver = "overOdds" in value;
+  const hasUnder = "underOdds" in value;
+
+  if (!hasLine && !hasOver && !hasUnder) {
+    return success(undefined);
+  }
+
+  if (!hasLine || !hasOver || !hasUnder) {
+    return failure(
+      "INVALID_FIELD",
+      "overUnderLine, overOdds, and underOdds must be provided together.",
+      "overUnderLine",
+    );
+  }
+
+  if (
+    typeof value.overUnderLine !== "number" ||
+    !Number.isFinite(value.overUnderLine)
+  ) {
+    return failure(
+      "INVALID_FIELD",
+      "overUnderLine must be a finite number.",
+      "overUnderLine",
+    );
+  }
+
+  const overOdds = requireDecimalOdds(value.overOdds, "overOdds");
+
+  if (!overOdds.ok) {
+    return overOdds;
+  }
+
+  const underOdds = requireDecimalOdds(value.underOdds, "underOdds");
+
+  if (!underOdds.ok) {
+    return underOdds;
+  }
+
+  return success(
+    Object.freeze({
+      overUnderLine: value.overUnderLine,
+      overOdds: overOdds.value,
+      underOdds: underOdds.value,
+    }),
+  );
+}
+
+function parseOptionalDecimalOddsField(
+  value: Record<string, unknown>,
+  field: string,
+): Result<number | undefined, EvidenceNormalizationError> {
+  if (!(field in value) || value[field] === undefined) {
+    return success(undefined);
+  }
+
+  const parsed = requireDecimalOdds(value[field], field);
+
+  if (!parsed.ok) {
+    return parsed;
+  }
+
+  return success(parsed.value);
+}
+
+function parseOptionalFiniteNumberField(
+  value: Record<string, unknown>,
+  field: string,
+): Result<number | undefined, EvidenceNormalizationError> {
+  if (!(field in value) || value[field] === undefined) {
+    return success(undefined);
+  }
+
+  if (typeof value[field] !== "number" || !Number.isFinite(value[field])) {
+    return failure("INVALID_FIELD", `${field} must be a finite number.`, field);
+  }
+
+  return success(value[field]);
+}
+
+function parseOptionalNonEmptyStringField(
+  value: Record<string, unknown>,
+  field: string,
+): Result<string | undefined, EvidenceNormalizationError> {
+  if (!(field in value) || value[field] === undefined) {
+    return success(undefined);
+  }
+
+  if (typeof value[field] !== "string" || value[field].trim().length === 0) {
+    return failure("INVALID_FIELD", `${field} must be a non-empty string.`, field);
+  }
+
+  return success(value[field].trim());
+}
+
+function parseOptionalSharpMoneyIndicator(
+  value: Record<string, unknown>,
+): Result<boolean | string | undefined, EvidenceNormalizationError> {
+  if (!("sharpMoneyIndicator" in value) || value.sharpMoneyIndicator === undefined) {
+    return success(undefined);
+  }
+
+  if (typeof value.sharpMoneyIndicator === "boolean") {
+    return success(value.sharpMoneyIndicator);
+  }
+
+  if (
+    typeof value.sharpMoneyIndicator === "string" &&
+    value.sharpMoneyIndicator.trim().length > 0
+  ) {
+    return success(value.sharpMoneyIndicator.trim());
+  }
+
+  return failure(
+    "INVALID_FIELD",
+    "sharpMoneyIndicator must be a boolean or non-empty string.",
+    "sharpMoneyIndicator",
+  );
+}
+
+const MARKET_TYPES = Object.freeze([
+  "asian_handicap",
+  "european_1x2",
+  "over_under",
+] as const);
+
+const MARKET_SELECTIONS = Object.freeze([
+  "asian_away",
+  "asian_home",
+  "away",
+  "draw",
+  "home",
+  "over",
+  "under",
+] as const);
+
+type MarketTypeValue = (typeof MARKET_TYPES)[number];
+type MarketSelectionValue = (typeof MARKET_SELECTIONS)[number];
+
+interface MarketEvidencePayloadRecord {
+  readonly marketType: MarketTypeValue;
+  readonly selection: MarketSelectionValue;
+  readonly line?: number;
+  readonly openingValue?: number;
+  readonly currentValue?: number;
+  readonly closingValue?: number;
+  readonly movement?: number;
+  readonly lineMovement?: number;
+  readonly observedAt: string;
+  readonly marketSource?: string;
+}
+
+function isMarketType(value: unknown): value is MarketTypeValue {
+  return (
+    typeof value === "string" && (MARKET_TYPES as readonly string[]).includes(value)
+  );
+}
+
+function isMarketSelection(value: unknown): value is MarketSelectionValue {
+  return (
+    typeof value === "string" &&
+    (MARKET_SELECTIONS as readonly string[]).includes(value)
+  );
+}
+
+function parseMarketEvidenceRecords(
+  value: Record<string, unknown>,
+): Result<
+  readonly MarketEvidencePayloadRecord[] | undefined,
+  EvidenceNormalizationError
+> {
+  if (!("markets" in value) || value.markets === undefined) {
+    return success(undefined);
+  }
+
+  if (!Array.isArray(value.markets)) {
+    return failure("INVALID_FIELD", "markets must be an array.", "markets");
+  }
+
+  if (value.markets.length === 0) {
+    return success(undefined);
+  }
+
+  const records: MarketEvidencePayloadRecord[] = [];
+
+  for (const [index, entry] of value.markets.entries()) {
+    if (!isRecord(entry)) {
+      return failure(
+        "INVALID_FIELD",
+        `markets[${String(index)}] must be an object.`,
+        "markets",
+      );
+    }
+
+    if (!isMarketType(entry.marketType)) {
+      return failure(
+        "INVALID_FIELD",
+        `markets[${String(index)}].marketType is invalid.`,
+        "markets",
+      );
+    }
+
+    if (!isMarketSelection(entry.selection)) {
+      return failure(
+        "INVALID_FIELD",
+        `markets[${String(index)}].selection is invalid.`,
+        "markets",
+      );
+    }
+
+    if (
+      typeof entry.observedAt !== "string" ||
+      entry.observedAt.trim().length === 0 ||
+      Number.isNaN(Date.parse(entry.observedAt))
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        `markets[${String(index)}].observedAt must be a valid ISO 8601 timestamp.`,
+        "markets",
+      );
+    }
+
+    const line = parseOptionalFiniteNumberField(entry, "line");
+
+    if (!line.ok) {
+      return line;
+    }
+
+    const openingValue = parseOptionalFiniteNumberField(entry, "openingValue");
+
+    if (!openingValue.ok) {
+      return openingValue;
+    }
+
+    const currentValue = parseOptionalFiniteNumberField(entry, "currentValue");
+
+    if (!currentValue.ok) {
+      return currentValue;
+    }
+
+    const closingValue = parseOptionalFiniteNumberField(entry, "closingValue");
+
+    if (!closingValue.ok) {
+      return closingValue;
+    }
+
+    const movement = parseOptionalFiniteNumberField(entry, "movement");
+
+    if (!movement.ok) {
+      return movement;
+    }
+
+    const lineMovement = parseOptionalFiniteNumberField(entry, "lineMovement");
+
+    if (!lineMovement.ok) {
+      return lineMovement;
+    }
+
+    const marketSource = parseOptionalNonEmptyStringField(entry, "marketSource");
+
+    if (!marketSource.ok) {
+      return marketSource;
+    }
+
+    records.push(
+      Object.freeze({
+        marketType: entry.marketType,
+        selection: entry.selection,
+        observedAt: entry.observedAt.trim(),
+        ...(line.value === undefined ? {} : { line: line.value }),
+        ...(openingValue.value === undefined
+          ? {}
+          : { openingValue: openingValue.value }),
+        ...(currentValue.value === undefined
+          ? {}
+          : { currentValue: currentValue.value }),
+        ...(closingValue.value === undefined
+          ? {}
+          : { closingValue: closingValue.value }),
+        ...(movement.value === undefined ? {} : { movement: movement.value }),
+        ...(lineMovement.value === undefined
+          ? {}
+          : { lineMovement: lineMovement.value }),
+        ...(marketSource.value === undefined
+          ? {}
+          : { marketSource: marketSource.value }),
+      }),
+    );
+  }
+
+  return success(Object.freeze(records));
+}
+
+interface MarketDepthFields {
+  readonly marketSource?: string;
+  readonly overUnder?: OverUnderFields;
+  readonly openingHomeOdds?: number;
+  readonly openingDrawOdds?: number;
+  readonly openingAwayOdds?: number;
+  readonly closingHomeOdds?: number;
+  readonly closingDrawOdds?: number;
+  readonly closingAwayOdds?: number;
+  readonly oddsMovementHome?: number;
+  readonly oddsMovementDraw?: number;
+  readonly oddsMovementAway?: number;
+  readonly asianHandicapOpeningLine?: number;
+  readonly asianHandicapOpeningHomeOdds?: number;
+  readonly asianHandicapOpeningAwayOdds?: number;
+  readonly handicapMovement?: number;
+  readonly overUnderOpeningLine?: number;
+  readonly overOpeningOdds?: number;
+  readonly underOpeningOdds?: number;
+  readonly overUnderLineMovement?: number;
+  readonly publicBettingHomePct?: number;
+  readonly publicBettingDrawPct?: number;
+  readonly publicBettingAwayPct?: number;
+  readonly bettingVolume?: number;
+  readonly sharpMoneyIndicator?: boolean | string;
+  readonly markets?: readonly MarketEvidencePayloadRecord[];
+}
+
+function parseMarketDepthFields(
+  value: Record<string, unknown>,
+): Result<MarketDepthFields, EvidenceNormalizationError> {
+  const marketSource = parseOptionalNonEmptyStringField(value, "marketSource");
+
+  if (!marketSource.ok) {
+    return marketSource;
+  }
+
+  const overUnder = parseOverUnderFields(value);
+
+  if (!overUnder.ok) {
+    return overUnder;
+  }
+
+  const openingHomeOdds = parseOptionalDecimalOddsField(value, "openingHomeOdds");
+
+  if (!openingHomeOdds.ok) {
+    return openingHomeOdds;
+  }
+
+  const openingDrawOdds = parseOptionalDecimalOddsField(value, "openingDrawOdds");
+
+  if (!openingDrawOdds.ok) {
+    return openingDrawOdds;
+  }
+
+  const openingAwayOdds = parseOptionalDecimalOddsField(value, "openingAwayOdds");
+
+  if (!openingAwayOdds.ok) {
+    return openingAwayOdds;
+  }
+
+  const closingHomeOdds = parseOptionalDecimalOddsField(value, "closingHomeOdds");
+
+  if (!closingHomeOdds.ok) {
+    return closingHomeOdds;
+  }
+
+  const closingDrawOdds = parseOptionalDecimalOddsField(value, "closingDrawOdds");
+
+  if (!closingDrawOdds.ok) {
+    return closingDrawOdds;
+  }
+
+  const closingAwayOdds = parseOptionalDecimalOddsField(value, "closingAwayOdds");
+
+  if (!closingAwayOdds.ok) {
+    return closingAwayOdds;
+  }
+
+  const oddsMovementHome = parseOptionalFiniteNumberField(value, "oddsMovementHome");
+
+  if (!oddsMovementHome.ok) {
+    return oddsMovementHome;
+  }
+
+  const oddsMovementDraw = parseOptionalFiniteNumberField(value, "oddsMovementDraw");
+
+  if (!oddsMovementDraw.ok) {
+    return oddsMovementDraw;
+  }
+
+  const oddsMovementAway = parseOptionalFiniteNumberField(value, "oddsMovementAway");
+
+  if (!oddsMovementAway.ok) {
+    return oddsMovementAway;
+  }
+
+  const asianHandicapOpeningLine = parseOptionalFiniteNumberField(
+    value,
+    "asianHandicapOpeningLine",
+  );
+
+  if (!asianHandicapOpeningLine.ok) {
+    return asianHandicapOpeningLine;
+  }
+
+  const asianHandicapOpeningHomeOdds = parseOptionalDecimalOddsField(
+    value,
+    "asianHandicapOpeningHomeOdds",
+  );
+
+  if (!asianHandicapOpeningHomeOdds.ok) {
+    return asianHandicapOpeningHomeOdds;
+  }
+
+  const asianHandicapOpeningAwayOdds = parseOptionalDecimalOddsField(
+    value,
+    "asianHandicapOpeningAwayOdds",
+  );
+
+  if (!asianHandicapOpeningAwayOdds.ok) {
+    return asianHandicapOpeningAwayOdds;
+  }
+
+  const handicapMovement = parseOptionalFiniteNumberField(value, "handicapMovement");
+
+  if (!handicapMovement.ok) {
+    return handicapMovement;
+  }
+
+  const overUnderOpeningLine = parseOptionalFiniteNumberField(
+    value,
+    "overUnderOpeningLine",
+  );
+
+  if (!overUnderOpeningLine.ok) {
+    return overUnderOpeningLine;
+  }
+
+  const overOpeningOdds = parseOptionalDecimalOddsField(value, "overOpeningOdds");
+
+  if (!overOpeningOdds.ok) {
+    return overOpeningOdds;
+  }
+
+  const underOpeningOdds = parseOptionalDecimalOddsField(value, "underOpeningOdds");
+
+  if (!underOpeningOdds.ok) {
+    return underOpeningOdds;
+  }
+
+  const overUnderLineMovement = parseOptionalFiniteNumberField(
+    value,
+    "overUnderLineMovement",
+  );
+
+  if (!overUnderLineMovement.ok) {
+    return overUnderLineMovement;
+  }
+
+  const publicBettingHomePct = parseOptionalFiniteNumberField(
+    value,
+    "publicBettingHomePct",
+  );
+
+  if (!publicBettingHomePct.ok) {
+    return publicBettingHomePct;
+  }
+
+  const publicBettingDrawPct = parseOptionalFiniteNumberField(
+    value,
+    "publicBettingDrawPct",
+  );
+
+  if (!publicBettingDrawPct.ok) {
+    return publicBettingDrawPct;
+  }
+
+  const publicBettingAwayPct = parseOptionalFiniteNumberField(
+    value,
+    "publicBettingAwayPct",
+  );
+
+  if (!publicBettingAwayPct.ok) {
+    return publicBettingAwayPct;
+  }
+
+  const bettingVolume = parseOptionalFiniteNumberField(value, "bettingVolume");
+
+  if (!bettingVolume.ok) {
+    return bettingVolume;
+  }
+
+  const sharpMoneyIndicator = parseOptionalSharpMoneyIndicator(value);
+
+  if (!sharpMoneyIndicator.ok) {
+    return sharpMoneyIndicator;
+  }
+
+  const markets = parseMarketEvidenceRecords(value);
+
+  if (!markets.ok) {
+    return markets;
+  }
+
+  return success(
+    Object.freeze({
+      ...(marketSource.value === undefined
+        ? {}
+        : { marketSource: marketSource.value }),
+      ...(overUnder.value === undefined ? {} : { overUnder: overUnder.value }),
+      ...(openingHomeOdds.value === undefined
+        ? {}
+        : { openingHomeOdds: openingHomeOdds.value }),
+      ...(openingDrawOdds.value === undefined
+        ? {}
+        : { openingDrawOdds: openingDrawOdds.value }),
+      ...(openingAwayOdds.value === undefined
+        ? {}
+        : { openingAwayOdds: openingAwayOdds.value }),
+      ...(closingHomeOdds.value === undefined
+        ? {}
+        : { closingHomeOdds: closingHomeOdds.value }),
+      ...(closingDrawOdds.value === undefined
+        ? {}
+        : { closingDrawOdds: closingDrawOdds.value }),
+      ...(closingAwayOdds.value === undefined
+        ? {}
+        : { closingAwayOdds: closingAwayOdds.value }),
+      ...(oddsMovementHome.value === undefined
+        ? {}
+        : { oddsMovementHome: oddsMovementHome.value }),
+      ...(oddsMovementDraw.value === undefined
+        ? {}
+        : { oddsMovementDraw: oddsMovementDraw.value }),
+      ...(oddsMovementAway.value === undefined
+        ? {}
+        : { oddsMovementAway: oddsMovementAway.value }),
+      ...(asianHandicapOpeningLine.value === undefined
+        ? {}
+        : { asianHandicapOpeningLine: asianHandicapOpeningLine.value }),
+      ...(asianHandicapOpeningHomeOdds.value === undefined
+        ? {}
+        : { asianHandicapOpeningHomeOdds: asianHandicapOpeningHomeOdds.value }),
+      ...(asianHandicapOpeningAwayOdds.value === undefined
+        ? {}
+        : { asianHandicapOpeningAwayOdds: asianHandicapOpeningAwayOdds.value }),
+      ...(handicapMovement.value === undefined
+        ? {}
+        : { handicapMovement: handicapMovement.value }),
+      ...(overUnderOpeningLine.value === undefined
+        ? {}
+        : { overUnderOpeningLine: overUnderOpeningLine.value }),
+      ...(overOpeningOdds.value === undefined
+        ? {}
+        : { overOpeningOdds: overOpeningOdds.value }),
+      ...(underOpeningOdds.value === undefined
+        ? {}
+        : { underOpeningOdds: underOpeningOdds.value }),
+      ...(overUnderLineMovement.value === undefined
+        ? {}
+        : { overUnderLineMovement: overUnderLineMovement.value }),
+      ...(publicBettingHomePct.value === undefined
+        ? {}
+        : { publicBettingHomePct: publicBettingHomePct.value }),
+      ...(publicBettingDrawPct.value === undefined
+        ? {}
+        : { publicBettingDrawPct: publicBettingDrawPct.value }),
+      ...(publicBettingAwayPct.value === undefined
+        ? {}
+        : { publicBettingAwayPct: publicBettingAwayPct.value }),
+      ...(bettingVolume.value === undefined
+        ? {}
+        : { bettingVolume: bettingVolume.value }),
+      ...(sharpMoneyIndicator.value === undefined
+        ? {}
+        : { sharpMoneyIndicator: sharpMoneyIndicator.value }),
+      ...(markets.value === undefined ? {} : { markets: markets.value }),
+    }),
+  );
+}
+
 function parseProviderProvenanceOverlay(
   value: Record<string, unknown>,
 ): Result<OddsProvenanceOverlay | undefined, EvidenceNormalizationError> {
@@ -825,6 +1409,12 @@ function parseOdds(
     return asianHandicap;
   }
 
+  const marketDepth = parseMarketDepthFields(value);
+
+  if (!marketDepth.ok) {
+    return marketDepth;
+  }
+
   const source = provenanceOverlay.value?.source ?? "fixture";
   const sourceId = provenanceOverlay.value?.sourceId ?? `fixture-${matchId}-odds`;
   const method = provenanceOverlay.value?.method ?? "fixture";
@@ -862,6 +1452,129 @@ function parseOdds(
                 asianHandicapLine: asianHandicap.value.asianHandicapLine,
                 asianHandicapHomeOdds: asianHandicap.value.asianHandicapHomeOdds,
                 asianHandicapAwayOdds: asianHandicap.value.asianHandicapAwayOdds,
+              }),
+          ...(marketDepth.value.marketSource === undefined
+            ? {}
+            : { marketSource: marketDepth.value.marketSource }),
+          ...(marketDepth.value.overUnder === undefined
+            ? {}
+            : {
+                overUnderLine: marketDepth.value.overUnder.overUnderLine,
+                overOdds: marketDepth.value.overUnder.overOdds,
+                underOdds: marketDepth.value.overUnder.underOdds,
+              }),
+          ...(marketDepth.value.openingHomeOdds === undefined
+            ? {}
+            : { openingHomeOdds: marketDepth.value.openingHomeOdds }),
+          ...(marketDepth.value.openingDrawOdds === undefined
+            ? {}
+            : { openingDrawOdds: marketDepth.value.openingDrawOdds }),
+          ...(marketDepth.value.openingAwayOdds === undefined
+            ? {}
+            : { openingAwayOdds: marketDepth.value.openingAwayOdds }),
+          ...(marketDepth.value.closingHomeOdds === undefined
+            ? {}
+            : { closingHomeOdds: marketDepth.value.closingHomeOdds }),
+          ...(marketDepth.value.closingDrawOdds === undefined
+            ? {}
+            : { closingDrawOdds: marketDepth.value.closingDrawOdds }),
+          ...(marketDepth.value.closingAwayOdds === undefined
+            ? {}
+            : { closingAwayOdds: marketDepth.value.closingAwayOdds }),
+          ...(marketDepth.value.oddsMovementHome === undefined
+            ? {}
+            : { oddsMovementHome: marketDepth.value.oddsMovementHome }),
+          ...(marketDepth.value.oddsMovementDraw === undefined
+            ? {}
+            : { oddsMovementDraw: marketDepth.value.oddsMovementDraw }),
+          ...(marketDepth.value.oddsMovementAway === undefined
+            ? {}
+            : { oddsMovementAway: marketDepth.value.oddsMovementAway }),
+          ...(marketDepth.value.asianHandicapOpeningLine === undefined
+            ? {}
+            : {
+                asianHandicapOpeningLine: marketDepth.value.asianHandicapOpeningLine,
+              }),
+          ...(marketDepth.value.asianHandicapOpeningHomeOdds === undefined
+            ? {}
+            : {
+                asianHandicapOpeningHomeOdds:
+                  marketDepth.value.asianHandicapOpeningHomeOdds,
+              }),
+          ...(marketDepth.value.asianHandicapOpeningAwayOdds === undefined
+            ? {}
+            : {
+                asianHandicapOpeningAwayOdds:
+                  marketDepth.value.asianHandicapOpeningAwayOdds,
+              }),
+          ...(marketDepth.value.handicapMovement === undefined
+            ? {}
+            : { handicapMovement: marketDepth.value.handicapMovement }),
+          ...(marketDepth.value.overUnderOpeningLine === undefined
+            ? {}
+            : { overUnderOpeningLine: marketDepth.value.overUnderOpeningLine }),
+          ...(marketDepth.value.overOpeningOdds === undefined
+            ? {}
+            : { overOpeningOdds: marketDepth.value.overOpeningOdds }),
+          ...(marketDepth.value.underOpeningOdds === undefined
+            ? {}
+            : { underOpeningOdds: marketDepth.value.underOpeningOdds }),
+          ...(marketDepth.value.overUnderLineMovement === undefined
+            ? {}
+            : {
+                overUnderLineMovement: marketDepth.value.overUnderLineMovement,
+              }),
+          ...(marketDepth.value.publicBettingHomePct === undefined
+            ? {}
+            : { publicBettingHomePct: marketDepth.value.publicBettingHomePct }),
+          ...(marketDepth.value.publicBettingDrawPct === undefined
+            ? {}
+            : { publicBettingDrawPct: marketDepth.value.publicBettingDrawPct }),
+          ...(marketDepth.value.publicBettingAwayPct === undefined
+            ? {}
+            : { publicBettingAwayPct: marketDepth.value.publicBettingAwayPct }),
+          ...(marketDepth.value.bettingVolume === undefined
+            ? {}
+            : { bettingVolume: marketDepth.value.bettingVolume }),
+          ...(marketDepth.value.sharpMoneyIndicator === undefined
+            ? {}
+            : { sharpMoneyIndicator: marketDepth.value.sharpMoneyIndicator }),
+          ...(marketDepth.value.markets === undefined
+            ? {}
+            : {
+                markets: marketDepth.value.markets.map((row) => {
+                  const record: {
+                    [key: string]: string | number | boolean;
+                  } = {
+                    marketType: row.marketType,
+                    selection: row.selection,
+                    observedAt: row.observedAt,
+                  };
+
+                  if (row.line !== undefined) {
+                    record.line = row.line;
+                  }
+                  if (row.openingValue !== undefined) {
+                    record.openingValue = row.openingValue;
+                  }
+                  if (row.currentValue !== undefined) {
+                    record.currentValue = row.currentValue;
+                  }
+                  if (row.closingValue !== undefined) {
+                    record.closingValue = row.closingValue;
+                  }
+                  if (row.movement !== undefined) {
+                    record.movement = row.movement;
+                  }
+                  if (row.lineMovement !== undefined) {
+                    record.lineMovement = row.lineMovement;
+                  }
+                  if (row.marketSource !== undefined) {
+                    record.marketSource = row.marketSource;
+                  }
+
+                  return Object.freeze(record);
+                }),
               }),
         },
       }),

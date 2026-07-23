@@ -2,15 +2,15 @@
 
 ## Snapshot
 
-- Last updated: 2026-07-22
+- Last updated: 2026-07-23
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
 - Current task status: **Architecture Freeze v0.2** holding; F.1 landed; product roadmap is `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **I1B Context Intelligence** delivered (Features → Rules → Confidence → Projection from MATCH_CONTEXT)
-- Last completed delivery: Sprint **I1B** Context Intelligence (`docs/sprints/I1/I1B_CONTEXT_INTELLIGENCE_COMPLETION_REPORT.md`); prior I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
-- Demo: recorded cassette `football:100001` includes full xG windows + Match Context; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`
-- Next authorized work: **I2A** Odds & Market Evidence
+- Current sprint: **I2A** Odds & Market Evidence delivered (ODDS payload depth → Workspace/Report; no Market Features)
+- Last completed delivery: Sprint **I2A** Odds & Market Evidence (`docs/sprints/I2/I2A_ODDS_MARKET_EVIDENCE_COMPLETION_REPORT.md`); prior I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
+- Demo: recorded cassette `football:100001` includes full xG windows + Match Context; odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`
+- Next authorized work: **I2B** Odds & Market Intelligence Features
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.2** (stable for long-term feature work inside frozen boundaries)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
@@ -48,7 +48,7 @@ Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
   → Web Match Center / Session / Workspace / Library
 ```
 
-Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG Evidence is **F1.3A** (`EXPECTED_GOALS`); Feature/Rule/Confidence/Projection consume is **F1.3B** (`feature.v2.f13b.xg` / `rule.mvp.f13b.xg` / `projection.v2.f13b.xg`). Match Context Evidence is **I1A** (`MATCH_CONTEXT`); Feature/Rule/Confidence/Projection consume is **I1B** (`feature.v2.i1b.context` / `rule.mvp.i1b.context` / `projection.v2.i1b.context`).
+Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG Evidence is **F1.3A** (`EXPECTED_GOALS`); Feature/Rule/Confidence/Projection consume is **F1.3B** (`feature.v2.f13b.xg` / `rule.mvp.f13b.xg` / `projection.v2.f13b.xg`). Match Context Evidence is **I1A** (`MATCH_CONTEXT`); Feature/Rule/Confidence/Projection consume is **I1B** (`feature.v2.i1b.context` / `rule.mvp.i1b.context` / `projection.v2.i1b.context`). Odds & Market Evidence depth is **I2A** (extended `ODDS` payload + Workspace/Report); Market Intelligence Features are **I2B**.
 
 Implemented packages used by the slice (non-exhaustive):
 

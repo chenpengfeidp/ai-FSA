@@ -22,6 +22,11 @@ import type {
   GoalRangeView,
   LineupPlayerItemView,
   LineupsContextView,
+  MarketEvidenceRecordView,
+  MarketEvidenceSummaryView,
+  MarketEvidenceView,
+  MarketSelectionView,
+  MarketTypeView,
   MatchContextEvidenceView,
   MatchContextRecordView,
   MostLikelyScoreView,
@@ -143,7 +148,7 @@ const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
   MATCH_CONTEXT: "Match Context",
   MATCH_INFO: "Match information",
   NEWS: "News",
-  ODDS: "Odds",
+  ODDS: "Odds & Market",
   PLAYER: "Player",
   RANKING: "Ranking",
   STATISTICS: "Statistics",
@@ -778,6 +783,135 @@ function buildMatchContextEvidence(
   });
 }
 
+function isMarketType(value: unknown): value is MarketTypeView {
+  return (
+    value === "asian_handicap" || value === "european_1x2" || value === "over_under"
+  );
+}
+
+function isMarketSelection(value: unknown): value is MarketSelectionView {
+  return (
+    value === "asian_away" ||
+    value === "asian_home" ||
+    value === "away" ||
+    value === "draw" ||
+    value === "home" ||
+    value === "over" ||
+    value === "under"
+  );
+}
+
+function mapMarketEvidenceRecord(value: unknown): MarketEvidenceRecordView | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+
+  if (!isMarketType(record.marketType) || !isMarketSelection(record.selection)) {
+    return null;
+  }
+
+  if (
+    typeof record.observedAt !== "string" ||
+    record.observedAt.trim().length === 0
+  ) {
+    return null;
+  }
+
+  return Object.freeze({
+    marketType: record.marketType,
+    selection: record.selection,
+    line: optionalNumber(record.line),
+    openingValue: optionalNumber(record.openingValue),
+    currentValue: optionalNumber(record.currentValue),
+    closingValue: optionalNumber(record.closingValue),
+    movement: optionalNumber(record.movement),
+    lineMovement: optionalNumber(record.lineMovement),
+    observedAt: record.observedAt,
+    marketSource:
+      typeof record.marketSource === "string" ? record.marketSource : null,
+  });
+}
+
+function mapMarketEvidenceSummary(
+  payload: Readonly<{ [key: string]: JsonValue }>,
+): MarketEvidenceSummaryView | null {
+  if (typeof payload.observedAt !== "string") {
+    return null;
+  }
+
+  const sharp =
+    typeof payload.sharpMoneyIndicator === "boolean" ||
+    typeof payload.sharpMoneyIndicator === "string"
+      ? payload.sharpMoneyIndicator
+      : null;
+
+  return Object.freeze({
+    observedAt: payload.observedAt,
+    marketSource:
+      typeof payload.marketSource === "string" ? payload.marketSource : null,
+    homeOdds: optionalNumber(payload.homeOdds),
+    drawOdds: optionalNumber(payload.drawOdds),
+    awayOdds: optionalNumber(payload.awayOdds),
+    asianHandicapLine: optionalNumber(payload.asianHandicapLine),
+    asianHandicapHomeOdds: optionalNumber(payload.asianHandicapHomeOdds),
+    asianHandicapAwayOdds: optionalNumber(payload.asianHandicapAwayOdds),
+    overUnderLine: optionalNumber(payload.overUnderLine),
+    overOdds: optionalNumber(payload.overOdds),
+    underOdds: optionalNumber(payload.underOdds),
+    openingHomeOdds: optionalNumber(payload.openingHomeOdds),
+    openingDrawOdds: optionalNumber(payload.openingDrawOdds),
+    openingAwayOdds: optionalNumber(payload.openingAwayOdds),
+    closingHomeOdds: optionalNumber(payload.closingHomeOdds),
+    closingDrawOdds: optionalNumber(payload.closingDrawOdds),
+    closingAwayOdds: optionalNumber(payload.closingAwayOdds),
+    oddsMovementHome: optionalNumber(payload.oddsMovementHome),
+    oddsMovementDraw: optionalNumber(payload.oddsMovementDraw),
+    oddsMovementAway: optionalNumber(payload.oddsMovementAway),
+    asianHandicapOpeningLine: optionalNumber(payload.asianHandicapOpeningLine),
+    handicapMovement: optionalNumber(payload.handicapMovement),
+    overUnderOpeningLine: optionalNumber(payload.overUnderOpeningLine),
+    overUnderLineMovement: optionalNumber(payload.overUnderLineMovement),
+    publicBettingHomePct: optionalNumber(payload.publicBettingHomePct),
+    publicBettingDrawPct: optionalNumber(payload.publicBettingDrawPct),
+    publicBettingAwayPct: optionalNumber(payload.publicBettingAwayPct),
+    bettingVolume: optionalNumber(payload.bettingVolume),
+    sharpMoneyIndicator: sharp,
+  });
+}
+
+function buildMarketEvidence(evidence: readonly EvidenceDto[]): MarketEvidenceView {
+  const odds = evidence.find((item) => item.type === "ODDS");
+
+  if (odds === undefined) {
+    return Object.freeze({
+      available: false,
+      summary: null,
+      markets: Object.freeze([]),
+      providerId: null,
+      source: null,
+      provenanceMethod: null,
+      note: "Odds & Market Evidence is not available for this match (honest absence). Never estimated or inferred.",
+    });
+  }
+
+  const marketsRaw = Array.isArray(odds.payload.markets) ? odds.payload.markets : [];
+  const markets = marketsRaw
+    .map(mapMarketEvidenceRecord)
+    .filter((item): item is MarketEvidenceRecordView => item !== null);
+
+  return Object.freeze({
+    available: true,
+    summary: mapMarketEvidenceSummary(odds.payload),
+    markets: Object.freeze(markets),
+    providerId: odds.providerId,
+    source: odds.source,
+    provenanceMethod: odds.provenance.method,
+    note: "Odds & Market is raw Evidence (I2A supporting evidence). It does not drive Football Intelligence. No Market Features in this sprint.",
+  });
+}
+
 function buildLineupsContext(evidence: readonly EvidenceDto[]): LineupsContextView {
   const sheets = evidence
     .map(mapTeamLineup)
@@ -1091,6 +1225,7 @@ export function buildExplainableReportView(
   const advancedStatisticsContext = buildAdvancedStatisticsContext(evidence);
   const expectedGoalsContext = buildExpectedGoalsContext(evidence);
   const matchContextEvidence = buildMatchContextEvidence(evidence);
+  const marketEvidence = buildMarketEvidence(evidence);
   const availabilityContext = buildAvailabilitySummary(evidence);
 
   return Object.freeze({
@@ -1109,6 +1244,7 @@ export function buildExplainableReportView(
     advancedStatistics: advancedStatisticsContext,
     expectedGoals: expectedGoalsContext,
     matchContext: matchContextEvidence,
+    marketEvidence,
     availability: availabilityContext,
     winnerPrediction,
     mostLikelyScore,

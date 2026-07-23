@@ -26,8 +26,47 @@
             { "name": "Liverpool", "price": 1.75, "point": -0.75 },
             { "name": "Chelsea", "price": 2.2, "point": 0.75 }
           ]
+        },
+        {
+          "key": "totals",
+          "last_update": "2026-07-18T12:00:00Z",
+          "outcomes": [
+            { "name": "Over", "price": 1.9, "point": 2.5 },
+            { "name": "Under", "price": 1.95, "point": 2.5 }
+          ]
         }
       ]
     }
-  ]
+  ],
+  "fas_market_depth": {
+    "opening": {
+      "observedAt": "2026-07-10T12:00:00Z",
+      "homeOdds": 1.7,
+      "drawOdds": 3.9,
+      "awayOdds": 5.0,
+      "asianHandicapLine": -0.5,
+      "asianHandicapHomeOdds": 1.95,
+      "asianHandicapAwayOdds": 1.9,
+      "overUnderLine": 2.5,
+      "overOdds": 1.95,
+      "underOdds": 1.9
+    },
+    "closing": {
+      "observedAt": "2026-08-01T18:00:00Z",
+      "homeOdds": 1.5,
+      "drawOdds": 4.3,
+      "awayOdds": 6.0,
+      "asianHandicapLine": -0.75,
+      "asianHandicapHomeOdds": 1.72,
+      "asianHandicapAwayOdds": 2.25,
+      "overUnderLine": 2.5,
+      "overOdds": 1.88,
+      "underOdds": 1.98
+    },
+    "publicBettingHomePct": 62,
+    "publicBettingDrawPct": 18,
+    "publicBettingAwayPct": 20,
+    "bettingVolume": 1250000,
+    "sharpMoneyIndicator": true
+  }
 }

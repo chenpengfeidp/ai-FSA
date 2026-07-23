@@ -312,6 +312,8 @@ describe("buildExplainableReportView", () => {
     expect(view.availability.injuryCount).toBe(1);
     expect(view.availability.suspensionCount).toBe(1);
     expect(view.availability.injuries[0]?.playerName).toBe("Darwin Nunez");
+    expect(view.marketEvidence.available).toBe(false);
+    expect(view.marketEvidence.note).toContain("honest absence");
   });
 
   it("resolves confidence levels from pass ratios", () => {
@@ -341,6 +343,8 @@ describe("ExplainableMatchReport", () => {
     expect(screen.getByText(zh.report.players)).toBeInTheDocument();
     expect(screen.getByText("Alisson")).toBeInTheDocument();
     expect(screen.getByText("Player")).toBeInTheDocument();
+    expect(screen.getByText(zh.report.marketEvidence)).toBeInTheDocument();
+    expect(screen.getByText(zh.report.noMarketEvidence)).toBeInTheDocument();
     expect(screen.getByText(zh.report.availability)).toBeInTheDocument();
     expect(
       screen.getByText(zh.report.availabilitySummary(1, 1)),

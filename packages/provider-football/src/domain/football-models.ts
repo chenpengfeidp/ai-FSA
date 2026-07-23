@@ -3,9 +3,17 @@
  * Adapters map vendor payloads into these types; Evidence never sees raw vendor JSON.
  */
 
+import type { FootballClubIntelligenceRecord } from "./football-club-intelligence.js";
 import type { FootballExpectedGoalsRecord } from "./football-expected-goals.js";
 import type { FootballMatchContextRecord } from "./football-match-context.js";
 
+export type { FootballClubIntelligenceRecord } from "./football-club-intelligence.js";
+export type {
+  FootballClubIntelligenceMetrics,
+  FootballClubIntelligenceSide,
+  FootballClubIntelligenceWindow,
+  FootballClubManagerFact,
+} from "./football-club-intelligence.js";
 export type { FootballExpectedGoalsRecord } from "./football-expected-goals.js";
 export type {
   FootballExpectedGoalsMetrics,
@@ -212,6 +220,16 @@ export interface FootballH2H {
   readonly providerMethod: FootballProviderMethod;
 }
 
+/** Home or away split inside a standings row (when the provider supplies it). */
+export interface FootballStandingSplit {
+  readonly played: number;
+  readonly won: number;
+  readonly drawn: number;
+  readonly lost: number;
+  readonly goalsFor: number;
+  readonly goalsAgainst: number;
+}
+
 export interface FootballStandingRow {
   readonly rank: number;
   readonly teamId: string;
@@ -223,6 +241,14 @@ export interface FootballStandingRow {
   readonly goalsFor: number;
   readonly goalsAgainst: number;
   readonly points: number;
+  /** Provider goalsDiff when present. */
+  readonly goalsDiff?: number;
+  /** Provider form string when present (e.g. WWDLW). */
+  readonly form?: string;
+  /** Provider zone description (promotion / relegation) when present. */
+  readonly description?: string;
+  readonly home?: FootballStandingSplit;
+  readonly away?: FootballStandingSplit;
 }
 
 export interface FootballStandings {
@@ -264,6 +290,11 @@ export interface FootballMatchBundle {
    * Empty means honest absence — never invent rest/travel/knockout facts.
    */
   readonly matchContext: readonly FootballMatchContextRecord[];
+  /**
+   * Club Intelligence records (L1A Evidence only).
+   * Empty means honest absence — never invent standings or manager facts.
+   */
+  readonly clubIntelligence: readonly FootballClubIntelligenceRecord[];
 }
 
 export interface FootballBoardRow {

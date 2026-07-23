@@ -1770,6 +1770,21 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(...normalizedMatchContext.value);
   }
 
+  if (input.clubIntelligence !== undefined) {
+    const normalizedClubIntelligence = parseClubIntelligence(
+      input.clubIntelligence,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalizedClubIntelligence.ok) {
+      return normalizedClubIntelligence;
+    }
+
+    evidences.push(...normalizedClubIntelligence.value);
+  }
+
   if (input.odds !== undefined) {
     const normalized = parseOdds(
       input.odds,
@@ -3402,6 +3417,258 @@ function parseMatchContext(
       return failure(
         "UNEXPECTED_ERROR",
         "MATCH_CONTEXT evidence normalization failed unexpectedly.",
+      );
+    }
+  }
+
+  return success(Object.freeze(records));
+}
+
+type ClubIntelligenceWindow = "current" | "season";
+
+function isClubIntelligenceWindow(value: unknown): value is ClubIntelligenceWindow {
+  return value === "season" || value === "current";
+}
+
+function parseClubIntelligenceMetrics(
+  value: unknown,
+): Result<Readonly<Record<string, number | string>>, EvidenceNormalizationError> {
+  if (value === undefined) {
+    return failure(
+      "INVALID_FIELD",
+      "clubIntelligence.metrics is required when a record is present.",
+      "clubIntelligence.metrics",
+    );
+  }
+
+  if (!isRecord(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "clubIntelligence.metrics must be an object.",
+      "clubIntelligence.metrics",
+    );
+  }
+
+  const numberFields = [
+    "leagueRank",
+    "leaguePoints",
+    "goalDifference",
+    "goalsScored",
+    "goalsConceded",
+    "wins",
+    "draws",
+    "losses",
+    "played",
+    "homePlayed",
+    "homeWins",
+    "homeDraws",
+    "homeLosses",
+    "homeGoalsScored",
+    "homeGoalsConceded",
+    "awayPlayed",
+    "awayWins",
+    "awayDraws",
+    "awayLosses",
+    "awayGoalsScored",
+    "awayGoalsConceded",
+    "managerTenureDays",
+  ] as const;
+
+  const stringFields = [
+    "currentForm",
+    "promotionRelegationStatus",
+    "managerName",
+    "managerStartDate",
+  ] as const;
+
+  const metrics: { [key: string]: number | string } = {};
+
+  for (const field of numberFields) {
+    const parsed = parseOptionalFiniteNumber(
+      value[field],
+      `clubIntelligence.metrics.${field}`,
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    if (parsed.value !== undefined) {
+      metrics[field] = parsed.value;
+    }
+  }
+
+  for (const field of stringFields) {
+    if (value[field] === undefined) {
+      continue;
+    }
+
+    if (typeof value[field] !== "string" || value[field].trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        `clubIntelligence.metrics.${field} must be a non-empty string when present.`,
+        `clubIntelligence.metrics.${field}`,
+      );
+    }
+
+    metrics[field] = value[field].trim();
+  }
+
+  if (Object.keys(metrics).length === 0) {
+    return failure(
+      "INVALID_FIELD",
+      "clubIntelligence.metrics must include at least one provider metric.",
+      "clubIntelligence.metrics",
+    );
+  }
+
+  return success(Object.freeze(metrics));
+}
+
+/**
+ * L1A: optional Club Intelligence Evidence records.
+ * Absent array → honest absence. Never invent standings or manager facts.
+ */
+function parseClubIntelligence(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): Result<readonly Evidence[], EvidenceNormalizationError> {
+  if (!Array.isArray(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "clubIntelligence must be an array.",
+      "clubIntelligence",
+    );
+  }
+
+  const records: Evidence[] = [];
+
+  for (const [index, entry] of value.entries()) {
+    if (!isRecord(entry)) {
+      return failure(
+        "INVALID_FIELD",
+        "clubIntelligence entry must be an object.",
+        "clubIntelligence",
+      );
+    }
+
+    const teamSide = requireTeamSide(entry.teamSide);
+    if (teamSide === undefined) {
+      return failure(
+        "INVALID_FIELD",
+        'clubIntelligence.teamSide must be "home" or "away".',
+        "clubIntelligence.teamSide",
+      );
+    }
+
+    if (typeof entry.teamId !== "string" || entry.teamId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "clubIntelligence.teamId must be a non-empty string.",
+        "clubIntelligence.teamId",
+      );
+    }
+
+    if (typeof entry.teamName !== "string" || entry.teamName.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "clubIntelligence.teamName must be a non-empty string.",
+        "clubIntelligence.teamName",
+      );
+    }
+
+    if (!isClubIntelligenceWindow(entry.window)) {
+      return failure(
+        "INVALID_FIELD",
+        'clubIntelligence.window must be "season" or "current".',
+        "clubIntelligence.window",
+      );
+    }
+
+    if (
+      typeof entry.observedAt !== "string" ||
+      entry.observedAt.trim().length === 0
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "clubIntelligence.observedAt must be a non-empty string.",
+        "clubIntelligence.observedAt",
+      );
+    }
+
+    const metrics = parseClubIntelligenceMetrics(entry.metrics);
+    if (!metrics.ok) {
+      return metrics;
+    }
+
+    const providerSource =
+      typeof entry.providerSource === "string" &&
+      entry.providerSource.trim().length > 0
+        ? entry.providerSource.trim()
+        : "api-football";
+    const providerSourceId =
+      typeof entry.providerSourceId === "string" &&
+      entry.providerSourceId.trim().length > 0
+        ? entry.providerSourceId.trim()
+        : `club-intelligence:${matchId}:${teamSide}:${String(index)}`;
+    const providerMethod =
+      typeof entry.providerMethod === "string" &&
+      entry.providerMethod.trim().length > 0
+        ? entry.providerMethod.trim()
+        : "fixture";
+
+    try {
+      records.push(
+        createEvidence({
+          id: `evidence:${matchId}:club-intelligence:${teamSide}:${entry.window}:${String(index)}`,
+          source: providerSource,
+          sourceId: providerSourceId,
+          type: "CLUB_INTELLIGENCE",
+          matchId: createMatchId(matchId),
+          collectedAt,
+          eventTime,
+          freshness: "fresh",
+          quality: "verified",
+          provenance: {
+            collector: "@fas/evidence-normalizer",
+            method: providerMethod,
+          },
+          payload: Object.freeze({
+            teamId: entry.teamId.trim(),
+            teamName: entry.teamName.trim(),
+            teamSide,
+            window: entry.window,
+            ...(typeof entry.competitionId === "string" &&
+            entry.competitionId.trim().length > 0
+              ? { competitionId: entry.competitionId.trim() }
+              : {}),
+            ...(typeof entry.competitionName === "string" &&
+            entry.competitionName.trim().length > 0
+              ? { competitionName: entry.competitionName.trim() }
+              : {}),
+            ...(typeof entry.season === "string" && entry.season.trim().length > 0
+              ? { season: entry.season.trim() }
+              : typeof entry.season === "number" && Number.isFinite(entry.season)
+                ? { season: String(entry.season) }
+                : {}),
+            metrics: metrics.value,
+            observedAt: entry.observedAt.trim(),
+          }),
+        }),
+      );
+    } catch (error: unknown) {
+      if (
+        error instanceof EvidenceValidationError ||
+        error instanceof MatchValidationError
+      ) {
+        return failure("DOMAIN_VALIDATION_FAILED", error.message);
+      }
+
+      return failure(
+        "UNEXPECTED_ERROR",
+        "CLUB_INTELLIGENCE evidence normalization failed unexpectedly.",
       );
     }
   }

@@ -3,6 +3,12 @@ import type { FootballMatchCatalog } from "../domain/ports.js";
 import { mapApiFootballFixtureItem } from "../mapper/map-api-football-fixture.js";
 import { mapApiFootballTeamForm } from "../mapper/map-api-football-form.js";
 import { mapApiFootballH2H } from "../mapper/map-api-football-h2h.js";
+import type { FootballClubManagerFact } from "../domain/football-club-intelligence.js";
+import {
+  mapApiFootballCoachResponse,
+  mapCoachNameFromLineupEntry,
+} from "../mapper/map-api-football-coach.js";
+import { mapClubIntelligenceFromStandings } from "../mapper/map-club-intelligence-from-standings.js";
 import { mapApiFootballInjuriesResponse } from "../mapper/map-api-football-injuries.js";
 import { mapApiFootballLineupsResponse } from "../mapper/map-api-football-lineups.js";
 import { mapApiFootballSquadResponse } from "../mapper/map-api-football-squad.js";
@@ -133,6 +139,8 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       injuriesBody,
       lineupsBody,
       fixtureStatsBody,
+      homeCoachBody,
+      awayCoachBody,
     ] = await Promise.all([
       // last=10 supplies venue-split samples; overall form still caps at 5.
       this.#getJson(
@@ -174,6 +182,9 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       this.#getJson(
         `/fixtures/statistics?fixture=${encodeURIComponent(fixture.fixtureId)}`,
       ),
+      // Optional manager facts for Club Intelligence (honest absence when empty).
+      this.#getJson(`/coachs?team=${encodeURIComponent(fixture.homeTeamId)}`),
+      this.#getJson(`/coachs?team=${encodeURIComponent(fixture.awayTeamId)}`),
     ]);
 
     const homeForm = mapApiFootballTeamForm(homeFormBody, {
@@ -301,6 +312,34 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       providerMethod: "http-live",
     });
 
+    const homeCoach = mapApiFootballCoachResponse(homeCoachBody, {
+      teamId: fixture.homeTeamId,
+      teamSide: "home",
+      observedAt: fixture.kickoff,
+    });
+    const awayCoach = mapApiFootballCoachResponse(awayCoachBody, {
+      teamId: fixture.awayTeamId,
+      teamSide: "away",
+      observedAt: fixture.kickoff,
+    });
+    const managers = mergeClubManagers(
+      homeCoach,
+      awayCoach,
+      lineupsBody,
+      fixture.homeTeamId,
+      fixture.awayTeamId,
+    );
+
+    const clubIntelligence = mapClubIntelligenceFromStandings(standings, {
+      homeTeamId: fixture.homeTeamId,
+      awayTeamId: fixture.awayTeamId,
+      homeTeamName: fixture.homeTeamName,
+      awayTeamName: fixture.awayTeamName,
+      observedAt: fixture.kickoff,
+      providerMethod: "http-live",
+      managers,
+    });
+
     const bundle: FootballMatchBundle = Object.freeze({
       fixture,
       homeForm,
@@ -314,6 +353,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       lineups,
       expectedGoals,
       matchContext,
+      clubIntelligence,
     });
 
     this.#cache.set(matchId, bundle);
@@ -328,4 +368,63 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       maxRetries: this.#maxRetries,
     });
   }
+}
+
+function mergeClubManagers(
+  homeCoach: FootballClubManagerFact | undefined,
+  awayCoach: FootballClubManagerFact | undefined,
+  lineupsBody: unknown,
+  homeTeamId: string,
+  awayTeamId: string,
+): readonly FootballClubManagerFact[] {
+  const byTeam = new Map<string, FootballClubManagerFact>();
+
+  if (homeCoach !== undefined) {
+    byTeam.set(homeCoach.teamId, homeCoach);
+  }
+  if (awayCoach !== undefined) {
+    byTeam.set(awayCoach.teamId, awayCoach);
+  }
+
+  if (isRecord(lineupsBody) && Array.isArray(lineupsBody.response)) {
+    for (const entry of lineupsBody.response) {
+      if (!isRecord(entry)) {
+        continue;
+      }
+
+      const team = isRecord(entry.team) ? entry.team : undefined;
+      const teamIdNum = team?.id;
+      const teamId =
+        typeof teamIdNum === "number" || typeof teamIdNum === "string"
+          ? String(teamIdNum)
+          : undefined;
+      const coachName = mapCoachNameFromLineupEntry(entry);
+
+      if (teamId === undefined || coachName === undefined) {
+        continue;
+      }
+
+      const existing = byTeam.get(teamId);
+      if (existing !== undefined) {
+        continue;
+      }
+
+      const teamSide =
+        teamId === homeTeamId ? "home" : teamId === awayTeamId ? "away" : undefined;
+      if (teamSide === undefined) {
+        continue;
+      }
+
+      byTeam.set(
+        teamId,
+        Object.freeze({
+          teamId,
+          teamSide,
+          managerName: coachName,
+        }),
+      );
+    }
+  }
+
+  return Object.freeze([...byTeam.values()]);
 }

@@ -114,6 +114,7 @@ describe("A1 completed score → matchResult mapping", () => {
       lineups: Object.freeze([]),
       expectedGoals: Object.freeze([]),
       matchContext: Object.freeze([]),
+      clubIntelligence: Object.freeze([]),
       standings: undefined,
     } satisfies FootballMatchBundle;
 

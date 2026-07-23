@@ -55,8 +55,10 @@ function evidenceIcon(type: EvidenceType): ReactElement {
       return <MapPin aria-hidden="true" className={className} />;
     case "PLAYER":
       return <UserRound aria-hidden="true" className={className} />;
+    case "CLUB_INTELLIGENCE":
     case "EXPECTED_GOALS":
     case "MATCH_CONTEXT":
+    case "MATCH_RESULT":
     case "ODDS":
     case "RANKING":
     case "STATISTICS":

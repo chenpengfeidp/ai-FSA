@@ -12,8 +12,9 @@ function footballCapabilities(): readonly ProviderCapabilityDeclaration[] {
     Object.freeze({
       kind: "coach" as const,
       supported: true,
-      ingestImplemented: false,
-      notes: "Provider supports coaches; ingest deferred.",
+      ingestImplemented: true,
+      notes:
+        "L1A: /coachs (+ lineup coach name) → CLUB_INTELLIGENCE manager metrics when present.",
     }),
     Object.freeze({
       kind: "referee" as const,

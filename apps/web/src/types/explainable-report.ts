@@ -174,6 +174,56 @@ export interface ExpectedGoalsContextView {
   readonly note: string;
 }
 
+export type ClubIntelligenceWindowId = "current" | "season";
+
+export interface ClubIntelligenceMetricsView {
+  readonly leagueRank: number | null;
+  readonly leaguePoints: number | null;
+  readonly goalDifference: number | null;
+  readonly goalsScored: number | null;
+  readonly goalsConceded: number | null;
+  readonly wins: number | null;
+  readonly draws: number | null;
+  readonly losses: number | null;
+  readonly played: number | null;
+  readonly homePlayed: number | null;
+  readonly homeWins: number | null;
+  readonly homeDraws: number | null;
+  readonly homeLosses: number | null;
+  readonly homeGoalsScored: number | null;
+  readonly homeGoalsConceded: number | null;
+  readonly awayPlayed: number | null;
+  readonly awayWins: number | null;
+  readonly awayDraws: number | null;
+  readonly awayLosses: number | null;
+  readonly awayGoalsScored: number | null;
+  readonly awayGoalsConceded: number | null;
+  readonly currentForm: string | null;
+  readonly promotionRelegationStatus: string | null;
+  readonly managerName: string | null;
+  readonly managerStartDate: string | null;
+  readonly managerTenureDays: number | null;
+}
+
+export interface ClubIntelligenceRecordView {
+  readonly teamSide: "away" | "home";
+  readonly teamName: string;
+  readonly window: ClubIntelligenceWindowId;
+  readonly competitionName: string | null;
+  readonly season: string | null;
+  readonly observedAt: string;
+  readonly metrics: ClubIntelligenceMetricsView;
+  readonly providerId: string;
+  readonly source: string;
+  readonly provenanceMethod: string;
+}
+
+export interface ClubIntelligenceContextView {
+  readonly available: boolean;
+  readonly records: readonly ClubIntelligenceRecordView[];
+  readonly note: string;
+}
+
 export interface MatchContextMetricsView {
   readonly restDays: number | null;
   readonly daysSinceLastMatch: number | null;
@@ -369,6 +419,7 @@ export interface ExplainableReportView {
   readonly lineups: LineupsContextView;
   readonly advancedStatistics: AdvancedStatisticsContextView;
   readonly expectedGoals: ExpectedGoalsContextView;
+  readonly clubIntelligence: ClubIntelligenceContextView;
   readonly matchContext: MatchContextEvidenceView;
   readonly marketEvidence: MarketEvidenceView;
   readonly availability: AvailabilitySummaryView;

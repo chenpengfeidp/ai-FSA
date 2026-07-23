@@ -12,6 +12,7 @@ import { ReasoningSection } from "./reasoning-section";
 import { RuleEvaluationSection } from "./rule-evaluation-section";
 import { AdvancedStatisticsContextSection } from "./advanced-statistics-context";
 import { AvailabilityContextSection } from "./availability-context";
+import { ClubIntelligenceEvidenceSection } from "./club-intelligence-evidence";
 import { ExpectedGoalsContextSection } from "./expected-goals-context";
 import { MarketEvidenceSection } from "./market-evidence";
 import { MatchContextEvidenceSection } from "./match-context-evidence";
@@ -78,6 +79,10 @@ export function ExplainableMatchReport({
 
       <WorkspaceSection id="expected-goals">
         <ExpectedGoalsContextSection expectedGoals={view.expectedGoals} />
+      </WorkspaceSection>
+
+      <WorkspaceSection id="club-intelligence">
+        <ClubIntelligenceEvidenceSection clubIntelligence={view.clubIntelligence} />
       </WorkspaceSection>
 
       <WorkspaceSection id="match-context">

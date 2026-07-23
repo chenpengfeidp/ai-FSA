@@ -13,6 +13,9 @@ import type {
   AvailabilitySummaryView,
   ConfidenceLevel,
   EvidenceTimelineItemView,
+  ClubIntelligenceContextView,
+  ClubIntelligenceRecordView,
+  ClubIntelligenceWindowId,
   ExpectedGoalsContextView,
   ExpectedGoalsRecordView,
   ExpectedGoalsWindowId,
@@ -151,12 +154,14 @@ const RULE_TITLES: Readonly<Record<string, string>> = Object.freeze({
 });
 
 const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
+  CLUB_INTELLIGENCE: "Club Intelligence",
   EXPECTED_GOALS: "Expected Goals",
   HEAD_TO_HEAD: "Head-to-head",
   INJURY: "Injury",
   LINEUP: "Lineup",
   MATCH_CONTEXT: "Match Context",
   MATCH_INFO: "Match information",
+  MATCH_RESULT: "Match Result",
   NEWS: "News",
   ODDS: "Odds & Market",
   PLAYER: "Player",
@@ -684,6 +689,117 @@ function buildExpectedGoalsContext(
     available: true,
     records: Object.freeze(records),
     note: "Expected Goals are provider measurements only (F1.3A Evidence; not Features, Rules, or Projection).",
+  });
+}
+
+const CLUB_INTELLIGENCE_WINDOWS: ReadonlySet<ClubIntelligenceWindowId> = new Set([
+  "season",
+  "current",
+]);
+
+function optionalString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
+function mapClubIntelligenceRecord(
+  item: EvidenceDto,
+): ClubIntelligenceRecordView | null {
+  if (item.type !== "CLUB_INTELLIGENCE") {
+    return null;
+  }
+
+  const teamSide =
+    item.payload.teamSide === "home" || item.payload.teamSide === "away"
+      ? item.payload.teamSide
+      : null;
+  const teamName =
+    typeof item.payload.teamName === "string" ? item.payload.teamName : null;
+  const window =
+    typeof item.payload.window === "string" &&
+    CLUB_INTELLIGENCE_WINDOWS.has(item.payload.window as ClubIntelligenceWindowId)
+      ? (item.payload.window as ClubIntelligenceWindowId)
+      : null;
+  const observedAt =
+    typeof item.payload.observedAt === "string" ? item.payload.observedAt : null;
+  const metricsRaw =
+    typeof item.payload.metrics === "object" &&
+    item.payload.metrics !== null &&
+    !Array.isArray(item.payload.metrics)
+      ? (item.payload.metrics as Record<string, unknown>)
+      : null;
+
+  if (
+    teamSide === null ||
+    teamName === null ||
+    window === null ||
+    observedAt === null ||
+    metricsRaw === null
+  ) {
+    return null;
+  }
+
+  return Object.freeze({
+    teamSide,
+    teamName,
+    window,
+    competitionName: optionalString(item.payload.competitionName),
+    season: optionalString(item.payload.season),
+    observedAt,
+    metrics: Object.freeze({
+      leagueRank: optionalNumber(metricsRaw.leagueRank),
+      leaguePoints: optionalNumber(metricsRaw.leaguePoints),
+      goalDifference: optionalNumber(metricsRaw.goalDifference),
+      goalsScored: optionalNumber(metricsRaw.goalsScored),
+      goalsConceded: optionalNumber(metricsRaw.goalsConceded),
+      wins: optionalNumber(metricsRaw.wins),
+      draws: optionalNumber(metricsRaw.draws),
+      losses: optionalNumber(metricsRaw.losses),
+      played: optionalNumber(metricsRaw.played),
+      homePlayed: optionalNumber(metricsRaw.homePlayed),
+      homeWins: optionalNumber(metricsRaw.homeWins),
+      homeDraws: optionalNumber(metricsRaw.homeDraws),
+      homeLosses: optionalNumber(metricsRaw.homeLosses),
+      homeGoalsScored: optionalNumber(metricsRaw.homeGoalsScored),
+      homeGoalsConceded: optionalNumber(metricsRaw.homeGoalsConceded),
+      awayPlayed: optionalNumber(metricsRaw.awayPlayed),
+      awayWins: optionalNumber(metricsRaw.awayWins),
+      awayDraws: optionalNumber(metricsRaw.awayDraws),
+      awayLosses: optionalNumber(metricsRaw.awayLosses),
+      awayGoalsScored: optionalNumber(metricsRaw.awayGoalsScored),
+      awayGoalsConceded: optionalNumber(metricsRaw.awayGoalsConceded),
+      currentForm: optionalString(metricsRaw.currentForm),
+      promotionRelegationStatus: optionalString(
+        metricsRaw.promotionRelegationStatus,
+      ),
+      managerName: optionalString(metricsRaw.managerName),
+      managerStartDate: optionalString(metricsRaw.managerStartDate),
+      managerTenureDays: optionalNumber(metricsRaw.managerTenureDays),
+    }),
+    providerId: item.providerId,
+    source: item.source,
+    provenanceMethod: item.provenance.method,
+  });
+}
+
+function buildClubIntelligenceContext(
+  evidence: readonly EvidenceDto[],
+): ClubIntelligenceContextView {
+  const records = evidence
+    .map(mapClubIntelligenceRecord)
+    .filter((item): item is ClubIntelligenceRecordView => item !== null);
+
+  if (records.length === 0) {
+    return Object.freeze({
+      available: false,
+      records: Object.freeze([]),
+      note: "Club Intelligence Evidence is not available for this match (honest absence). Never invented from form proxies.",
+    });
+  }
+
+  return Object.freeze({
+    available: true,
+    records: Object.freeze(records),
+    note: "Club Intelligence values are provider Facts only (L1A Evidence; not Features, Rules, or Projection).",
   });
 }
 
@@ -1234,6 +1350,7 @@ export function buildExplainableReportView(
   const lineupsContext = buildLineupsContext(evidence);
   const advancedStatisticsContext = buildAdvancedStatisticsContext(evidence);
   const expectedGoalsContext = buildExpectedGoalsContext(evidence);
+  const clubIntelligenceContext = buildClubIntelligenceContext(evidence);
   const matchContextEvidence = buildMatchContextEvidence(evidence);
   const marketEvidence = buildMarketEvidence(evidence);
   const availabilityContext = buildAvailabilitySummary(evidence);
@@ -1253,6 +1370,7 @@ export function buildExplainableReportView(
     lineups: lineupsContext,
     advancedStatistics: advancedStatisticsContext,
     expectedGoals: expectedGoalsContext,
+    clubIntelligence: clubIntelligenceContext,
     matchContext: matchContextEvidence,
     marketEvidence,
     availability: availabilityContext,

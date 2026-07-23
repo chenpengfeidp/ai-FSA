@@ -13,6 +13,11 @@ export type {
   FootballAvailabilityAbsence,
   FootballAvailabilityKind,
   FootballBoardRow,
+  FootballClubIntelligenceMetrics,
+  FootballClubIntelligenceRecord,
+  FootballClubIntelligenceSide,
+  FootballClubIntelligenceWindow,
+  FootballClubManagerFact,
   FootballCompetitionKind,
   FootballCompletedScore,
   FootballExpectedGoalsMetrics,
@@ -34,6 +39,7 @@ export type {
   FootballReferee,
   FootballResultCode,
   FootballStandingRow,
+  FootballStandingSplit,
   FootballStandings,
   FootballTeamForm,
   FootballTeamLineup,
@@ -77,6 +83,11 @@ export { mapApiFootballH2H } from "./mapper/map-api-football-h2h.js";
 export { mapApiFootballInjuriesResponse } from "./mapper/map-api-football-injuries.js";
 export { mapApiFootballLineupsResponse } from "./mapper/map-api-football-lineups.js";
 export { mapApiFootballSquadResponse } from "./mapper/map-api-football-squad.js";
+export {
+  mapApiFootballCoachResponse,
+  mapCoachNameFromLineupEntry,
+} from "./mapper/map-api-football-coach.js";
+export { mapClubIntelligenceFromStandings } from "./mapper/map-club-intelligence-from-standings.js";
 export { mapApiFootballStandings } from "./mapper/map-api-football-standings.js";
 export {
   mapApiFootballTeamStats,

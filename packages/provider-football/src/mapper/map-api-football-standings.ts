@@ -1,6 +1,7 @@
 import type {
   FootballProviderMethod,
   FootballStandingRow,
+  FootballStandingSplit,
   FootballStandings,
 } from "../domain/football-models.js";
 
@@ -16,6 +17,40 @@ function asString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0
     ? value.trim()
     : undefined;
+}
+
+function mapStandingSplit(value: unknown): FootballStandingSplit | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const goals = isRecord(value.goals) ? value.goals : undefined;
+  const played = asNumber(value.played);
+  const won = asNumber(value.win);
+  const drawn = asNumber(value.draw);
+  const lost = asNumber(value.lose);
+  const goalsFor = asNumber(goals?.for);
+  const goalsAgainst = asNumber(goals?.against);
+
+  if (
+    played === undefined ||
+    won === undefined ||
+    drawn === undefined ||
+    lost === undefined ||
+    goalsFor === undefined ||
+    goalsAgainst === undefined
+  ) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    played,
+    won,
+    drawn,
+    lost,
+    goalsFor,
+    goalsAgainst,
+  });
 }
 
 /**
@@ -89,6 +124,12 @@ export function mapApiFootballStandings(
         continue;
       }
 
+      const home = mapStandingSplit(entry.home);
+      const away = mapStandingSplit(entry.away);
+      const goalsDiff = asNumber(entry.goalsDiff);
+      const form = asString(entry.form);
+      const description = asString(entry.description);
+
       rows.push(
         Object.freeze({
           rank,
@@ -101,6 +142,11 @@ export function mapApiFootballStandings(
           goalsFor,
           goalsAgainst,
           points,
+          ...(goalsDiff === undefined ? {} : { goalsDiff }),
+          ...(form === undefined ? {} : { form }),
+          ...(description === undefined ? {} : { description }),
+          ...(home === undefined ? {} : { home }),
+          ...(away === undefined ? {} : { away }),
         }),
       );
     }

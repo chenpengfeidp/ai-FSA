@@ -1,3 +1,4 @@
+import type { FootballClubIntelligenceRecord } from "../domain/football-club-intelligence.js";
 import type { FootballExpectedGoalsRecord } from "../domain/football-expected-goals.js";
 import type { FootballMatchContextRecord } from "../domain/football-match-context.js";
 import type {
@@ -115,6 +116,89 @@ function toMatchContextShape(
     observedAt: record.observedAt,
     providerSource: "api-football",
     providerSourceId: `api-football:${fixtureKey}:context:${record.teamSide}`,
+    providerMethod: record.providerMethod,
+  });
+}
+
+function freezeClubIntelligenceMetrics(
+  metrics: FootballClubIntelligenceRecord["metrics"],
+): unknown {
+  return Object.freeze({
+    ...(metrics.leagueRank === undefined ? {} : { leagueRank: metrics.leagueRank }),
+    ...(metrics.leaguePoints === undefined
+      ? {}
+      : { leaguePoints: metrics.leaguePoints }),
+    ...(metrics.goalDifference === undefined
+      ? {}
+      : { goalDifference: metrics.goalDifference }),
+    ...(metrics.goalsScored === undefined
+      ? {}
+      : { goalsScored: metrics.goalsScored }),
+    ...(metrics.goalsConceded === undefined
+      ? {}
+      : { goalsConceded: metrics.goalsConceded }),
+    ...(metrics.wins === undefined ? {} : { wins: metrics.wins }),
+    ...(metrics.draws === undefined ? {} : { draws: metrics.draws }),
+    ...(metrics.losses === undefined ? {} : { losses: metrics.losses }),
+    ...(metrics.played === undefined ? {} : { played: metrics.played }),
+    ...(metrics.homePlayed === undefined ? {} : { homePlayed: metrics.homePlayed }),
+    ...(metrics.homeWins === undefined ? {} : { homeWins: metrics.homeWins }),
+    ...(metrics.homeDraws === undefined ? {} : { homeDraws: metrics.homeDraws }),
+    ...(metrics.homeLosses === undefined ? {} : { homeLosses: metrics.homeLosses }),
+    ...(metrics.homeGoalsScored === undefined
+      ? {}
+      : { homeGoalsScored: metrics.homeGoalsScored }),
+    ...(metrics.homeGoalsConceded === undefined
+      ? {}
+      : { homeGoalsConceded: metrics.homeGoalsConceded }),
+    ...(metrics.awayPlayed === undefined ? {} : { awayPlayed: metrics.awayPlayed }),
+    ...(metrics.awayWins === undefined ? {} : { awayWins: metrics.awayWins }),
+    ...(metrics.awayDraws === undefined ? {} : { awayDraws: metrics.awayDraws }),
+    ...(metrics.awayLosses === undefined ? {} : { awayLosses: metrics.awayLosses }),
+    ...(metrics.awayGoalsScored === undefined
+      ? {}
+      : { awayGoalsScored: metrics.awayGoalsScored }),
+    ...(metrics.awayGoalsConceded === undefined
+      ? {}
+      : { awayGoalsConceded: metrics.awayGoalsConceded }),
+    ...(metrics.currentForm === undefined
+      ? {}
+      : { currentForm: metrics.currentForm }),
+    ...(metrics.promotionRelegationStatus === undefined
+      ? {}
+      : { promotionRelegationStatus: metrics.promotionRelegationStatus }),
+    ...(metrics.managerName === undefined
+      ? {}
+      : { managerName: metrics.managerName }),
+    ...(metrics.managerStartDate === undefined
+      ? {}
+      : { managerStartDate: metrics.managerStartDate }),
+    ...(metrics.managerTenureDays === undefined
+      ? {}
+      : { managerTenureDays: metrics.managerTenureDays }),
+  });
+}
+
+function toClubIntelligenceShape(
+  record: FootballClubIntelligenceRecord,
+  fixtureKey: string,
+): unknown {
+  return Object.freeze({
+    teamId: record.teamId,
+    teamName: record.teamName,
+    teamSide: record.teamSide,
+    ...(record.competitionId === undefined
+      ? {}
+      : { competitionId: record.competitionId }),
+    ...(record.competitionName === undefined
+      ? {}
+      : { competitionName: record.competitionName }),
+    ...(record.season === undefined ? {} : { season: record.season }),
+    window: record.window,
+    metrics: freezeClubIntelligenceMetrics(record.metrics),
+    observedAt: record.observedAt,
+    providerSource: "api-football",
+    providerSourceId: `api-football:${fixtureKey}:club:${record.teamSide}:${record.window}`,
     providerMethod: record.providerMethod,
   });
 }
@@ -244,6 +328,7 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     lineups,
     expectedGoals,
     matchContext,
+    clubIntelligence,
   } = bundle;
   const fixtureKey = fixture.fixtureId;
   const completedScore = fixture.completedScore;
@@ -383,6 +468,15 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
             matchContext.map((record) => toMatchContextShape(record, fixtureKey)),
           ),
         }),
+    ...(clubIntelligence.length === 0
+      ? {}
+      : {
+          clubIntelligence: Object.freeze(
+            clubIntelligence.map((record) =>
+              toClubIntelligenceShape(record, fixtureKey),
+            ),
+          ),
+        }),
     teamForm: Object.freeze([
       toTeamFormShape(homeForm, fixtureKey),
       toTeamFormShape(awayForm, fixtureKey),
@@ -398,7 +492,7 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
       providerSourceId: `api-football:${fixtureKey}:h2h`,
       providerMethod: headToHead.providerMethod,
     }),
-    // Standings stay FAS-domain only; Evidence kinds do not require them in F.1.
+    // Raw standings domain retained for diagnostics; Club Intelligence is Evidence.
     standings: bundle.standings,
   });
 }

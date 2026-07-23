@@ -1,12 +1,14 @@
 import type { JsonValue } from "./analysis";
 
 export type EvidenceType =
+  | "CLUB_INTELLIGENCE"
   | "EXPECTED_GOALS"
   | "HEAD_TO_HEAD"
   | "INJURY"
   | "LINEUP"
   | "MATCH_CONTEXT"
   | "MATCH_INFO"
+  | "MATCH_RESULT"
   | "NEWS"
   | "ODDS"
   | "PLAYER"

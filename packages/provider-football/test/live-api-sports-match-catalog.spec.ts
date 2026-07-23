@@ -298,6 +298,13 @@ function createLiveFetch(): typeof fetch {
       });
     }
 
+    if (url.includes("/coachs")) {
+      return new Response(JSON.stringify({ response: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     return new Response("not found", { status: 404 });
   }) as unknown as typeof fetch;
 }

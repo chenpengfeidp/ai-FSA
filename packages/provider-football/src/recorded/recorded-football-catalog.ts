@@ -2,6 +2,12 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
+  FootballClubIntelligenceMetrics,
+  FootballClubIntelligenceRecord,
+  FootballClubIntelligenceWindow,
+  FootballClubManagerFact,
+} from "../domain/football-club-intelligence.js";
+import type {
   FootballExpectedGoalsMetrics,
   FootballExpectedGoalsRecord,
   FootballExpectedGoalsWindow,
@@ -32,6 +38,7 @@ import type {
   FootballFixturesSource,
   FootballMatchCatalog,
 } from "../domain/ports.js";
+import { mapClubIntelligenceFromStandings } from "../mapper/map-club-intelligence-from-standings.js";
 import { mapBundleToBoardRow } from "../mapper/map-bundle-to-board-row.js";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -544,6 +551,169 @@ function parseMatchContextRecord(
   });
 }
 
+const CLUB_INTELLIGENCE_WINDOWS: ReadonlySet<FootballClubIntelligenceWindow> =
+  new Set(["season", "current"]);
+
+function parseClubIntelligenceMetrics(
+  value: unknown,
+): FootballClubIntelligenceMetrics | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const metrics: {
+    -readonly [K in keyof FootballClubIntelligenceMetrics]?: FootballClubIntelligenceMetrics[K];
+  } = {};
+
+  const numberKeys = [
+    "leagueRank",
+    "leaguePoints",
+    "goalDifference",
+    "goalsScored",
+    "goalsConceded",
+    "wins",
+    "draws",
+    "losses",
+    "played",
+    "homePlayed",
+    "homeWins",
+    "homeDraws",
+    "homeLosses",
+    "homeGoalsScored",
+    "homeGoalsConceded",
+    "awayPlayed",
+    "awayWins",
+    "awayDraws",
+    "awayLosses",
+    "awayGoalsScored",
+    "awayGoalsConceded",
+    "managerTenureDays",
+  ] as const;
+
+  for (const key of numberKeys) {
+    const parsed = parseOptionalFiniteNumber(value[key]);
+    if (parsed !== undefined) {
+      metrics[key] = parsed;
+    }
+  }
+
+  for (const key of [
+    "currentForm",
+    "promotionRelegationStatus",
+    "managerName",
+    "managerStartDate",
+  ] as const) {
+    if (typeof value[key] === "string" && value[key].trim().length > 0) {
+      metrics[key] = value[key].trim();
+    }
+  }
+
+  if (Object.keys(metrics).length === 0) {
+    return undefined;
+  }
+
+  return Object.freeze(metrics);
+}
+
+function parseClubIntelligenceRecord(
+  entry: unknown,
+): FootballClubIntelligenceRecord | undefined {
+  if (!isRecord(entry)) {
+    return undefined;
+  }
+
+  const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+  const teamName = typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+  const teamSide =
+    entry.teamSide === "home" || entry.teamSide === "away"
+      ? entry.teamSide
+      : undefined;
+  const window =
+    typeof entry.window === "string" &&
+    CLUB_INTELLIGENCE_WINDOWS.has(entry.window as FootballClubIntelligenceWindow)
+      ? (entry.window as FootballClubIntelligenceWindow)
+      : undefined;
+  const observedAt =
+    typeof entry.observedAt === "string" && entry.observedAt.trim().length > 0
+      ? entry.observedAt.trim()
+      : undefined;
+  const providerMethod =
+    entry.providerMethod === "http-live" ||
+    entry.providerMethod === "recorded-snapshot"
+      ? entry.providerMethod
+      : undefined;
+  const metrics = parseClubIntelligenceMetrics(entry.metrics);
+
+  if (
+    teamId.length === 0 ||
+    teamName.length === 0 ||
+    teamSide === undefined ||
+    window === undefined ||
+    observedAt === undefined ||
+    providerMethod === undefined ||
+    metrics === undefined
+  ) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    teamId,
+    teamName,
+    teamSide,
+    ...(typeof entry.competitionId === "string" &&
+    entry.competitionId.trim().length > 0
+      ? { competitionId: entry.competitionId.trim() }
+      : {}),
+    ...(typeof entry.competitionName === "string" &&
+    entry.competitionName.trim().length > 0
+      ? { competitionName: entry.competitionName.trim() }
+      : {}),
+    ...(typeof entry.season === "string" && entry.season.trim().length > 0
+      ? { season: entry.season.trim() }
+      : typeof entry.season === "number" && Number.isFinite(entry.season)
+        ? { season: String(entry.season) }
+        : {}),
+    window,
+    metrics,
+    observedAt,
+    providerMethod,
+  });
+}
+
+function parseClubManagerFact(entry: unknown): FootballClubManagerFact | undefined {
+  if (!isRecord(entry)) {
+    return undefined;
+  }
+
+  const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+  const teamSide =
+    entry.teamSide === "home" || entry.teamSide === "away"
+      ? entry.teamSide
+      : undefined;
+  const managerName =
+    typeof entry.managerName === "string" && entry.managerName.trim().length > 0
+      ? entry.managerName.trim()
+      : undefined;
+
+  if (teamId.length === 0 || teamSide === undefined || managerName === undefined) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    teamId,
+    teamSide,
+    managerName,
+    ...(typeof entry.managerStartDate === "string" &&
+    entry.managerStartDate.trim().length > 0
+      ? { managerStartDate: entry.managerStartDate.trim() }
+      : {}),
+    ...(typeof entry.managerTenureDays === "number" &&
+    Number.isFinite(entry.managerTenureDays)
+      ? { managerTenureDays: entry.managerTenureDays }
+      : {}),
+  });
+}
+
 function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
   if (!isRecord(raw)) {
     return undefined;
@@ -645,6 +815,34 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
   const lineupsRaw = Array.isArray(raw.lineups) ? raw.lineups : [];
   const expectedGoalsRaw = Array.isArray(raw.expectedGoals) ? raw.expectedGoals : [];
   const matchContextRaw = Array.isArray(raw.matchContext) ? raw.matchContext : [];
+  const clubIntelligenceRaw = Array.isArray(raw.clubIntelligence)
+    ? raw.clubIntelligence
+    : [];
+  const managersRaw = Array.isArray(raw.managers) ? raw.managers : [];
+  const managers = Object.freeze(
+    managersRaw.flatMap((entry) => {
+      const mapped = parseClubManagerFact(entry);
+      return mapped === undefined ? [] : [mapped];
+    }),
+  );
+  const parsedClubIntelligence = Object.freeze(
+    clubIntelligenceRaw.flatMap((entry) => {
+      const mapped = parseClubIntelligenceRecord(entry);
+      return mapped === undefined ? [] : [mapped];
+    }),
+  );
+  const clubIntelligence =
+    parsedClubIntelligence.length > 0
+      ? parsedClubIntelligence
+      : mapClubIntelligenceFromStandings(standings, {
+          homeTeamId: fixture.homeTeamId,
+          awayTeamId: fixture.awayTeamId,
+          homeTeamName: fixture.homeTeamName,
+          awayTeamName: fixture.awayTeamName,
+          observedAt: fixture.kickoff,
+          providerMethod: fixture.providerMethod,
+          managers,
+        });
 
   return Object.freeze({
     fixture,
@@ -842,6 +1040,7 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
         return mapped === undefined ? [] : [mapped];
       }),
     ),
+    clubIntelligence,
   });
 }
 

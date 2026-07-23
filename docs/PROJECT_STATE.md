@@ -5,12 +5,12 @@
 - Last updated: 2026-07-23
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **A1.5 Evaluation Platform Foundation** complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
+- Current task status: **P0 Football Intelligence v2 Provider Capability Review** complete (analysis only); prior **A1.5** complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **A1.5** Evaluation Platform Foundation complete
-- Last completed delivery: Sprint **A1.5** (`docs/sprints/A1/A1.5_EVALUATION_PLATFORM_FOUNDATION_COMPLETION_REPORT.md`); prior A1, R1, I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
+- Current sprint: **P0** FI v2 Provider Capability Review complete
+- Last completed delivery: Sprint **P0** (`docs/reviews/FOOTBALL_INTELLIGENCE_V2_PROVIDER_CAPABILITY_REVIEW.md`); prior A1.5, A1, R1, I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
 - Demo: recorded cassette `football:100001` includes full xG windows + Match Context; odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`; evaluation demo population + Evaluation History in `@fas/statistics`
-- Next authorized work: **A2 Calibration**
+- Next authorized work: **FI-v2 Wave 1 Team Strength Intelligence** (per P0 review) and/or **A2 Calibration** (doc 40 trust track); human chooses sequencing
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`

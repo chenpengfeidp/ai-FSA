@@ -244,10 +244,12 @@ Match Center (web)
 
 1. **A1 Prediction Evaluation** — 已完成（`docs/sprints/A1/A1_PREDICTION_EVALUATION_COMPLETION_REPORT.md`）  
 2. **A1.5 Evaluation Platform Foundation** — 已完成（`docs/sprints/A1/A1.5_EVALUATION_PLATFORM_FOUNDATION_COMPLETION_REPORT.md`）  
-3. **A2** — Calibration productization（当前下一步；消费 Evaluation History）  
-3. 其后按 doc 40：K1 / C1 / … → v1.0 → v2.0  
+3. **P0 FI v2 Provider Capability Review** — 已完成（`docs/reviews/FOOTBALL_INTELLIGENCE_V2_PROVIDER_CAPABILITY_REVIEW.md`）  
+4. **FI-v2 Wave 1 Team Strength** — 推荐的下一 Intelligence 编码冲刺（现有 Provider 派生；见 P0 §7–§8）  
+5. **A2** — Calibration productization（并行信任轨道；消费 Evaluation History；勿与 Provider 混写）  
+6. 其后按 doc 40 / P0：Player Impact / Lineup consume / 可选新 Provider Gate → v1.0  
 
-历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3  
+历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 Provider Review  
 
 平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 

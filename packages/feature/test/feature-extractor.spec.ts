@@ -286,7 +286,7 @@ describe("FeatureExtractor", () => {
     });
     const bundle = new FeatureExtractor().extractBundle([matchInfo, odds]);
 
-    expect(bundle.featureModelVersion).toBe("feature.v2.i2b.market");
+    expect(bundle.featureModelVersion).toBe("feature.v2.l1b.club");
     expect(bundle.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "marketConsensus" }),
@@ -539,7 +539,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.i2b.market");
+    expect(bundle.featureModelVersion).toBe("feature.v2.l1b.club");
     expect(
       bundle.features.some((feature) => feature.name === "availabilityPenaltyAway"),
     ).toBe(false);
@@ -682,7 +682,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.i2b.market");
+    expect(bundle.featureModelVersion).toBe("feature.v2.l1b.club");
   });
 
   it("keeps xG Features absent when EXPECTED_GOALS Evidence is missing", () => {
@@ -888,7 +888,7 @@ describe("FeatureExtractor", () => {
         expect.objectContaining({ name: "knockoutContext", value: 0 }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.i2b.market");
+    expect(bundle.featureModelVersion).toBe("feature.v2.l1b.club");
   });
 
   it("keeps Context Features absent when MATCH_CONTEXT Evidence is missing", () => {

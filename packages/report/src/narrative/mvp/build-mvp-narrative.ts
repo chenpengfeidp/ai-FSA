@@ -143,6 +143,36 @@ export function buildMvpIntelligenceNarrative(
   );
   const marketVolatility = numericFeature(analysis.features, "marketVolatility");
   const sharpSupport = numericFeature(analysis.features, "sharpSupport");
+  const clubStrengthHome = numericFeature(analysis.features, "clubStrengthHome");
+  const clubStrengthAway = numericFeature(analysis.features, "clubStrengthAway");
+  const leagueStrengthHome = numericFeature(analysis.features, "leagueStrengthHome");
+  const leagueStrengthAway = numericFeature(analysis.features, "leagueStrengthAway");
+  const formStrengthHome = numericFeature(analysis.features, "formStrengthHome");
+  const formStrengthAway = numericFeature(analysis.features, "formStrengthAway");
+  const clubAttackStrengthHome = numericFeature(
+    analysis.features,
+    "clubAttackStrengthHome",
+  );
+  const clubAttackStrengthAway = numericFeature(
+    analysis.features,
+    "clubAttackStrengthAway",
+  );
+  const clubDefensiveStrengthHome = numericFeature(
+    analysis.features,
+    "clubDefensiveStrengthHome",
+  );
+  const clubDefensiveStrengthAway = numericFeature(
+    analysis.features,
+    "clubDefensiveStrengthAway",
+  );
+  const managerStabilityHome = numericFeature(
+    analysis.features,
+    "managerStabilityHome",
+  );
+  const managerStabilityAway = numericFeature(
+    analysis.features,
+    "managerStabilityAway",
+  );
 
   const overview = [
     `${homeTeam} vs ${awayTeam}: Most Likely is ${most.label} (${formatPct(most.probability)}).`,
@@ -164,6 +194,7 @@ export function buildMvpIntelligenceNarrative(
     `ExpectedGoalsFeatures (derived from EXPECTED_GOALS Evidence): xgAttackQuality home=${xgAttackHome ?? "n/a"} away=${xgAttackAway ?? "n/a"}; xgDefenseQuality home=${xgDefenseHome ?? "n/a"} away=${xgDefenseAway ?? "n/a"}; xgDominance=${xgDominance ?? "n/a"}; finishingEfficiency home=${finishingHome ?? "n/a"} away=${finishingAway ?? "n/a"}.`,
     `MatchContextFeatures (derived from MATCH_CONTEXT Evidence): fatigueIndex home=${fatigueHome ?? "n/a"} away=${fatigueAway ?? "n/a"}; scheduleAdvantage=${scheduleAdvantage ?? "n/a"}; homeStability=${homeStability ?? "n/a"}; rotationPressure home=${rotationHome ?? "n/a"} away=${rotationAway ?? "n/a"}; knockoutContext=${knockoutContext ?? "n/a"}.`,
     `MarketIntelligenceFeatures (derived from ODDS Evidence; supporting only): marketConsensus=${marketConsensus ?? "n/a"}; steamMove=${steamMove ?? "n/a"}; reverseLineMovement=${reverseLineMovement ?? "n/a"}; marketVolatility=${marketVolatility ?? "n/a"}; sharpSupport=${sharpSupport ?? "n/a"}.`,
+    `ClubIntelligenceFeatures (derived from CLUB_INTELLIGENCE Evidence): clubStrength home=${clubStrengthHome ?? "n/a"} away=${clubStrengthAway ?? "n/a"}; leagueStrength home=${leagueStrengthHome ?? "n/a"} away=${leagueStrengthAway ?? "n/a"}; formStrength home=${formStrengthHome ?? "n/a"} away=${formStrengthAway ?? "n/a"}; clubAttackStrength home=${clubAttackStrengthHome ?? "n/a"} away=${clubAttackStrengthAway ?? "n/a"}; clubDefensiveStrength home=${clubDefensiveStrengthHome ?? "n/a"} away=${clubDefensiveStrengthAway ?? "n/a"}; managerStability home=${managerStabilityHome ?? "n/a"} away=${managerStabilityAway ?? "n/a"}.`,
   ].join(" ");
 
   const riskRules = analysis.ruleResults.filter(

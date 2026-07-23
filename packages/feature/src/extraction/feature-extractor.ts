@@ -7,11 +7,19 @@ import {
 } from "../domain/feature-bundle.js";
 import { createFeature, type Feature, type FeatureName } from "../domain/feature.js";
 import {
+  BASELINE_LEAGUE_SIZE,
   computeAsianHandicapLean,
   computeAttackEfficiency,
   computeAttackRating,
   computeAvailabilityPenalty,
   computeChanceCreation,
+  computeClubAttackStrength,
+  computeClubDefensiveStrength,
+  computeClubGoalDifferenceStrength,
+  computeClubLeagueStrength,
+  computeClubPointsPerMatch,
+  computeClubStrength,
+  computeClubVenueStrength,
   computeDefenseRating,
   computeDisciplineRisk,
   computeFatigueIndex,
@@ -20,6 +28,7 @@ import {
   computeHomeStability,
   computeImpliedProbabilities,
   computeKnockoutContext,
+  computeManagerStability,
   computeMarketConsensus,
   computeMarketLean,
   computeMarketVolatility,
@@ -867,6 +876,415 @@ function extractMatchContextFeatures(input: {
   return Object.freeze(features);
 }
 
+type ClubIntelligenceMetrics = Readonly<{
+  leagueRank?: number;
+  leaguePoints?: number;
+  goalDifference?: number;
+  goalsScored?: number;
+  goalsConceded?: number;
+  played?: number;
+  homePlayed?: number;
+  homeWins?: number;
+  homeDraws?: number;
+  homeLosses?: number;
+  homeGoalsScored?: number;
+  homeGoalsConceded?: number;
+  awayPlayed?: number;
+  awayWins?: number;
+  awayDraws?: number;
+  awayLosses?: number;
+  awayGoalsScored?: number;
+  awayGoalsConceded?: number;
+  currentForm?: string;
+  managerTenureDays?: number;
+}>;
+
+function readClubIntelligenceMetrics(
+  payload: Evidence["payload"],
+): ClubIntelligenceMetrics {
+  const metricsRaw = payload.metrics;
+
+  if (
+    typeof metricsRaw !== "object" ||
+    metricsRaw === null ||
+    Array.isArray(metricsRaw)
+  ) {
+    return Object.freeze({});
+  }
+
+  const metrics = metricsRaw as Record<string, unknown>;
+  const leagueRank = asFiniteNumber(metrics.leagueRank);
+  const leaguePoints = asFiniteNumber(metrics.leaguePoints);
+  const goalDifference = asFiniteNumber(metrics.goalDifference);
+  const goalsScored = asFiniteNumber(metrics.goalsScored);
+  const goalsConceded = asFiniteNumber(metrics.goalsConceded);
+  const played = asFiniteNumber(metrics.played);
+  const homePlayed = asFiniteNumber(metrics.homePlayed);
+  const homeWins = asFiniteNumber(metrics.homeWins);
+  const homeDraws = asFiniteNumber(metrics.homeDraws);
+  const homeLosses = asFiniteNumber(metrics.homeLosses);
+  const homeGoalsScored = asFiniteNumber(metrics.homeGoalsScored);
+  const homeGoalsConceded = asFiniteNumber(metrics.homeGoalsConceded);
+  const awayPlayed = asFiniteNumber(metrics.awayPlayed);
+  const awayWins = asFiniteNumber(metrics.awayWins);
+  const awayDraws = asFiniteNumber(metrics.awayDraws);
+  const awayLosses = asFiniteNumber(metrics.awayLosses);
+  const awayGoalsScored = asFiniteNumber(metrics.awayGoalsScored);
+  const awayGoalsConceded = asFiniteNumber(metrics.awayGoalsConceded);
+  const currentFormRaw = metrics.currentForm;
+  const currentForm =
+    typeof currentFormRaw === "string" && currentFormRaw.trim().length > 0
+      ? currentFormRaw.trim()
+      : undefined;
+  const managerTenureDays = asFiniteNumber(metrics.managerTenureDays);
+
+  return Object.freeze({
+    ...(leagueRank === undefined ? {} : { leagueRank }),
+    ...(leaguePoints === undefined ? {} : { leaguePoints }),
+    ...(goalDifference === undefined ? {} : { goalDifference }),
+    ...(goalsScored === undefined ? {} : { goalsScored }),
+    ...(goalsConceded === undefined ? {} : { goalsConceded }),
+    ...(played === undefined ? {} : { played }),
+    ...(homePlayed === undefined ? {} : { homePlayed }),
+    ...(homeWins === undefined ? {} : { homeWins }),
+    ...(homeDraws === undefined ? {} : { homeDraws }),
+    ...(homeLosses === undefined ? {} : { homeLosses }),
+    ...(homeGoalsScored === undefined ? {} : { homeGoalsScored }),
+    ...(homeGoalsConceded === undefined ? {} : { homeGoalsConceded }),
+    ...(awayPlayed === undefined ? {} : { awayPlayed }),
+    ...(awayWins === undefined ? {} : { awayWins }),
+    ...(awayDraws === undefined ? {} : { awayDraws }),
+    ...(awayLosses === undefined ? {} : { awayLosses }),
+    ...(awayGoalsScored === undefined ? {} : { awayGoalsScored }),
+    ...(awayGoalsConceded === undefined ? {} : { awayGoalsConceded }),
+    ...(currentForm === undefined ? {} : { currentForm }),
+    ...(managerTenureDays === undefined ? {} : { managerTenureDays }),
+  });
+}
+
+function parseClubFormResults(
+  value: string,
+): readonly ("D" | "L" | "W")[] | undefined {
+  const codes: ("D" | "L" | "W")[] = [];
+
+  for (const char of value) {
+    if (char !== "W" && char !== "D" && char !== "L") {
+      return undefined;
+    }
+
+    codes.push(char);
+  }
+
+  return codes.length === 0 ? undefined : Object.freeze(codes);
+}
+
+function findClubIntelligenceEvidence(
+  evidences: readonly Evidence[],
+  side: "away" | "home",
+): Evidence | undefined {
+  const sideRecords = evidences.filter(
+    (evidence) =>
+      evidence.type === "CLUB_INTELLIGENCE" && evidence.payload.teamSide === side,
+  );
+
+  return (
+    sideRecords.find((evidence) => evidence.payload.window === "season") ??
+    sideRecords[0]
+  );
+}
+
+/**
+ * L1B: derived Club Intelligence Features for one side from CLUB_INTELLIGENCE
+ * Evidence only. Never invents standings, form, or manager facts absent from
+ * the provider; every Feature omits when its required metric is missing.
+ */
+function extractClubIntelligenceFeaturesForSide(input: {
+  readonly evidence: Evidence;
+  readonly side: "away" | "home";
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { evidence, side, matchId, generatedAt } = input;
+
+  if (matchId === undefined) {
+    return emptyFeatures;
+  }
+
+  const metrics = readClubIntelligenceMetrics(evidence.payload);
+  const features: Feature[] = [];
+  const suffix = side === "home" ? "Home" : "Away";
+
+  let pointsPerMatch: number | undefined;
+  let goalDifferenceStrength: number | undefined;
+  let leagueStrength: number | undefined;
+
+  if (
+    metrics.leaguePoints !== undefined &&
+    metrics.played !== undefined &&
+    metrics.played > 0
+  ) {
+    pointsPerMatch = roundFeature(
+      computeClubPointsPerMatch(metrics.leaguePoints, metrics.played),
+    );
+    const name = `pointsPerMatch${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value: pointsPerMatch,
+        explanation: `Points per match ${pointsPerMatch} from CLUB_INTELLIGENCE leaguePoints=${metrics.leaguePoints} over played=${metrics.played} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (
+    metrics.goalDifference !== undefined &&
+    metrics.played !== undefined &&
+    metrics.played > 0
+  ) {
+    goalDifferenceStrength = roundFeature(
+      computeClubGoalDifferenceStrength(metrics.goalDifference, metrics.played),
+    );
+    const name = `goalDifferenceStrength${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value: goalDifferenceStrength,
+        explanation: `Goal difference strength ${goalDifferenceStrength} from CLUB_INTELLIGENCE goalDifference=${metrics.goalDifference} over played=${metrics.played} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (
+    metrics.goalsScored !== undefined &&
+    metrics.played !== undefined &&
+    metrics.played > 0
+  ) {
+    const value = roundFeature(
+      computeClubAttackStrength(metrics.goalsScored, metrics.played),
+    );
+    const name = `clubAttackStrength${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Club attack strength ${value} from CLUB_INTELLIGENCE goalsScored=${metrics.goalsScored} over played=${metrics.played} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (
+    metrics.goalsConceded !== undefined &&
+    metrics.played !== undefined &&
+    metrics.played > 0
+  ) {
+    const value = roundFeature(
+      computeClubDefensiveStrength(metrics.goalsConceded, metrics.played),
+    );
+    const name = `clubDefensiveStrength${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Club defensive strength ${value} from CLUB_INTELLIGENCE goalsConceded=${metrics.goalsConceded} over played=${metrics.played} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (metrics.leagueRank !== undefined) {
+    leagueStrength = roundFeature(computeClubLeagueStrength(metrics.leagueRank));
+    const name = `leagueStrength${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value: leagueStrength,
+        explanation: `League strength ${leagueStrength} from CLUB_INTELLIGENCE leagueRank=${metrics.leagueRank} (assumed ${BASELINE_LEAGUE_SIZE}-team table; Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (
+    pointsPerMatch !== undefined &&
+    goalDifferenceStrength !== undefined &&
+    leagueStrength !== undefined
+  ) {
+    const value = roundFeature(
+      computeClubStrength({
+        pointsPerMatch,
+        goalDifferenceStrength,
+        leagueStrength,
+      }),
+    );
+    const name = `clubStrength${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Club strength ${value} composite of pointsPerMatch=${pointsPerMatch}, goalDifferenceStrength=${goalDifferenceStrength}, leagueStrength=${leagueStrength} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (metrics.currentForm !== undefined) {
+    const results = parseClubFormResults(metrics.currentForm);
+
+    if (results !== undefined) {
+      const value = roundFeature(computeRecentFormScore(results));
+      const name = `formStrength${suffix}` as FeatureName;
+      features.push(
+        createFeature({
+          featureId: featureId(evidence.id, name),
+          matchId,
+          name,
+          value,
+          explanation: `Form strength ${value} from CLUB_INTELLIGENCE currentForm="${metrics.currentForm}" (Evidence ${evidence.id}).`,
+          sourceEvidenceId: evidence.id,
+          generatedAt,
+        }),
+      );
+    }
+  }
+
+  if (metrics.managerTenureDays !== undefined) {
+    const value = roundFeature(computeManagerStability(metrics.managerTenureDays));
+    const name = `managerStability${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Manager stability ${value} from CLUB_INTELLIGENCE managerTenureDays=${metrics.managerTenureDays} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (
+    side === "home" &&
+    metrics.homePlayed !== undefined &&
+    metrics.homePlayed > 0 &&
+    metrics.homeWins !== undefined &&
+    metrics.homeDraws !== undefined &&
+    metrics.homeLosses !== undefined &&
+    metrics.homeGoalsScored !== undefined &&
+    metrics.homeGoalsConceded !== undefined
+  ) {
+    const value = roundFeature(
+      computeClubVenueStrength({
+        wins: metrics.homeWins,
+        draws: metrics.homeDraws,
+        losses: metrics.homeLosses,
+        played: metrics.homePlayed,
+        goalsScored: metrics.homeGoalsScored,
+        goalsConceded: metrics.homeGoalsConceded,
+      }),
+    );
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, "homeLeagueStrength"),
+        matchId,
+        name: "homeLeagueStrength",
+        value,
+        explanation: `Home league strength ${value} from CLUB_INTELLIGENCE home split (played=${metrics.homePlayed}) (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (
+    side === "away" &&
+    metrics.awayPlayed !== undefined &&
+    metrics.awayPlayed > 0 &&
+    metrics.awayWins !== undefined &&
+    metrics.awayDraws !== undefined &&
+    metrics.awayLosses !== undefined &&
+    metrics.awayGoalsScored !== undefined &&
+    metrics.awayGoalsConceded !== undefined
+  ) {
+    const value = roundFeature(
+      computeClubVenueStrength({
+        wins: metrics.awayWins,
+        draws: metrics.awayDraws,
+        losses: metrics.awayLosses,
+        played: metrics.awayPlayed,
+        goalsScored: metrics.awayGoalsScored,
+        goalsConceded: metrics.awayGoalsConceded,
+      }),
+    );
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, "awayLeagueStrength"),
+        matchId,
+        name: "awayLeagueStrength",
+        value,
+        explanation: `Away league strength ${value} from CLUB_INTELLIGENCE away split (played=${metrics.awayPlayed}) (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
+/**
+ * L1B: derived Club Intelligence Features from CLUB_INTELLIGENCE Evidence only.
+ * Rules consume these Features; never Provider/standings data directly.
+ */
+function extractClubIntelligenceFeatures(input: {
+  readonly evidences: readonly Evidence[];
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { evidences, matchId, generatedAt } = input;
+  const features: Feature[] = [];
+
+  for (const side of ["home", "away"] as const) {
+    const evidence = findClubIntelligenceEvidence(evidences, side);
+
+    if (evidence === undefined) {
+      continue;
+    }
+
+    features.push(
+      ...extractClubIntelligenceFeaturesForSide({
+        evidence,
+        side,
+        matchId,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
 /**
  * I2B: derived Market Intelligence Features from ODDS Evidence only.
  * Omit Feature (→ Rule INAPPLICABLE) when required movement / public / sharp facts are absent.
@@ -1196,6 +1614,14 @@ export class FeatureExtractor {
 
     features.push(
       ...extractMatchContextFeatures({
+        evidences,
+        matchId,
+        generatedAt,
+      }),
+    );
+
+    features.push(
+      ...extractClubIntelligenceFeatures({
         evidences,
         matchId,
         generatedAt,

@@ -219,6 +219,20 @@ export function computeDeterministicMatchProjection(input: {
     "SIGNALS_ALIGNED_AWAY",
     "H2H_SUPPORTS_HOME",
     "H2H_SUPPORTS_AWAY",
+    // L1B Club Intelligence — comparative club edges participate in the
+    // existing football channel like other rule edges (no softmax redesign).
+    "CLUB_STRENGTH_EDGE",
+    "CLUB_STRENGTH_EDGE_AWAY",
+    "LEAGUE_STRENGTH_EDGE",
+    "LEAGUE_STRENGTH_EDGE_AWAY",
+    "FORM_STRENGTH_EDGE",
+    "FORM_STRENGTH_EDGE_AWAY",
+    "ATTACK_STRENGTH_EDGE",
+    "ATTACK_STRENGTH_EDGE_AWAY",
+    "DEFENSE_STRENGTH_EDGE",
+    "DEFENSE_STRENGTH_EDGE_AWAY",
+    "MANAGER_STABILITY",
+    "MANAGER_STABILITY_AWAY",
   ]);
   const footballRules = input.ruleResults.filter((rule) =>
     footballChannelRules.has(rule.ruleName),

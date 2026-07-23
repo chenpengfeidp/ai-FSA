@@ -329,6 +329,121 @@ export function computeKnockoutContext(input: {
   return clamp(score, 0, 100);
 }
 
+export const BASELINE_CLUB_GOALS_FOR = 1.3;
+export const BASELINE_CLUB_GOALS_AGAINST = 1.3;
+export const BASELINE_LEAGUE_SIZE = 20;
+export const BASELINE_MANAGER_TENURE_DAYS = 730;
+
+/**
+ * L1B Points Per Match from provider league points and matches played.
+ * Honest absence when either value is unavailable — handled by the caller.
+ */
+export function computeClubPointsPerMatch(
+  leaguePoints: number,
+  played: number,
+): number {
+  return leaguePoints / Math.max(played, 1);
+}
+
+/**
+ * L1B Goal Difference Strength in [0, 100]. 50 = neutral goal difference per
+ * match; higher favors a positive per-match goal difference.
+ */
+export function computeClubGoalDifferenceStrength(
+  goalDifference: number,
+  played: number,
+): number {
+  const perMatch = goalDifference / Math.max(played, 1);
+  return clamp(50 + perMatch * 25, 0, 100);
+}
+
+/**
+ * L1B Attack Strength in [0, 100] from provider league goals scored.
+ * Never estimates from shots or xG — standings goals only.
+ */
+export function computeClubAttackStrength(
+  goalsScored: number,
+  played: number,
+): number {
+  const perMatch = goalsScored / Math.max(played, 1);
+  return clamp(100 * (perMatch / BASELINE_CLUB_GOALS_FOR), 0, 100);
+}
+
+/**
+ * L1B Defensive Strength in [0, 100] from provider league goals conceded.
+ * Higher means fewer goals conceded per match (stronger defense).
+ */
+export function computeClubDefensiveStrength(
+  goalsConceded: number,
+  played: number,
+): number {
+  const perMatch = goalsConceded / Math.max(played, 1);
+  return clamp(
+    100 * (BASELINE_CLUB_GOALS_AGAINST / Math.max(perMatch, 0.01)),
+    0,
+    100,
+  );
+}
+
+/**
+ * L1B League Strength in [0, 100] from provider league rank.
+ * Assumes a BASELINE_LEAGUE_SIZE-team table when the provider does not
+ * supply the competition size; rank 1 → 100, last → 0.
+ */
+export function computeClubLeagueStrength(leagueRank: number): number {
+  return clamp(100 - ((leagueRank - 1) / (BASELINE_LEAGUE_SIZE - 1)) * 100, 0, 100);
+}
+
+/**
+ * L1B composite Club Strength in [0, 100] from already-derived
+ * pointsPerMatch, goalDifferenceStrength, and leagueStrength Features.
+ */
+export function computeClubStrength(input: {
+  readonly pointsPerMatch: number;
+  readonly goalDifferenceStrength: number;
+  readonly leagueStrength: number;
+}): number {
+  const pointsIndex = clamp((input.pointsPerMatch / 3) * 100, 0, 100);
+
+  return clamp(
+    0.4 * pointsIndex +
+      0.3 * input.goalDifferenceStrength +
+      0.3 * input.leagueStrength,
+    0,
+    100,
+  );
+}
+
+/**
+ * L1B venue-specific Club Strength in [0, 100] from a provider home/away
+ * split (wins/draws/losses/played/goals). Used for homeLeagueStrength
+ * (home team's home split) and awayLeagueStrength (away team's away split).
+ */
+export function computeClubVenueStrength(input: {
+  readonly wins: number;
+  readonly draws: number;
+  readonly losses: number;
+  readonly played: number;
+  readonly goalsScored: number;
+  readonly goalsConceded: number;
+}): number {
+  const played = Math.max(input.played, 1);
+  const pointsPerMatch = (input.wins * 3 + input.draws) / played;
+  const pointsIndex = clamp((pointsPerMatch / 3) * 100, 0, 100);
+  const goalDifferencePerMatch = (input.goalsScored - input.goalsConceded) / played;
+  const goalDifferenceIndex = clamp(50 + goalDifferencePerMatch * 25, 0, 100);
+
+  return clamp(0.6 * pointsIndex + 0.4 * goalDifferenceIndex, 0, 100);
+}
+
+/**
+ * L1B Manager Stability in [0, 100] from provider manager tenure in days.
+ * Never estimated when the provider omits current-club tenure.
+ */
+export function computeManagerStability(managerTenureDays: number): number {
+  return clamp((managerTenureDays / BASELINE_MANAGER_TENURE_DAYS) * 100, 0, 100);
+}
+
 /**
  * Head-to-head lean from meetings oriented to the current fixture.
  * Positive favors the current home side. Shrinks toward 0 with small samples.

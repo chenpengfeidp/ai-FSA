@@ -3,6 +3,8 @@ import { createMatchId, type MatchId } from "@fas/match";
 export type RuleId =
   | "rule:attack-efficiency-away-edge:v1"
   | "rule:attack-efficiency-home-edge:v1"
+  | "rule:attack-strength-edge:v1"
+  | "rule:attack-strength-edge-away:v1"
   | "rule:availability-away-hit:v1"
   | "rule:availability-away-unknown:v1"
   | "rule:availability-home-hit:v1"
@@ -12,10 +14,14 @@ export type RuleId =
   | "rule:away-venue-form-edge:v1"
   | "rule:chance-creation-away-edge:v1"
   | "rule:chance-creation-home-edge:v1"
+  | "rule:club-strength-edge:v1"
+  | "rule:club-strength-edge-away:v1"
   | "rule:defense-away-fragile:v1"
   | "rule:defense-away-stable:v1"
   | "rule:defense-home-fragile:v1"
   | "rule:defense-home-stable:v1"
+  | "rule:defense-strength-edge:v1"
+  | "rule:defense-strength-edge-away:v1"
   | "rule:discipline-away-risk:v1"
   | "rule:discipline-home-risk:v1"
   | "rule:fatigue-away:v1"
@@ -23,6 +29,8 @@ export type RuleId =
   | "rule:form-away-superior:v1"
   | "rule:form-home-superior:v1"
   | "rule:form-near-parity:v1"
+  | "rule:form-strength-edge:v1"
+  | "rule:form-strength-edge-away:v1"
   | "rule:goals-scored-away-edge:v1"
   | "rule:goals-scored-home-edge:v1"
   | "rule:h2h-supports-away:v1"
@@ -34,6 +42,10 @@ export type RuleId =
   | "rule:home-venue-form-edge:v1"
   | "rule:kickoff-present:v1"
   | "rule:knockout-context:v1"
+  | "rule:league-strength-edge:v1"
+  | "rule:league-strength-edge-away:v1"
+  | "rule:manager-stability:v1"
+  | "rule:manager-stability-away:v1"
   | "rule:market-ah-lean-away:v1"
   | "rule:market-ah-lean-home:v1"
   | "rule:market-consensus:v1"
@@ -68,15 +80,21 @@ export type RuleName =
   | "AVAILABILITY_HOME_UNKNOWN"
   | "ATTACK_EFFICIENCY_AWAY_EDGE"
   | "ATTACK_EFFICIENCY_HOME_EDGE"
+  | "ATTACK_STRENGTH_EDGE"
+  | "ATTACK_STRENGTH_EDGE_AWAY"
   | "AWAY_ATTACK_EDGE"
   | "AWAY_TEAM_PRESENT"
   | "AWAY_VENUE_FORM_EDGE"
   | "CHANCE_CREATION_AWAY_EDGE"
   | "CHANCE_CREATION_HOME_EDGE"
+  | "CLUB_STRENGTH_EDGE"
+  | "CLUB_STRENGTH_EDGE_AWAY"
   | "DEFENSE_AWAY_FRAGILE"
   | "DEFENSE_AWAY_STABLE"
   | "DEFENSE_HOME_FRAGILE"
   | "DEFENSE_HOME_STABLE"
+  | "DEFENSE_STRENGTH_EDGE"
+  | "DEFENSE_STRENGTH_EDGE_AWAY"
   | "DISCIPLINE_AWAY_RISK"
   | "DISCIPLINE_HOME_RISK"
   | "FATIGUE_AWAY"
@@ -84,6 +102,8 @@ export type RuleName =
   | "FORM_AWAY_SUPERIOR"
   | "FORM_HOME_SUPERIOR"
   | "FORM_NEAR_PARITY"
+  | "FORM_STRENGTH_EDGE"
+  | "FORM_STRENGTH_EDGE_AWAY"
   | "GOALS_SCORED_AWAY_EDGE"
   | "GOALS_SCORED_HOME_EDGE"
   | "H2H_SUPPORTS_AWAY"
@@ -95,6 +115,10 @@ export type RuleName =
   | "HOME_VENUE_FORM_EDGE"
   | "KICKOFF_PRESENT"
   | "KNOCKOUT_CONTEXT"
+  | "LEAGUE_STRENGTH_EDGE"
+  | "LEAGUE_STRENGTH_EDGE_AWAY"
+  | "MANAGER_STABILITY"
+  | "MANAGER_STABILITY_AWAY"
   | "MARKET_AH_LEAN_AWAY"
   | "MARKET_AH_LEAN_HOME"
   | "MARKET_CONSENSUS"
@@ -162,6 +186,8 @@ export class RuleResultValidationError extends Error {
 const ruleIds: ReadonlySet<string> = new Set([
   "rule:attack-efficiency-away-edge:v1",
   "rule:attack-efficiency-home-edge:v1",
+  "rule:attack-strength-edge:v1",
+  "rule:attack-strength-edge-away:v1",
   "rule:availability-away-hit:v1",
   "rule:availability-away-unknown:v1",
   "rule:availability-home-hit:v1",
@@ -171,10 +197,14 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:away-venue-form-edge:v1",
   "rule:chance-creation-away-edge:v1",
   "rule:chance-creation-home-edge:v1",
+  "rule:club-strength-edge:v1",
+  "rule:club-strength-edge-away:v1",
   "rule:defense-away-fragile:v1",
   "rule:defense-away-stable:v1",
   "rule:defense-home-fragile:v1",
   "rule:defense-home-stable:v1",
+  "rule:defense-strength-edge:v1",
+  "rule:defense-strength-edge-away:v1",
   "rule:discipline-away-risk:v1",
   "rule:discipline-home-risk:v1",
   "rule:fatigue-away:v1",
@@ -182,6 +212,8 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:form-away-superior:v1",
   "rule:form-home-superior:v1",
   "rule:form-near-parity:v1",
+  "rule:form-strength-edge:v1",
+  "rule:form-strength-edge-away:v1",
   "rule:goals-scored-away-edge:v1",
   "rule:goals-scored-home-edge:v1",
   "rule:h2h-supports-away:v1",
@@ -193,6 +225,10 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:home-venue-form-edge:v1",
   "rule:kickoff-present:v1",
   "rule:knockout-context:v1",
+  "rule:league-strength-edge:v1",
+  "rule:league-strength-edge-away:v1",
+  "rule:manager-stability:v1",
+  "rule:manager-stability-away:v1",
   "rule:market-ah-lean-away:v1",
   "rule:market-ah-lean-home:v1",
   "rule:market-consensus:v1",
@@ -223,6 +259,8 @@ const ruleIds: ReadonlySet<string> = new Set([
 const ruleNames: ReadonlySet<string> = new Set([
   "ATTACK_EFFICIENCY_AWAY_EDGE",
   "ATTACK_EFFICIENCY_HOME_EDGE",
+  "ATTACK_STRENGTH_EDGE",
+  "ATTACK_STRENGTH_EDGE_AWAY",
   "AVAILABILITY_AWAY_HIT",
   "AVAILABILITY_AWAY_UNKNOWN",
   "AVAILABILITY_HOME_HIT",
@@ -232,10 +270,14 @@ const ruleNames: ReadonlySet<string> = new Set([
   "AWAY_VENUE_FORM_EDGE",
   "CHANCE_CREATION_AWAY_EDGE",
   "CHANCE_CREATION_HOME_EDGE",
+  "CLUB_STRENGTH_EDGE",
+  "CLUB_STRENGTH_EDGE_AWAY",
   "DEFENSE_AWAY_FRAGILE",
   "DEFENSE_AWAY_STABLE",
   "DEFENSE_HOME_FRAGILE",
   "DEFENSE_HOME_STABLE",
+  "DEFENSE_STRENGTH_EDGE",
+  "DEFENSE_STRENGTH_EDGE_AWAY",
   "DISCIPLINE_AWAY_RISK",
   "DISCIPLINE_HOME_RISK",
   "FATIGUE_AWAY",
@@ -243,6 +285,8 @@ const ruleNames: ReadonlySet<string> = new Set([
   "FORM_AWAY_SUPERIOR",
   "FORM_HOME_SUPERIOR",
   "FORM_NEAR_PARITY",
+  "FORM_STRENGTH_EDGE",
+  "FORM_STRENGTH_EDGE_AWAY",
   "GOALS_SCORED_AWAY_EDGE",
   "GOALS_SCORED_HOME_EDGE",
   "H2H_SUPPORTS_AWAY",
@@ -254,6 +298,10 @@ const ruleNames: ReadonlySet<string> = new Set([
   "HOME_VENUE_FORM_EDGE",
   "KICKOFF_PRESENT",
   "KNOCKOUT_CONTEXT",
+  "LEAGUE_STRENGTH_EDGE",
+  "LEAGUE_STRENGTH_EDGE_AWAY",
+  "MANAGER_STABILITY",
+  "MANAGER_STABILITY_AWAY",
   "MARKET_AH_LEAN_AWAY",
   "MARKET_AH_LEAN_HOME",
   "MARKET_CONSENSUS",

@@ -54,7 +54,13 @@ const TAU_DEFENSE_STABLE = 55;
 const TAU_DEFENSE_FRAGILE = 45;
 const TAU_AVAILABILITY_HIT = 8;
 const TAU_VENUE = 1;
-const RULE_POLICY = "rule.mvp.i2b.market";
+const TAU_CLUB_STRENGTH = 10;
+const TAU_LEAGUE_STRENGTH = 15;
+const TAU_CLUB_FORM_STRENGTH = 15;
+const TAU_CLUB_ATTACK_STRENGTH = 10;
+const TAU_CLUB_DEFENSE_STRENGTH = 10;
+const TAU_MANAGER_STABILITY = 20;
+const RULE_POLICY = "rule.mvp.l1b.club";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -954,6 +960,256 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
         sample !== undefined &&
         lean <= -TAU_H2H &&
         sample >= H2H_N_MIN
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  // L1B Club Intelligence — comparative edges consume CLUB_INTELLIGENCE-derived
+  // Features only; participate in the existing football channel like other edges.
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:club-strength-edge:v1",
+    ruleName: "CLUB_STRENGTH_EDGE",
+    weight: 0.6,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "clubStrengthHome",
+      "clubStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("clubStrengthHome"));
+      const away = numericValue(features.get("clubStrengthAway"));
+
+      return (
+        home !== undefined && away !== undefined && home - away >= TAU_CLUB_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:club-strength-edge-away:v1",
+    ruleName: "CLUB_STRENGTH_EDGE_AWAY",
+    weight: 0.6,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "clubStrengthHome",
+      "clubStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("clubStrengthHome"));
+      const away = numericValue(features.get("clubStrengthAway"));
+
+      return (
+        home !== undefined && away !== undefined && away - home >= TAU_CLUB_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:league-strength-edge:v1",
+    ruleName: "LEAGUE_STRENGTH_EDGE",
+    weight: 0.45,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "leagueStrengthHome",
+      "leagueStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("leagueStrengthHome"));
+      const away = numericValue(features.get("leagueStrengthAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_LEAGUE_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:league-strength-edge-away:v1",
+    ruleName: "LEAGUE_STRENGTH_EDGE_AWAY",
+    weight: 0.45,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "leagueStrengthHome",
+      "leagueStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("leagueStrengthHome"));
+      const away = numericValue(features.get("leagueStrengthAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_LEAGUE_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:form-strength-edge:v1",
+    ruleName: "FORM_STRENGTH_EDGE",
+    weight: 0.45,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "formStrengthHome",
+      "formStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("formStrengthHome"));
+      const away = numericValue(features.get("formStrengthAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_CLUB_FORM_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:form-strength-edge-away:v1",
+    ruleName: "FORM_STRENGTH_EDGE_AWAY",
+    weight: 0.45,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "formStrengthHome",
+      "formStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("formStrengthHome"));
+      const away = numericValue(features.get("formStrengthAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_CLUB_FORM_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:attack-strength-edge:v1",
+    ruleName: "ATTACK_STRENGTH_EDGE",
+    weight: 0.5,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "clubAttackStrengthHome",
+      "clubAttackStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("clubAttackStrengthHome"));
+      const away = numericValue(features.get("clubAttackStrengthAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_CLUB_ATTACK_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:attack-strength-edge-away:v1",
+    ruleName: "ATTACK_STRENGTH_EDGE_AWAY",
+    weight: 0.5,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "clubAttackStrengthHome",
+      "clubAttackStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("clubAttackStrengthHome"));
+      const away = numericValue(features.get("clubAttackStrengthAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_CLUB_ATTACK_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:defense-strength-edge:v1",
+    ruleName: "DEFENSE_STRENGTH_EDGE",
+    weight: 0.5,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "clubDefensiveStrengthHome",
+      "clubDefensiveStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("clubDefensiveStrengthHome"));
+      const away = numericValue(features.get("clubDefensiveStrengthAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_CLUB_DEFENSE_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:defense-strength-edge-away:v1",
+    ruleName: "DEFENSE_STRENGTH_EDGE_AWAY",
+    weight: 0.5,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "clubDefensiveStrengthHome",
+      "clubDefensiveStrengthAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("clubDefensiveStrengthHome"));
+      const away = numericValue(features.get("clubDefensiveStrengthAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_CLUB_DEFENSE_STRENGTH
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-stability:v1",
+    ruleName: "MANAGER_STABILITY",
+    weight: 0.3,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "managerStabilityHome",
+      "managerStabilityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerStabilityHome"));
+      const away = numericValue(features.get("managerStabilityAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_MANAGER_STABILITY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-stability-away:v1",
+    ruleName: "MANAGER_STABILITY_AWAY",
+    weight: 0.3,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "managerStabilityHome",
+      "managerStabilityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerStabilityHome"));
+      const away = numericValue(features.get("managerStabilityAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_MANAGER_STABILITY
       );
     },
   }) satisfies FootballRuleDefinition,

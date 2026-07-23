@@ -24,6 +24,18 @@ function makeFeature(name: FeatureName, options: FeatureOptions = {}): Feature {
     h2hLean: 0.5,
     h2hSampleSize: 5,
     marketLean: 0.2,
+    clubStrengthHome: 65,
+    clubStrengthAway: 45,
+    leagueStrengthHome: 70,
+    leagueStrengthAway: 40,
+    formStrengthHome: 75,
+    formStrengthAway: 45,
+    clubAttackStrengthHome: 60,
+    clubAttackStrengthAway: 40,
+    clubDefensiveStrengthHome: 65,
+    clubDefensiveStrengthAway: 45,
+    managerStabilityHome: 80,
+    managerStabilityAway: 30,
   };
 
   return createFeature({
@@ -233,6 +245,18 @@ describe("RuleEvaluator", () => {
       { ruleName: "SIGNALS_ALIGNED_AWAY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "H2H_SUPPORTS_HOME", status: "PASS", score: 0.25 },
       { ruleName: "H2H_SUPPORTS_AWAY", status: "FAIL", score: 0 },
+      { ruleName: "CLUB_STRENGTH_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "CLUB_STRENGTH_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "LEAGUE_STRENGTH_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "LEAGUE_STRENGTH_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "FORM_STRENGTH_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "FORM_STRENGTH_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "ATTACK_STRENGTH_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "ATTACK_STRENGTH_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "DEFENSE_STRENGTH_EDGE", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "DEFENSE_STRENGTH_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "MANAGER_STABILITY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "MANAGER_STABILITY_AWAY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "MARKET_LEAN_HOME", status: "PASS", score: 1 },
       { ruleName: "MARKET_LEAN_AWAY", status: "FAIL", score: 0 },
       { ruleName: "MARKET_AH_LEAN_HOME", status: "INAPPLICABLE", score: 0 },
@@ -853,6 +877,200 @@ describe("RuleEvaluator", () => {
           ].includes(result.ruleName),
         )
         .every((result) => result.status === "INAPPLICABLE"),
+    ).toBe(true);
+  });
+
+  it("evaluates L1B Club Intelligence Rules from Club Features", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      makeFeature("clubStrengthHome"),
+      makeFeature("clubStrengthAway"),
+      makeFeature("leagueStrengthHome"),
+      makeFeature("leagueStrengthAway"),
+      makeFeature("formStrengthHome"),
+      makeFeature("formStrengthAway"),
+      makeFeature("clubAttackStrengthHome"),
+      makeFeature("clubAttackStrengthAway"),
+      makeFeature("clubDefensiveStrengthHome"),
+      makeFeature("clubDefensiveStrengthAway"),
+      makeFeature("managerStabilityHome"),
+      makeFeature("managerStabilityAway"),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "CLUB_STRENGTH_EDGE",
+            "CLUB_STRENGTH_EDGE_AWAY",
+            "LEAGUE_STRENGTH_EDGE",
+            "LEAGUE_STRENGTH_EDGE_AWAY",
+            "FORM_STRENGTH_EDGE",
+            "FORM_STRENGTH_EDGE_AWAY",
+            "ATTACK_STRENGTH_EDGE",
+            "ATTACK_STRENGTH_EDGE_AWAY",
+            "DEFENSE_STRENGTH_EDGE",
+            "DEFENSE_STRENGTH_EDGE_AWAY",
+            "MANAGER_STABILITY",
+            "MANAGER_STABILITY_AWAY",
+          ].includes(result.ruleName),
+        )
+        .map(({ ruleName, status, channel, sourceFeatureIds }) => ({
+          ruleName,
+          status,
+          channel,
+          sourceFeatureIds,
+        })),
+    ).toEqual([
+      {
+        ruleName: "CLUB_STRENGTH_EDGE",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:clubStrengthHome",
+          "feature:evidence-1:clubStrengthAway",
+        ],
+      },
+      {
+        ruleName: "CLUB_STRENGTH_EDGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:clubStrengthHome",
+          "feature:evidence-1:clubStrengthAway",
+        ],
+      },
+      {
+        ruleName: "LEAGUE_STRENGTH_EDGE",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:leagueStrengthHome",
+          "feature:evidence-1:leagueStrengthAway",
+        ],
+      },
+      {
+        ruleName: "LEAGUE_STRENGTH_EDGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:leagueStrengthHome",
+          "feature:evidence-1:leagueStrengthAway",
+        ],
+      },
+      {
+        ruleName: "FORM_STRENGTH_EDGE",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:formStrengthHome",
+          "feature:evidence-1:formStrengthAway",
+        ],
+      },
+      {
+        ruleName: "FORM_STRENGTH_EDGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:formStrengthHome",
+          "feature:evidence-1:formStrengthAway",
+        ],
+      },
+      {
+        ruleName: "ATTACK_STRENGTH_EDGE",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:clubAttackStrengthHome",
+          "feature:evidence-1:clubAttackStrengthAway",
+        ],
+      },
+      {
+        ruleName: "ATTACK_STRENGTH_EDGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:clubAttackStrengthHome",
+          "feature:evidence-1:clubAttackStrengthAway",
+        ],
+      },
+      {
+        ruleName: "DEFENSE_STRENGTH_EDGE",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:clubDefensiveStrengthHome",
+          "feature:evidence-1:clubDefensiveStrengthAway",
+        ],
+      },
+      {
+        ruleName: "DEFENSE_STRENGTH_EDGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:clubDefensiveStrengthHome",
+          "feature:evidence-1:clubDefensiveStrengthAway",
+        ],
+      },
+      {
+        ruleName: "MANAGER_STABILITY",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:managerStabilityHome",
+          "feature:evidence-1:managerStabilityAway",
+        ],
+      },
+      {
+        ruleName: "MANAGER_STABILITY_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:managerStabilityHome",
+          "feature:evidence-1:managerStabilityAway",
+        ],
+      },
+    ]);
+  });
+
+  it("marks Club Intelligence Rules INAPPLICABLE when Club Features are absent", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "CLUB_STRENGTH_EDGE",
+            "CLUB_STRENGTH_EDGE_AWAY",
+            "LEAGUE_STRENGTH_EDGE",
+            "LEAGUE_STRENGTH_EDGE_AWAY",
+            "FORM_STRENGTH_EDGE",
+            "FORM_STRENGTH_EDGE_AWAY",
+            "ATTACK_STRENGTH_EDGE",
+            "ATTACK_STRENGTH_EDGE_AWAY",
+            "DEFENSE_STRENGTH_EDGE",
+            "DEFENSE_STRENGTH_EDGE_AWAY",
+            "MANAGER_STABILITY",
+            "MANAGER_STABILITY_AWAY",
+          ].includes(result.ruleName),
+        )
+        .every((result) => result.status === "INAPPLICABLE" && result.score === 0),
     ).toBe(true);
   });
 

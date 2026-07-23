@@ -59,6 +59,19 @@ const P1_CHANNEL_RULES = new Set([
   "HOME_ADVANTAGE_MATERIAL",
   "AVAILABILITY_HOME_HIT",
   "AVAILABILITY_AWAY_HIT",
+  // L1B Club Intelligence — comparative club edges participate like other P1 edges.
+  "CLUB_STRENGTH_EDGE",
+  "CLUB_STRENGTH_EDGE_AWAY",
+  "LEAGUE_STRENGTH_EDGE",
+  "LEAGUE_STRENGTH_EDGE_AWAY",
+  "FORM_STRENGTH_EDGE",
+  "FORM_STRENGTH_EDGE_AWAY",
+  "ATTACK_STRENGTH_EDGE",
+  "ATTACK_STRENGTH_EDGE_AWAY",
+  "DEFENSE_STRENGTH_EDGE",
+  "DEFENSE_STRENGTH_EDGE_AWAY",
+  "MANAGER_STABILITY",
+  "MANAGER_STABILITY_AWAY",
 ]);
 
 function clamp(value: number, lo: number, hi: number): number {
@@ -151,6 +164,16 @@ function evidenceCompleteness(evidences: readonly Evidence[]): number {
     evidences.some(
       (evidence) =>
         evidence.type === "MATCH_CONTEXT" && evidence.payload.teamSide === "away",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "CLUB_INTELLIGENCE" &&
+        evidence.payload.teamSide === "home",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "CLUB_INTELLIGENCE" &&
+        evidence.payload.teamSide === "away",
     ),
   ];
   const present = checks.filter(Boolean).length;
@@ -448,6 +471,21 @@ export function computeIntelligenceConfidence(input: {
   if (!hasContextHome || !hasContextAway) {
     limitations.push(
       "MATCH_CONTEXT Evidence incomplete; fatigue / schedule / rotation Features may be absent (never estimated).",
+    );
+  }
+
+  const hasClubIntelligenceHome = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "CLUB_INTELLIGENCE" && evidence.payload.teamSide === "home",
+  );
+  const hasClubIntelligenceAway = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "CLUB_INTELLIGENCE" && evidence.payload.teamSide === "away",
+  );
+
+  if (!hasClubIntelligenceHome || !hasClubIntelligenceAway) {
+    limitations.push(
+      "CLUB_INTELLIGENCE Evidence incomplete; club/league/form/manager strength Features may be absent (never estimated from unavailable standings).",
     );
   }
 

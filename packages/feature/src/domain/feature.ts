@@ -11,8 +11,15 @@ export type FeatureName =
   | "availabilityPenaltyAway"
   | "availabilityPenaltyHome"
   | "awayTeam"
+  | "awayLeagueStrength"
   | "chanceCreationAway"
   | "chanceCreationHome"
+  | "clubAttackStrengthAway"
+  | "clubAttackStrengthHome"
+  | "clubDefensiveStrengthAway"
+  | "clubDefensiveStrengthHome"
+  | "clubStrengthAway"
+  | "clubStrengthHome"
   | "defenseRatingAway"
   | "defenseRatingHome"
   | "disciplineRiskAway"
@@ -25,6 +32,10 @@ export type FeatureName =
   | "formAtHomeHome"
   | "formOnRoadAway"
   | "formOnRoadHome"
+  | "formStrengthAway"
+  | "formStrengthHome"
+  | "goalDifferenceStrengthAway"
+  | "goalDifferenceStrengthHome"
   | "goalsConcededRateAway"
   | "goalsConcededRateHome"
   | "goalsScoredRateAway"
@@ -32,10 +43,15 @@ export type FeatureName =
   | "h2hLean"
   | "h2hSampleSize"
   | "homeAdvantage"
+  | "homeLeagueStrength"
   | "homeStability"
   | "homeTeam"
   | "kickoff"
   | "knockoutContext"
+  | "leagueStrengthAway"
+  | "leagueStrengthHome"
+  | "managerStabilityAway"
+  | "managerStabilityHome"
   | "marketConsensus"
   | "marketImpliedAway"
   | "marketImpliedDraw"
@@ -45,6 +61,8 @@ export type FeatureName =
   | "momentum"
   | "momentumAway"
   | "momentumHome"
+  | "pointsPerMatchAway"
+  | "pointsPerMatchHome"
   | "possessionAway"
   | "possessionHome"
   | "recentFormAway"
@@ -101,8 +119,15 @@ const featureNames: ReadonlySet<string> = new Set([
   "availabilityPenaltyAway",
   "availabilityPenaltyHome",
   "awayTeam",
+  "awayLeagueStrength",
   "chanceCreationAway",
   "chanceCreationHome",
+  "clubAttackStrengthAway",
+  "clubAttackStrengthHome",
+  "clubDefensiveStrengthAway",
+  "clubDefensiveStrengthHome",
+  "clubStrengthAway",
+  "clubStrengthHome",
   "defenseRatingAway",
   "defenseRatingHome",
   "disciplineRiskAway",
@@ -115,6 +140,10 @@ const featureNames: ReadonlySet<string> = new Set([
   "formAtHomeHome",
   "formOnRoadAway",
   "formOnRoadHome",
+  "formStrengthAway",
+  "formStrengthHome",
+  "goalDifferenceStrengthAway",
+  "goalDifferenceStrengthHome",
   "goalsConcededRateAway",
   "goalsConcededRateHome",
   "goalsScoredRateAway",
@@ -122,10 +151,15 @@ const featureNames: ReadonlySet<string> = new Set([
   "h2hLean",
   "h2hSampleSize",
   "homeAdvantage",
+  "homeLeagueStrength",
   "homeStability",
   "homeTeam",
   "kickoff",
   "knockoutContext",
+  "leagueStrengthAway",
+  "leagueStrengthHome",
+  "managerStabilityAway",
+  "managerStabilityHome",
   "marketConsensus",
   "marketImpliedAway",
   "marketImpliedDraw",
@@ -135,6 +169,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "momentum",
   "momentumAway",
   "momentumHome",
+  "pointsPerMatchAway",
+  "pointsPerMatchHome",
   "possessionAway",
   "possessionHome",
   "recentFormAway",

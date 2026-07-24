@@ -113,3 +113,28 @@ export type {
   EvaluationHistoryRepository,
 } from "./repository/evaluation-history-repository.js";
 export { InMemoryEvaluationHistoryRepository } from "./repository/in-memory-evaluation-history-repository.js";
+
+export {
+  CONFIDENCE_BANDS,
+  GOAL_RANGE_BUCKETS,
+  MATCH_OUTCOME_LABELS,
+  MINIMUM_QUALIFIED_BUCKET_SAMPLE_SIZE,
+  MINIMUM_QUALIFIED_REPORT_SAMPLE_SIZE,
+  PREDICTION_CALIBRATION_REPORT_MODEL_VERSION,
+  PredictionCalibrationReportValidationError,
+} from "./domain/prediction-calibration-report.js";
+export type {
+  CalibrationErrorMetric,
+  ConfidenceBandLabel,
+  ConfidenceBucketAccuracyRow,
+  ConfidenceDistributionRow,
+  GoalRangeCalibrationRow,
+  MatchOutcomeLabel,
+  OutcomeCalibrationRow,
+  PredictionCalibrationProvenance,
+  PredictionCalibrationReport,
+  ProbabilityBucketRow,
+} from "./domain/prediction-calibration-report.js";
+
+export { computePredictionCalibrationReport } from "./reliability/compute-prediction-calibration-report.js";
+export type { ComputePredictionCalibrationReportInput } from "./reliability/compute-prediction-calibration-report.js";

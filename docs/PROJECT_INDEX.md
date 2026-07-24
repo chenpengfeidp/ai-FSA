@@ -189,7 +189,7 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `@fas/feature` | FeatureBundle |
 | `@fas/rule` | 确定性规则 findings |
 | `@fas/analysis` | 比赛投影（Poisson + 规则调整 + 校准引用） |
-| `@fas/statistics` | 校准 artifact（identity / population_demo_v1） |
+| `@fas/statistics` | 校准 artifact（identity / population_demo_v1）+ A1.5 Evaluation History + A2 Prediction Calibration report（仅度量，只读 History） |
 | `@fas/report` | AnalysisReport |
 | `@fas/prompt` | 封存上下文组合（无检索） |
 | `@fas/ai-provider` | 仅本地确定性叙事适配器 |

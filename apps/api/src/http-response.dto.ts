@@ -510,6 +510,14 @@ export class AnalysisReportDto {
     additionalProperties: true,
   })
   declare readonly evaluationHistory?: readonly Readonly<Record<string, unknown>>[];
+
+  @ApiPropertyOptional({
+    description:
+      "A2 Prediction Calibration — population-level reliability measurement over all Evaluation History (not scoped to this match). Display-only; never adjusts Prediction.",
+    type: "object",
+    additionalProperties: true,
+  })
+  declare readonly calibration?: Readonly<Record<string, unknown>>;
 }
 
 export class AnalysisErrorCauseDto {

@@ -7,8 +7,10 @@ import {
 import type { MatchId } from "@fas/match";
 import {
   buildEvaluationHistoryRecord,
+  computePredictionCalibrationReport,
   type EvaluationHistoryRecord,
   type EvaluationHistoryRepository,
+  type PredictionCalibrationReport,
 } from "@fas/statistics";
 import type { AnalysisReport } from "../domain/analysis-report.js";
 import { createAnalysisReport } from "../domain/analysis-report.js";
@@ -25,6 +27,7 @@ export interface AnalysisReportBuilder {
 
 export type ReportGenerationErrorCode =
   | "ANALYSIS_FAILED"
+  | "CALIBRATION_REPORT_FAILED"
   | "EVALUATION_HISTORY_FAILED"
   | "REPORT_BUILD_FAILED";
 
@@ -50,6 +53,45 @@ function failure(
   return Object.freeze({
     error: Object.freeze({ code, message }),
     ok: false,
+  });
+}
+
+/**
+ * A2 Prediction Calibration overlay: computed from the FULL Evaluation
+ * History population (never scoped to a single match) so Workspace/Report
+ * can show honest population-level reliability alongside per-match history.
+ * Pure read + pure compute — never mutates History or sealed Prediction.
+ */
+async function computeCalibrationOverlay(
+  repository: EvaluationHistoryRepository,
+  computedAt: string,
+): Promise<PredictionCalibrationReport> {
+  const records = await repository.query({});
+  return computePredictionCalibrationReport({ records, computedAt });
+}
+
+function withOverlays(
+  report: AnalysisReport,
+  evaluationHistory: readonly EvaluationHistoryRecord[],
+  calibration: PredictionCalibrationReport,
+): AnalysisReport {
+  return createAnalysisReport({
+    reportId: report.reportId,
+    matchId: report.matchId,
+    generatedAt: report.generatedAt,
+    summary: report.summary,
+    features: report.features,
+    rules: report.rules,
+    deterministic: report.deterministic,
+    scenarios: report.scenarios,
+    intelligenceConfidence: report.intelligenceConfidence,
+    narrative: report.narrative,
+    ...(report.actualResult === undefined
+      ? {}
+      : { actualResult: report.actualResult }),
+    ...(report.evaluation === undefined ? {} : { evaluation: report.evaluation }),
+    ...(evaluationHistory.length === 0 ? {} : { evaluationHistory }),
+    calibration,
   });
 }
 
@@ -128,41 +170,35 @@ export class GenerateMatchReportUseCase {
       return report;
     }
 
+    let evaluationHistory: readonly EvaluationHistoryRecord[];
+
     try {
-      const evaluationHistory = await persistAndLoadHistory(
+      evaluationHistory = await persistAndLoadHistory(
         analysis.value,
         report,
         this.#evaluationHistoryRepository,
       );
-
-      if (evaluationHistory.length === 0) {
-        return report;
-      }
-
-      return createAnalysisReport({
-        reportId: report.reportId,
-        matchId: report.matchId,
-        generatedAt: report.generatedAt,
-        summary: report.summary,
-        features: report.features,
-        rules: report.rules,
-        deterministic: report.deterministic,
-        scenarios: report.scenarios,
-        intelligenceConfidence: report.intelligenceConfidence,
-        narrative: report.narrative,
-        ...(report.actualResult === undefined
-          ? {}
-          : { actualResult: report.actualResult }),
-        ...(report.evaluation === undefined
-          ? {}
-          : { evaluation: report.evaluation }),
-        evaluationHistory,
-      });
     } catch {
       return failure(
         "EVALUATION_HISTORY_FAILED",
         "Evaluation History persistence failed unexpectedly.",
       );
     }
+
+    let calibration: PredictionCalibrationReport;
+
+    try {
+      calibration = await computeCalibrationOverlay(
+        this.#evaluationHistoryRepository,
+        analysis.value.generatedAt,
+      );
+    } catch {
+      return failure(
+        "CALIBRATION_REPORT_FAILED",
+        "Prediction Calibration computation failed unexpectedly.",
+      );
+    }
+
+    return withOverlays(report, evaluationHistory, calibration);
   }
 }

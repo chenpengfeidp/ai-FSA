@@ -231,6 +231,16 @@ describe("HTTP import and Evidence query workflow", () => {
     expect(report.intelligenceConfidence).toMatchObject({
       policyVersion: "confidence.mvp.a05",
     });
+    // A2 Prediction Calibration overlay: always attached (measurement-only,
+    // population-wide over Evaluation History), never adjusts the report above.
+    expect(report.calibration).toMatchObject({
+      schemaVersion: "calibration-report.mvp.a2",
+      minimumQualifiedSampleSize: 20,
+      provenance: expect.objectContaining({ sourceRecordCount: expect.any(Number) }),
+      limitations: expect.arrayContaining([
+        expect.stringContaining("Computed only from Evaluation History"),
+      ]),
+    });
     expect(report.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "homeTeam", value: "Liverpool" }),
@@ -348,6 +358,33 @@ describe("HTTP import and Evidence query workflow", () => {
       ]),
     );
     expect(String(narrative.disclaimer)).toContain("no LLM");
+  });
+
+  it("serves the A2 Prediction Calibration report from GET /api/calibration", async () => {
+    const response = await request(baseUrl, "/api/calibration");
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      schemaVersion: "calibration-report.mvp.a2",
+      sampleSize: expect.any(Number),
+      qualified: false,
+      minimumQualifiedSampleSize: 20,
+    });
+    expect(Array.isArray(report.confidenceBucketAccuracy)).toBe(true);
+    expect(Array.isArray(report.confidenceDistribution)).toBe(true);
+    expect(Array.isArray(report.reliabilityTable)).toBe(true);
+    expect(Array.isArray(report.outcomeCalibration)).toBe(true);
+    expect(Array.isArray(report.goalRangeCalibration)).toBe(true);
+    expect(report.expectedCalibrationError).toMatchObject({
+      qualified: expect.any(Boolean),
+    });
+    expect(report.brierScore).toMatchObject({ qualified: expect.any(Boolean) });
+    expect(report.limitations).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("Computed only from Evaluation History"),
+      ]),
+    );
   });
 
   it("lists upcoming Match Center fixtures from the recorded football-data board", async () => {

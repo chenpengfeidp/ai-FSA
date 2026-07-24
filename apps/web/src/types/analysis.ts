@@ -324,6 +324,85 @@ export interface EvaluationHistoryRecordDto {
   readonly evaluation: PredictionEvaluationDto;
 }
 
+export type ConfidenceBandLabel = "high" | "low" | "medium" | "very_high";
+
+export type MatchOutcomeLabel = "away" | "draw" | "home";
+
+export type GoalRangeBucketLabel = "range01" | "range23" | "range4Plus";
+
+export interface ConfidenceBucketAccuracyRowDto {
+  readonly band: ConfidenceBandLabel;
+  readonly sampleSize: number;
+  readonly hits: number;
+  readonly accuracy?: number;
+  readonly qualified: boolean;
+}
+
+export interface ConfidenceDistributionRowDto {
+  readonly band: ConfidenceBandLabel;
+  readonly sampleSize: number;
+  readonly share: number;
+}
+
+export interface ProbabilityBucketRowDto {
+  readonly bucketLabel: string;
+  readonly minProbability: number;
+  readonly maxProbability: number;
+  readonly sampleSize: number;
+  readonly meanPredictedProbability?: number;
+  readonly observedFrequency?: number;
+  readonly qualified: boolean;
+}
+
+export interface OutcomeCalibrationRowDto extends ProbabilityBucketRowDto {
+  readonly outcome: MatchOutcomeLabel;
+}
+
+export interface GoalRangeCalibrationRowDto {
+  readonly bucket: GoalRangeBucketLabel;
+  readonly sampleSize: number;
+  readonly hits: number;
+  readonly accuracy?: number;
+  readonly qualified: boolean;
+}
+
+export interface CalibrationErrorMetricDto {
+  readonly value?: number;
+  readonly sampleSize: number;
+  readonly qualified: boolean;
+}
+
+export interface PredictionCalibrationProvenanceDto {
+  readonly sourceRecordCount: number;
+  readonly evaluationHistorySchemaVersions: readonly string[];
+  readonly evaluationModelVersions: readonly string[];
+  readonly projectionModelVersions: readonly string[];
+  readonly earliestMatchDate?: string;
+  readonly latestMatchDate?: string;
+}
+
+/**
+ * A2 Prediction Calibration — read-only measurement over Evaluation History.
+ * Population-level: not scoped to a single match. Display-only; never
+ * adjusts Prediction, Feature, Rule, or Projection outputs.
+ */
+export interface PredictionCalibrationReportDto {
+  readonly schemaVersion: string;
+  readonly computedAt: string;
+  readonly sampleSize: number;
+  readonly qualified: boolean;
+  readonly minimumQualifiedSampleSize: number;
+  readonly provenance: PredictionCalibrationProvenanceDto;
+  readonly confidenceBucketAccuracy: readonly ConfidenceBucketAccuracyRowDto[];
+  readonly confidenceDistribution: readonly ConfidenceDistributionRowDto[];
+  readonly reliabilityTable: readonly ProbabilityBucketRowDto[];
+  readonly expectedCalibrationError: CalibrationErrorMetricDto;
+  readonly brierScore: CalibrationErrorMetricDto;
+  readonly outcomeCalibration: readonly OutcomeCalibrationRowDto[];
+  readonly goalRangeCalibration: readonly GoalRangeCalibrationRowDto[];
+  readonly limitations: readonly string[];
+}
+
 export interface AnalysisReportDto {
   readonly reportId: string;
   readonly matchId: string;
@@ -336,6 +415,7 @@ export interface AnalysisReportDto {
   readonly actualResult?: ActualMatchResultDto;
   readonly evaluation?: PredictionEvaluationDto;
   readonly evaluationHistory?: readonly EvaluationHistoryRecordDto[];
+  readonly calibration?: PredictionCalibrationReportDto;
 }
 
 export interface BackendErrorDto {

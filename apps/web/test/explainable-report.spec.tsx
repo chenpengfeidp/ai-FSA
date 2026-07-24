@@ -387,5 +387,120 @@ describe("ExplainableMatchReport", () => {
         zh.report.evidenceSource("internal:recorded", "fixture", "fixture"),
       ),
     ).toBeInTheDocument();
+    expect(screen.getByText(zh.report.calibration)).toBeInTheDocument();
+    expect(screen.getByText(zh.report.calibrationUnavailable)).toBeInTheDocument();
+  });
+
+  it("renders A2 Prediction Calibration metrics with provenance and insufficient-sample flags", () => {
+    const reportWithCalibration: AnalysisReportDto = {
+      ...report,
+      calibration: {
+        schemaVersion: "calibration-report.mvp.a2",
+        computedAt: "2026-07-24T00:00:00.000Z",
+        sampleSize: 3,
+        qualified: false,
+        minimumQualifiedSampleSize: 20,
+        provenance: {
+          sourceRecordCount: 3,
+          evaluationHistorySchemaVersions: ["evaluation-history.mvp.a1"],
+          evaluationModelVersions: ["evaluation.mvp.a1"],
+          projectionModelVersions: ["projection.v2.p1b.player"],
+          earliestMatchDate: "2026-07-01T10:00:00.000Z",
+          latestMatchDate: "2026-07-20T10:00:00.000Z",
+        },
+        confidenceBucketAccuracy: [
+          {
+            band: "high",
+            sampleSize: 2,
+            hits: 1,
+            accuracy: 0.5,
+            qualified: false,
+          },
+          { band: "medium", sampleSize: 0, hits: 0, qualified: false },
+          { band: "low", sampleSize: 0, hits: 0, qualified: false },
+          { band: "very_high", sampleSize: 0, hits: 0, qualified: false },
+        ],
+        confidenceDistribution: [
+          { band: "high", sampleSize: 2, share: 0.6667 },
+          { band: "medium", sampleSize: 0, share: 0 },
+          { band: "low", sampleSize: 0, share: 0 },
+          { band: "very_high", sampleSize: 0, share: 0 },
+        ],
+        reliabilityTable: [
+          {
+            bucketLabel: "60-70%",
+            minProbability: 0.6,
+            maxProbability: 0.7,
+            sampleSize: 2,
+            meanPredictedProbability: 0.65,
+            observedFrequency: 0.5,
+            qualified: false,
+          },
+        ],
+        expectedCalibrationError: { value: 0.15, sampleSize: 3, qualified: false },
+        brierScore: { value: 0.21, sampleSize: 3, qualified: false },
+        outcomeCalibration: [
+          {
+            outcome: "home",
+            bucketLabel: "60-70%",
+            minProbability: 0.6,
+            maxProbability: 0.7,
+            sampleSize: 2,
+            meanPredictedProbability: 0.65,
+            observedFrequency: 0.5,
+            qualified: false,
+          },
+        ],
+        goalRangeCalibration: [
+          {
+            bucket: "range01",
+            sampleSize: 1,
+            hits: 1,
+            accuracy: 1,
+            qualified: false,
+          },
+          {
+            bucket: "range23",
+            sampleSize: 2,
+            hits: 1,
+            accuracy: 0.5,
+            qualified: false,
+          },
+          { bucket: "range4Plus", sampleSize: 0, hits: 0, qualified: false },
+        ],
+        limitations: [
+          "Computed only from Evaluation History (A1.5); missing history is never estimated or fabricated.",
+          "Overall sample size (3) is below the minimum qualified threshold (20); report metrics are directional only.",
+        ],
+      },
+    };
+
+    render(
+      <ExplainableMatchReport
+        evidence={evidence}
+        match={match}
+        report={reportWithCalibration}
+      />,
+    );
+
+    expect(screen.getByText(zh.report.calibration)).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.calibrationConfidenceBucketAccuracy),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.calibrationReliabilityTable),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.calibrationExpectedCalibrationError),
+    ).toBeInTheDocument();
+    expect(screen.getByText(zh.report.calibrationBrierScore)).toBeInTheDocument();
+    expect(
+      screen.getAllByText(zh.report.calibrationInsufficientBadge).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByText(
+        "Computed only from Evaluation History (A1.5); missing history is never estimated or fabricated.",
+      ),
+    ).toBeInTheDocument();
   });
 });

@@ -10,6 +10,7 @@ import type { RuleResult } from "@fas/rule";
 import type {
   ActualMatchResult,
   EvaluationHistoryRecord,
+  PredictionCalibrationReport,
   PredictionEvaluationRecord,
 } from "@fas/statistics";
 
@@ -30,6 +31,12 @@ export interface AnalysisReport {
   readonly evaluation?: PredictionEvaluationRecord;
   /** Read-only Evaluation History for this match (A1.5). */
   readonly evaluationHistory?: readonly EvaluationHistoryRecord[];
+  /**
+   * A2 Prediction Calibration — population-level measurement over all
+   * Evaluation History, not scoped to this match. Display-only: never
+   * adjusts this or any future Prediction.
+   */
+  readonly calibration?: PredictionCalibrationReport;
 }
 
 export interface CreateAnalysisReportInput {
@@ -46,6 +53,7 @@ export interface CreateAnalysisReportInput {
   readonly actualResult?: ActualMatchResult;
   readonly evaluation?: PredictionEvaluationRecord;
   readonly evaluationHistory?: readonly EvaluationHistoryRecord[];
+  readonly calibration?: PredictionCalibrationReport;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -189,5 +197,6 @@ export function createAnalysisReport(
       : {
           evaluationHistory: Object.freeze([...input.evaluationHistory]),
         }),
+    ...(input.calibration === undefined ? {} : { calibration: input.calibration }),
   });
 }

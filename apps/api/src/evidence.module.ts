@@ -21,6 +21,7 @@ import type { EvaluationHistoryRepository } from "@fas/statistics";
 import { Module } from "@nestjs/common";
 import { AnalysisController } from "./analysis.controller.js";
 import { MatchAnalysisController } from "./match-analysis.controller.js";
+import { CalibrationController } from "./calibration.controller.js";
 import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
 import { EvaluationHistoryController } from "./evaluation-history.controller.js";
@@ -67,6 +68,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     MatchAnalysisController,
     EvidenceController,
     EvaluationHistoryController,
+    CalibrationController,
     ProvidersController,
     ImportController,
     MatchesController,

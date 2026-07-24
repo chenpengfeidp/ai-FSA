@@ -10,6 +10,12 @@ import { createEvidence } from "@fas/evidence";
 import { FeatureExtractor } from "@fas/feature";
 import { createMatchId } from "@fas/match";
 import { RuleEvaluator } from "@fas/rule";
+import {
+  buildEvaluationHistoryRecord,
+  createActualMatchResult,
+  evaluatePrediction,
+  InMemoryEvaluationHistoryRepository,
+} from "@fas/statistics";
 import { describe, expect, it } from "vitest";
 import { GenerateMatchReportUseCase, ReportBuilder } from "../src/index.js";
 
@@ -310,5 +316,134 @@ describe("GenerateMatchReportUseCase", () => {
       error: { code: "REPORT_BUILD_FAILED" },
       ok: false,
     });
+  });
+});
+
+function seedOtherMatchHistoryRecord(
+  repository: InMemoryEvaluationHistoryRepository,
+): Promise<unknown> {
+  const otherMatchId = "other-match";
+  const prediction = Object.freeze({
+    matchId: otherMatchId,
+    projectionChecksum: "proj-other",
+    projectionStatus: "completed_nonempty" as const,
+    pHome: 0.6,
+    pDraw: 0.25,
+    pAway: 0.15,
+    topScorelines: Object.freeze([
+      Object.freeze({ homeGoals: 1, awayGoals: 0, probability: 0.12 }),
+    ]),
+    goalRange: Object.freeze({ range01: 0.3, range23: 0.45, range4Plus: 0.25 }),
+    predictionConfidence: 70,
+    confidenceBand: "high" as const,
+    scenarios: Object.freeze({
+      mostLikely: Object.freeze({
+        slot: "mostLikely" as const,
+        winner: "home" as const,
+        homeGoals: 1,
+        awayGoals: 0,
+        probability: 0.6,
+      }),
+      secondLikely: Object.freeze({
+        slot: "secondLikely" as const,
+        winner: "draw" as const,
+        homeGoals: 1,
+        awayGoals: 1,
+        probability: 0.25,
+      }),
+      upset: Object.freeze({
+        slot: "upset" as const,
+        winner: "away" as const,
+        homeGoals: 0,
+        awayGoals: 1,
+        probability: 0.15,
+      }),
+    }),
+    rules: Object.freeze([]),
+    featureNames: Object.freeze(["homeTeam", "awayTeam"]),
+    projectionModelVersion: "projection.v2.i2b.market",
+    featureModelVersion: "feature.v2.i2b.market",
+    ruleSetVersion: "rule.mvp.i2b.market",
+  });
+
+  const actual = createActualMatchResult({
+    matchId: otherMatchId,
+    homeGoals: 1,
+    awayGoals: 0,
+    winner: "home",
+    totalGoals: 1,
+    matchStatus: "FINISHED",
+    providerId: "football:demo",
+    providerSourceId: "demo:other-match:result",
+    providerMethod: "recorded-snapshot",
+    observedAt: "2026-07-01T15:00:00.000Z",
+  });
+
+  const evaluation = evaluatePrediction({
+    prediction,
+    actual,
+    evaluatedAt: "2026-07-01T15:00:00.000Z",
+  });
+
+  const record = buildEvaluationHistoryRecord({
+    predictionSnapshot: prediction,
+    actualResult: actual,
+    evaluation,
+    homeTeam: "Other Home FC",
+    awayTeam: "Other Away FC",
+    matchDate: "2026-07-01T10:00:00.000Z",
+    recordedAt: "2026-07-01T15:00:00.000Z",
+  });
+
+  return repository.save(record);
+}
+
+describe("GenerateMatchReportUseCase — A2 Prediction Calibration overlay", () => {
+  it("attaches a population-wide calibration report even when this match has no History yet", async () => {
+    const repository = new InMemoryEvaluationHistoryRepository();
+    await seedOtherMatchHistoryRecord(repository);
+
+    const analysis = makeCompletedAnalysis();
+    const useCase = new GenerateMatchReportUseCase(
+      { execute: async () => ({ ok: true, value: analysis }) },
+      createReportBuilder(),
+      repository,
+    );
+
+    const result = await useCase.execute(matchId);
+
+    if ("ok" in result) {
+      throw new Error("Expected a sealed AnalysisReport.");
+    }
+
+    expect(result.evaluationHistory).toBeUndefined();
+    expect(result.calibration).toBeDefined();
+    expect(result.calibration?.schemaVersion).toBe("calibration-report.mvp.a2");
+    // Population-wide: includes the unrelated seeded match, not just this one.
+    expect(result.calibration?.sampleSize).toBe(1);
+    expect(result.calibration?.qualified).toBe(false);
+    expect(result.calibration?.limitations.length).toBeGreaterThan(0);
+  });
+
+  it("never mutates Feature/Rule/Projection while attaching the calibration overlay", async () => {
+    const repository = new InMemoryEvaluationHistoryRepository();
+    const analysis = makeCompletedAnalysis();
+    const useCase = new GenerateMatchReportUseCase(
+      { execute: async () => ({ ok: true, value: analysis }) },
+      createReportBuilder(),
+      repository,
+    );
+
+    const result = await useCase.execute(matchId);
+
+    if ("ok" in result) {
+      throw new Error("Expected a sealed AnalysisReport.");
+    }
+
+    expect(result.deterministic).toEqual(analysis.projection);
+    expect(result.features).toEqual(analysis.features);
+    expect(result.rules).toEqual(analysis.ruleResults);
+    expect(result.calibration?.sampleSize).toBe(0);
+    expect(result.calibration?.qualified).toBe(false);
   });
 });

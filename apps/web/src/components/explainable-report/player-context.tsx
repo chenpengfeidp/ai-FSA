@@ -3,14 +3,72 @@ import type { ReactElement } from "react";
 import { zh } from "../../copy/zh";
 import type {
   PlayerContextItemView,
+  PlayerSeasonStatsView,
   PlayersContextView,
 } from "../../types/explainable-report";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tag } from "../ui/tag";
 
+function seasonStatRows(
+  stats: PlayerSeasonStatsView,
+): ReadonlyArray<Readonly<{ label: string; value: string }>> {
+  const rows: Array<{ label: string; value: string }> = [];
+  const push = (label: string, value: number | null): void => {
+    if (value !== null) {
+      rows.push({ label, value: String(value) });
+    }
+  };
+
+  push(zh.report.playerStatAppearances, stats.appearances);
+  push(zh.report.playerStatStarts, stats.starts);
+  push(zh.report.playerStatMinutesPlayed, stats.minutesPlayed);
+  push(zh.report.playerStatRating, stats.rating);
+  push(zh.report.playerStatGoals, stats.goals);
+  push(zh.report.playerStatAssists, stats.assists);
+  push(zh.report.playerStatYellowCards, stats.yellowCards);
+  push(zh.report.playerStatRedCards, stats.redCards);
+  push(zh.report.playerStatSaves, stats.saves);
+  push(zh.report.playerStatGoalsConceded, stats.goalsConceded);
+
+  return Object.freeze(rows);
+}
+
+function availabilityTag(
+  status: PlayerContextItemView["availabilityStatus"],
+): ReactElement | null {
+  if (status === null) {
+    return null;
+  }
+
+  const label =
+    status === "injury"
+      ? zh.report.playerAvailabilityInjury
+      : zh.report.playerAvailabilitySuspension;
+
+  return <Tag variant="default">{label}</Tag>;
+}
+
+function squadStatusTag(
+  status: PlayerContextItemView["matchSquadStatus"],
+): ReactElement | null {
+  if (status === null) {
+    return null;
+  }
+
+  const label =
+    status === "starting"
+      ? zh.report.playerSquadStatusStarting
+      : zh.report.playerSquadStatusBench;
+
+  return <Tag variant="muted">{label}</Tag>;
+}
+
 function PlayerRow({
   player,
 }: Readonly<{ player: PlayerContextItemView }>): ReactElement {
+  const statRows =
+    player.seasonStats !== null ? seasonStatRows(player.seasonStats) : [];
+
   return (
     <li className="flex items-start gap-3 rounded-xl border border-border bg-gradient-to-br from-surface to-surface-muted/40 px-4 py-3">
       {player.photo !== null ? (
@@ -37,6 +95,14 @@ function PlayerRow({
           {player.position !== null ? (
             <Tag variant="muted">{player.position}</Tag>
           ) : null}
+          {player.age !== null ? (
+            <Tag variant="muted">{zh.report.playerAge(player.age)}</Tag>
+          ) : null}
+          {player.captain === true ? (
+            <Tag variant="primary">{zh.report.playerCaptain}</Tag>
+          ) : null}
+          {squadStatusTag(player.matchSquadStatus)}
+          {availabilityTag(player.availabilityStatus)}
         </div>
         <p className="text-caption text-muted-foreground">{player.teamName}</p>
         {player.nationality !== null ? (
@@ -45,6 +111,23 @@ function PlayerRow({
         <p className="text-caption font-mono text-subtle">
           {zh.report.playerId(player.playerId)}
         </p>
+        {statRows.length > 0 ? (
+          <dl className="grid gap-x-4 gap-y-1 pt-1 sm:grid-cols-2">
+            {statRows.map((row) => (
+              <div
+                key={`${player.playerId}-${row.label}`}
+                className="flex items-baseline justify-between gap-3 border-b border-border/60 pb-1"
+              >
+                <dt className="text-caption text-muted-foreground">{row.label}</dt>
+                <dd className="text-body font-medium text-foreground">
+                  {row.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="text-caption text-subtle">{zh.report.playerStatsNone}</p>
+        )}
         <p className="text-caption text-muted-foreground">
           {zh.report.evidenceSource(player.providerId, player.source, "player")}
         </p>

@@ -344,6 +344,153 @@ describe("LiveApiSportsMatchCatalog", () => {
     }
   });
 
+  it("enriches capped candidates with season stats and cross-referenced availability/squad status", async () => {
+    const fetchImpl = vi.fn(async (input: string) => {
+      const url = String(input);
+
+      if (url.includes("/players/squads?team=10")) {
+        return new Response(
+          JSON.stringify({
+            response: [
+              {
+                players: [
+                  {
+                    id: 101,
+                    name: "Home Keeper",
+                    position: "Goalkeeper",
+                    number: 1,
+                  },
+                  { id: 102, name: "Home Striker", position: "Attacker", number: 9 },
+                ],
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      if (url.includes("/players/squads?team=20")) {
+        return new Response(
+          JSON.stringify({
+            response: [
+              {
+                players: [
+                  {
+                    id: 201,
+                    name: "Away Keeper",
+                    position: "Goalkeeper",
+                    number: 1,
+                  },
+                ],
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      if (url.includes("/players?id=102")) {
+        return new Response(
+          JSON.stringify({
+            response: [
+              {
+                player: { id: 102, age: 24 },
+                statistics: [
+                  {
+                    team: { id: 10 },
+                    league: { id: 292, season: 2026 },
+                    games: {
+                      appearences: 15,
+                      minutes: 1200,
+                      rating: "7.2",
+                      captain: false,
+                    },
+                    goals: { total: 8, assists: 2 },
+                    cards: { yellow: 1 },
+                  },
+                ],
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      if (url.includes("/players?id=101") || url.includes("/players?id=201")) {
+        return new Response(JSON.stringify({ response: [] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      if (url.includes("/injuries")) {
+        return new Response(
+          JSON.stringify({
+            response: [
+              {
+                player: { id: 201, name: "Away Keeper" },
+                team: { id: 20, name: "Away FC" },
+                type: "Injury",
+                reason: "Hamstring",
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      if (url.includes("/fixtures/lineups")) {
+        return new Response(
+          JSON.stringify({
+            response: [
+              {
+                team: { id: 10, name: "Home FC" },
+                formation: "4-3-3",
+                startXI: [
+                  {
+                    player: {
+                      id: 101,
+                      name: "Home Keeper",
+                      number: 1,
+                      pos: "G",
+                      grid: "1:1",
+                    },
+                  },
+                ],
+                substitutes: [],
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      return createLiveFetch()(input);
+    }) as unknown as typeof fetch;
+
+    const catalog = new LiveApiSportsMatchCatalog({
+      apiKey: "test-key",
+      fetchImpl,
+      maxRetries: 0,
+    });
+
+    const bundle = await catalog.ensureMatchBundle("football:555001");
+    expect(bundle).toBeDefined();
+    if (bundle === undefined) {
+      return;
+    }
+
+    const homeKeeper = bundle.players.find((player) => player.playerId === "101");
+    const homeStriker = bundle.players.find((player) => player.playerId === "102");
+    const awayKeeper = bundle.players.find((player) => player.playerId === "201");
+
+    expect(homeStriker?.seasonStats?.goals).toBe(8);
+    expect(homeStriker?.age).toBe(24);
+    expect(homeKeeper?.matchSquadStatus).toBe("starting");
+    expect(awayKeeper?.availabilityStatus).toBe("injury");
+    expect(awayKeeper?.seasonStats).toBeUndefined();
+  });
+
   it("returns undefined for unknown fixture ids without fabricating Evidence", async () => {
     const fetchImpl = vi.fn(
       async () =>

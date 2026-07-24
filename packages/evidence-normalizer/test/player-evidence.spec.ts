@@ -127,6 +127,145 @@ describe("PLAYER evidence (F1.1C-1)", () => {
     expect(players[0]?.provenance.category).toBe("football");
   });
 
+  it("normalizes P1A player intelligence: age, captain, availability, squad status, season stats", () => {
+    const result = normalizeFixtureEvidenceSet(
+      {
+        matchId: "football:100001",
+        home: "FC Seoul",
+        away: "Ulsan Hyundai FC",
+        kickoff: "2026-07-19T10:30:00+00:00",
+        providerSource: "api-football",
+        providerSourceId: "api-football:100001:match",
+        providerMethod: "recorded-snapshot",
+        players: [
+          {
+            playerId: "1000012",
+            name: "FC Seoul Forward",
+            teamId: "2766",
+            teamName: "FC Seoul",
+            teamSide: "home",
+            position: "Attacker",
+            number: 9,
+            age: 27,
+            captain: true,
+            availabilityStatus: "injury",
+            matchSquadStatus: "bench",
+            seasonStats: {
+              competitionId: "292",
+              season: 2026,
+              appearances: 18,
+              starts: 16,
+              minutesPlayed: 1440,
+              rating: 7.17,
+              goals: 9,
+              assists: 4,
+              yellowCards: 3,
+              redCards: 0,
+            },
+            providerSource: "api-football",
+            providerSourceId: "api-football:100001:player:1000012",
+            providerMethod: "recorded-snapshot",
+          },
+        ],
+        ...baseFormsAndStats,
+      },
+      { collectedAt: "2026-07-17T10:00:00Z" },
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+
+    const players = result.value.filter((item) => item.type === "PLAYER");
+    expect(players).toHaveLength(1);
+    expect(players[0]?.payload).toEqual({
+      playerId: "1000012",
+      name: "FC Seoul Forward",
+      teamId: "2766",
+      teamName: "FC Seoul",
+      teamSide: "home",
+      position: "Attacker",
+      number: 9,
+      age: 27,
+      captain: true,
+      availabilityStatus: "injury",
+      matchSquadStatus: "bench",
+      seasonStats: {
+        competitionId: "292",
+        season: 2026,
+        appearances: 18,
+        starts: 16,
+        minutesPlayed: 1440,
+        rating: 7.17,
+        goals: 9,
+        assists: 4,
+        yellowCards: 3,
+        redCards: 0,
+      },
+    });
+  });
+
+  it("rejects an invalid availabilityStatus value on PLAYER evidence", () => {
+    const result = normalizeFixtureEvidenceSet(
+      {
+        matchId: "football:100001",
+        home: "FC Seoul",
+        away: "Ulsan Hyundai FC",
+        kickoff: "2026-07-19T10:30:00+00:00",
+        players: [
+          {
+            playerId: "1",
+            name: "Player One",
+            teamId: "2766",
+            teamName: "FC Seoul",
+            teamSide: "home",
+            availabilityStatus: "doubtful",
+          },
+        ],
+        ...baseFormsAndStats,
+      },
+      { collectedAt: "2026-07-17T10:00:00Z" },
+    );
+
+    expect(result.ok).toBe(false);
+  });
+
+  it("keeps PLAYER evidence honestly absent of season stats when the provider supplies none", () => {
+    const result = normalizeFixtureEvidenceSet(
+      {
+        matchId: "football:100001",
+        home: "FC Seoul",
+        away: "Ulsan Hyundai FC",
+        kickoff: "2026-07-19T10:30:00+00:00",
+        players: [
+          {
+            playerId: "1000014",
+            name: "Ulsan Hyundai FC Defender",
+            teamId: "2765",
+            teamName: "Ulsan Hyundai FC",
+            teamSide: "away",
+            position: "Defender",
+            number: 4,
+          },
+        ],
+        ...baseFormsAndStats,
+      },
+      { collectedAt: "2026-07-17T10:00:00Z" },
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+
+    const player = result.value.find((item) => item.type === "PLAYER");
+    expect(player?.payload.seasonStats).toBeUndefined();
+    expect(player?.payload.age).toBeUndefined();
+    expect(player?.payload.availabilityStatus).toBeUndefined();
+    expect(player?.payload.matchSquadStatus).toBeUndefined();
+  });
+
   it("allows evidence sets without players (honest absence)", () => {
     const result = normalizeFixtureEvidenceSet(
       {

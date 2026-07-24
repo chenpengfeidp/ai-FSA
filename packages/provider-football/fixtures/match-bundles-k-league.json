@@ -261,8 +261,20 @@
           "teamSide": "home",
           "position": "Goalkeeper",
           "number": 1,
+          "age": 29,
           "nationality": "Korea Republic",
           "photoUrl": "https://media.api-sports.io/football/players/1000011.png",
+          "captain": false,
+          "seasonStats": {
+            "competitionId": "292",
+            "season": 2026,
+            "appearances": 20,
+            "starts": 20,
+            "minutesPlayed": 1800,
+            "rating": 7.1,
+            "saves": 58,
+            "goalsConceded": 22
+          },
           "providerMethod": "recorded-snapshot"
         },
         {
@@ -273,8 +285,22 @@
           "teamSide": "home",
           "position": "Attacker",
           "number": 9,
+          "age": 24,
           "nationality": "Korea Republic",
           "photoUrl": "https://media.api-sports.io/football/players/1000012.png",
+          "captain": false,
+          "seasonStats": {
+            "competitionId": "292",
+            "season": 2026,
+            "appearances": 15,
+            "starts": 13,
+            "minutesPlayed": 1150,
+            "rating": 7.35,
+            "goals": 11,
+            "assists": 5,
+            "yellowCards": 2,
+            "redCards": 0
+          },
           "providerMethod": "recorded-snapshot"
         },
         {
@@ -285,8 +311,22 @@
           "teamSide": "away",
           "position": "Midfielder",
           "number": 8,
+          "age": 26,
           "nationality": "Korea Republic",
           "photoUrl": "https://media.api-sports.io/football/players/1000013.png",
+          "captain": true,
+          "seasonStats": {
+            "competitionId": "292",
+            "season": 2026,
+            "appearances": 19,
+            "starts": 19,
+            "minutesPlayed": 1710,
+            "rating": 7.4,
+            "goals": 4,
+            "assists": 8,
+            "yellowCards": 4,
+            "redCards": 0
+          },
           "providerMethod": "recorded-snapshot"
         },
         {
@@ -332,8 +372,8 @@
           "formation": "4-3-3",
           "startXI": [
             {
-              "playerId": "h1",
-              "name": "Home Player 1",
+              "playerId": "1000011",
+              "name": "FC Seoul Keeper",
               "number": 1,
               "position": "G",
               "grid": "1:1"
@@ -490,8 +530,8 @@
               "grid": "2:3"
             },
             {
-              "playerId": "a8",
-              "name": "Away Player 8",
+              "playerId": "1000013",
+              "name": "Ulsan Hyundai FC Midfielder",
               "number": 8,
               "position": "M",
               "grid": "2:4"

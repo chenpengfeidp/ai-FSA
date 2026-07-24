@@ -37,9 +37,47 @@ export interface FootballVenue {
   readonly city: string | undefined;
 }
 
+/** Injury or suspension absence row (F1.1D). Not Expected Lineup. */
+export type FootballAvailabilityKind = "injury" | "suspension";
+
 /**
- * Basic player identity for a match context (F1.1C-1).
- * No statistics, rating, injury, or lineup status.
+ * Confirmed matchday squad placement for one fixture (P1A).
+ * Derived only from the same fixture's confirmed `/fixtures/lineups` sheet
+ * (never Expected Lineup). Absent when the sheet has not been published.
+ */
+export type FootballMatchSquadStatus = "bench" | "starting";
+
+/**
+ * Optional current-season statistics for one player at one club (P1A).
+ * Every metric is present only when the provider supplies it for the
+ * matched team/competition; never estimate or carry over a prior club.
+ */
+export interface FootballPlayerSeasonStats {
+  readonly competitionId: string | undefined;
+  readonly season: number | undefined;
+  readonly appearances: number | undefined;
+  readonly starts: number | undefined;
+  readonly minutesPlayed: number | undefined;
+  /** Vendor-reported average rating for the matched competition/team. */
+  readonly rating: number | undefined;
+  readonly goals: number | undefined;
+  readonly assists: number | undefined;
+  readonly yellowCards: number | undefined;
+  readonly redCards: number | undefined;
+  /**
+   * Goalkeeper-only metrics; undefined for outfield players.
+   * Clean sheets are not exposed here: the provider does not supply a
+   * reliable per-player clean-sheet count on this endpoint — never derive
+   * one from team results, which would fabricate a per-player fact.
+   */
+  readonly saves: number | undefined;
+  readonly goalsConceded: number | undefined;
+}
+
+/**
+ * Player identity + optional intelligence for a match context (F1.1C-1, P1A).
+ * Statistics, captain flag, availability, and squad status are present only
+ * when the provider supplies them for a capped candidate set; never invent.
  */
 export interface FootballPlayer {
   readonly playerId: string;
@@ -49,13 +87,18 @@ export interface FootballPlayer {
   readonly teamSide: "away" | "home";
   readonly position: string | undefined;
   readonly number: number | undefined;
+  readonly age: number | undefined;
   readonly nationality: string | undefined;
   readonly photoUrl: string | undefined;
+  /** Vendor-reported captain flag when the season-stats call supplies it. */
+  readonly captain: boolean | undefined;
+  /** Cross-referenced from this fixture's INJURY/SUSPENSION Evidence facts. */
+  readonly availabilityStatus: FootballAvailabilityKind | undefined;
+  /** Cross-referenced from this fixture's confirmed lineup sheet. */
+  readonly matchSquadStatus: FootballMatchSquadStatus | undefined;
+  readonly seasonStats: FootballPlayerSeasonStats | undefined;
   readonly providerMethod: FootballProviderMethod;
 }
-
-/** Injury or suspension absence row (F1.1D). Not Expected Lineup. */
-export type FootballAvailabilityKind = "injury" | "suspension";
 
 export interface FootballAvailabilityAbsence {
   readonly playerId: string;

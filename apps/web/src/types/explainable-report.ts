@@ -24,6 +24,24 @@ export interface VenueContextView {
   readonly note: string;
 }
 
+export type PlayerAvailabilityStatus = "injury" | "suspension";
+export type PlayerMatchSquadStatus = "bench" | "starting";
+
+export interface PlayerSeasonStatsView {
+  readonly competitionId: string | null;
+  readonly season: number | null;
+  readonly appearances: number | null;
+  readonly starts: number | null;
+  readonly minutesPlayed: number | null;
+  readonly rating: number | null;
+  readonly goals: number | null;
+  readonly assists: number | null;
+  readonly yellowCards: number | null;
+  readonly redCards: number | null;
+  readonly saves: number | null;
+  readonly goalsConceded: number | null;
+}
+
 export interface PlayerContextItemView {
   readonly playerId: string;
   readonly name: string;
@@ -32,8 +50,13 @@ export interface PlayerContextItemView {
   readonly teamSide: "away" | "home";
   readonly position: string | null;
   readonly number: number | null;
+  readonly age: number | null;
   readonly nationality: string | null;
   readonly photo: string | null;
+  readonly captain: boolean | null;
+  readonly availabilityStatus: PlayerAvailabilityStatus | null;
+  readonly matchSquadStatus: PlayerMatchSquadStatus | null;
+  readonly seasonStats: PlayerSeasonStatsView | null;
   readonly providerId: string;
   readonly source: string;
 }

@@ -2269,6 +2269,63 @@ function parsePlayers(
       );
     }
 
+    const age = parseOptionalNonNegativeInteger(entry.age, "age");
+
+    if (!age.ok) {
+      return age;
+    }
+
+    if (entry.captain !== undefined && typeof entry.captain !== "boolean") {
+      return failure(
+        "INVALID_FIELD",
+        "captain must be a boolean when provided.",
+        "captain",
+      );
+    }
+
+    const captain = typeof entry.captain === "boolean" ? entry.captain : undefined;
+
+    if (
+      entry.availabilityStatus !== undefined &&
+      entry.availabilityStatus !== "injury" &&
+      entry.availabilityStatus !== "suspension"
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        'availabilityStatus must be "injury" or "suspension" when provided.',
+        "availabilityStatus",
+      );
+    }
+
+    const availabilityStatus =
+      entry.availabilityStatus === "injury" ||
+      entry.availabilityStatus === "suspension"
+        ? entry.availabilityStatus
+        : undefined;
+
+    if (
+      entry.matchSquadStatus !== undefined &&
+      entry.matchSquadStatus !== "starting" &&
+      entry.matchSquadStatus !== "bench"
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        'matchSquadStatus must be "starting" or "bench" when provided.',
+        "matchSquadStatus",
+      );
+    }
+
+    const matchSquadStatus =
+      entry.matchSquadStatus === "starting" || entry.matchSquadStatus === "bench"
+        ? entry.matchSquadStatus
+        : undefined;
+
+    const seasonStats = parsePlayerSeasonStats(entry.seasonStats);
+
+    if (!seasonStats.ok) {
+      return seasonStats;
+    }
+
     const provenanceOverlay = parseProviderProvenanceOverlay(entry);
 
     if (!provenanceOverlay.ok) {
@@ -2307,8 +2364,15 @@ function parsePlayers(
             teamSide,
             ...(position === undefined ? {} : { position }),
             ...(number === undefined ? {} : { number }),
+            ...(age.value === undefined ? {} : { age: age.value }),
             ...(nationality === undefined ? {} : { nationality }),
             ...(photo === undefined ? {} : { photo }),
+            ...(captain === undefined ? {} : { captain }),
+            ...(availabilityStatus === undefined ? {} : { availabilityStatus }),
+            ...(matchSquadStatus === undefined ? {} : { matchSquadStatus }),
+            ...(seasonStats.value === undefined
+              ? {}
+              : { seasonStats: seasonStats.value }),
           }),
         }),
       );
@@ -2328,6 +2392,83 @@ function parsePlayers(
   }
 
   return success(Object.freeze(players));
+}
+
+const PLAYER_SEASON_STATS_NUMBER_FIELDS = [
+  "season",
+  "appearances",
+  "starts",
+  "minutesPlayed",
+  "rating",
+  "goals",
+  "assists",
+  "yellowCards",
+  "redCards",
+  "saves",
+  "goalsConceded",
+] as const;
+
+/**
+ * P1A: optional per-player current-season statistics nested on PLAYER
+ * Evidence. Every metric is present only when supplied; absent → honest
+ * absence. Never estimate a value the provider did not return.
+ */
+function parsePlayerSeasonStats(
+  value: unknown,
+): Result<
+  Readonly<Record<string, number | string>> | undefined,
+  EvidenceNormalizationError
+> {
+  if (value === undefined) {
+    return success(undefined);
+  }
+
+  if (!isRecord(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "seasonStats must be an object when present.",
+      "seasonStats",
+    );
+  }
+
+  const stats: { [key: string]: number | string } = {};
+
+  if (value.competitionId !== undefined) {
+    if (
+      typeof value.competitionId !== "string" ||
+      value.competitionId.trim().length === 0
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "seasonStats.competitionId must be a non-empty string when present.",
+        "seasonStats.competitionId",
+      );
+    }
+
+    stats.competitionId = value.competitionId.trim();
+  }
+
+  for (const field of PLAYER_SEASON_STATS_NUMBER_FIELDS) {
+    const parsed = parseOptionalFiniteNumber(value[field], `seasonStats.${field}`);
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    if (parsed.value !== undefined) {
+      stats[field] = parsed.value;
+    }
+  }
+
+  if (Object.keys(stats).length === 0) {
+    return failure(
+      "INVALID_FIELD",
+      "seasonStats must include at least one provider metric when present.",
+      "seasonStats",
+    );
+  }
+
+  return success(Object.freeze(stats));
 }
 
 function parseAvailabilityAbsences(

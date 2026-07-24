@@ -21,13 +21,16 @@ import type {
 import type {
   FootballAdvancedTeamStats,
   FootballAvailabilityAbsence,
+  FootballAvailabilityKind,
   FootballBoardRow,
   FootballFormSplit,
   FootballFixture,
   FootballH2H,
   FootballLineupPlayer,
   FootballMatchBundle,
+  FootballMatchSquadStatus,
   FootballPlayer,
+  FootballPlayerSeasonStats,
   FootballReferee,
   FootballStandings,
   FootballTeamForm,
@@ -38,6 +41,7 @@ import type {
   FootballFixturesSource,
   FootballMatchCatalog,
 } from "../domain/ports.js";
+import { applyAvailabilityAndSquadStatus } from "../mapper/enrich-player-intelligence.js";
 import { mapClubIntelligenceFromStandings } from "../mapper/map-club-intelligence-from-standings.js";
 import { mapBundleToBoardRow } from "../mapper/map-bundle-to-board-row.js";
 
@@ -284,6 +288,107 @@ function parseLineupPlayer(entry: unknown): FootballLineupPlayer | undefined {
       typeof entry.grid === "string" && entry.grid.trim().length > 0
         ? entry.grid.trim()
         : undefined,
+  });
+}
+
+function parsePlayerSeasonStats(
+  value: unknown,
+): FootballPlayerSeasonStats | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const stats: FootballPlayerSeasonStats = Object.freeze({
+    competitionId:
+      typeof value.competitionId === "string" &&
+      value.competitionId.trim().length > 0
+        ? value.competitionId.trim()
+        : undefined,
+    season: optionalFinite(value.season),
+    appearances: optionalFinite(value.appearances),
+    starts: optionalFinite(value.starts),
+    minutesPlayed: optionalFinite(value.minutesPlayed),
+    rating: optionalFinite(value.rating),
+    goals: optionalFinite(value.goals),
+    assists: optionalFinite(value.assists),
+    yellowCards: optionalFinite(value.yellowCards),
+    redCards: optionalFinite(value.redCards),
+    saves: optionalFinite(value.saves),
+    goalsConceded: optionalFinite(value.goalsConceded),
+  });
+
+  const hasAny = Object.values(stats).some((entry) => entry !== undefined);
+  return hasAny ? stats : undefined;
+}
+
+function parsePlayerEntry(entry: unknown): FootballPlayer | undefined {
+  if (!isRecord(entry)) {
+    return undefined;
+  }
+
+  const playerId = typeof entry.playerId === "string" ? entry.playerId.trim() : "";
+  const name = typeof entry.name === "string" ? entry.name.trim() : "";
+  const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+  const teamName = typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+  const teamSide =
+    entry.teamSide === "home" || entry.teamSide === "away"
+      ? entry.teamSide
+      : undefined;
+  const providerMethod =
+    entry.providerMethod === "http-live" ||
+    entry.providerMethod === "recorded-snapshot"
+      ? entry.providerMethod
+      : undefined;
+
+  if (
+    playerId.length === 0 ||
+    name.length === 0 ||
+    teamId.length === 0 ||
+    teamName.length === 0 ||
+    teamSide === undefined ||
+    providerMethod === undefined
+  ) {
+    return undefined;
+  }
+
+  const availabilityStatus: FootballAvailabilityKind | undefined =
+    entry.availabilityStatus === "injury" ||
+    entry.availabilityStatus === "suspension"
+      ? entry.availabilityStatus
+      : undefined;
+  const matchSquadStatus: FootballMatchSquadStatus | undefined =
+    entry.matchSquadStatus === "starting" || entry.matchSquadStatus === "bench"
+      ? entry.matchSquadStatus
+      : undefined;
+
+  return Object.freeze({
+    playerId,
+    name,
+    teamId,
+    teamName,
+    teamSide,
+    position:
+      typeof entry.position === "string" && entry.position.trim().length > 0
+        ? entry.position.trim()
+        : undefined,
+    number:
+      typeof entry.number === "number" && Number.isFinite(entry.number)
+        ? entry.number
+        : undefined,
+    age: optionalFinite(entry.age),
+    nationality:
+      typeof entry.nationality === "string" && entry.nationality.trim().length > 0
+        ? entry.nationality.trim()
+        : undefined,
+    photoUrl:
+      typeof entry.photoUrl === "string" && entry.photoUrl.trim().length > 0
+        ? entry.photoUrl.trim()
+        : undefined,
+    captain: typeof entry.captain === "boolean" ? entry.captain : undefined,
+    availabilityStatus,
+    matchSquadStatus,
+    seasonStats: parsePlayerSeasonStats(entry.seasonStats),
+    providerMethod,
   });
 }
 
@@ -844,6 +949,135 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
           managers,
         });
 
+  const parsedAbsences: readonly FootballAvailabilityAbsence[] = Object.freeze(
+    absencesRaw.flatMap((entry) => {
+      if (!isRecord(entry)) {
+        return [];
+      }
+
+      const playerId =
+        typeof entry.playerId === "string" ? entry.playerId.trim() : "";
+      const playerName =
+        typeof entry.playerName === "string" ? entry.playerName.trim() : "";
+      const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+      const teamName =
+        typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+      const teamSide =
+        entry.teamSide === "home" || entry.teamSide === "away"
+          ? entry.teamSide
+          : undefined;
+      const kind =
+        entry.kind === "injury" || entry.kind === "suspension"
+          ? entry.kind
+          : undefined;
+      const providerMethod =
+        entry.providerMethod === "http-live" ||
+        entry.providerMethod === "recorded-snapshot"
+          ? entry.providerMethod
+          : undefined;
+
+      if (
+        playerId.length === 0 ||
+        playerName.length === 0 ||
+        teamId.length === 0 ||
+        teamName.length === 0 ||
+        teamSide === undefined ||
+        kind === undefined ||
+        providerMethod === undefined
+      ) {
+        return [];
+      }
+
+      const absence: FootballAvailabilityAbsence = Object.freeze({
+        playerId,
+        playerName,
+        teamId,
+        teamName,
+        teamSide,
+        kind,
+        reason:
+          typeof entry.reason === "string" && entry.reason.trim().length > 0
+            ? entry.reason.trim()
+            : undefined,
+        providerMethod,
+      });
+
+      return [absence];
+    }),
+  );
+
+  const parsedLineups: readonly FootballTeamLineup[] = Object.freeze(
+    lineupsRaw.flatMap((entry) => {
+      if (!isRecord(entry)) {
+        return [];
+      }
+
+      const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+      const teamName =
+        typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+      const teamSide =
+        entry.teamSide === "home" || entry.teamSide === "away"
+          ? entry.teamSide
+          : undefined;
+      const providerMethod =
+        entry.providerMethod === "http-live" ||
+        entry.providerMethod === "recorded-snapshot"
+          ? entry.providerMethod
+          : undefined;
+      const startXI = Array.isArray(entry.startXI)
+        ? entry.startXI.flatMap((player) => {
+            const mapped = parseLineupPlayer(player);
+            return mapped === undefined ? [] : [mapped];
+          })
+        : [];
+
+      if (
+        teamId.length === 0 ||
+        teamName.length === 0 ||
+        teamSide === undefined ||
+        providerMethod === undefined ||
+        startXI.length === 0
+      ) {
+        return [];
+      }
+
+      const substitutes = Array.isArray(entry.substitutes)
+        ? entry.substitutes.flatMap((player) => {
+            const mapped = parseLineupPlayer(player);
+            return mapped === undefined ? [] : [mapped];
+          })
+        : [];
+
+      const lineup: FootballTeamLineup = Object.freeze({
+        teamId,
+        teamName,
+        teamSide,
+        formation:
+          typeof entry.formation === "string" && entry.formation.trim().length > 0
+            ? entry.formation.trim()
+            : undefined,
+        startXI: Object.freeze(startXI),
+        substitutes: Object.freeze(substitutes),
+        providerMethod,
+      });
+
+      return [lineup];
+    }),
+  );
+
+  const parsedPlayers: readonly FootballPlayer[] = Object.freeze(
+    playersRaw.flatMap((entry) => {
+      const player = parsePlayerEntry(entry);
+      return player === undefined ? [] : [player];
+    }),
+  );
+
+  const enrichedPlayers = applyAvailabilityAndSquadStatus(
+    parsedPlayers,
+    parsedAbsences,
+    parsedLineups,
+  );
+
   return Object.freeze({
     fixture,
     homeForm,
@@ -852,182 +1086,9 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
     awayStats: enrichTeamStats(awayStats),
     headToHead: Object.freeze({ ...headToHead }),
     standings: standings === undefined ? undefined : Object.freeze({ ...standings }),
-    players: Object.freeze(
-      playersRaw.flatMap((entry) => {
-        if (!isRecord(entry)) {
-          return [];
-        }
-
-        const playerId =
-          typeof entry.playerId === "string" ? entry.playerId.trim() : "";
-        const name = typeof entry.name === "string" ? entry.name.trim() : "";
-        const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
-        const teamName =
-          typeof entry.teamName === "string" ? entry.teamName.trim() : "";
-        const teamSide =
-          entry.teamSide === "home" || entry.teamSide === "away"
-            ? entry.teamSide
-            : undefined;
-        const providerMethod =
-          entry.providerMethod === "http-live" ||
-          entry.providerMethod === "recorded-snapshot"
-            ? entry.providerMethod
-            : undefined;
-
-        if (
-          playerId.length === 0 ||
-          name.length === 0 ||
-          teamId.length === 0 ||
-          teamName.length === 0 ||
-          teamSide === undefined ||
-          providerMethod === undefined
-        ) {
-          return [];
-        }
-
-        const player: FootballPlayer = Object.freeze({
-          playerId,
-          name,
-          teamId,
-          teamName,
-          teamSide,
-          position:
-            typeof entry.position === "string" && entry.position.trim().length > 0
-              ? entry.position.trim()
-              : undefined,
-          number:
-            typeof entry.number === "number" && Number.isFinite(entry.number)
-              ? entry.number
-              : undefined,
-          nationality:
-            typeof entry.nationality === "string" &&
-            entry.nationality.trim().length > 0
-              ? entry.nationality.trim()
-              : undefined,
-          photoUrl:
-            typeof entry.photoUrl === "string" && entry.photoUrl.trim().length > 0
-              ? entry.photoUrl.trim()
-              : undefined,
-          providerMethod,
-        });
-
-        return [player];
-      }),
-    ),
-    availabilityAbsences: Object.freeze(
-      absencesRaw.flatMap((entry) => {
-        if (!isRecord(entry)) {
-          return [];
-        }
-
-        const playerId =
-          typeof entry.playerId === "string" ? entry.playerId.trim() : "";
-        const playerName =
-          typeof entry.playerName === "string" ? entry.playerName.trim() : "";
-        const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
-        const teamName =
-          typeof entry.teamName === "string" ? entry.teamName.trim() : "";
-        const teamSide =
-          entry.teamSide === "home" || entry.teamSide === "away"
-            ? entry.teamSide
-            : undefined;
-        const kind =
-          entry.kind === "injury" || entry.kind === "suspension"
-            ? entry.kind
-            : undefined;
-        const providerMethod =
-          entry.providerMethod === "http-live" ||
-          entry.providerMethod === "recorded-snapshot"
-            ? entry.providerMethod
-            : undefined;
-
-        if (
-          playerId.length === 0 ||
-          playerName.length === 0 ||
-          teamId.length === 0 ||
-          teamName.length === 0 ||
-          teamSide === undefined ||
-          kind === undefined ||
-          providerMethod === undefined
-        ) {
-          return [];
-        }
-
-        const absence: FootballAvailabilityAbsence = Object.freeze({
-          playerId,
-          playerName,
-          teamId,
-          teamName,
-          teamSide,
-          kind,
-          reason:
-            typeof entry.reason === "string" && entry.reason.trim().length > 0
-              ? entry.reason.trim()
-              : undefined,
-          providerMethod,
-        });
-
-        return [absence];
-      }),
-    ),
-    lineups: Object.freeze(
-      lineupsRaw.flatMap((entry) => {
-        if (!isRecord(entry)) {
-          return [];
-        }
-
-        const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
-        const teamName =
-          typeof entry.teamName === "string" ? entry.teamName.trim() : "";
-        const teamSide =
-          entry.teamSide === "home" || entry.teamSide === "away"
-            ? entry.teamSide
-            : undefined;
-        const providerMethod =
-          entry.providerMethod === "http-live" ||
-          entry.providerMethod === "recorded-snapshot"
-            ? entry.providerMethod
-            : undefined;
-        const startXI = Array.isArray(entry.startXI)
-          ? entry.startXI.flatMap((player) => {
-              const mapped = parseLineupPlayer(player);
-              return mapped === undefined ? [] : [mapped];
-            })
-          : [];
-
-        if (
-          teamId.length === 0 ||
-          teamName.length === 0 ||
-          teamSide === undefined ||
-          providerMethod === undefined ||
-          startXI.length === 0
-        ) {
-          return [];
-        }
-
-        const substitutes = Array.isArray(entry.substitutes)
-          ? entry.substitutes.flatMap((player) => {
-              const mapped = parseLineupPlayer(player);
-              return mapped === undefined ? [] : [mapped];
-            })
-          : [];
-
-        const lineup: FootballTeamLineup = Object.freeze({
-          teamId,
-          teamName,
-          teamSide,
-          formation:
-            typeof entry.formation === "string" && entry.formation.trim().length > 0
-              ? entry.formation.trim()
-              : undefined,
-          startXI: Object.freeze(startXI),
-          substitutes: Object.freeze(substitutes),
-          providerMethod,
-        });
-
-        return [lineup];
-      }),
-    ),
+    players: enrichedPlayers,
+    availabilityAbsences: parsedAbsences,
+    lineups: parsedLineups,
     expectedGoals: Object.freeze(
       expectedGoalsRaw.flatMap((entry) => {
         const mapped = parseExpectedGoalsRecord(entry);

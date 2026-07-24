@@ -220,8 +220,25 @@ const evidence: readonly EvidenceDto[] = [
       teamSide: "home",
       position: "Goalkeeper",
       number: 1,
+      age: 31,
       nationality: "Brazil",
       photo: "https://media.api-sports.io/football/players/1.png",
+      captain: true,
+      matchSquadStatus: "starting",
+      seasonStats: {
+        competitionId: "39",
+        season: 2026,
+        appearances: 20,
+        starts: 20,
+        minutesPlayed: 1800,
+        rating: 6.9,
+        goals: 0,
+        assists: 0,
+        yellowCards: 1,
+        redCards: 0,
+        saves: 60,
+        goalsConceded: 18,
+      },
     },
   },
   {
@@ -308,6 +325,12 @@ describe("buildExplainableReportView", () => {
     expect(view.players.available).toBe(true);
     expect(view.players.home).toHaveLength(1);
     expect(view.players.home[0]?.name).toBe("Alisson");
+    expect(view.players.home[0]?.age).toBe(31);
+    expect(view.players.home[0]?.captain).toBe(true);
+    expect(view.players.home[0]?.matchSquadStatus).toBe("starting");
+    expect(view.players.home[0]?.availabilityStatus).toBeNull();
+    expect(view.players.home[0]?.seasonStats?.appearances).toBe(20);
+    expect(view.players.home[0]?.seasonStats?.saves).toBe(60);
     expect(view.availability.available).toBe(true);
     expect(view.availability.injuryCount).toBe(1);
     expect(view.availability.suspensionCount).toBe(1);
@@ -343,6 +366,12 @@ describe("ExplainableMatchReport", () => {
     expect(screen.getByText(zh.report.players)).toBeInTheDocument();
     expect(screen.getByText("Alisson")).toBeInTheDocument();
     expect(screen.getByText("Player")).toBeInTheDocument();
+    expect(screen.getByText(zh.report.playerCaptain)).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.playerSquadStatusStarting),
+    ).toBeInTheDocument();
+    expect(screen.getByText(zh.report.playerStatAppearances)).toBeInTheDocument();
+    expect(screen.getByText(zh.report.playerStatSaves)).toBeInTheDocument();
     expect(screen.getByText(zh.report.marketEvidence)).toBeInTheDocument();
     expect(screen.getByText(zh.report.noMarketEvidence)).toBeInTheDocument();
     expect(screen.getByText(zh.report.availability)).toBeInTheDocument();

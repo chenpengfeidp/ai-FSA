@@ -34,6 +34,7 @@ import type {
   MatchContextRecordView,
   MostLikelyScoreView,
   PlayerContextItemView,
+  PlayerSeasonStatsView,
   PlayersContextView,
   RefereeContextView,
   RuleEvaluationItemView,
@@ -300,11 +301,50 @@ function mapPlayerEvidence(item: EvidenceDto): PlayerContextItemView | null {
     position:
       typeof item.payload.position === "string" ? item.payload.position : null,
     number: typeof item.payload.number === "number" ? item.payload.number : null,
+    age: typeof item.payload.age === "number" ? item.payload.age : null,
     nationality:
       typeof item.payload.nationality === "string" ? item.payload.nationality : null,
     photo: typeof item.payload.photo === "string" ? item.payload.photo : null,
+    captain: typeof item.payload.captain === "boolean" ? item.payload.captain : null,
+    availabilityStatus:
+      item.payload.availabilityStatus === "injury" ||
+      item.payload.availabilityStatus === "suspension"
+        ? item.payload.availabilityStatus
+        : null,
+    matchSquadStatus:
+      item.payload.matchSquadStatus === "starting" ||
+      item.payload.matchSquadStatus === "bench"
+        ? item.payload.matchSquadStatus
+        : null,
+    seasonStats: mapPlayerSeasonStats(item.payload.seasonStats),
     providerId: item.providerId,
     source: item.source,
+  });
+}
+
+function mapPlayerSeasonStats(value: unknown): PlayerSeasonStatsView | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+
+  const stats = value as Record<string, unknown>;
+  const numberOrNull = (key: string): number | null =>
+    typeof stats[key] === "number" ? stats[key] : null;
+
+  return Object.freeze({
+    competitionId:
+      typeof stats.competitionId === "string" ? stats.competitionId : null,
+    season: numberOrNull("season"),
+    appearances: numberOrNull("appearances"),
+    starts: numberOrNull("starts"),
+    minutesPlayed: numberOrNull("minutesPlayed"),
+    rating: numberOrNull("rating"),
+    goals: numberOrNull("goals"),
+    assists: numberOrNull("assists"),
+    yellowCards: numberOrNull("yellowCards"),
+    redCards: numberOrNull("redCards"),
+    saves: numberOrNull("saves"),
+    goalsConceded: numberOrNull("goalsConceded"),
   });
 }
 
@@ -326,7 +366,7 @@ function buildPlayersContext(evidence: readonly EvidenceDto[]): PlayersContextVi
     available: true,
     home: Object.freeze(players.filter((player) => player.teamSide === "home")),
     away: Object.freeze(players.filter((player) => player.teamSide === "away")),
-    note: "Players are basic squad identity from Evidence (not used by Rules or Projection).",
+    note: "Player Intelligence Evidence: squad identity plus provider-supplied season stats/availability/squad status when present (not used by Rules or Projection).",
   });
 }
 

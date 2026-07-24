@@ -87,6 +87,34 @@ describe("RecordedFootballCatalog", () => {
     expect(suspensions).toHaveLength(1);
     expect(injuries[0]?.payload.playerName).toBe("FC Seoul Forward");
     expect(suspensions[0]?.payload.kind).toBe("suspension");
+
+    // P1A: season stats + cross-referenced availability/squad status.
+    const keeper = players.find((item) => item.payload.playerId === "1000011");
+    const injuredForward = players.find(
+      (item) => item.payload.playerId === "1000012",
+    );
+    const captainMidfielder = players.find(
+      (item) => item.payload.playerId === "1000013",
+    );
+    const suspendedDefender = players.find(
+      (item) => item.payload.playerId === "1000014",
+    );
+
+    expect(keeper?.payload.matchSquadStatus).toBe("starting");
+    expect(keeper?.payload.seasonStats).toMatchObject({
+      saves: 58,
+      goalsConceded: 22,
+    });
+    expect(injuredForward?.payload.availabilityStatus).toBe("injury");
+    expect(injuredForward?.payload.seasonStats).toMatchObject({
+      goals: 11,
+      assists: 5,
+    });
+    expect(captainMidfielder?.payload.captain).toBe(true);
+    expect(captainMidfielder?.payload.matchSquadStatus).toBe("starting");
+    expect(suspendedDefender?.payload.availabilityStatus).toBe("suspension");
+    // Defender is not a season-stats candidate (goalkeeper + attackers only).
+    expect(suspendedDefender?.payload.seasonStats).toBeUndefined();
   });
 });
 

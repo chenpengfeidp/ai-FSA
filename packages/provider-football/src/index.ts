@@ -34,7 +34,9 @@ export type {
   FootballH2HMeeting,
   FootballLineupPlayer,
   FootballMatchBundle,
+  FootballMatchSquadStatus,
   FootballPlayer,
+  FootballPlayerSeasonStats,
   FootballProviderMethod,
   FootballReferee,
   FootballResultCode,
@@ -83,6 +85,14 @@ export { mapApiFootballH2H } from "./mapper/map-api-football-h2h.js";
 export { mapApiFootballInjuriesResponse } from "./mapper/map-api-football-injuries.js";
 export { mapApiFootballLineupsResponse } from "./mapper/map-api-football-lineups.js";
 export { mapApiFootballSquadResponse } from "./mapper/map-api-football-squad.js";
+export { mapApiFootballPlayerStatsResponse } from "./mapper/map-api-football-player-stats.js";
+export type { FootballPlayerStatsEnrichment } from "./mapper/map-api-football-player-stats.js";
+export {
+  applyAvailabilityAndSquadStatus,
+  mergePlayerSeasonStats,
+  selectPlayerStatsCandidates,
+} from "./mapper/enrich-player-intelligence.js";
+export type { PlayerStatsEnrichmentEntry } from "./mapper/enrich-player-intelligence.js";
 export {
   mapApiFootballCoachResponse,
   mapCoachNameFromLineupEntry,

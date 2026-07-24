@@ -5,7 +5,7 @@
 | Purpose | Track which Evidence / product surfaces are wired in the private V1 path |
 | Authority | Complements domain Evidence types; does **not** replace Architecture Freeze or doc 41 |
 | Roadmap | [`docs/40_PRODUCT_ROADMAP.md`](./40_PRODUCT_ROADMAP.md) |
-| Last updated | 2026-07-23 (after Sprint **L1A** Club Intelligence Evidence) |
+| Last updated | 2026-07-24 (after Sprint **P1A** Player Intelligence Evidence) |
 
 Status legend:
 
@@ -42,13 +42,13 @@ Status legend:
 | CLUB_INTELLIGENCE | `CLUB_INTELLIGENCE` | Active | L1A Evidence (standings + optional manager) + L1B Feature/Rule/Confidence/Projection consume |
 | HEAD_TO_HEAD | `HEAD_TO_HEAD` | Active | F.1 |
 | VENUE | `VENUE` | Active | F1.1B-1 |
-| PLAYER | `PLAYER` | Active | F1.1C-1 (basic identity) |
+| PLAYER | `PLAYER` | Active | F1.1C-1 basic identity + **P1A** season stats/age/captain/availability/match squad status (capped candidate coverage; honest absence otherwise) |
 | ODDS | `ODDS` | Active (optional path) | I2A Market Evidence + I2B Market Intelligence Features/Rules (findings-only; never override Football); honest absence when depth missing |
 | LINEUP | `LINEUP` | Confirmed XI only (F1.1E) | Honest absence when unpublished; never Expected Lineup |
 | WEATHER | `WEATHER` | Typed unused | Future |
 | Expected Lineup | — | **Not supported** | No API-Football Fact endpoint |
 | Referee | `MATCH_INFO.referee` | F1.1E | Identity + optional country/league/statistics when supplied |
-| Player Statistics | — | Deferred | Later |
+| Player Statistics | `PLAYER.seasonStats` | Active | **P1A** season appearances/starts/minutes/rating/goals/assists/cards + GK saves/goalsConceded when provider supplies them |
 
 ---
 

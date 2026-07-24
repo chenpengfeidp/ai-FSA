@@ -64,8 +64,13 @@ export function mapApiFootballSquadResponse(
         teamSide: options.teamSide,
         position: asString(entry.position),
         number: asNumber(entry.number),
+        age: undefined,
         nationality: asString(entry.nationality),
         photoUrl: asString(entry.photo),
+        captain: undefined,
+        availabilityStatus: undefined,
+        matchSquadStatus: undefined,
+        seasonStats: undefined,
         providerMethod: options.providerMethod,
       }),
     );

@@ -11,6 +11,13 @@ import {
 import { mapClubIntelligenceFromStandings } from "../mapper/map-club-intelligence-from-standings.js";
 import { mapApiFootballInjuriesResponse } from "../mapper/map-api-football-injuries.js";
 import { mapApiFootballLineupsResponse } from "../mapper/map-api-football-lineups.js";
+import {
+  applyAvailabilityAndSquadStatus,
+  mergePlayerSeasonStats,
+  selectPlayerStatsCandidates,
+  type PlayerStatsEnrichmentEntry,
+} from "../mapper/enrich-player-intelligence.js";
+import { mapApiFootballPlayerStatsResponse } from "../mapper/map-api-football-player-stats.js";
 import { mapApiFootballSquadResponse } from "../mapper/map-api-football-squad.js";
 import { mapApiFootballStandings } from "../mapper/map-api-football-standings.js";
 import { mapApiFootballFixtureExpectedGoals } from "../mapper/map-api-football-expected-goals.js";
@@ -280,6 +287,39 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       providerMethod: "http-live",
     });
 
+    // P1A: capped candidate set (squad-listed goalkeeper + attackers) for a
+    // second-phase per-player season-stats fetch. Quota-safe by design —
+    // never fetch the full squad's individual statistics.
+    const homeCandidates = selectPlayerStatsCandidates(homePlayers);
+    const awayCandidates = selectPlayerStatsCandidates(awayPlayers);
+    const candidates = [...homeCandidates, ...awayCandidates];
+
+    const statsResponses = await Promise.all(
+      candidates.map((candidate) =>
+        this.#getJson(
+          `/players?id=${encodeURIComponent(candidate.playerId)}&season=${String(fixture.season)}`,
+        ),
+      ),
+    );
+
+    const enrichmentByPlayerId = new Map<string, PlayerStatsEnrichmentEntry>();
+    candidates.forEach((candidate, index) => {
+      const enrichment = mapApiFootballPlayerStatsResponse(statsResponses[index], {
+        teamId: candidate.teamId,
+        competitionId: fixture.competitionId,
+      });
+
+      if (enrichment !== undefined) {
+        enrichmentByPlayerId.set(candidate.playerId, enrichment);
+      }
+    });
+
+    const enrichedPlayers = applyAvailabilityAndSquadStatus(
+      mergePlayerSeasonStats([...homePlayers, ...awayPlayers], enrichmentByPlayerId),
+      availabilityAbsences,
+      lineups,
+    );
+
     // Empty expectedGoals → honest absence (never estimate from shots).
     const expectedGoals = mapApiFootballFixtureExpectedGoals(fixtureStatsBody, {
       homeTeamId: fixture.homeTeamId,
@@ -348,7 +388,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       awayStats,
       headToHead,
       standings,
-      players: Object.freeze([...homePlayers, ...awayPlayers]),
+      players: enrichedPlayers,
       availabilityAbsences,
       lineups,
       expectedGoals,

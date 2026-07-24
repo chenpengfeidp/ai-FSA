@@ -248,11 +248,14 @@ Match Center (web)
 4. **DA FI v2 Domain Architecture** — 已完成（`docs/architecture/FOOTBALL_INTELLIGENCE_V2_DOMAIN_ARCHITECTURE.md`；L1–L4）  
 5. **L1A Club Intelligence Evidence** — 已完成（`docs/sprints/L1/L1A_CLUB_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`）  
 6. **L1B Club Intelligence Features** — 已完成（`docs/sprints/L1/L1B_CLUB_INTELLIGENCE_COMPLETION_REPORT.md`；Feature → Rule → Confidence → Projection）  
-7. **L2A Squad Intelligence Evidence** — 推荐的下一 Intelligence 编码冲刺  
-8. **A2** — Calibration productization（并行信任轨道；消费 Evaluation History；勿与 Provider 混写）  
-9. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0  
+7. **Player Intelligence MVP Scope Review**（Wave 2 设计评审）— 已完成（`docs/reviews/PLAYER_INTELLIGENCE_MVP_SCOPE_REVIEW.md`）  
+8. **P1A Player Intelligence Evidence** — 已完成（`docs/sprints/P1/P1A_PLAYER_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`）  
+9. **P1B Player Intelligence Features** — 推荐的下一 Intelligence 编码冲刺（Feature → Rule → Confidence → Projection）  
+10. **L2A Squad Intelligence Evidence** — 其后候选  
+11. **A2** — Calibration productization（并行信任轨道；消费 Evaluation History；勿与 Provider 混写）  
+12. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0  
 
-历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B  
+历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A  
 
 平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 

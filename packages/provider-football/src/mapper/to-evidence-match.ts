@@ -5,6 +5,7 @@ import type {
   FootballAdvancedTeamStats,
   FootballFormSplit,
   FootballMatchBundle,
+  FootballPlayer,
   FootballTeamForm,
   FootballTeamStats,
 } from "../domain/football-models.js";
@@ -117,6 +118,33 @@ function toMatchContextShape(
     providerSource: "api-football",
     providerSourceId: `api-football:${fixtureKey}:context:${record.teamSide}`,
     providerMethod: record.providerMethod,
+  });
+}
+
+function freezePlayerSeasonStats(stats: FootballPlayer["seasonStats"]): unknown {
+  if (stats === undefined) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    ...(stats.competitionId === undefined
+      ? {}
+      : { competitionId: stats.competitionId }),
+    ...(stats.season === undefined ? {} : { season: stats.season }),
+    ...(stats.appearances === undefined ? {} : { appearances: stats.appearances }),
+    ...(stats.starts === undefined ? {} : { starts: stats.starts }),
+    ...(stats.minutesPlayed === undefined
+      ? {}
+      : { minutesPlayed: stats.minutesPlayed }),
+    ...(stats.rating === undefined ? {} : { rating: stats.rating }),
+    ...(stats.goals === undefined ? {} : { goals: stats.goals }),
+    ...(stats.assists === undefined ? {} : { assists: stats.assists }),
+    ...(stats.yellowCards === undefined ? {} : { yellowCards: stats.yellowCards }),
+    ...(stats.redCards === undefined ? {} : { redCards: stats.redCards }),
+    ...(stats.saves === undefined ? {} : { saves: stats.saves }),
+    ...(stats.goalsConceded === undefined
+      ? {}
+      : { goalsConceded: stats.goalsConceded }),
   });
 }
 
@@ -396,8 +424,10 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
       ? {}
       : {
           players: Object.freeze(
-            players.map((player) =>
-              Object.freeze({
+            players.map((player) => {
+              const seasonStats = freezePlayerSeasonStats(player.seasonStats);
+
+              return Object.freeze({
                 playerId: player.playerId,
                 name: player.name,
                 teamId: player.teamId,
@@ -407,11 +437,20 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
                 number: player.number,
                 nationality: player.nationality,
                 photo: player.photoUrl,
+                ...(player.age === undefined ? {} : { age: player.age }),
+                ...(player.captain === undefined ? {} : { captain: player.captain }),
+                ...(player.availabilityStatus === undefined
+                  ? {}
+                  : { availabilityStatus: player.availabilityStatus }),
+                ...(player.matchSquadStatus === undefined
+                  ? {}
+                  : { matchSquadStatus: player.matchSquadStatus }),
+                ...(seasonStats === undefined ? {} : { seasonStats }),
                 providerSource: "api-football",
                 providerSourceId: `api-football:${fixtureKey}:player:${player.playerId}`,
                 providerMethod: player.providerMethod,
-              }),
-            ),
+              });
+            }),
           ),
         }),
     ...(availabilityAbsences.length === 0

@@ -138,3 +138,31 @@ export type {
 
 export { computePredictionCalibrationReport } from "./reliability/compute-prediction-calibration-report.js";
 export type { ComputePredictionCalibrationReportInput } from "./reliability/compute-prediction-calibration-report.js";
+
+export {
+  FEATURE_PROFILE_IDS,
+  FEATURE_PROFILE_LABELS,
+  MINIMUM_QUALIFIED_PROFILE_SAMPLE_SIZE,
+  MINIMUM_QUALIFIED_SEGMENT_SAMPLE_SIZE,
+  VALIDATION_REPORT_MODEL_VERSION,
+  ValidationReportValidationError,
+} from "./domain/validation-report.js";
+export type {
+  FeatureProfileId,
+  ValidationMetricSummary,
+  ValidationProfileRow,
+  ValidationProvenance,
+  ValidationReport,
+} from "./domain/validation-report.js";
+
+export {
+  ADVANCED_STATISTICS_FEATURE_NAMES,
+  CLUB_INTELLIGENCE_FEATURE_NAMES,
+  EXPECTED_GOALS_FEATURE_NAMES,
+  MATCH_CONTEXT_FEATURE_NAMES,
+  PLAYER_INTELLIGENCE_FEATURE_NAMES,
+  classifyFeatureProfile,
+} from "./validation/feature-profile.js";
+
+export { computeValidationReport } from "./validation/compute-validation-report.js";
+export type { ComputeValidationReportInput } from "./validation/compute-validation-report.js";

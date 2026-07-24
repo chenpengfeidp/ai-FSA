@@ -12,6 +12,7 @@ import type {
   EvaluationHistoryRecord,
   PredictionCalibrationReport,
   PredictionEvaluationRecord,
+  ValidationReport,
 } from "@fas/statistics";
 
 export interface AnalysisReport {
@@ -37,6 +38,13 @@ export interface AnalysisReport {
    * adjusts this or any future Prediction.
    */
   readonly calibration?: PredictionCalibrationReport;
+  /**
+   * V1A Football Intelligence Validation — population-level comparison of
+   * prediction quality across Feature-configuration profiles, not scoped
+   * to this match. Display-only: never adjusts Prediction, and never
+   * claims one profile improved over another.
+   */
+  readonly validation?: ValidationReport;
 }
 
 export interface CreateAnalysisReportInput {
@@ -54,6 +62,7 @@ export interface CreateAnalysisReportInput {
   readonly evaluation?: PredictionEvaluationRecord;
   readonly evaluationHistory?: readonly EvaluationHistoryRecord[];
   readonly calibration?: PredictionCalibrationReport;
+  readonly validation?: ValidationReport;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -198,5 +207,6 @@ export function createAnalysisReport(
           evaluationHistory: Object.freeze([...input.evaluationHistory]),
         }),
     ...(input.calibration === undefined ? {} : { calibration: input.calibration }),
+    ...(input.validation === undefined ? {} : { validation: input.validation }),
   });
 }

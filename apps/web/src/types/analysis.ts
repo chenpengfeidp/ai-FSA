@@ -403,6 +403,58 @@ export interface PredictionCalibrationReportDto {
   readonly limitations: readonly string[];
 }
 
+export type FeatureProfileId =
+  | "baseline"
+  | "club_intelligence"
+  | "club_player"
+  | "club_player_xg"
+  | "full_football_intelligence";
+
+export interface ValidationMetricSummaryDto {
+  readonly value?: number;
+  readonly sampleSize: number;
+  readonly qualified: boolean;
+}
+
+export interface ValidationProfileRowDto {
+  readonly profile: FeatureProfileId;
+  readonly label: string;
+  readonly sampleSize: number;
+  readonly qualified: boolean;
+  readonly winnerAccuracy: ValidationMetricSummaryDto;
+  readonly drawAccuracy: ValidationMetricSummaryDto;
+  readonly scoreAccuracy: ValidationMetricSummaryDto;
+  readonly goalRangeAccuracy: ValidationMetricSummaryDto;
+  readonly coverage: ValidationMetricSummaryDto;
+  readonly paperReturn: ValidationMetricSummaryDto;
+  readonly calibration: PredictionCalibrationReportDto;
+}
+
+export interface ValidationProvenanceDto {
+  readonly sourceRecordCount: number;
+  readonly evaluationHistorySchemaVersions: readonly string[];
+  readonly evaluationModelVersions: readonly string[];
+  readonly projectionModelVersions: readonly string[];
+  readonly earliestMatchDate?: string;
+  readonly latestMatchDate?: string;
+}
+
+/**
+ * V1A Football Intelligence Validation — read-only comparison of prediction
+ * quality across Feature-configuration profiles over Evaluation History.
+ * Population-level: not scoped to a single match. Display-only; never
+ * adjusts Prediction, and never claims one profile improved over another.
+ */
+export interface ValidationReportDto {
+  readonly schemaVersion: string;
+  readonly computedAt: string;
+  readonly totalSampleSize: number;
+  readonly minimumQualifiedSampleSize: number;
+  readonly provenance: ValidationProvenanceDto;
+  readonly profiles: readonly ValidationProfileRowDto[];
+  readonly limitations: readonly string[];
+}
+
 export interface AnalysisReportDto {
   readonly reportId: string;
   readonly matchId: string;
@@ -416,6 +468,7 @@ export interface AnalysisReportDto {
   readonly evaluation?: PredictionEvaluationDto;
   readonly evaluationHistory?: readonly EvaluationHistoryRecordDto[];
   readonly calibration?: PredictionCalibrationReportDto;
+  readonly validation?: ValidationReportDto;
 }
 
 export interface BackendErrorDto {

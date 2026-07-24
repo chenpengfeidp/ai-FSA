@@ -447,3 +447,57 @@ describe("GenerateMatchReportUseCase — A2 Prediction Calibration overlay", () 
     expect(result.calibration?.qualified).toBe(false);
   });
 });
+
+describe("GenerateMatchReportUseCase — V1A Football Intelligence Validation overlay", () => {
+  it("attaches a population-wide validation report from the same History snapshot as calibration", async () => {
+    const repository = new InMemoryEvaluationHistoryRepository();
+    await seedOtherMatchHistoryRecord(repository);
+
+    const analysis = makeCompletedAnalysis();
+    const useCase = new GenerateMatchReportUseCase(
+      { execute: async () => ({ ok: true, value: analysis }) },
+      createReportBuilder(),
+      repository,
+    );
+
+    const result = await useCase.execute(matchId);
+
+    if ("ok" in result) {
+      throw new Error("Expected a sealed AnalysisReport.");
+    }
+
+    expect(result.validation).toBeDefined();
+    expect(result.validation?.schemaVersion).toBe("validation-report.mvp.v1a");
+    // Same sealed population that calibration measured (the seeded other match).
+    expect(result.validation?.totalSampleSize).toBe(result.calibration?.sampleSize);
+    expect(result.validation?.profiles).toHaveLength(5);
+    expect(
+      result.validation?.profiles.reduce((sum, row) => sum + row.sampleSize, 0),
+    ).toBe(result.validation?.totalSampleSize);
+  });
+
+  it("never mutates Feature/Rule/Projection while attaching the validation overlay, and never claims improvement", async () => {
+    const repository = new InMemoryEvaluationHistoryRepository();
+    const analysis = makeCompletedAnalysis();
+    const useCase = new GenerateMatchReportUseCase(
+      { execute: async () => ({ ok: true, value: analysis }) },
+      createReportBuilder(),
+      repository,
+    );
+
+    const result = await useCase.execute(matchId);
+
+    if ("ok" in result) {
+      throw new Error("Expected a sealed AnalysisReport.");
+    }
+
+    expect(result.deterministic).toEqual(analysis.projection);
+    expect(result.features).toEqual(analysis.features);
+    expect(result.rules).toEqual(analysis.ruleResults);
+    expect(result.validation).not.toHaveProperty("winningProfile");
+    expect(result.validation).not.toHaveProperty("bestProfile");
+    expect(result.validation?.profiles.every((row) => row.sampleSize === 0)).toBe(
+      true,
+    );
+  });
+});

@@ -389,6 +389,8 @@ describe("ExplainableMatchReport", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(zh.report.calibration)).toBeInTheDocument();
     expect(screen.getByText(zh.report.calibrationUnavailable)).toBeInTheDocument();
+    expect(screen.getByText(zh.report.validation)).toBeInTheDocument();
+    expect(screen.getByText(zh.report.validationUnavailable)).toBeInTheDocument();
   });
 
   it("renders A2 Prediction Calibration metrics with provenance and insufficient-sample flags", () => {
@@ -500,6 +502,144 @@ describe("ExplainableMatchReport", () => {
     expect(
       screen.getByText(
         "Computed only from Evaluation History (A1.5); missing history is never estimated or fabricated.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("renders V1A Football Intelligence Validation profile comparison with insufficient-sample flags", () => {
+    const minimalCalibration = {
+      schemaVersion: "calibration-report.mvp.a2",
+      computedAt: "2026-07-24T00:00:00.000Z",
+      sampleSize: 1,
+      qualified: false,
+      minimumQualifiedSampleSize: 20,
+      provenance: {
+        sourceRecordCount: 1,
+        evaluationHistorySchemaVersions: ["evaluation-history.mvp.a15"],
+        evaluationModelVersions: ["evaluation.mvp.a1"],
+        projectionModelVersions: ["projection.v2.p1b.player"],
+      },
+      confidenceBucketAccuracy: [],
+      confidenceDistribution: [],
+      reliabilityTable: [],
+      expectedCalibrationError: { value: 0.1, sampleSize: 1, qualified: false },
+      brierScore: { value: 0.2, sampleSize: 1, qualified: false },
+      outcomeCalibration: [],
+      goalRangeCalibration: [],
+      limitations: [],
+    } as const;
+
+    const reportWithValidation: AnalysisReportDto = {
+      ...report,
+      validation: {
+        schemaVersion: "validation-report.mvp.v1a",
+        computedAt: "2026-07-24T00:00:00.000Z",
+        totalSampleSize: 1,
+        minimumQualifiedSampleSize: 20,
+        provenance: {
+          sourceRecordCount: 1,
+          evaluationHistorySchemaVersions: ["evaluation-history.mvp.a15"],
+          evaluationModelVersions: ["evaluation.mvp.a1"],
+          projectionModelVersions: ["projection.v2.p1b.player"],
+        },
+        profiles: [
+          {
+            profile: "baseline",
+            label: "Baseline",
+            sampleSize: 1,
+            qualified: false,
+            winnerAccuracy: { value: 1, sampleSize: 1, qualified: false },
+            drawAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            scoreAccuracy: { value: 0, sampleSize: 1, qualified: false },
+            goalRangeAccuracy: { value: 1, sampleSize: 1, qualified: false },
+            coverage: { value: 0.8, sampleSize: 1, qualified: false },
+            paperReturn: { value: 1, sampleSize: 1, qualified: false },
+            calibration: minimalCalibration,
+          },
+          {
+            profile: "club_intelligence",
+            label: "Club Intelligence",
+            sampleSize: 0,
+            qualified: false,
+            winnerAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            drawAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            scoreAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            goalRangeAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            coverage: { value: undefined, sampleSize: 0, qualified: false },
+            paperReturn: { value: undefined, sampleSize: 0, qualified: false },
+            calibration: { ...minimalCalibration, sampleSize: 0 },
+          },
+          {
+            profile: "club_player",
+            label: "Club + Player",
+            sampleSize: 0,
+            qualified: false,
+            winnerAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            drawAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            scoreAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            goalRangeAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            coverage: { value: undefined, sampleSize: 0, qualified: false },
+            paperReturn: { value: undefined, sampleSize: 0, qualified: false },
+            calibration: { ...minimalCalibration, sampleSize: 0 },
+          },
+          {
+            profile: "club_player_xg",
+            label: "Club + Player + xG",
+            sampleSize: 0,
+            qualified: false,
+            winnerAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            drawAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            scoreAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            goalRangeAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            coverage: { value: undefined, sampleSize: 0, qualified: false },
+            paperReturn: { value: undefined, sampleSize: 0, qualified: false },
+            calibration: { ...minimalCalibration, sampleSize: 0 },
+          },
+          {
+            profile: "full_football_intelligence",
+            label: "Full Football Intelligence",
+            sampleSize: 0,
+            qualified: false,
+            winnerAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            drawAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            scoreAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            goalRangeAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            coverage: { value: undefined, sampleSize: 0, qualified: false },
+            paperReturn: { value: undefined, sampleSize: 0, qualified: false },
+            calibration: { ...minimalCalibration, sampleSize: 0 },
+          },
+        ],
+        limitations: [
+          "Computed only from Evaluation History (A1.5); missing history is never estimated or fabricated.",
+          "This report never claims one profile improved over another — read qualified flags and sample sizes before drawing any conclusion.",
+        ],
+      },
+    };
+
+    render(
+      <ExplainableMatchReport
+        evidence={evidence}
+        match={match}
+        report={reportWithValidation}
+      />,
+    );
+
+    expect(screen.getByText(zh.report.validation)).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.validationProfileLabel.baseline),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.validationProfileLabel.club_intelligence),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.validationProfileLabel.full_football_intelligence),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(zh.report.validationInsufficientBadge).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByText(
+        "This report never claims one profile improved over another — read qualified flags and sample sizes before drawing any conclusion.",
       ),
     ).toBeInTheDocument();
   });

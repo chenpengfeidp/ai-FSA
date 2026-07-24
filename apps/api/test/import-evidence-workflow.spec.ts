@@ -241,6 +241,18 @@ describe("HTTP import and Evidence query workflow", () => {
         expect.stringContaining("Computed only from Evaluation History"),
       ]),
     });
+    // V1A Football Intelligence Validation overlay: always attached (measurement-only,
+    // population-wide over Evaluation History), never adjusts the report above.
+    expect(report.validation).toMatchObject({
+      schemaVersion: "validation-report.mvp.v1a",
+      minimumQualifiedSampleSize: 20,
+      totalSampleSize: expect.any(Number),
+      limitations: expect.arrayContaining([
+        expect.stringContaining("Computed only from Evaluation History"),
+      ]),
+    });
+    expect(Array.isArray(requireRecord(report.validation).profiles)).toBe(true);
+    expect(requireRecord(report.validation).profiles).toHaveLength(5);
     expect(report.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "homeTeam", value: "Liverpool" }),
@@ -383,6 +395,45 @@ describe("HTTP import and Evidence query workflow", () => {
     expect(report.limitations).toEqual(
       expect.arrayContaining([
         expect.stringContaining("Computed only from Evaluation History"),
+      ]),
+    );
+  });
+
+  it("serves the V1A Football Intelligence Validation report from GET /api/validation", async () => {
+    const response = await request(baseUrl, "/api/validation");
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      schemaVersion: "validation-report.mvp.v1a",
+      totalSampleSize: expect.any(Number),
+      minimumQualifiedSampleSize: 20,
+    });
+    expect(Array.isArray(report.profiles)).toBe(true);
+    expect(report.profiles).toHaveLength(5);
+    const profileIds = (report.profiles as readonly Record<string, unknown>[]).map(
+      (row) => row.profile,
+    );
+    expect(profileIds).toEqual([
+      "baseline",
+      "club_intelligence",
+      "club_player",
+      "club_player_xg",
+      "full_football_intelligence",
+    ]);
+    for (const row of report.profiles as readonly Record<string, unknown>[]) {
+      expect(row).toMatchObject({
+        sampleSize: expect.any(Number),
+        qualified: expect.any(Boolean),
+      });
+      expect(requireRecord(row.calibration).schemaVersion).toBe(
+        "calibration-report.mvp.a2",
+      );
+    }
+    expect(report.limitations).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("Computed only from Evaluation History"),
+        expect.stringContaining("never claims"),
       ]),
     );
   });

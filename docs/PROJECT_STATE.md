@@ -5,11 +5,11 @@
 - Last updated: 2026-07-24
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **A2 Prediction Calibration** (trust track) complete; **Football Intelligence v2 Wave 2 P1B Player Intelligence Feature/Rule/Confidence/Projection** complete; prior **P1A** Player Intelligence Evidence + **L1B** Club Intelligence Features/Rule/Confidence/Projection + **L1A** Club Intelligence Evidence + **DA** Domain Architecture + **P0** + **A1.5** complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
+- Current task status: **V1A Football Intelligence Validation** (trust track) complete; prior **A2 Prediction Calibration** (trust track) complete; **Football Intelligence v2 Wave 2 P1B Player Intelligence Feature/Rule/Confidence/Projection** complete; prior **P1A** Player Intelligence Evidence + **L1B** Club Intelligence Features/Rule/Confidence/Projection + **L1A** Club Intelligence Evidence + **DA** Domain Architecture + **P0** + **A1.5** complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **A2** Prediction Calibration complete (trust track, parallel to Wave 2)
-- Last completed delivery: Sprint **A2** (`docs/sprints/A2/A2_PREDICTION_CALIBRATION_COMPLETION_REPORT.md`); prior P1B, P1A, L1B, L1A, DA, P0, A1.5, A1, R1, I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
-- Demo: recorded cassette `football:100001` includes full xG windows + Match Context + Club Intelligence + enriched Player Intelligence (season stats/age/captain/availability/match squad status); odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`; evaluation demo population + Evaluation History + Prediction Calibration report in `@fas/statistics`
+- Current sprint: **V1A** Football Intelligence Validation complete (trust track, parallel to Wave 2). **Governance note:** `V1A` is not yet a Sprint id listed in `docs/40_PRODUCT_ROADMAP.md` or in the DA Wave sequencing; it was authorized directly by the task requester as a bounded, measurement-only extension of the A1/A1.5/A2 trust track (same Must-Not constraints: no Provider/Feature/Rule/Projection/Confidence/Evaluation/Calibration modification, no ML, no schema change). Recommend a follow-up documentation pass to add a `V1` entry to doc 40 citing this delivery, mirroring how A1.5 extended A1.
+- Last completed delivery: Sprint **V1A** (`docs/sprints/V1A/V1A_FOOTBALL_INTELLIGENCE_VALIDATION_COMPLETION_REPORT.md`); prior A2, P1B, P1A, L1B, L1A, DA, P0, A1.5, A1, R1, I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
+- Demo: recorded cassette `football:100001` includes full xG windows + Match Context + Club Intelligence + enriched Player Intelligence (season stats/age/captain/availability/match squad status); odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`; evaluation demo population + Evaluation History + Prediction Calibration report + Football Intelligence Validation report in `@fas/statistics`
 - Next authorized work: **M1A Manager Intelligence Evidence** (Wave 2, per `docs/reviews/PLAYER_INTELLIGENCE_MVP_SCOPE_REVIEW.md` and DA L-track sequencing)
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
@@ -55,7 +55,7 @@ Implemented packages used by the slice (non-exhaustive):
 - `@fas/match`, `@fas/evidence`, `@fas/evidence-normalizer`, `@fas/evidence-import`, `@fas/evidence-query`
 - `@fas/provider-fixture`, `@fas/provider-football`, `@fas/provider-odds`, `@fas/application`
 - `@fas/feature`, `@fas/rule`, `@fas/analysis`, `@fas/report`
-- `@fas/statistics` (pinned `population_demo_v1` frequency-ratio candidate by default; identity still selectable; no match-run training; A1 evaluation + A1.5 Evaluation History repository port / in-memory store + A2 Prediction Calibration report compute)
+- `@fas/statistics` (pinned `population_demo_v1` frequency-ratio candidate by default; identity still selectable; no match-run training; A1 evaluation + A1.5 Evaluation History repository port / in-memory store + A2 Prediction Calibration report compute + V1A Football Intelligence Validation report compute)
 - `@fas/prompt` (sealed-context composition; no retrieval / no network)
 - `@fas/ai-provider` (`LocalDeterministicNarrativeAdapter` only; no provider SDK)
 
@@ -75,6 +75,7 @@ Domain (private demo):
 - `GET /api/evaluation-history/match/:matchId`
 - `GET /api/evaluation-history`
 - `GET /api/calibration`
+- `GET /api/validation`
 - `GET /api/matches/upcoming`
 - `GET /api/evidence/example`
 - `GET /api/evidence/match/:matchId`
@@ -84,7 +85,7 @@ Domain (private demo):
 
 - Match Center, analysis session pacing UI, explainable workspace, analysis library (`/reports`)
 - Workspace maps sealed projection / narrative; does not recompute λ, 1X2, confidence, or recommendations
-- Workspace separates **Prediction** / **Actual Result** (`MATCH_RESULT`) / **Evaluation** / **Evaluation History** (A1 + A1.5; History is append-only and read-only; never mutates Projection) / **Prediction Calibration** (A2; population-wide, measurement-only; never adjusts Prediction)
+- Workspace separates **Prediction** / **Actual Result** (`MATCH_RESULT`) / **Evaluation** / **Evaluation History** (A1 + A1.5; History is append-only and read-only; never mutates Projection) / **Prediction Calibration** (A2; population-wide, measurement-only; never adjusts Prediction) / **Football Intelligence Validation** (V1A; population-wide comparison of prediction quality across Feature-configuration profiles evaluated against the same sealed historical predictions; measurement-only; never adjusts Prediction and never claims one profile improved over another)
 
 ### Worker
 
@@ -234,18 +235,18 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. Intelligence MVP + A1 Evaluation + A1.5 Evaluation History + A2 Prediction Calibration are implemented with default offline recorded + memory Evidence/History. Wave 2 of the Football Intelligence v2 DA (L1 Club, L3 Player) is now complete through Feature/Rule/Confidence/Projection consume; next authorized Wave 2 work is **M1A Manager Intelligence Evidence**.
+No numbered sprint is active. Intelligence MVP + A1 Evaluation + A1.5 Evaluation History + A2 Prediction Calibration + V1A Football Intelligence Validation are implemented with default offline recorded + memory Evidence/History. Wave 2 of the Football Intelligence v2 DA (L1 Club, L3 Player) is now complete through Feature/Rule/Confidence/Projection consume; next authorized Wave 2 work is **M1A Manager Intelligence Evidence**.
 
 Recommended follow-ons (ordered):
 
 1. **M1A Manager Intelligence Evidence** (Wave 2, DA L-track), then the matching **M1B** Feature/Rule/Confidence/Projection sprint;
-2. Follow **`docs/40_PRODUCT_ROADMAP.md`** in parallel for the trust track: a follow-up sprint on how **A2 Calibration** informs future Confidence reporting (display-only; no pipeline change), then **K1/C1/S1/R1 → v1.0 → v2.0** as authorized;
+2. Follow **`docs/40_PRODUCT_ROADMAP.md`** in parallel for the trust track: a documentation pass to add a `V1` Sprint id to doc 40 retroactively citing the **V1A** Validation delivery (see governance note above), then a follow-up sprint on how **A2 Calibration** and **V1A Validation** inform future Confidence reporting (display-only; no pipeline change), then **K1/C1/S1/R1 → v1.0 → v2.0** as authorized;
 3. Keep Odds as optional market layer only; do not re-merge schedule ownership into Odds;
 4. Compose migrate automation / postgres-mode smoke evidence (platform companion);
 5. Do not start a sprint without citing doc 40 Sprint id (and, for Wave 2 Intelligence sprints, the DA + Scope Review);
 6. Later product items only as listed in doc 40 (no ad-hoc engine invention).
 
-Recently delivered: **A2** Prediction Calibration (`docs/sprints/A2/A2_PREDICTION_CALIBRATION_COMPLETION_REPORT.md`); **P1B** Player Intelligence Feature/Rule/Confidence/Projection (`docs/sprints/P1/P1B_PLAYER_INTELLIGENCE_COMPLETION_REPORT.md`); **P1A** Player Intelligence Evidence; **L1B** Club Intelligence Feature/Rule/Confidence/Projection; **L1A** Club Intelligence Evidence; **A1.5** Evaluation Platform Foundation; **A1** Prediction Evaluation; Architecture Freeze Review **v0.3**; Intelligence MVP (F1.2–I2B); prior Freeze v0.2; F.1 Football Data Provider; Match Center; ZH-2; `docs/PROJECT_INDEX.md`.
+Recently delivered: **V1A** Football Intelligence Validation (`docs/sprints/V1A/V1A_FOOTBALL_INTELLIGENCE_VALIDATION_COMPLETION_REPORT.md`); **A2** Prediction Calibration (`docs/sprints/A2/A2_PREDICTION_CALIBRATION_COMPLETION_REPORT.md`); **P1B** Player Intelligence Feature/Rule/Confidence/Projection (`docs/sprints/P1/P1B_PLAYER_INTELLIGENCE_COMPLETION_REPORT.md`); **P1A** Player Intelligence Evidence; **L1B** Club Intelligence Feature/Rule/Confidence/Projection; **L1A** Club Intelligence Evidence; **A1.5** Evaluation Platform Foundation; **A1** Prediction Evaluation; Architecture Freeze Review **v0.3**; Intelligence MVP (F1.2–I2B); prior Freeze v0.2; F.1 Football Data Provider; Match Center; ZH-2; `docs/PROJECT_INDEX.md`.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

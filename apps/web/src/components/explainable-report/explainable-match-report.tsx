@@ -23,6 +23,7 @@ import { VenueContextSection } from "./venue-context";
 import { CalibrationSection } from "./calibration-section";
 import { EvaluationHistorySection } from "./evaluation-history-section";
 import { EvaluationSection } from "./evaluation-section";
+import { ValidationSection } from "./validation-section";
 import { WinnerPredictionCard } from "./winner-prediction-card";
 import { WorkspaceSection } from "./workspace-section";
 
@@ -57,6 +58,8 @@ export function ExplainableMatchReport({
       <EvaluationHistorySection history={report.evaluationHistory} />
 
       <CalibrationSection calibration={report.calibration} />
+
+      <ValidationSection validation={report.validation} />
 
       <ReasoningSection />
 

@@ -22,6 +22,7 @@ import { Module } from "@nestjs/common";
 import { AnalysisController } from "./analysis.controller.js";
 import { MatchAnalysisController } from "./match-analysis.controller.js";
 import { CalibrationController } from "./calibration.controller.js";
+import { ValidationController } from "./validation.controller.js";
 import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
 import { EvaluationHistoryController } from "./evaluation-history.controller.js";
@@ -69,6 +70,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     EvidenceController,
     EvaluationHistoryController,
     CalibrationController,
+    ValidationController,
     ProvidersController,
     ImportController,
     MatchesController,

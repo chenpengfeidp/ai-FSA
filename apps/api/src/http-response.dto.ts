@@ -518,6 +518,14 @@ export class AnalysisReportDto {
     additionalProperties: true,
   })
   declare readonly calibration?: Readonly<Record<string, unknown>>;
+
+  @ApiPropertyOptional({
+    description:
+      "V1A Football Intelligence Validation — population-level comparison of prediction quality across Feature-configuration profiles over all Evaluation History (not scoped to this match). Display-only; never adjusts Prediction and never claims improvement.",
+    type: "object",
+    additionalProperties: true,
+  })
+  declare readonly validation?: Readonly<Record<string, unknown>>;
 }
 
 export class AnalysisErrorCauseDto {

@@ -24,6 +24,7 @@ import {
   computeDisciplineRisk,
   computeFatigueIndex,
   computeFinishingEfficiency,
+  computeGoalkeeperReliability,
   computeH2hLean,
   computeHomeStability,
   computeImpliedProbabilities,
@@ -33,17 +34,21 @@ import {
   computeMarketLean,
   computeMarketVolatility,
   computeMomentum,
+  computePlayerAttackContribution,
+  computePlayerAvailabilityImpact,
   computePossessionDominance,
   computeRecentFormScore,
   computeReverseLineMovement,
   computeRotationPressure,
   computeScheduleAdvantage,
   computeSharpSupport,
+  computeSquadAvailabilityScore,
   computeSteamMove,
   computeXgAttackQuality,
   computeXgDefenseQuality,
   computeXgDominance,
   DEFAULT_HOME_ADVANTAGE,
+  isKeyPlayerAbsence,
   roundFeature,
   VENUE_ADVANTAGE_SCORE,
   type AdvancedStatInputs,
@@ -1285,6 +1290,303 @@ function extractClubIntelligenceFeatures(input: {
   return Object.freeze(features);
 }
 
+type PlayerIntelligenceEntry = Readonly<{
+  evidence: Evidence;
+  position?: string;
+  captain?: boolean;
+  availabilityStatus?: "injury" | "suspension";
+  seasonStats?: Readonly<{
+    appearances?: number;
+    minutesPlayed?: number;
+    rating?: number;
+    goals?: number;
+    assists?: number;
+    saves?: number;
+    goalsConceded?: number;
+  }>;
+}>;
+
+function readPlayerSeasonStats(
+  payload: Evidence["payload"],
+): PlayerIntelligenceEntry["seasonStats"] {
+  const raw = payload.seasonStats;
+
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+    return undefined;
+  }
+
+  const stats = raw as Record<string, unknown>;
+  const appearances = asFiniteNumber(stats.appearances);
+  const minutesPlayed = asFiniteNumber(stats.minutesPlayed);
+  const rating = asFiniteNumber(stats.rating);
+  const goals = asFiniteNumber(stats.goals);
+  const assists = asFiniteNumber(stats.assists);
+  const saves = asFiniteNumber(stats.saves);
+  const goalsConceded = asFiniteNumber(stats.goalsConceded);
+
+  return Object.freeze({
+    ...(appearances === undefined ? {} : { appearances }),
+    ...(minutesPlayed === undefined ? {} : { minutesPlayed }),
+    ...(rating === undefined ? {} : { rating }),
+    ...(goals === undefined ? {} : { goals }),
+    ...(assists === undefined ? {} : { assists }),
+    ...(saves === undefined ? {} : { saves }),
+    ...(goalsConceded === undefined ? {} : { goalsConceded }),
+  });
+}
+
+function readPlayerIntelligenceEntry(evidence: Evidence): PlayerIntelligenceEntry {
+  const position =
+    typeof evidence.payload.position === "string"
+      ? evidence.payload.position
+      : undefined;
+  const captain =
+    typeof evidence.payload.captain === "boolean"
+      ? evidence.payload.captain
+      : undefined;
+  const availabilityStatus =
+    evidence.payload.availabilityStatus === "injury" ||
+    evidence.payload.availabilityStatus === "suspension"
+      ? evidence.payload.availabilityStatus
+      : undefined;
+
+  const seasonStats = readPlayerSeasonStats(evidence.payload);
+
+  return Object.freeze({
+    evidence,
+    ...(position === undefined ? {} : { position }),
+    ...(captain === undefined ? {} : { captain }),
+    ...(availabilityStatus === undefined ? {} : { availabilityStatus }),
+    ...(seasonStats === undefined ? {} : { seasonStats }),
+  });
+}
+
+function findPlayerIntelligenceEntries(
+  evidences: readonly Evidence[],
+  side: "away" | "home",
+): readonly PlayerIntelligenceEntry[] {
+  return Object.freeze(
+    evidences
+      .filter(
+        (evidence) =>
+          evidence.type === "PLAYER" && evidence.payload.teamSide === side,
+      )
+      .map(readPlayerIntelligenceEntry),
+  );
+}
+
+function playerAttackContributionFor(
+  entry: PlayerIntelligenceEntry,
+): number | undefined {
+  const stats = entry.seasonStats;
+
+  if (
+    stats === undefined ||
+    stats.appearances === undefined ||
+    stats.appearances <= 0 ||
+    stats.goals === undefined ||
+    stats.assists === undefined
+  ) {
+    return undefined;
+  }
+
+  return computePlayerAttackContribution({
+    appearances: stats.appearances,
+    goals: stats.goals,
+    assists: stats.assists,
+    ...(stats.minutesPlayed === undefined
+      ? {}
+      : { minutesPlayed: stats.minutesPlayed }),
+    ...(stats.rating === undefined ? {} : { rating: stats.rating }),
+  });
+}
+
+/**
+ * P1B: derived Player Intelligence Features for one side from PLAYER
+ * Evidence only (never Provider directly). Availability impact and key-player
+ * status use only confirmed cross-referenced injury/suspension facts already
+ * on the Evidence item; attack contribution and goalkeeper reliability use
+ * only season-stats fields the provider actually returned. Every emitted
+ * Feature omits when its backing metric is missing (honest absence).
+ */
+function extractPlayerIntelligenceFeaturesForSide(input: {
+  readonly entries: readonly PlayerIntelligenceEntry[];
+  readonly side: "away" | "home";
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { entries, side, matchId, generatedAt } = input;
+
+  if (matchId === undefined || entries.length === 0) {
+    return emptyFeatures;
+  }
+
+  const suffix = side === "home" ? "Home" : "Away";
+  const features: Feature[] = [];
+  const primaryEvidenceId = entries[0]?.evidence.id ?? "";
+  const absentEntries = entries.filter(
+    (entry) => entry.availabilityStatus !== undefined,
+  );
+
+  if (absentEntries.length > 0) {
+    const impactValue = roundFeature(
+      computePlayerAvailabilityImpact(absentEntries.map((entry) => entry.position)),
+    );
+    const impactSourceId = absentEntries[0]?.evidence.id ?? primaryEvidenceId;
+    const impactName = `playerAvailabilityImpact${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(impactSourceId, impactName),
+        matchId,
+        name: impactName,
+        value: impactValue,
+        explanation: `Position-weighted availability impact ${impactValue} from ${absentEntries.length} confirmed injury/suspension PLAYER Evidence item(s) (${absentEntries.map((entry) => entry.evidence.id).join(", ")}).`,
+        sourceEvidenceId: impactSourceId,
+        generatedAt,
+      }),
+    );
+
+    const keyMissing = absentEntries.some((entry) => {
+      const attackContribution = playerAttackContributionFor(entry);
+
+      return isKeyPlayerAbsence({
+        ...(entry.captain === undefined ? {} : { captain: entry.captain }),
+        ...(entry.position === undefined ? {} : { position: entry.position }),
+        ...(attackContribution === undefined ? {} : { attackContribution }),
+      });
+    });
+    const keyName = `keyPlayerAvailability${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(impactSourceId, keyName),
+        matchId,
+        name: keyName,
+        value: keyMissing,
+        explanation: `Key player missing = ${String(keyMissing)} from captain/goalkeeper/top-attack-contribution facts on confirmed absences (${absentEntries.map((entry) => entry.evidence.id).join(", ")}).`,
+        sourceEvidenceId: impactSourceId,
+        generatedAt,
+      }),
+    );
+  }
+
+  const squadScoreValue = roundFeature(
+    computeSquadAvailabilityScore({
+      totalListed: entries.length,
+      unavailableCount: absentEntries.length,
+    }),
+  );
+  const squadScoreName = `squadAvailabilityScore${suffix}` as FeatureName;
+  features.push(
+    createFeature({
+      featureId: featureId(primaryEvidenceId, squadScoreName),
+      matchId,
+      name: squadScoreName,
+      value: squadScoreValue,
+      explanation: `Squad availability ${squadScoreValue} = ${String(entries.length - absentEntries.length)}/${String(entries.length)} listed PLAYER Evidence items with no confirmed absence.`,
+      sourceEvidenceId: primaryEvidenceId,
+      generatedAt,
+    }),
+  );
+
+  const attackers = entries.filter(
+    (entry) =>
+      entry.position === "Attacker" &&
+      entry.availabilityStatus === undefined &&
+      playerAttackContributionFor(entry) !== undefined,
+  );
+
+  if (attackers.length > 0) {
+    const contributions = attackers.map(
+      (entry) => playerAttackContributionFor(entry) as number,
+    );
+    const attackValue = roundFeature(
+      contributions.reduce((sum, value) => sum + value, 0) / contributions.length,
+    );
+    const attackSourceId = attackers[0]?.evidence.id ?? primaryEvidenceId;
+    const attackName = `playerAttackContribution${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(attackSourceId, attackName),
+        matchId,
+        name: attackName,
+        value: attackValue,
+        explanation: `Attack contribution ${attackValue} averaged over ${attackers.length} currently-available tracked attacking candidate(s) with season goals/assists (${attackers.map((entry) => entry.evidence.id).join(", ")}).`,
+        sourceEvidenceId: attackSourceId,
+        generatedAt,
+      }),
+    );
+  }
+
+  const goalkeeper = entries.find(
+    (entry) =>
+      entry.position === "Goalkeeper" &&
+      entry.availabilityStatus === undefined &&
+      entry.seasonStats !== undefined &&
+      entry.seasonStats.appearances !== undefined &&
+      entry.seasonStats.appearances > 0 &&
+      (entry.seasonStats.saves !== undefined ||
+        entry.seasonStats.goalsConceded !== undefined ||
+        entry.seasonStats.rating !== undefined),
+  );
+
+  if (goalkeeper?.seasonStats?.appearances !== undefined) {
+    const stats = goalkeeper.seasonStats;
+    const reliability = computeGoalkeeperReliability({
+      appearances: stats.appearances as number,
+      ...(stats.saves === undefined ? {} : { saves: stats.saves }),
+      ...(stats.goalsConceded === undefined
+        ? {}
+        : { goalsConceded: stats.goalsConceded }),
+      ...(stats.rating === undefined ? {} : { rating: stats.rating }),
+    });
+
+    if (reliability !== undefined) {
+      const value = roundFeature(reliability);
+      const gkName = `goalkeeperReliability${suffix}` as FeatureName;
+      features.push(
+        createFeature({
+          featureId: featureId(goalkeeper.evidence.id, gkName),
+          matchId,
+          name: gkName,
+          value,
+          explanation: `Goalkeeper reliability ${value} for the currently-available squad-listed primary/listed goalkeeper from season saves/goals-conceded/rating (Evidence ${goalkeeper.evidence.id}).`,
+          sourceEvidenceId: goalkeeper.evidence.id,
+          generatedAt,
+        }),
+      );
+    }
+  }
+
+  return Object.freeze(features);
+}
+
+/**
+ * P1B: derived Player Intelligence Features from PLAYER Evidence only.
+ * Rules consume these Features; never Provider data directly.
+ */
+function extractPlayerIntelligenceFeatures(input: {
+  readonly evidences: readonly Evidence[];
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { evidences, matchId, generatedAt } = input;
+  const features: Feature[] = [];
+
+  for (const side of ["home", "away"] as const) {
+    const entries = findPlayerIntelligenceEntries(evidences, side);
+    features.push(
+      ...extractPlayerIntelligenceFeaturesForSide({
+        entries,
+        side,
+        matchId,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
 /**
  * I2B: derived Market Intelligence Features from ODDS Evidence only.
  * Omit Feature (→ Rule INAPPLICABLE) when required movement / public / sharp facts are absent.
@@ -1630,6 +1932,14 @@ export class FeatureExtractor {
 
     features.push(
       ...extractMarketIntelligenceFeatures({
+        evidences,
+        matchId,
+        generatedAt,
+      }),
+    );
+
+    features.push(
+      ...extractPlayerIntelligenceFeatures({
         evidences,
         matchId,
         generatedAt,

@@ -173,6 +173,44 @@ export function buildMvpIntelligenceNarrative(
     analysis.features,
     "managerStabilityAway",
   );
+  const playerAvailabilityImpactHome = numericFeature(
+    analysis.features,
+    "playerAvailabilityImpactHome",
+  );
+  const playerAvailabilityImpactAway = numericFeature(
+    analysis.features,
+    "playerAvailabilityImpactAway",
+  );
+  const squadAvailabilityScoreHome = numericFeature(
+    analysis.features,
+    "squadAvailabilityScoreHome",
+  );
+  const squadAvailabilityScoreAway = numericFeature(
+    analysis.features,
+    "squadAvailabilityScoreAway",
+  );
+  const playerAttackContributionHome = numericFeature(
+    analysis.features,
+    "playerAttackContributionHome",
+  );
+  const playerAttackContributionAway = numericFeature(
+    analysis.features,
+    "playerAttackContributionAway",
+  );
+  const goalkeeperReliabilityHome = numericFeature(
+    analysis.features,
+    "goalkeeperReliabilityHome",
+  );
+  const goalkeeperReliabilityAway = numericFeature(
+    analysis.features,
+    "goalkeeperReliabilityAway",
+  );
+  const keyPlayerMissingHome = analysis.features.find(
+    (feature) => feature.name === "keyPlayerAvailabilityHome",
+  )?.value;
+  const keyPlayerMissingAway = analysis.features.find(
+    (feature) => feature.name === "keyPlayerAvailabilityAway",
+  )?.value;
 
   const overview = [
     `${homeTeam} vs ${awayTeam}: Most Likely is ${most.label} (${formatPct(most.probability)}).`,
@@ -195,6 +233,7 @@ export function buildMvpIntelligenceNarrative(
     `MatchContextFeatures (derived from MATCH_CONTEXT Evidence): fatigueIndex home=${fatigueHome ?? "n/a"} away=${fatigueAway ?? "n/a"}; scheduleAdvantage=${scheduleAdvantage ?? "n/a"}; homeStability=${homeStability ?? "n/a"}; rotationPressure home=${rotationHome ?? "n/a"} away=${rotationAway ?? "n/a"}; knockoutContext=${knockoutContext ?? "n/a"}.`,
     `MarketIntelligenceFeatures (derived from ODDS Evidence; supporting only): marketConsensus=${marketConsensus ?? "n/a"}; steamMove=${steamMove ?? "n/a"}; reverseLineMovement=${reverseLineMovement ?? "n/a"}; marketVolatility=${marketVolatility ?? "n/a"}; sharpSupport=${sharpSupport ?? "n/a"}.`,
     `ClubIntelligenceFeatures (derived from CLUB_INTELLIGENCE Evidence): clubStrength home=${clubStrengthHome ?? "n/a"} away=${clubStrengthAway ?? "n/a"}; leagueStrength home=${leagueStrengthHome ?? "n/a"} away=${leagueStrengthAway ?? "n/a"}; formStrength home=${formStrengthHome ?? "n/a"} away=${formStrengthAway ?? "n/a"}; clubAttackStrength home=${clubAttackStrengthHome ?? "n/a"} away=${clubAttackStrengthAway ?? "n/a"}; clubDefensiveStrength home=${clubDefensiveStrengthHome ?? "n/a"} away=${clubDefensiveStrengthAway ?? "n/a"}; managerStability home=${managerStabilityHome ?? "n/a"} away=${managerStabilityAway ?? "n/a"}.`,
+    `PlayerIntelligenceFeatures (derived from PLAYER Evidence): playerAvailabilityImpact home=${playerAvailabilityImpactHome ?? "n/a"} away=${playerAvailabilityImpactAway ?? "n/a"}; squadAvailabilityScore home=${squadAvailabilityScoreHome ?? "n/a"} away=${squadAvailabilityScoreAway ?? "n/a"}; keyPlayerAvailability home=${keyPlayerMissingHome ?? "n/a"} away=${keyPlayerMissingAway ?? "n/a"}; playerAttackContribution home=${playerAttackContributionHome ?? "n/a"} away=${playerAttackContributionAway ?? "n/a"}; goalkeeperReliability home=${goalkeeperReliabilityHome ?? "n/a"} away=${goalkeeperReliabilityAway ?? "n/a"}.`,
   ].join(" ");
 
   const riskRules = analysis.ruleResults.filter(
@@ -202,6 +241,7 @@ export function buildMvpIntelligenceNarrative(
       rule.status === "PASS" &&
       (rule.ruleName.startsWith("AVAILABILITY_") ||
         rule.ruleName.startsWith("VENUE_") ||
+        rule.ruleName.startsWith("KEY_PLAYER_MISSING_") ||
         rule.ruleName.includes("FRAGILE")),
   );
   const riskBody = [

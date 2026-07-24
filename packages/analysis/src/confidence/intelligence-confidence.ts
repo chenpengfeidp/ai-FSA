@@ -72,6 +72,15 @@ const P1_CHANNEL_RULES = new Set([
   "DEFENSE_STRENGTH_EDGE_AWAY",
   "MANAGER_STABILITY",
   "MANAGER_STABILITY_AWAY",
+  // P1B Player Intelligence — comparative player edges participate like other P1 edges.
+  "PLAYER_AVAILABILITY_EDGE_HOME",
+  "PLAYER_AVAILABILITY_EDGE_AWAY",
+  "KEY_PLAYER_MISSING_HOME",
+  "KEY_PLAYER_MISSING_AWAY",
+  "PLAYER_ATTACK_EDGE_HOME",
+  "PLAYER_ATTACK_EDGE_AWAY",
+  "GOALKEEPER_EDGE_HOME",
+  "GOALKEEPER_EDGE_AWAY",
 ]);
 
 function clamp(value: number, lo: number, hi: number): number {
@@ -174,6 +183,14 @@ function evidenceCompleteness(evidences: readonly Evidence[]): number {
       (evidence) =>
         evidence.type === "CLUB_INTELLIGENCE" &&
         evidence.payload.teamSide === "away",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "PLAYER" && evidence.payload.teamSide === "home",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "PLAYER" && evidence.payload.teamSide === "away",
     ),
   ];
   const present = checks.filter(Boolean).length;
@@ -486,6 +503,19 @@ export function computeIntelligenceConfidence(input: {
   if (!hasClubIntelligenceHome || !hasClubIntelligenceAway) {
     limitations.push(
       "CLUB_INTELLIGENCE Evidence incomplete; club/league/form/manager strength Features may be absent (never estimated from unavailable standings).",
+    );
+  }
+
+  const hasPlayerHome = input.evidenceSet.some(
+    (evidence) => evidence.type === "PLAYER" && evidence.payload.teamSide === "home",
+  );
+  const hasPlayerAway = input.evidenceSet.some(
+    (evidence) => evidence.type === "PLAYER" && evidence.payload.teamSide === "away",
+  );
+
+  if (!hasPlayerHome || !hasPlayerAway) {
+    limitations.push(
+      "PLAYER Evidence incomplete; player availability/attack/goalkeeper Features may be absent (never estimated from unlisted squads).",
     );
   }
 

@@ -5,12 +5,12 @@
 - Last updated: 2026-07-24
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **Football Intelligence v2 Wave 2 P1A Player Intelligence Evidence** complete; prior **L1B** Club Intelligence Features/Rule/Confidence/Projection + **L1A** Club Intelligence Evidence + **DA** Domain Architecture + **P0** + **A1.5** complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
+- Current task status: **Football Intelligence v2 Wave 2 P1B Player Intelligence Feature/Rule/Confidence/Projection** complete; prior **P1A** Player Intelligence Evidence + **L1B** Club Intelligence Features/Rule/Confidence/Projection + **L1A** Club Intelligence Evidence + **DA** Domain Architecture + **P0** + **A1.5** complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **P1A** Player Intelligence Evidence complete (Wave 2)
-- Last completed delivery: Sprint **P1A** (`docs/sprints/P1/P1A_PLAYER_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`); prior L1B, L1A, DA, P0, A1.5, A1, R1, I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
+- Current sprint: **P1B** Player Intelligence Feature/Rule/Confidence/Projection complete (Wave 2)
+- Last completed delivery: Sprint **P1B** (`docs/sprints/P1/P1B_PLAYER_INTELLIGENCE_COMPLETION_REPORT.md`); prior P1A, L1B, L1A, DA, P0, A1.5, A1, R1, I2B, I2A, I1B, I1A, F1.3B, F1.3A, F1.2b, F1.2a, F1.1E
 - Demo: recorded cassette `football:100001` includes full xG windows + Match Context + Club Intelligence + enriched Player Intelligence (season stats/age/captain/availability/match squad status); odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`; evaluation demo population + Evaluation History in `@fas/statistics`
-- Next authorized work: **P1B Player Intelligence Features / Rule / Confidence / Projection** (Wave 2, per `docs/reviews/PLAYER_INTELLIGENCE_MVP_SCOPE_REVIEW.md`)
+- Next authorized work: **M1A Manager Intelligence Evidence** (Wave 2, per `docs/reviews/PLAYER_INTELLIGENCE_MVP_SCOPE_REVIEW.md` and DA L-track sequencing)
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
@@ -48,7 +48,7 @@ Import MATCH_INFO + TEAM_FORM×2 + STATISTICS×2
   → Web Match Center / Session / Workspace / Library
 ```
 
-Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG Evidence is **F1.3A** (`EXPECTED_GOALS`); Feature/Rule/Confidence/Projection consume is **F1.3B** (`feature.v2.f13b.xg` / `rule.mvp.f13b.xg` / `projection.v2.f13b.xg`). Match Context Evidence is **I1A** (`MATCH_CONTEXT`); Feature/Rule/Confidence/Projection consume is **I1B** (`feature.v2.i1b.context` / `rule.mvp.i1b.context` / `projection.v2.i1b.context`). Odds & Market Evidence depth is **I2A** (extended `ODDS` payload + Workspace/Report); Market Intelligence Feature/Rule/Confidence/Projection supporting consume is **I2B** (`feature.v2.i2b.market` / `rule.mvp.i2b.market` / `projection.v2.i2b.market`; Market Rules `channel: none`). Prediction Evaluation is **A1** (`MATCH_RESULT` Evidence + `@fas/statistics` `evaluatePrediction`; Report/Workspace Actual + Evaluation overlays; never mutates sealed Projection). Evaluation History is **A1.5** (append-only history records + memory/postgres repository; `GET /api/evaluation-history`; Workspace History section). Club Intelligence Evidence is **L1A** (`CLUB_INTELLIGENCE` from standings + optional manager); Feature/Rule/Confidence/Projection consume is **L1B** (`feature.v2.l1b.club` / `rule.mvp.l1b.club` / `projection.v2.l1b.club`). Player Intelligence Evidence is **P1A** (extended `PLAYER` payload: age/captain/availabilityStatus/matchSquadStatus/seasonStats, capped candidate coverage; no Feature/Rule/Confidence/Projection consume yet — reserved for **P1B**).
+Default Match Center schedule source is Football Data (`FOOTBALL_DATA_PROVIDER_MODE=recorded`): cassette fixtures with Form/Stats/H2H mapped through FAS Football Domain Model before Evidence (never raw API-Football JSON). Odds (`ODDS_PROVIDER_MODE=recorded|live`) remains an optional market layer / `odds:*` analyze path; when Football Data mode is `fixture`, Match Center falls back to the Odds calendar. Live Football Data uses API-Sports official host + `API_FOOTBALL_KEY` (`x-apisports-key`). Live Odds still requires `THE_ODDS_API_KEY` and `ODDS_SPORT_KEYS` fan-out. True xG Evidence is **F1.3A** (`EXPECTED_GOALS`); Feature/Rule/Confidence/Projection consume is **F1.3B** (`feature.v2.f13b.xg` / `rule.mvp.f13b.xg` / `projection.v2.f13b.xg`). Match Context Evidence is **I1A** (`MATCH_CONTEXT`); Feature/Rule/Confidence/Projection consume is **I1B** (`feature.v2.i1b.context` / `rule.mvp.i1b.context` / `projection.v2.i1b.context`). Odds & Market Evidence depth is **I2A** (extended `ODDS` payload + Workspace/Report); Market Intelligence Feature/Rule/Confidence/Projection supporting consume is **I2B** (`feature.v2.i2b.market` / `rule.mvp.i2b.market` / `projection.v2.i2b.market`; Market Rules `channel: none`). Prediction Evaluation is **A1** (`MATCH_RESULT` Evidence + `@fas/statistics` `evaluatePrediction`; Report/Workspace Actual + Evaluation overlays; never mutates sealed Projection). Evaluation History is **A1.5** (append-only history records + memory/postgres repository; `GET /api/evaluation-history`; Workspace History section). Club Intelligence Evidence is **L1A** (`CLUB_INTELLIGENCE` from standings + optional manager); Feature/Rule/Confidence/Projection consume is **L1B** (`feature.v2.l1b.club` / `rule.mvp.l1b.club` / `projection.v2.l1b.club`). Player Intelligence Evidence is **P1A** (extended `PLAYER` payload: age/captain/availabilityStatus/matchSquadStatus/seasonStats, capped candidate coverage); Feature/Rule/Confidence/Projection consume is **P1B** (`feature.v2.p1b.player` / `rule.mvp.p1b.player` / `projection.v2.p1b.player`).
 
 Implemented packages used by the slice (non-exhaustive):
 
@@ -233,17 +233,18 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. Intelligence MVP + A1 Evaluation + A1.5 Evaluation History are implemented with default offline recorded + memory Evidence/History.
+No numbered sprint is active. Intelligence MVP + A1 Evaluation + A1.5 Evaluation History are implemented with default offline recorded + memory Evidence/History. Wave 2 of the Football Intelligence v2 DA (L1 Club, L3 Player) is now complete through Feature/Rule/Confidence/Projection consume; next authorized Wave 2 work is **M1A Manager Intelligence Evidence**.
 
 Recommended follow-ons (ordered):
 
-1. Follow **`docs/40_PRODUCT_ROADMAP.md`**: next product sprint **A2 Calibration** (then K1/C1/S1/R1 → v1.0 → v2.0 as authorized);
-2. Keep Odds as optional market layer only; do not re-merge schedule ownership into Odds;
-3. Compose migrate automation / postgres-mode smoke evidence (platform companion);
-4. Do not start a sprint without citing doc 40 Sprint id;
-5. Later product items only as listed in doc 40 (no ad-hoc engine invention).
+1. **M1A Manager Intelligence Evidence** (Wave 2, DA L-track), then the matching **M1B** Feature/Rule/Confidence/Projection sprint;
+2. Follow **`docs/40_PRODUCT_ROADMAP.md`** in parallel for the trust track: **A2 Calibration** (then K1/C1/S1/R1 → v1.0 → v2.0 as authorized);
+3. Keep Odds as optional market layer only; do not re-merge schedule ownership into Odds;
+4. Compose migrate automation / postgres-mode smoke evidence (platform companion);
+5. Do not start a sprint without citing doc 40 Sprint id (and, for Wave 2 Intelligence sprints, the DA + Scope Review);
+6. Later product items only as listed in doc 40 (no ad-hoc engine invention).
 
-Recently delivered: **A1.5** Evaluation Platform Foundation (`docs/sprints/A1/A1.5_EVALUATION_PLATFORM_FOUNDATION_COMPLETION_REPORT.md`); **A1** Prediction Evaluation; Architecture Freeze Review **v0.3**; Intelligence MVP (F1.2–I2B); prior Freeze v0.2; F.1 Football Data Provider; Match Center; ZH-2; `docs/PROJECT_INDEX.md`.
+Recently delivered: **P1B** Player Intelligence Feature/Rule/Confidence/Projection (`docs/sprints/P1/P1B_PLAYER_INTELLIGENCE_COMPLETION_REPORT.md`); **P1A** Player Intelligence Evidence; **L1B** Club Intelligence Feature/Rule/Confidence/Projection; **L1A** Club Intelligence Evidence; **A1.5** Evaluation Platform Foundation; **A1** Prediction Evaluation; Architecture Freeze Review **v0.3**; Intelligence MVP (F1.2–I2B); prior Freeze v0.2; F.1 Football Data Provider; Match Center; ZH-2; `docs/PROJECT_INDEX.md`.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

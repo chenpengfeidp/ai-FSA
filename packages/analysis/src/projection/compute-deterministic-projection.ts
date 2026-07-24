@@ -233,6 +233,16 @@ export function computeDeterministicMatchProjection(input: {
     "DEFENSE_STRENGTH_EDGE_AWAY",
     "MANAGER_STABILITY",
     "MANAGER_STABILITY_AWAY",
+    // P1B Player Intelligence — comparative player edges participate in the
+    // existing football channel like other rule edges (no softmax redesign).
+    "PLAYER_AVAILABILITY_EDGE_HOME",
+    "PLAYER_AVAILABILITY_EDGE_AWAY",
+    "KEY_PLAYER_MISSING_HOME",
+    "KEY_PLAYER_MISSING_AWAY",
+    "PLAYER_ATTACK_EDGE_HOME",
+    "PLAYER_ATTACK_EDGE_AWAY",
+    "GOALKEEPER_EDGE_HOME",
+    "GOALKEEPER_EDGE_AWAY",
   ]);
   const footballRules = input.ruleResults.filter((rule) =>
     footballChannelRules.has(rule.ruleName),

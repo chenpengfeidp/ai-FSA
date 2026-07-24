@@ -60,7 +60,10 @@ const TAU_CLUB_FORM_STRENGTH = 15;
 const TAU_CLUB_ATTACK_STRENGTH = 10;
 const TAU_CLUB_DEFENSE_STRENGTH = 10;
 const TAU_MANAGER_STABILITY = 20;
-const RULE_POLICY = "rule.mvp.l1b.club";
+const TAU_PLAYER_AVAILABILITY = 10;
+const TAU_PLAYER_ATTACK = 15;
+const TAU_GOALKEEPER_EDGE = 15;
+const RULE_POLICY = "rule.mvp.p1b.player";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -1213,6 +1216,154 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
       );
     },
   }) satisfies FootballRuleDefinition,
+  // P1B Player Intelligence — comparative edges consume PLAYER-derived
+  // Features only; participate in the existing football channel like other edges.
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:player-availability-edge-home:v1",
+    ruleName: "PLAYER_AVAILABILITY_EDGE_HOME",
+    weight: 0.5,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "playerAvailabilityImpactHome",
+      "playerAvailabilityImpactAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("playerAvailabilityImpactHome"));
+      const away = numericValue(features.get("playerAvailabilityImpactAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_PLAYER_AVAILABILITY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:player-availability-edge-away:v1",
+    ruleName: "PLAYER_AVAILABILITY_EDGE_AWAY",
+    weight: 0.5,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "playerAvailabilityImpactHome",
+      "playerAvailabilityImpactAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("playerAvailabilityImpactHome"));
+      const away = numericValue(features.get("playerAvailabilityImpactAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_PLAYER_AVAILABILITY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:key-player-missing-home:v1",
+    ruleName: "KEY_PLAYER_MISSING_HOME",
+    weight: 0.55,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "keyPlayerAvailabilityHome",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean =>
+      booleanValue(features.get("keyPlayerAvailabilityHome")) === true,
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:key-player-missing-away:v1",
+    ruleName: "KEY_PLAYER_MISSING_AWAY",
+    weight: 0.55,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "keyPlayerAvailabilityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean =>
+      booleanValue(features.get("keyPlayerAvailabilityAway")) === true,
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:player-attack-edge-home:v1",
+    ruleName: "PLAYER_ATTACK_EDGE_HOME",
+    weight: 0.45,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "playerAttackContributionHome",
+      "playerAttackContributionAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("playerAttackContributionHome"));
+      const away = numericValue(features.get("playerAttackContributionAway"));
+
+      return (
+        home !== undefined && away !== undefined && home - away >= TAU_PLAYER_ATTACK
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:player-attack-edge-away:v1",
+    ruleName: "PLAYER_ATTACK_EDGE_AWAY",
+    weight: 0.45,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "playerAttackContributionHome",
+      "playerAttackContributionAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("playerAttackContributionHome"));
+      const away = numericValue(features.get("playerAttackContributionAway"));
+
+      return (
+        home !== undefined && away !== undefined && away - home >= TAU_PLAYER_ATTACK
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:goalkeeper-edge-home:v1",
+    ruleName: "GOALKEEPER_EDGE_HOME",
+    weight: 0.35,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "goalkeeperReliabilityHome",
+      "goalkeeperReliabilityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("goalkeeperReliabilityHome"));
+      const away = numericValue(features.get("goalkeeperReliabilityAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_GOALKEEPER_EDGE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:goalkeeper-edge-away:v1",
+    ruleName: "GOALKEEPER_EDGE_AWAY",
+    weight: 0.35,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "goalkeeperReliabilityHome",
+      "goalkeeperReliabilityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("goalkeeperReliabilityHome"));
+      const away = numericValue(features.get("goalkeeperReliabilityAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_GOALKEEPER_EDGE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
   // Market rules use channel "none" — findings only; never enter football softmax.
   Object.freeze({
     kind: "football",
@@ -1356,6 +1507,10 @@ function numericValue(feature: Feature | undefined): number | undefined {
   return typeof feature?.value === "number" && Number.isFinite(feature.value)
     ? feature.value
     : undefined;
+}
+
+function booleanValue(feature: Feature | undefined): boolean | undefined {
+  return typeof feature?.value === "boolean" ? feature.value : undefined;
 }
 
 function latestGeneratedAt(features: readonly Feature[]): string {

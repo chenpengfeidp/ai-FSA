@@ -31,6 +31,8 @@ export type RuleId =
   | "rule:form-near-parity:v1"
   | "rule:form-strength-edge:v1"
   | "rule:form-strength-edge-away:v1"
+  | "rule:goalkeeper-edge-away:v1"
+  | "rule:goalkeeper-edge-home:v1"
   | "rule:goals-scored-away-edge:v1"
   | "rule:goals-scored-home-edge:v1"
   | "rule:h2h-supports-away:v1"
@@ -40,6 +42,8 @@ export type RuleId =
   | "rule:home-stability:v1"
   | "rule:home-team-present:v1"
   | "rule:home-venue-form-edge:v1"
+  | "rule:key-player-missing-away:v1"
+  | "rule:key-player-missing-home:v1"
   | "rule:kickoff-present:v1"
   | "rule:knockout-context:v1"
   | "rule:league-strength-edge:v1"
@@ -57,6 +61,10 @@ export type RuleId =
   | "rule:steam-move:v1"
   | "rule:momentum-away:v1"
   | "rule:momentum-home:v1"
+  | "rule:player-attack-edge-away:v1"
+  | "rule:player-attack-edge-home:v1"
+  | "rule:player-availability-edge-away:v1"
+  | "rule:player-availability-edge-home:v1"
   | "rule:possession-away-edge:v1"
   | "rule:possession-home-edge:v1"
   | "rule:rest-advantage-away:v1"
@@ -104,6 +112,8 @@ export type RuleName =
   | "FORM_NEAR_PARITY"
   | "FORM_STRENGTH_EDGE"
   | "FORM_STRENGTH_EDGE_AWAY"
+  | "GOALKEEPER_EDGE_AWAY"
+  | "GOALKEEPER_EDGE_HOME"
   | "GOALS_SCORED_AWAY_EDGE"
   | "GOALS_SCORED_HOME_EDGE"
   | "H2H_SUPPORTS_AWAY"
@@ -113,6 +123,8 @@ export type RuleName =
   | "HOME_STABILITY"
   | "HOME_TEAM_PRESENT"
   | "HOME_VENUE_FORM_EDGE"
+  | "KEY_PLAYER_MISSING_AWAY"
+  | "KEY_PLAYER_MISSING_HOME"
   | "KICKOFF_PRESENT"
   | "KNOCKOUT_CONTEXT"
   | "LEAGUE_STRENGTH_EDGE"
@@ -130,6 +142,10 @@ export type RuleName =
   | "STEAM_MOVE"
   | "MOMENTUM_AWAY"
   | "MOMENTUM_HOME"
+  | "PLAYER_ATTACK_EDGE_AWAY"
+  | "PLAYER_ATTACK_EDGE_HOME"
+  | "PLAYER_AVAILABILITY_EDGE_AWAY"
+  | "PLAYER_AVAILABILITY_EDGE_HOME"
   | "POSSESSION_AWAY_EDGE"
   | "POSSESSION_HOME_EDGE"
   | "REST_ADVANTAGE_AWAY"
@@ -214,6 +230,8 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:form-near-parity:v1",
   "rule:form-strength-edge:v1",
   "rule:form-strength-edge-away:v1",
+  "rule:goalkeeper-edge-away:v1",
+  "rule:goalkeeper-edge-home:v1",
   "rule:goals-scored-away-edge:v1",
   "rule:goals-scored-home-edge:v1",
   "rule:h2h-supports-away:v1",
@@ -223,6 +241,8 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:home-stability:v1",
   "rule:home-team-present:v1",
   "rule:home-venue-form-edge:v1",
+  "rule:key-player-missing-away:v1",
+  "rule:key-player-missing-home:v1",
   "rule:kickoff-present:v1",
   "rule:knockout-context:v1",
   "rule:league-strength-edge:v1",
@@ -240,6 +260,10 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:steam-move:v1",
   "rule:momentum-away:v1",
   "rule:momentum-home:v1",
+  "rule:player-attack-edge-away:v1",
+  "rule:player-attack-edge-home:v1",
+  "rule:player-availability-edge-away:v1",
+  "rule:player-availability-edge-home:v1",
   "rule:possession-away-edge:v1",
   "rule:possession-home-edge:v1",
   "rule:rest-advantage-away:v1",
@@ -287,6 +311,8 @@ const ruleNames: ReadonlySet<string> = new Set([
   "FORM_NEAR_PARITY",
   "FORM_STRENGTH_EDGE",
   "FORM_STRENGTH_EDGE_AWAY",
+  "GOALKEEPER_EDGE_AWAY",
+  "GOALKEEPER_EDGE_HOME",
   "GOALS_SCORED_AWAY_EDGE",
   "GOALS_SCORED_HOME_EDGE",
   "H2H_SUPPORTS_AWAY",
@@ -296,6 +322,8 @@ const ruleNames: ReadonlySet<string> = new Set([
   "HOME_STABILITY",
   "HOME_TEAM_PRESENT",
   "HOME_VENUE_FORM_EDGE",
+  "KEY_PLAYER_MISSING_AWAY",
+  "KEY_PLAYER_MISSING_HOME",
   "KICKOFF_PRESENT",
   "KNOCKOUT_CONTEXT",
   "LEAGUE_STRENGTH_EDGE",
@@ -313,6 +341,10 @@ const ruleNames: ReadonlySet<string> = new Set([
   "STEAM_MOVE",
   "MOMENTUM_AWAY",
   "MOMENTUM_HOME",
+  "PLAYER_ATTACK_EDGE_AWAY",
+  "PLAYER_ATTACK_EDGE_HOME",
+  "PLAYER_AVAILABILITY_EDGE_AWAY",
+  "PLAYER_AVAILABILITY_EDGE_HOME",
   "POSSESSION_AWAY_EDGE",
   "POSSESSION_HOME_EDGE",
   "REST_ADVANTAGE_AWAY",

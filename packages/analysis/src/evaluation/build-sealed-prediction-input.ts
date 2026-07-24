@@ -59,6 +59,6 @@ export function buildSealedPredictionInput(
     featureNames: Object.freeze(features.map((feature) => feature.name)),
     projectionModelVersion: projection.projectionModelVersion,
     featureModelVersion: analysis.featureBundle.featureModelVersion,
-    ruleSetVersion: "rule.mvp.l1b.club",
+    ruleSetVersion: "rule.mvp.p1b.player",
   });
 }

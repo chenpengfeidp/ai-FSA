@@ -286,7 +286,7 @@ describe("FeatureExtractor", () => {
     });
     const bundle = new FeatureExtractor().extractBundle([matchInfo, odds]);
 
-    expect(bundle.featureModelVersion).toBe("feature.v2.l1b.club");
+    expect(bundle.featureModelVersion).toBe("feature.v2.p1b.player");
     expect(bundle.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "marketConsensus" }),
@@ -539,10 +539,152 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.l1b.club");
+    expect(bundle.featureModelVersion).toBe("feature.v2.p1b.player");
     expect(
       bundle.features.some((feature) => feature.name === "availabilityPenaltyAway"),
     ).toBe(false);
+  });
+
+  it("extracts Player Intelligence Features from PLAYER Evidence without fabricating", () => {
+    const matchId = createMatchId("match-1");
+    const matchInfo = makeEvidence();
+    const playerEvidence = (id: string, payload: JsonObject): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "PLAYER",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "unverified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload,
+      });
+
+    const homeGoalkeeper = playerEvidence("evidence-player-home-gk", {
+      playerId: "p-home-gk",
+      name: "Home Keeper",
+      teamId: "team-home",
+      teamName: "Liverpool",
+      teamSide: "home",
+      position: "Goalkeeper",
+      seasonStats: { appearances: 10, saves: 30, goalsConceded: 10, rating: 7.2 },
+    });
+    const homeAttackerInjured = playerEvidence("evidence-player-home-att1", {
+      playerId: "p-home-att1",
+      name: "Home Striker",
+      teamId: "team-home",
+      teamName: "Liverpool",
+      teamSide: "home",
+      position: "Attacker",
+      captain: true,
+      availabilityStatus: "injury",
+      seasonStats: {
+        appearances: 10,
+        goals: 8,
+        assists: 2,
+        minutesPlayed: 850,
+        rating: 7.8,
+      },
+    });
+    const homeAttackerAvailable = playerEvidence("evidence-player-home-att2", {
+      playerId: "p-home-att2",
+      name: "Home Winger",
+      teamId: "team-home",
+      teamName: "Liverpool",
+      teamSide: "home",
+      position: "Attacker",
+      seasonStats: {
+        appearances: 10,
+        goals: 1,
+        assists: 1,
+        minutesPlayed: 300,
+        rating: 6.5,
+      },
+    });
+    const awayGoalkeeperNoStats = playerEvidence("evidence-player-away-gk", {
+      playerId: "p-away-gk",
+      name: "Away Keeper",
+      teamId: "team-away",
+      teamName: "Chelsea",
+      teamSide: "away",
+      position: "Goalkeeper",
+    });
+    const awayDefenderSuspended = playerEvidence("evidence-player-away-def", {
+      playerId: "p-away-def",
+      name: "Away Defender",
+      teamId: "team-away",
+      teamName: "Chelsea",
+      teamSide: "away",
+      position: "Defender",
+      captain: false,
+      availabilityStatus: "suspension",
+    });
+
+    const bundle = new FeatureExtractor().extractBundle([
+      matchInfo,
+      homeGoalkeeper,
+      homeAttackerInjured,
+      homeAttackerAvailable,
+      awayGoalkeeperNoStats,
+      awayDefenderSuspended,
+    ]);
+
+    const byName = (name: string): unknown =>
+      bundle.features.find((feature) => feature.name === name)?.value;
+
+    expect(byName("playerAvailabilityImpactHome")).toBe(25);
+    expect(byName("keyPlayerAvailabilityHome")).toBe(true);
+    expect(byName("squadAvailabilityScoreHome")).toBeCloseTo(66.6667, 3);
+    expect(byName("playerAttackContributionHome")).toBeCloseTo(46.2619, 3);
+    expect(byName("goalkeeperReliabilityHome")).toBe(100);
+
+    expect(byName("playerAvailabilityImpactAway")).toBe(15);
+    expect(byName("keyPlayerAvailabilityAway")).toBe(false);
+    expect(byName("squadAvailabilityScoreAway")).toBe(50);
+    expect(byName("playerAttackContributionAway")).toBeUndefined();
+    expect(byName("goalkeeperReliabilityAway")).toBeUndefined();
+
+    const availabilityFeature = bundle.features.find(
+      (feature) => feature.name === "playerAvailabilityImpactHome",
+    );
+    expect(availabilityFeature?.sourceEvidenceId).toBe("evidence-player-home-att1");
+    const attackFeature = bundle.features.find(
+      (feature) => feature.name === "playerAttackContributionHome",
+    );
+    expect(attackFeature?.sourceEvidenceId).toBe("evidence-player-home-att2");
+    const gkFeature = bundle.features.find(
+      (feature) => feature.name === "goalkeeperReliabilityHome",
+    );
+    expect(gkFeature?.sourceEvidenceId).toBe("evidence-player-home-gk");
+  });
+
+  it("omits all Player Intelligence Features when no PLAYER Evidence exists", () => {
+    const matchInfo = makeEvidence();
+
+    const bundle = new FeatureExtractor().extractBundle([matchInfo]);
+
+    const playerFeatureNames = [
+      "playerAvailabilityImpactHome",
+      "playerAvailabilityImpactAway",
+      "keyPlayerAvailabilityHome",
+      "keyPlayerAvailabilityAway",
+      "squadAvailabilityScoreHome",
+      "squadAvailabilityScoreAway",
+      "playerAttackContributionHome",
+      "playerAttackContributionAway",
+      "goalkeeperReliabilityHome",
+      "goalkeeperReliabilityAway",
+    ];
+
+    for (const name of playerFeatureNames) {
+      expect(bundle.features.some((feature) => feature.name === name)).toBe(false);
+    }
   });
 
   it("extracts xG Features from EXPECTED_GOALS Evidence without fabricating", () => {
@@ -682,7 +824,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.l1b.club");
+    expect(bundle.featureModelVersion).toBe("feature.v2.p1b.player");
   });
 
   it("keeps xG Features absent when EXPECTED_GOALS Evidence is missing", () => {
@@ -888,7 +1030,7 @@ describe("FeatureExtractor", () => {
         expect.objectContaining({ name: "knockoutContext", value: 0 }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.l1b.club");
+    expect(bundle.featureModelVersion).toBe("feature.v2.p1b.player");
   });
 
   it("keeps Context Features absent when MATCH_CONTEXT Evidence is missing", () => {

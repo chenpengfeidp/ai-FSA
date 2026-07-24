@@ -444,6 +444,204 @@ export function computeManagerStability(managerTenureDays: number): number {
   return clamp((managerTenureDays / BASELINE_MANAGER_TENURE_DAYS) * 100, 0, 100);
 }
 
+export const BASELINE_PLAYER_CONTRIBUTION_PER_MATCH = 0.5;
+export const BASELINE_PLAYER_RATING = 7.0;
+export const BASELINE_PLAYER_MINUTES_PER_MATCH = 90;
+export const BASELINE_GOALKEEPER_SAVES_PER_MATCH = 3;
+export const BASELINE_GOALKEEPER_GOALS_CONCEDED_PER_MATCH = 1.3;
+export const DEFAULT_POSITION_AVAILABILITY_WEIGHT = 15;
+
+const POSITION_AVAILABILITY_WEIGHTS: ReadonlyMap<string, number> = new Map([
+  ["Goalkeeper", 30],
+  ["Attacker", 25],
+  ["Midfielder", 18],
+  ["Defender", 15],
+]);
+
+/**
+ * P1B: fixed, position-based importance weight used only to weigh a
+ * confirmed absence (never to rank players who are present).
+ */
+export function positionAvailabilityWeight(position: string | undefined): number {
+  if (position === undefined) {
+    return DEFAULT_POSITION_AVAILABILITY_WEIGHT;
+  }
+
+  return (
+    POSITION_AVAILABILITY_WEIGHTS.get(position) ??
+    DEFAULT_POSITION_AVAILABILITY_WEIGHT
+  );
+}
+
+/**
+ * P1B Position-weighted availability impact in [0, 100] from the positions
+ * of players currently cross-referenced as injured/suspended (PLAYER.
+ * availabilityStatus) on one side. Caller gates emission on the presence of
+ * INJURY/SUSPENSION Evidence for the side — this never invents an absence.
+ */
+export function computePlayerAvailabilityImpact(
+  absentPositions: readonly (string | undefined)[],
+): number {
+  const raw = absentPositions.reduce(
+    (sum, position) => sum + positionAvailabilityWeight(position),
+    0,
+  );
+
+  return clamp(raw, 0, 100);
+}
+
+/**
+ * P1B Squad availability score in [0, 100] — the share of the listed PLAYER
+ * roster on one side that is not currently cross-referenced as injured or
+ * suspended. Requires at least one listed PLAYER Evidence item (caller-gated).
+ */
+export function computeSquadAvailabilityScore(input: {
+  readonly totalListed: number;
+  readonly unavailableCount: number;
+}): number {
+  if (input.totalListed <= 0) {
+    return 100;
+  }
+
+  return clamp(100 * (1 - input.unavailableCount / input.totalListed), 0, 100);
+}
+
+/**
+ * P1B Player attack contribution in [0, 100] for one tracked candidate
+ * (goalkeeper-set aside) from season goals+assists per match, minutes/starts
+ * share (when present), and vendor rating (when present). Fixed deterministic
+ * weights — never a fitted/learned model.
+ */
+export function computePlayerAttackContribution(input: {
+  readonly appearances: number;
+  readonly goals: number;
+  readonly assists: number;
+  readonly minutesPlayed?: number;
+  readonly rating?: number;
+}): number {
+  const appearances = Math.max(input.appearances, 1);
+  const contributionPerMatch = (input.goals + input.assists) / appearances;
+  const contributionIndex = clamp(
+    100 * (contributionPerMatch / BASELINE_PLAYER_CONTRIBUTION_PER_MATCH),
+    0,
+    100,
+  );
+  const components: number[] = [contributionIndex];
+  const weights: number[] = [0.6];
+
+  if (input.minutesPlayed !== undefined) {
+    const minutesShare = clamp(
+      (input.minutesPlayed / (appearances * BASELINE_PLAYER_MINUTES_PER_MATCH)) *
+        100,
+      0,
+      100,
+    );
+    components.push(minutesShare);
+    weights.push(0.25);
+  }
+
+  if (input.rating !== undefined) {
+    const ratingIndex = clamp(100 * (input.rating / BASELINE_PLAYER_RATING), 0, 100);
+    components.push(ratingIndex);
+    weights.push(0.15);
+  }
+
+  const weightSum = weights.reduce((sum, weight) => sum + weight, 0);
+  const weighted = components.reduce(
+    (sum, component, index) => sum + component * (weights[index] ?? 0),
+    0,
+  );
+
+  return clamp(weighted / weightSum, 0, 100);
+}
+
+export const KEY_PLAYER_CONTRIBUTION_THRESHOLD = 40;
+
+/**
+ * P1B A confirmed absence is treated as "key" only from facts already on the
+ * PLAYER Evidence item itself (captain flag, goalkeeper position, or a
+ * season-stats-derived attack contribution over threshold) — never from a
+ * subjective or learned notion of importance.
+ */
+export function isKeyPlayerAbsence(input: {
+  readonly captain?: boolean;
+  readonly position?: string;
+  readonly attackContribution?: number;
+}): boolean {
+  if (input.captain === true) {
+    return true;
+  }
+
+  if (input.position === "Goalkeeper") {
+    return true;
+  }
+
+  return (
+    input.attackContribution !== undefined &&
+    input.attackContribution >= KEY_PLAYER_CONTRIBUTION_THRESHOLD
+  );
+}
+
+/**
+ * P1B Goalkeeper reliability in [0, 100] for the squad-listed primary/likely
+ * goalkeeper from season saves and goals-conceded rate (when present) and
+ * vendor rating (when present). Honest absence when none of the three exist.
+ * Never claims "starting" pre-lineup — labelled "primary/listed" by callers.
+ */
+export function computeGoalkeeperReliability(input: {
+  readonly appearances: number;
+  readonly saves?: number;
+  readonly goalsConceded?: number;
+  readonly rating?: number;
+}): number | undefined {
+  if (
+    input.saves === undefined &&
+    input.goalsConceded === undefined &&
+    input.rating === undefined
+  ) {
+    return undefined;
+  }
+
+  const appearances = Math.max(input.appearances, 1);
+  const components: number[] = [];
+  const weights: number[] = [];
+
+  if (input.saves !== undefined) {
+    const savesPerMatch = input.saves / appearances;
+    components.push(
+      clamp(100 * (savesPerMatch / BASELINE_GOALKEEPER_SAVES_PER_MATCH), 0, 100),
+    );
+    weights.push(0.4);
+  }
+
+  if (input.goalsConceded !== undefined) {
+    const concededPerMatch = input.goalsConceded / appearances;
+    components.push(
+      clamp(
+        100 *
+          (BASELINE_GOALKEEPER_GOALS_CONCEDED_PER_MATCH /
+            Math.max(concededPerMatch, 0.01)),
+        0,
+        100,
+      ),
+    );
+    weights.push(0.4);
+  }
+
+  if (input.rating !== undefined) {
+    components.push(clamp(100 * (input.rating / BASELINE_PLAYER_RATING), 0, 100));
+    weights.push(0.2);
+  }
+
+  const weightSum = weights.reduce((sum, weight) => sum + weight, 0);
+  const weighted = components.reduce(
+    (sum, component, index) => sum + component * (weights[index] ?? 0),
+    0,
+  );
+
+  return clamp(weighted / weightSum, 0, 100);
+}
+
 /**
  * Head-to-head lean from meetings oriented to the current fixture.
  * Positive favors the current home side. Shrinks toward 0 with small samples.

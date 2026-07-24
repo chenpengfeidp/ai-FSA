@@ -36,6 +36,8 @@ export type FeatureName =
   | "formStrengthHome"
   | "goalDifferenceStrengthAway"
   | "goalDifferenceStrengthHome"
+  | "goalkeeperReliabilityAway"
+  | "goalkeeperReliabilityHome"
   | "goalsConcededRateAway"
   | "goalsConcededRateHome"
   | "goalsScoredRateAway"
@@ -46,6 +48,8 @@ export type FeatureName =
   | "homeLeagueStrength"
   | "homeStability"
   | "homeTeam"
+  | "keyPlayerAvailabilityAway"
+  | "keyPlayerAvailabilityHome"
   | "kickoff"
   | "knockoutContext"
   | "leagueStrengthAway"
@@ -61,6 +65,10 @@ export type FeatureName =
   | "momentum"
   | "momentumAway"
   | "momentumHome"
+  | "playerAttackContributionAway"
+  | "playerAttackContributionHome"
+  | "playerAvailabilityImpactAway"
+  | "playerAvailabilityImpactHome"
   | "pointsPerMatchAway"
   | "pointsPerMatchHome"
   | "possessionAway"
@@ -74,6 +82,8 @@ export type FeatureName =
   | "rotationPressureHome"
   | "scheduleAdvantage"
   | "sharpSupport"
+  | "squadAvailabilityScoreAway"
+  | "squadAvailabilityScoreHome"
   | "steamMove"
   | "venueAdvantage"
   | "xgAttackQualityAway"
@@ -144,6 +154,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "formStrengthHome",
   "goalDifferenceStrengthAway",
   "goalDifferenceStrengthHome",
+  "goalkeeperReliabilityAway",
+  "goalkeeperReliabilityHome",
   "goalsConcededRateAway",
   "goalsConcededRateHome",
   "goalsScoredRateAway",
@@ -154,6 +166,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "homeLeagueStrength",
   "homeStability",
   "homeTeam",
+  "keyPlayerAvailabilityAway",
+  "keyPlayerAvailabilityHome",
   "kickoff",
   "knockoutContext",
   "leagueStrengthAway",
@@ -169,6 +183,10 @@ const featureNames: ReadonlySet<string> = new Set([
   "momentum",
   "momentumAway",
   "momentumHome",
+  "playerAttackContributionAway",
+  "playerAttackContributionHome",
+  "playerAvailabilityImpactAway",
+  "playerAvailabilityImpactHome",
   "pointsPerMatchAway",
   "pointsPerMatchHome",
   "possessionAway",
@@ -182,6 +200,8 @@ const featureNames: ReadonlySet<string> = new Set([
   "rotationPressureHome",
   "scheduleAdvantage",
   "sharpSupport",
+  "squadAvailabilityScoreAway",
+  "squadAvailabilityScoreHome",
   "steamMove",
   "venueAdvantage",
   "xgAttackQualityAway",

@@ -508,7 +508,7 @@ describe("HTTP import and Evidence query workflow", () => {
       );
       expect(report.deterministic).toMatchObject({
         status: "completed_nonempty",
-        projectionModelVersion: "projection.v2.l1b.club",
+        projectionModelVersion: "projection.v2.p1b.player",
       });
       const deterministic = requireRecord(report.deterministic);
       expect(

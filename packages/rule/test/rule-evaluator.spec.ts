@@ -36,6 +36,12 @@ function makeFeature(name: FeatureName, options: FeatureOptions = {}): Feature {
     clubDefensiveStrengthAway: 45,
     managerStabilityHome: 80,
     managerStabilityAway: 30,
+    playerAvailabilityImpactHome: 10,
+    playerAvailabilityImpactAway: 30,
+    playerAttackContributionHome: 70,
+    playerAttackContributionAway: 40,
+    goalkeeperReliabilityHome: 80,
+    goalkeeperReliabilityAway: 50,
   };
 
   return createFeature({
@@ -257,6 +263,22 @@ describe("RuleEvaluator", () => {
       { ruleName: "DEFENSE_STRENGTH_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "MANAGER_STABILITY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "MANAGER_STABILITY_AWAY", status: "INAPPLICABLE", score: 0 },
+      {
+        ruleName: "PLAYER_AVAILABILITY_EDGE_HOME",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      {
+        ruleName: "PLAYER_AVAILABILITY_EDGE_AWAY",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      { ruleName: "KEY_PLAYER_MISSING_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "KEY_PLAYER_MISSING_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "PLAYER_ATTACK_EDGE_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "PLAYER_ATTACK_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "GOALKEEPER_EDGE_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "GOALKEEPER_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "MARKET_LEAN_HOME", status: "PASS", score: 1 },
       { ruleName: "MARKET_LEAN_AWAY", status: "FAIL", score: 0 },
       { ruleName: "MARKET_AH_LEAN_HOME", status: "INAPPLICABLE", score: 0 },
@@ -1068,6 +1090,160 @@ describe("RuleEvaluator", () => {
             "DEFENSE_STRENGTH_EDGE_AWAY",
             "MANAGER_STABILITY",
             "MANAGER_STABILITY_AWAY",
+          ].includes(result.ruleName),
+        )
+        .every((result) => result.status === "INAPPLICABLE" && result.score === 0),
+    ).toBe(true);
+  });
+
+  it("evaluates P1B Player Intelligence Rules from Player Features", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      makeFeature("playerAvailabilityImpactHome"),
+      makeFeature("playerAvailabilityImpactAway"),
+      makeFeature("playerAttackContributionHome"),
+      makeFeature("playerAttackContributionAway"),
+      makeFeature("goalkeeperReliabilityHome"),
+      makeFeature("goalkeeperReliabilityAway"),
+      createFeature({
+        featureId: "feature:evidence-1:keyPlayerAvailabilityHome",
+        matchId: createMatchId("match-1"),
+        name: "keyPlayerAvailabilityHome",
+        value: true,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:keyPlayerAvailabilityAway",
+        matchId: createMatchId("match-1"),
+        name: "keyPlayerAvailabilityAway",
+        value: false,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "PLAYER_AVAILABILITY_EDGE_HOME",
+            "PLAYER_AVAILABILITY_EDGE_AWAY",
+            "KEY_PLAYER_MISSING_HOME",
+            "KEY_PLAYER_MISSING_AWAY",
+            "PLAYER_ATTACK_EDGE_HOME",
+            "PLAYER_ATTACK_EDGE_AWAY",
+            "GOALKEEPER_EDGE_HOME",
+            "GOALKEEPER_EDGE_AWAY",
+          ].includes(result.ruleName),
+        )
+        .map(({ ruleName, status, channel, sourceFeatureIds }) => ({
+          ruleName,
+          status,
+          channel,
+          sourceFeatureIds,
+        })),
+    ).toEqual([
+      {
+        ruleName: "PLAYER_AVAILABILITY_EDGE_HOME",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:playerAvailabilityImpactHome",
+          "feature:evidence-1:playerAvailabilityImpactAway",
+        ],
+      },
+      {
+        ruleName: "PLAYER_AVAILABILITY_EDGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:playerAvailabilityImpactHome",
+          "feature:evidence-1:playerAvailabilityImpactAway",
+        ],
+      },
+      {
+        ruleName: "KEY_PLAYER_MISSING_HOME",
+        status: "PASS",
+        channel: "away+",
+        sourceFeatureIds: ["feature:evidence-1:keyPlayerAvailabilityHome"],
+      },
+      {
+        ruleName: "KEY_PLAYER_MISSING_AWAY",
+        status: "FAIL",
+        channel: "home+",
+        sourceFeatureIds: ["feature:evidence-1:keyPlayerAvailabilityAway"],
+      },
+      {
+        ruleName: "PLAYER_ATTACK_EDGE_HOME",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:playerAttackContributionHome",
+          "feature:evidence-1:playerAttackContributionAway",
+        ],
+      },
+      {
+        ruleName: "PLAYER_ATTACK_EDGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:playerAttackContributionHome",
+          "feature:evidence-1:playerAttackContributionAway",
+        ],
+      },
+      {
+        ruleName: "GOALKEEPER_EDGE_HOME",
+        status: "PASS",
+        channel: "home+",
+        sourceFeatureIds: [
+          "feature:evidence-1:goalkeeperReliabilityHome",
+          "feature:evidence-1:goalkeeperReliabilityAway",
+        ],
+      },
+      {
+        ruleName: "GOALKEEPER_EDGE_AWAY",
+        status: "FAIL",
+        channel: "away+",
+        sourceFeatureIds: [
+          "feature:evidence-1:goalkeeperReliabilityHome",
+          "feature:evidence-1:goalkeeperReliabilityAway",
+        ],
+      },
+    ]);
+  });
+
+  it("marks Player Intelligence Rules INAPPLICABLE when Player Features are absent", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "PLAYER_AVAILABILITY_EDGE_HOME",
+            "PLAYER_AVAILABILITY_EDGE_AWAY",
+            "KEY_PLAYER_MISSING_HOME",
+            "KEY_PLAYER_MISSING_AWAY",
+            "PLAYER_ATTACK_EDGE_HOME",
+            "PLAYER_ATTACK_EDGE_AWAY",
+            "GOALKEEPER_EDGE_HOME",
+            "GOALKEEPER_EDGE_AWAY",
           ].includes(result.ruleName),
         )
         .every((result) => result.status === "INAPPLICABLE" && result.score === 0),

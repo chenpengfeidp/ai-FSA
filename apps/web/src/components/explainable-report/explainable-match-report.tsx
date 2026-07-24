@@ -21,6 +21,7 @@ import { PlayersContextSection } from "./player-context";
 import { RefereeContextSection } from "./referee-context";
 import { VenueContextSection } from "./venue-context";
 import { CalibrationSection } from "./calibration-section";
+import { ContributionSection } from "./contribution-section";
 import { EvaluationHistorySection } from "./evaluation-history-section";
 import { EvaluationSection } from "./evaluation-section";
 import { ValidationSection } from "./validation-section";
@@ -60,6 +61,8 @@ export function ExplainableMatchReport({
       <CalibrationSection calibration={report.calibration} />
 
       <ValidationSection validation={report.validation} />
+
+      <ContributionSection contribution={report.contribution} />
 
       <ReasoningSection />
 

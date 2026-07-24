@@ -7,8 +7,10 @@ import {
 import type { MatchId } from "@fas/match";
 import {
   buildEvaluationHistoryRecord,
+  computeContributionReport,
   computePredictionCalibrationReport,
   computeValidationReport,
+  type ContributionReport,
   type EvaluationHistoryRecord,
   type EvaluationHistoryRepository,
   type PredictionCalibrationReport,
@@ -30,6 +32,7 @@ export interface AnalysisReportBuilder {
 export type ReportGenerationErrorCode =
   | "ANALYSIS_FAILED"
   | "CALIBRATION_REPORT_FAILED"
+  | "CONTRIBUTION_REPORT_FAILED"
   | "EVALUATION_HISTORY_FAILED"
   | "REPORT_BUILD_FAILED"
   | "VALIDATION_REPORT_FAILED";
@@ -61,9 +64,10 @@ function failure(
 
 /**
  * Loads the FULL Evaluation History population once (never scoped to a
- * single match) so both the A2 Prediction Calibration overlay and the
- * V1A Validation overlay measure the exact same sealed population without
- * querying History twice. Pure read — never mutates History.
+ * single match) so the A2 Prediction Calibration overlay, the V1A
+ * Validation overlay, and the O1 Contribution overlay all measure the
+ * exact same sealed population without querying History three times.
+ * Pure read — never mutates History.
  */
 async function queryFullEvaluationHistoryPopulation(
   repository: EvaluationHistoryRepository,
@@ -76,6 +80,7 @@ function withOverlays(
   evaluationHistory: readonly EvaluationHistoryRecord[],
   calibration: PredictionCalibrationReport,
   validation: ValidationReport,
+  contribution: ContributionReport,
 ): AnalysisReport {
   return createAnalysisReport({
     reportId: report.reportId,
@@ -95,6 +100,7 @@ function withOverlays(
     ...(evaluationHistory.length === 0 ? {} : { evaluationHistory }),
     calibration,
     validation,
+    contribution,
   });
 }
 
@@ -230,6 +236,26 @@ export class GenerateMatchReportUseCase {
       );
     }
 
-    return withOverlays(report, evaluationHistory, calibration, validation);
+    let contribution: ContributionReport;
+
+    try {
+      contribution = computeContributionReport({
+        records: populationRecords,
+        computedAt,
+      });
+    } catch {
+      return failure(
+        "CONTRIBUTION_REPORT_FAILED",
+        "Football Intelligence Contribution computation failed unexpectedly.",
+      );
+    }
+
+    return withOverlays(
+      report,
+      evaluationHistory,
+      calibration,
+      validation,
+      contribution,
+    );
   }
 }

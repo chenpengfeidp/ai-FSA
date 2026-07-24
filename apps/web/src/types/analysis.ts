@@ -455,6 +455,57 @@ export interface ValidationReportDto {
   readonly limitations: readonly string[];
 }
 
+export type IntelligenceDomainId =
+  | "venue_intelligence"
+  | "availability_intelligence"
+  | "advanced_statistics"
+  | "expected_goals"
+  | "match_context"
+  | "club_intelligence"
+  | "player_intelligence"
+  | "market_intelligence";
+
+export interface DomainContributionRowDto {
+  readonly domain: IntelligenceDomainId;
+  readonly label: string;
+  readonly sampleSize: number;
+  readonly qualified: boolean;
+  readonly coverage: ValidationMetricSummaryDto;
+  readonly winnerAccuracy: ValidationMetricSummaryDto;
+  readonly drawAccuracy: ValidationMetricSummaryDto;
+  readonly scoreAccuracy: ValidationMetricSummaryDto;
+  readonly goalRangeAccuracy: ValidationMetricSummaryDto;
+  readonly expectedCalibrationError: CalibrationErrorMetricDto;
+  readonly brierScore: CalibrationErrorMetricDto;
+  readonly paperReturn: ValidationMetricSummaryDto;
+}
+
+export interface ContributionProvenanceDto {
+  readonly sourceRecordCount: number;
+  readonly evaluationHistorySchemaVersions: readonly string[];
+  readonly evaluationModelVersions: readonly string[];
+  readonly projectionModelVersions: readonly string[];
+  readonly earliestMatchDate?: string;
+  readonly latestMatchDate?: string;
+}
+
+/**
+ * O1 Football Intelligence Contribution Analysis — read-only measurement of
+ * each Intelligence domain's observed historical contribution over
+ * Evaluation History. Population-level: not scoped to a single match.
+ * Display-only; never adjusts Prediction, never ranks domains (always
+ * listed in this fixed canonical order), and never claims causation.
+ */
+export interface ContributionReportDto {
+  readonly schemaVersion: string;
+  readonly computedAt: string;
+  readonly totalSampleSize: number;
+  readonly minimumQualifiedSampleSize: number;
+  readonly provenance: ContributionProvenanceDto;
+  readonly domains: readonly DomainContributionRowDto[];
+  readonly limitations: readonly string[];
+}
+
 export interface AnalysisReportDto {
   readonly reportId: string;
   readonly matchId: string;
@@ -469,6 +520,7 @@ export interface AnalysisReportDto {
   readonly evaluationHistory?: readonly EvaluationHistoryRecordDto[];
   readonly calibration?: PredictionCalibrationReportDto;
   readonly validation?: ValidationReportDto;
+  readonly contribution?: ContributionReportDto;
 }
 
 export interface BackendErrorDto {

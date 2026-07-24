@@ -23,6 +23,7 @@ import { AnalysisController } from "./analysis.controller.js";
 import { MatchAnalysisController } from "./match-analysis.controller.js";
 import { CalibrationController } from "./calibration.controller.js";
 import { ValidationController } from "./validation.controller.js";
+import { ContributionController } from "./contribution.controller.js";
 import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
 import { EvaluationHistoryController } from "./evaluation-history.controller.js";
@@ -71,6 +72,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     EvaluationHistoryController,
     CalibrationController,
     ValidationController,
+    ContributionController,
     ProvidersController,
     ImportController,
     MatchesController,

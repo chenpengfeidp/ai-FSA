@@ -501,3 +501,66 @@ describe("GenerateMatchReportUseCase — V1A Football Intelligence Validation ov
     );
   });
 });
+
+describe("GenerateMatchReportUseCase — O1 Football Intelligence Contribution overlay", () => {
+  it("attaches a population-wide contribution report from the same History snapshot as calibration/validation", async () => {
+    const repository = new InMemoryEvaluationHistoryRepository();
+    await seedOtherMatchHistoryRecord(repository);
+
+    const analysis = makeCompletedAnalysis();
+    const useCase = new GenerateMatchReportUseCase(
+      { execute: async () => ({ ok: true, value: analysis }) },
+      createReportBuilder(),
+      repository,
+    );
+
+    const result = await useCase.execute(matchId);
+
+    if ("ok" in result) {
+      throw new Error("Expected a sealed AnalysisReport.");
+    }
+
+    expect(result.contribution).toBeDefined();
+    expect(result.contribution?.schemaVersion).toBe("contribution-report.mvp.o1");
+    // Same sealed population that calibration/validation measured (the seeded other match).
+    expect(result.contribution?.totalSampleSize).toBe(
+      result.calibration?.sampleSize,
+    );
+    expect(result.contribution?.domains).toHaveLength(8);
+    expect(result.contribution?.domains.map((row) => row.domain)).toEqual([
+      "venue_intelligence",
+      "availability_intelligence",
+      "advanced_statistics",
+      "expected_goals",
+      "match_context",
+      "club_intelligence",
+      "player_intelligence",
+      "market_intelligence",
+    ]);
+  });
+
+  it("never mutates Feature/Rule/Projection while attaching the contribution overlay, and never ranks domains", async () => {
+    const repository = new InMemoryEvaluationHistoryRepository();
+    const analysis = makeCompletedAnalysis();
+    const useCase = new GenerateMatchReportUseCase(
+      { execute: async () => ({ ok: true, value: analysis }) },
+      createReportBuilder(),
+      repository,
+    );
+
+    const result = await useCase.execute(matchId);
+
+    if ("ok" in result) {
+      throw new Error("Expected a sealed AnalysisReport.");
+    }
+
+    expect(result.deterministic).toEqual(analysis.projection);
+    expect(result.features).toEqual(analysis.features);
+    expect(result.rules).toEqual(analysis.ruleResults);
+    expect(result.contribution).not.toHaveProperty("bestDomain");
+    expect(result.contribution).not.toHaveProperty("ranking");
+    expect(result.contribution?.domains.every((row) => row.sampleSize === 0)).toBe(
+      true,
+    );
+  });
+});

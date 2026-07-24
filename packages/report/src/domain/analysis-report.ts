@@ -9,6 +9,7 @@ import { createMatchId, type MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
 import type {
   ActualMatchResult,
+  ContributionReport,
   EvaluationHistoryRecord,
   PredictionCalibrationReport,
   PredictionEvaluationRecord,
@@ -45,6 +46,14 @@ export interface AnalysisReport {
    * claims one profile improved over another.
    */
   readonly validation?: ValidationReport;
+  /**
+   * O1 Football Intelligence Contribution Analysis — population-level
+   * measurement of each Intelligence domain's observed historical
+   * contribution over all Evaluation History, not scoped to this match.
+   * Display-only: never adjusts Prediction, never ranks domains, and never
+   * claims causation.
+   */
+  readonly contribution?: ContributionReport;
 }
 
 export interface CreateAnalysisReportInput {
@@ -63,6 +72,7 @@ export interface CreateAnalysisReportInput {
   readonly evaluationHistory?: readonly EvaluationHistoryRecord[];
   readonly calibration?: PredictionCalibrationReport;
   readonly validation?: ValidationReport;
+  readonly contribution?: ContributionReport;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -208,5 +218,8 @@ export function createAnalysisReport(
         }),
     ...(input.calibration === undefined ? {} : { calibration: input.calibration }),
     ...(input.validation === undefined ? {} : { validation: input.validation }),
+    ...(input.contribution === undefined
+      ? {}
+      : { contribution: input.contribution }),
   });
 }

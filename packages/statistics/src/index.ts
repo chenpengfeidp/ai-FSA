@@ -166,3 +166,30 @@ export {
 
 export { computeValidationReport } from "./validation/compute-validation-report.js";
 export type { ComputeValidationReportInput } from "./validation/compute-validation-report.js";
+
+export {
+  CONTRIBUTION_REPORT_MODEL_VERSION,
+  INTELLIGENCE_DOMAIN_IDS,
+  INTELLIGENCE_DOMAIN_LABELS,
+  MINIMUM_QUALIFIED_DOMAIN_SAMPLE_SIZE,
+  MINIMUM_QUALIFIED_DOMAIN_SEGMENT_SAMPLE_SIZE,
+  ContributionReportValidationError,
+} from "./domain/contribution-report.js";
+export type {
+  ContributionProvenance,
+  ContributionReport,
+  DomainContributionRow,
+  IntelligenceDomainId,
+} from "./domain/contribution-report.js";
+
+export {
+  AVAILABILITY_INTELLIGENCE_FEATURE_NAMES,
+  INTELLIGENCE_DOMAIN_FEATURE_NAMES,
+  MARKET_INTELLIGENCE_FEATURE_NAMES,
+  MATCH_CONTEXT_DOMAIN_FEATURE_NAMES,
+  VENUE_INTELLIGENCE_FEATURE_NAMES,
+  hasDomainFeatures,
+} from "./contribution/domain-feature-families.js";
+
+export { computeContributionReport } from "./contribution/compute-contribution-report.js";
+export type { ComputeContributionReportInput } from "./contribution/compute-contribution-report.js";

@@ -253,6 +253,18 @@ describe("HTTP import and Evidence query workflow", () => {
     });
     expect(Array.isArray(requireRecord(report.validation).profiles)).toBe(true);
     expect(requireRecord(report.validation).profiles).toHaveLength(5);
+    // O1 Football Intelligence Contribution overlay: always attached (measurement-only,
+    // population-wide over Evaluation History), never adjusts the report above.
+    expect(report.contribution).toMatchObject({
+      schemaVersion: "contribution-report.mvp.o1",
+      minimumQualifiedSampleSize: 20,
+      totalSampleSize: expect.any(Number),
+      limitations: expect.arrayContaining([
+        expect.stringContaining("Computed only from Evaluation History"),
+      ]),
+    });
+    expect(Array.isArray(requireRecord(report.contribution).domains)).toBe(true);
+    expect(requireRecord(report.contribution).domains).toHaveLength(8);
     expect(report.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "homeTeam", value: "Liverpool" }),
@@ -434,6 +446,49 @@ describe("HTTP import and Evidence query workflow", () => {
       expect.arrayContaining([
         expect.stringContaining("Computed only from Evaluation History"),
         expect.stringContaining("never claims"),
+      ]),
+    );
+  });
+
+  it("serves the O1 Football Intelligence Contribution report from GET /api/contribution", async () => {
+    const response = await request(baseUrl, "/api/contribution");
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      schemaVersion: "contribution-report.mvp.o1",
+      totalSampleSize: expect.any(Number),
+      minimumQualifiedSampleSize: 20,
+    });
+    expect(Array.isArray(report.domains)).toBe(true);
+    expect(report.domains).toHaveLength(8);
+    const domainIds = (report.domains as readonly Record<string, unknown>[]).map(
+      (row) => row.domain,
+    );
+    expect(domainIds).toEqual([
+      "venue_intelligence",
+      "availability_intelligence",
+      "advanced_statistics",
+      "expected_goals",
+      "match_context",
+      "club_intelligence",
+      "player_intelligence",
+      "market_intelligence",
+    ]);
+    for (const row of report.domains as readonly Record<string, unknown>[]) {
+      expect(row).toMatchObject({
+        sampleSize: expect.any(Number),
+        qualified: expect.any(Boolean),
+      });
+      expect(row.expectedCalibrationError).toMatchObject({
+        qualified: expect.any(Boolean),
+      });
+      expect(row.brierScore).toMatchObject({ qualified: expect.any(Boolean) });
+    }
+    expect(report.limitations).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("Computed only from Evaluation History"),
+        expect.stringContaining("never ranks domains"),
       ]),
     );
   });

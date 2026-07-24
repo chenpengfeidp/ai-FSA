@@ -526,6 +526,14 @@ export class AnalysisReportDto {
     additionalProperties: true,
   })
   declare readonly validation?: Readonly<Record<string, unknown>>;
+
+  @ApiPropertyOptional({
+    description:
+      "O1 Football Intelligence Contribution Analysis — population-level measurement of each Intelligence domain's observed historical contribution over all Evaluation History (not scoped to this match). Display-only; never adjusts Prediction, never ranks domains, and never claims causation.",
+    type: "object",
+    additionalProperties: true,
+  })
+  declare readonly contribution?: Readonly<Record<string, unknown>>;
 }
 
 export class AnalysisErrorCauseDto {

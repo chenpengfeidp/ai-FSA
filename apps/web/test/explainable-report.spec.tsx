@@ -6,7 +6,11 @@ import {
   buildExplainableReportView,
   resolveConfidence,
 } from "../src/lib/explainable-report";
-import type { AnalysisReportDto } from "../src/types/analysis";
+import type {
+  AnalysisReportDto,
+  DomainContributionRowDto,
+  ValidationMetricSummaryDto,
+} from "../src/types/analysis";
 import type { EvidenceDto } from "../src/types/evidence";
 import type { MatchSummary } from "../src/types/match-center";
 
@@ -391,6 +395,8 @@ describe("ExplainableMatchReport", () => {
     expect(screen.getByText(zh.report.calibrationUnavailable)).toBeInTheDocument();
     expect(screen.getByText(zh.report.validation)).toBeInTheDocument();
     expect(screen.getByText(zh.report.validationUnavailable)).toBeInTheDocument();
+    expect(screen.getByText(zh.report.contribution)).toBeInTheDocument();
+    expect(screen.getByText(zh.report.contributionUnavailable)).toBeInTheDocument();
   });
 
   it("renders A2 Prediction Calibration metrics with provenance and insufficient-sample flags", () => {
@@ -640,6 +646,105 @@ describe("ExplainableMatchReport", () => {
     expect(
       screen.getByText(
         "This report never claims one profile improved over another — read qualified flags and sample sizes before drawing any conclusion.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("renders O1 Football Intelligence Contribution domain rows with insufficient-sample flags", () => {
+    const zeroMetric: ValidationMetricSummaryDto = {
+      value: undefined,
+      sampleSize: 0,
+      qualified: false,
+    };
+    const zeroDomainRow = (
+      domain: DomainContributionRowDto["domain"],
+      label: string,
+    ): DomainContributionRowDto => ({
+      domain,
+      label,
+      sampleSize: 0,
+      qualified: false,
+      coverage: zeroMetric,
+      winnerAccuracy: zeroMetric,
+      drawAccuracy: zeroMetric,
+      scoreAccuracy: zeroMetric,
+      goalRangeAccuracy: zeroMetric,
+      expectedCalibrationError: zeroMetric,
+      brierScore: zeroMetric,
+      paperReturn: zeroMetric,
+    });
+
+    const reportWithContribution: AnalysisReportDto = {
+      ...report,
+      contribution: {
+        schemaVersion: "contribution-report.mvp.o1",
+        computedAt: "2026-07-24T00:00:00.000Z",
+        totalSampleSize: 1,
+        minimumQualifiedSampleSize: 20,
+        provenance: {
+          sourceRecordCount: 1,
+          evaluationHistorySchemaVersions: ["evaluation-history.mvp.a15"],
+          evaluationModelVersions: ["evaluation.mvp.a1"],
+          projectionModelVersions: ["projection.v2.p1b.player"],
+        },
+        domains: [
+          {
+            domain: "venue_intelligence",
+            label: "Venue Intelligence",
+            sampleSize: 1,
+            qualified: false,
+            coverage: { value: 1, sampleSize: 1, qualified: false },
+            winnerAccuracy: { value: 1, sampleSize: 1, qualified: false },
+            drawAccuracy: { value: undefined, sampleSize: 0, qualified: false },
+            scoreAccuracy: { value: 0, sampleSize: 1, qualified: false },
+            goalRangeAccuracy: { value: 1, sampleSize: 1, qualified: false },
+            expectedCalibrationError: {
+              value: 0.1,
+              sampleSize: 1,
+              qualified: false,
+            },
+            brierScore: { value: 0.2, sampleSize: 1, qualified: false },
+            paperReturn: { value: 1, sampleSize: 1, qualified: false },
+          },
+          zeroDomainRow("availability_intelligence", "Availability Intelligence"),
+          zeroDomainRow("advanced_statistics", "Advanced Statistics"),
+          zeroDomainRow("expected_goals", "Expected Goals"),
+          zeroDomainRow("match_context", "Match Context"),
+          zeroDomainRow("club_intelligence", "Club Intelligence"),
+          zeroDomainRow("player_intelligence", "Player Intelligence"),
+          zeroDomainRow("market_intelligence", "Market Intelligence"),
+        ],
+        limitations: [
+          "Computed only from Evaluation History (A1.5); missing history is never estimated or fabricated.",
+          "This report never claims causation and never ranks domains — it reports only measured historical statistics in a fixed canonical order; read qualified flags and sample sizes before drawing any conclusion.",
+        ],
+      },
+    };
+
+    render(
+      <ExplainableMatchReport
+        evidence={evidence}
+        match={match}
+        report={reportWithContribution}
+      />,
+    );
+
+    expect(screen.getByText(zh.report.contribution)).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.contributionDomainLabel.venue_intelligence),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.contributionDomainLabel.club_intelligence),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.contributionDomainLabel.market_intelligence),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(zh.report.contributionInsufficientBadge).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByText(
+        "This report never claims causation and never ranks domains — it reports only measured historical statistics in a fixed canonical order; read qualified flags and sample sizes before drawing any conclusion.",
       ),
     ).toBeInTheDocument();
   });

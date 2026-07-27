@@ -9,6 +9,7 @@ import {
   mapCoachNameFromLineupEntry,
 } from "../mapper/map-api-football-coach.js";
 import { mapClubIntelligenceFromStandings } from "../mapper/map-club-intelligence-from-standings.js";
+import { mapApiFootballManagerIntelligence } from "../mapper/map-api-football-manager-intelligence.js";
 import { mapApiFootballInjuriesResponse } from "../mapper/map-api-football-injuries.js";
 import { mapApiFootballLineupsResponse } from "../mapper/map-api-football-lineups.js";
 import {
@@ -380,6 +381,48 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       managers,
     });
 
+    // M1A: independent Manager Intelligence Evidence — never gated behind a
+    // standings row (unlike Club Intelligence's managerName/tenure fields).
+    const homeLineupCoachName = findLineupCoachName(lineupsBody, fixture.homeTeamId);
+    const awayLineupCoachName = findLineupCoachName(lineupsBody, fixture.awayTeamId);
+    const homeManagerIntelligence = mapApiFootballManagerIntelligence(
+      homeCoachBody,
+      {
+        teamId: fixture.homeTeamId,
+        teamName: fixture.homeTeamName,
+        teamSide: "home",
+        competitionId: fixture.competitionId,
+        competitionName: fixture.competitionName,
+        season: String(fixture.season),
+        observedAt: fixture.kickoff,
+        providerMethod: "http-live",
+        ...(homeLineupCoachName === undefined
+          ? {}
+          : { lineupCoachName: homeLineupCoachName }),
+      },
+    );
+    const awayManagerIntelligence = mapApiFootballManagerIntelligence(
+      awayCoachBody,
+      {
+        teamId: fixture.awayTeamId,
+        teamName: fixture.awayTeamName,
+        teamSide: "away",
+        competitionId: fixture.competitionId,
+        competitionName: fixture.competitionName,
+        season: String(fixture.season),
+        observedAt: fixture.kickoff,
+        providerMethod: "http-live",
+        ...(awayLineupCoachName === undefined
+          ? {}
+          : { lineupCoachName: awayLineupCoachName }),
+      },
+    );
+    const managerIntelligence = Object.freeze(
+      [homeManagerIntelligence, awayManagerIntelligence].filter(
+        (record): record is NonNullable<typeof record> => record !== undefined,
+      ),
+    );
+
     const bundle: FootballMatchBundle = Object.freeze({
       fixture,
       homeForm,
@@ -394,6 +437,7 @@ export class LiveApiSportsMatchCatalog implements FootballMatchCatalog {
       expectedGoals,
       matchContext,
       clubIntelligence,
+      managerIntelligence,
     });
 
     this.#cache.set(matchId, bundle);
@@ -467,4 +511,38 @@ function mergeClubManagers(
   }
 
   return Object.freeze([...byTeam.values()]);
+}
+
+/** Finds the confirmed `/fixtures/lineups` coach name for one team, if published. */
+function findLineupCoachName(
+  lineupsBody: unknown,
+  teamId: string,
+): string | undefined {
+  if (!isRecord(lineupsBody) || !Array.isArray(lineupsBody.response)) {
+    return undefined;
+  }
+
+  for (const entry of lineupsBody.response) {
+    if (!isRecord(entry)) {
+      continue;
+    }
+
+    const team = isRecord(entry.team) ? entry.team : undefined;
+    const teamIdNum = team?.id;
+    const entryTeamId =
+      typeof teamIdNum === "number" || typeof teamIdNum === "string"
+        ? String(teamIdNum)
+        : undefined;
+
+    if (entryTeamId !== teamId) {
+      continue;
+    }
+
+    const coachName = mapCoachNameFromLineupEntry(entry);
+    if (coachName !== undefined) {
+      return coachName;
+    }
+  }
+
+  return undefined;
 }

@@ -275,6 +275,43 @@ const evidence: readonly EvidenceDto[] = [
     },
   },
   {
+    id: "evidence-api-football-match-example-1-manager-home",
+    providerId: "football:api-sports",
+    source: "api-football",
+    sourceId: "api-football:example:manager:home",
+    type: "MANAGER_INTELLIGENCE",
+    matchId: "match-example-1",
+    collectedAt: "2026-07-17T10:00:00.000Z",
+    eventTime: "2026-08-01T19:30:00.000Z",
+    timestamp: "2026-07-17T10:00:00.000Z",
+    freshness: "fresh",
+    confidence: "medium",
+    quality: "unverified",
+    provenance: {
+      collector: "@fas/evidence-normalizer",
+      method: "recorded-snapshot",
+      providerId: "football:api-sports",
+      category: "football",
+    },
+    payload: {
+      teamId: "40",
+      teamName: "Liverpool",
+      teamSide: "home",
+      managerName: "Arne Slot",
+      managerId: "5001",
+      competitionId: "39",
+      competitionName: "Premier League",
+      season: "2026",
+      nationality: "Netherlands",
+      age: 47,
+      appointmentDate: "2024-06-01",
+      tenureDays: 425,
+      previousClubs: ["Feyenoord"],
+      matchManagerConfirmed: true,
+      observedAt: "2026-07-17T10:00:00.000Z",
+    },
+  },
+  {
     id: "evidence-api-football-match-example-1-suspension-1",
     providerId: "football:api-sports",
     source: "api-football",
@@ -341,11 +378,29 @@ describe("buildExplainableReportView", () => {
     expect(view.availability.injuries[0]?.playerName).toBe("Darwin Nunez");
     expect(view.marketEvidence.available).toBe(false);
     expect(view.marketEvidence.note).toContain("honest absence");
+    expect(view.managerIntelligence.available).toBe(true);
+    expect(view.managerIntelligence.records).toHaveLength(1);
+    expect(view.managerIntelligence.records[0]?.managerName).toBe("Arne Slot");
+    expect(view.managerIntelligence.records[0]?.nationality).toBe("Netherlands");
+    expect(view.managerIntelligence.records[0]?.tenureDays).toBe(425);
+    expect(view.managerIntelligence.records[0]?.matchManagerConfirmed).toBe(true);
+    expect(view.managerIntelligence.records[0]?.interimManagerStatus).toBeNull();
   });
 
   it("resolves confidence levels from pass ratios", () => {
     expect(resolveConfidence(3, 3)).toBe("Very High");
     expect(resolveConfidence(1, 4)).toBe("Low");
+  });
+
+  it("records honest absence when no MANAGER_INTELLIGENCE Evidence exists", () => {
+    const evidenceWithoutManagers = evidence.filter(
+      (item) => item.type !== "MANAGER_INTELLIGENCE",
+    );
+    const view = buildExplainableReportView(match, report, evidenceWithoutManagers);
+
+    expect(view.managerIntelligence.available).toBe(false);
+    expect(view.managerIntelligence.records).toHaveLength(0);
+    expect(view.managerIntelligence.note).toContain("honest absence");
   });
 });
 
@@ -386,6 +441,9 @@ describe("ExplainableMatchReport", () => {
     expect(screen.getByText("Thiago Silva")).toBeInTheDocument();
     expect(screen.getByText("Injury")).toBeInTheDocument();
     expect(screen.getByText("Suspension")).toBeInTheDocument();
+    expect(screen.getByText(zh.report.managerIntelligence)).toBeInTheDocument();
+    expect(screen.getByText("Arne Slot")).toBeInTheDocument();
+    expect(screen.getByText(zh.report.managerMatchConfirmed)).toBeInTheDocument();
     expect(
       screen.getByText(
         zh.report.evidenceSource("internal:recorded", "fixture", "fixture"),

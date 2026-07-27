@@ -5,7 +5,7 @@
 | Purpose | Track which Evidence / product surfaces are wired in the private V1 path |
 | Authority | Complements domain Evidence types; does **not** replace Architecture Freeze or doc 41 |
 | Roadmap | [`docs/40_PRODUCT_ROADMAP.md`](./40_PRODUCT_ROADMAP.md) |
-| Last updated | 2026-07-24 (after Sprint **P1B** Player Intelligence Feature/Rule/Confidence/Projection) |
+| Last updated | 2026-07-24 (after Sprint **M1A** Manager Intelligence Evidence) |
 
 Status legend:
 
@@ -40,6 +40,7 @@ Status legend:
 | EXPECTED_GOALS | `EXPECTED_GOALS` | Active | F1.3A Evidence + F1.3B Feature/Rule/Confidence/Projection consume; never estimated from shots |
 | MATCH_CONTEXT | `MATCH_CONTEXT` | Active | I1A Evidence + I1B Feature/Rule/Confidence/Projection consume; never invent rest/travel/knockout |
 | CLUB_INTELLIGENCE | `CLUB_INTELLIGENCE` | Active | L1A Evidence (standings + optional manager) + L1B Feature/Rule/Confidence/Projection consume |
+| MANAGER_INTELLIGENCE | `MANAGER_INTELLIGENCE` | Active (Evidence only) | **M1A** Evidence: manager identity, nationality/age, appointment date, tenure, previous clubs, match-day confirmation (`/coachs` + lineup coach cross-reference); honest absence when provider does not supply a field (e.g. interim status never invented); no Feature/Rule/Confidence/Projection yet (reserved for **M1B**) |
 | HEAD_TO_HEAD | `HEAD_TO_HEAD` | Active | F.1 |
 | VENUE | `VENUE` | Active | F1.1B-1 |
 | PLAYER | `PLAYER` | Active | F1.1C-1 basic identity + **P1A** season stats/age/captain/availability/match squad status (capped candidate coverage; honest absence otherwise) + **P1B** Feature/Rule/Confidence/Projection consume |

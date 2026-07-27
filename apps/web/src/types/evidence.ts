@@ -6,6 +6,7 @@ export type EvidenceType =
   | "HEAD_TO_HEAD"
   | "INJURY"
   | "LINEUP"
+  | "MANAGER_INTELLIGENCE"
   | "MATCH_CONTEXT"
   | "MATCH_INFO"
   | "MATCH_RESULT"

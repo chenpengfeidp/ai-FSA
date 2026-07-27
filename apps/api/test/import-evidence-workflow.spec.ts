@@ -525,6 +525,46 @@ describe("HTTP import and Evidence query workflow", () => {
     );
   });
 
+  it("serves M1A MANAGER_INTELLIGENCE Evidence with provenance for the recorded K League match", async () => {
+    await request(baseUrl, "/api/import/match/football:100001", "POST");
+    const response = await request(baseUrl, "/api/evidence/match/football:100001");
+    const body = requireRecord(response.body);
+    const evidences = body.value;
+
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(Array.isArray(evidences)).toBe(true);
+
+    if (!Array.isArray(evidences)) {
+      throw new Error("Expected evidence array.");
+    }
+
+    const managers = evidences.filter(
+      (item) => requireRecord(item).type === "MANAGER_INTELLIGENCE",
+    );
+
+    expect(managers).toHaveLength(2);
+    expect(managers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "MANAGER_INTELLIGENCE",
+          source: "api-football",
+          provenance: expect.objectContaining({ method: "recorded-snapshot" }),
+          payload: expect.objectContaining({
+            teamSide: "home",
+            managerName: "Kim Gi-dong",
+            matchManagerConfirmed: true,
+          }),
+        }),
+      ]),
+    );
+    for (const manager of managers) {
+      expect(requireRecord(manager).payload).not.toHaveProperty(
+        "interimManagerStatus",
+      );
+    }
+  });
+
   it("analyzes a recorded football-data match with shots-based statistics", async () => {
     const response = await request(
       baseUrl,

@@ -5,6 +5,7 @@
 
 import type { FootballClubIntelligenceRecord } from "./football-club-intelligence.js";
 import type { FootballExpectedGoalsRecord } from "./football-expected-goals.js";
+import type { FootballManagerIntelligenceRecord } from "./football-manager-intelligence.js";
 import type { FootballMatchContextRecord } from "./football-match-context.js";
 
 export type { FootballClubIntelligenceRecord } from "./football-club-intelligence.js";
@@ -14,6 +15,8 @@ export type {
   FootballClubIntelligenceWindow,
   FootballClubManagerFact,
 } from "./football-club-intelligence.js";
+export type { FootballManagerIntelligenceRecord } from "./football-manager-intelligence.js";
+export type { FootballManagerIntelligenceSide } from "./football-manager-intelligence.js";
 export type { FootballExpectedGoalsRecord } from "./football-expected-goals.js";
 export type {
   FootballExpectedGoalsMetrics,
@@ -338,6 +341,12 @@ export interface FootballMatchBundle {
    * Empty means honest absence — never invent standings or manager facts.
    */
   readonly clubIntelligence: readonly FootballClubIntelligenceRecord[];
+  /**
+   * Manager Intelligence records (M1A Evidence only).
+   * Empty means honest absence — never invent identity, tenure, or career
+   * facts. Not consumed by Feature/Rule/Confidence/Projection in M1A.
+   */
+  readonly managerIntelligence: readonly FootballManagerIntelligenceRecord[];
 }
 
 export interface FootballBoardRow {

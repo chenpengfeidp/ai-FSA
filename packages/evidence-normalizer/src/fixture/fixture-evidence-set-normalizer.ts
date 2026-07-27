@@ -1785,6 +1785,21 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(...normalizedClubIntelligence.value);
   }
 
+  if (input.managerIntelligence !== undefined) {
+    const normalizedManagerIntelligence = parseManagerIntelligence(
+      input.managerIntelligence,
+      matchId,
+      context.collectedAt,
+      matchInfo.value.eventTime,
+    );
+
+    if (!normalizedManagerIntelligence.ok) {
+      return normalizedManagerIntelligence;
+    }
+
+    evidences.push(...normalizedManagerIntelligence.value);
+  }
+
   if (input.odds !== undefined) {
     const normalized = parseOdds(
       input.odds,
@@ -3810,6 +3825,216 @@ function parseClubIntelligence(
       return failure(
         "UNEXPECTED_ERROR",
         "CLUB_INTELLIGENCE evidence normalization failed unexpectedly.",
+      );
+    }
+  }
+
+  return success(Object.freeze(records));
+}
+
+/**
+ * M1A: optional Manager Intelligence Evidence records.
+ * Absent array → honest absence. Never invent identity, tenure, interim
+ * status, or career facts the provider does not supply.
+ */
+function parseManagerIntelligence(
+  value: unknown,
+  matchId: string,
+  collectedAt: string,
+  eventTime: string,
+): Result<readonly Evidence[], EvidenceNormalizationError> {
+  if (!Array.isArray(value)) {
+    return failure(
+      "INVALID_FIELD",
+      "managerIntelligence must be an array.",
+      "managerIntelligence",
+    );
+  }
+
+  const records: Evidence[] = [];
+
+  for (const [index, entry] of value.entries()) {
+    if (!isRecord(entry)) {
+      return failure(
+        "INVALID_FIELD",
+        "managerIntelligence entry must be an object.",
+        "managerIntelligence",
+      );
+    }
+
+    const teamSide = requireTeamSide(entry.teamSide);
+    if (teamSide === undefined) {
+      return failure(
+        "INVALID_FIELD",
+        'managerIntelligence.teamSide must be "home" or "away".',
+        "managerIntelligence.teamSide",
+      );
+    }
+
+    if (typeof entry.teamId !== "string" || entry.teamId.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "managerIntelligence.teamId must be a non-empty string.",
+        "managerIntelligence.teamId",
+      );
+    }
+
+    if (typeof entry.teamName !== "string" || entry.teamName.trim().length === 0) {
+      return failure(
+        "INVALID_FIELD",
+        "managerIntelligence.teamName must be a non-empty string.",
+        "managerIntelligence.teamName",
+      );
+    }
+
+    if (
+      typeof entry.managerName !== "string" ||
+      entry.managerName.trim().length === 0
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "managerIntelligence.managerName must be a non-empty string.",
+        "managerIntelligence.managerName",
+      );
+    }
+
+    if (
+      typeof entry.observedAt !== "string" ||
+      entry.observedAt.trim().length === 0
+    ) {
+      return failure(
+        "INVALID_FIELD",
+        "managerIntelligence.observedAt must be a non-empty string.",
+        "managerIntelligence.observedAt",
+      );
+    }
+
+    if (typeof entry.matchManagerConfirmed !== "boolean") {
+      return failure(
+        "INVALID_FIELD",
+        "managerIntelligence.matchManagerConfirmed must be a boolean.",
+        "managerIntelligence.matchManagerConfirmed",
+      );
+    }
+
+    const age = parseOptionalFiniteNumber(entry.age, "managerIntelligence.age");
+    if (!age.ok) {
+      return age;
+    }
+
+    const tenureDays = parseOptionalFiniteNumber(
+      entry.tenureDays,
+      "managerIntelligence.tenureDays",
+    );
+    if (!tenureDays.ok) {
+      return tenureDays;
+    }
+
+    let previousClubs: readonly string[] | undefined;
+    if (entry.previousClubs !== undefined) {
+      if (
+        !Array.isArray(entry.previousClubs) ||
+        !entry.previousClubs.every(
+          (club): club is string =>
+            typeof club === "string" && club.trim().length > 0,
+        )
+      ) {
+        return failure(
+          "INVALID_FIELD",
+          "managerIntelligence.previousClubs must be an array of non-empty strings.",
+          "managerIntelligence.previousClubs",
+        );
+      }
+
+      previousClubs = Object.freeze(entry.previousClubs.map((club) => club.trim()));
+    }
+
+    const providerSource =
+      typeof entry.providerSource === "string" &&
+      entry.providerSource.trim().length > 0
+        ? entry.providerSource.trim()
+        : "api-football";
+    const providerSourceId =
+      typeof entry.providerSourceId === "string" &&
+      entry.providerSourceId.trim().length > 0
+        ? entry.providerSourceId.trim()
+        : `manager-intelligence:${matchId}:${teamSide}:${String(index)}`;
+    const providerMethod =
+      typeof entry.providerMethod === "string" &&
+      entry.providerMethod.trim().length > 0
+        ? entry.providerMethod.trim()
+        : "fixture";
+
+    try {
+      records.push(
+        createEvidence({
+          id: `evidence:${matchId}:manager-intelligence:${teamSide}:${String(index)}`,
+          source: providerSource,
+          sourceId: providerSourceId,
+          type: "MANAGER_INTELLIGENCE",
+          matchId: createMatchId(matchId),
+          collectedAt,
+          eventTime,
+          freshness: "fresh",
+          quality: "verified",
+          provenance: {
+            collector: "@fas/evidence-normalizer",
+            method: providerMethod,
+          },
+          payload: Object.freeze({
+            teamId: entry.teamId.trim(),
+            teamName: entry.teamName.trim(),
+            teamSide,
+            managerName: entry.managerName.trim(),
+            ...(typeof entry.managerId === "string" &&
+            entry.managerId.trim().length > 0
+              ? { managerId: entry.managerId.trim() }
+              : {}),
+            ...(typeof entry.competitionId === "string" &&
+            entry.competitionId.trim().length > 0
+              ? { competitionId: entry.competitionId.trim() }
+              : {}),
+            ...(typeof entry.competitionName === "string" &&
+            entry.competitionName.trim().length > 0
+              ? { competitionName: entry.competitionName.trim() }
+              : {}),
+            ...(typeof entry.season === "string" && entry.season.trim().length > 0
+              ? { season: entry.season.trim() }
+              : typeof entry.season === "number" && Number.isFinite(entry.season)
+                ? { season: String(entry.season) }
+                : {}),
+            ...(typeof entry.nationality === "string" &&
+            entry.nationality.trim().length > 0
+              ? { nationality: entry.nationality.trim() }
+              : {}),
+            ...(age.value === undefined ? {} : { age: age.value }),
+            ...(typeof entry.appointmentDate === "string" &&
+            entry.appointmentDate.trim().length > 0
+              ? { appointmentDate: entry.appointmentDate.trim() }
+              : {}),
+            ...(tenureDays.value === undefined
+              ? {}
+              : { tenureDays: tenureDays.value }),
+            ...(typeof entry.interimManagerStatus === "boolean"
+              ? { interimManagerStatus: entry.interimManagerStatus }
+              : {}),
+            ...(previousClubs === undefined ? {} : { previousClubs }),
+            matchManagerConfirmed: entry.matchManagerConfirmed,
+            observedAt: entry.observedAt.trim(),
+          }),
+        }),
+      );
+    } catch (error: unknown) {
+      if (
+        error instanceof EvidenceValidationError ||
+        error instanceof MatchValidationError
+      ) {
+        return failure("DOMAIN_VALIDATION_FAILED", error.message);
+      }
+
+      return failure(
+        "UNEXPECTED_ERROR",
+        "MANAGER_INTELLIGENCE evidence normalization failed unexpectedly.",
       );
     }
   }

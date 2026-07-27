@@ -14,7 +14,8 @@ function footballCapabilities(): readonly ProviderCapabilityDeclaration[] {
       supported: true,
       ingestImplemented: true,
       notes:
-        "L1A: /coachs (+ lineup coach name) → CLUB_INTELLIGENCE manager metrics when present.",
+        "L1A: /coachs (+ lineup coach name) → CLUB_INTELLIGENCE manager metrics when present. " +
+        "M1A: same /coachs (+ lineup confirmation) → independent MANAGER_INTELLIGENCE Evidence.",
     }),
     Object.freeze({
       kind: "referee" as const,

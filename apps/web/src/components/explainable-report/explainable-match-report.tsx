@@ -14,6 +14,7 @@ import { AdvancedStatisticsContextSection } from "./advanced-statistics-context"
 import { AvailabilityContextSection } from "./availability-context";
 import { ClubIntelligenceEvidenceSection } from "./club-intelligence-evidence";
 import { ExpectedGoalsContextSection } from "./expected-goals-context";
+import { ManagerIntelligenceEvidenceSection } from "./manager-intelligence-evidence";
 import { MarketEvidenceSection } from "./market-evidence";
 import { MatchContextEvidenceSection } from "./match-context-evidence";
 import { LineupContextSection } from "./lineup-context";
@@ -92,6 +93,12 @@ export function ExplainableMatchReport({
 
       <WorkspaceSection id="club-intelligence">
         <ClubIntelligenceEvidenceSection clubIntelligence={view.clubIntelligence} />
+      </WorkspaceSection>
+
+      <WorkspaceSection id="manager-intelligence">
+        <ManagerIntelligenceEvidenceSection
+          managerIntelligence={view.managerIntelligence}
+        />
       </WorkspaceSection>
 
       <WorkspaceSection id="match-context">

@@ -252,6 +252,48 @@
           "managerTenureDays": 364
         }
       ],
+      "managerIntelligence": [
+        {
+          "teamId": "2766",
+          "teamName": "FC Seoul",
+          "teamSide": "home",
+          "managerId": "5501",
+          "managerName": "Kim Gi-dong",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "nationality": "South Korea",
+          "age": 52,
+          "appointmentDate": "2024-01-15",
+          "tenureDays": 897,
+          "previousClubs": ["Gwangju FC", "Busan IPark"],
+          "matchManagerConfirmed": true,
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerSource": "api-football",
+          "providerSourceId": "api-football:100001:manager:home",
+          "providerMethod": "recorded-snapshot"
+        },
+        {
+          "teamId": "2765",
+          "teamName": "Ulsan Hyundai FC",
+          "teamSide": "away",
+          "managerId": "5502",
+          "managerName": "Kim Pan-gon",
+          "competitionId": "292",
+          "competitionName": "K League 1",
+          "season": "2026",
+          "nationality": "South Korea",
+          "age": 55,
+          "appointmentDate": "2025-07-01",
+          "tenureDays": 364,
+          "previousClubs": ["Malaysia National Team"],
+          "matchManagerConfirmed": true,
+          "observedAt": "2026-07-19T10:30:00+00:00",
+          "providerSource": "api-football",
+          "providerSourceId": "api-football:100001:manager:away",
+          "providerMethod": "recorded-snapshot"
+        }
+      ],
       "players": [
         {
           "playerId": "1000011",

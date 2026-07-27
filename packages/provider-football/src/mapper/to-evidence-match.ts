@@ -1,5 +1,6 @@
 import type { FootballClubIntelligenceRecord } from "../domain/football-club-intelligence.js";
 import type { FootballExpectedGoalsRecord } from "../domain/football-expected-goals.js";
+import type { FootballManagerIntelligenceRecord } from "../domain/football-manager-intelligence.js";
 import type { FootballMatchContextRecord } from "../domain/football-match-context.js";
 import type {
   FootballAdvancedTeamStats,
@@ -231,6 +232,43 @@ function toClubIntelligenceShape(
   });
 }
 
+function toManagerIntelligenceShape(
+  record: FootballManagerIntelligenceRecord,
+  fixtureKey: string,
+): unknown {
+  return Object.freeze({
+    teamId: record.teamId,
+    teamName: record.teamName,
+    teamSide: record.teamSide,
+    managerName: record.managerName,
+    ...(record.managerId === undefined ? {} : { managerId: record.managerId }),
+    ...(record.competitionId === undefined
+      ? {}
+      : { competitionId: record.competitionId }),
+    ...(record.competitionName === undefined
+      ? {}
+      : { competitionName: record.competitionName }),
+    ...(record.season === undefined ? {} : { season: record.season }),
+    ...(record.nationality === undefined ? {} : { nationality: record.nationality }),
+    ...(record.age === undefined ? {} : { age: record.age }),
+    ...(record.appointmentDate === undefined
+      ? {}
+      : { appointmentDate: record.appointmentDate }),
+    ...(record.tenureDays === undefined ? {} : { tenureDays: record.tenureDays }),
+    ...(record.interimManagerStatus === undefined
+      ? {}
+      : { interimManagerStatus: record.interimManagerStatus }),
+    ...(record.previousClubs === undefined
+      ? {}
+      : { previousClubs: record.previousClubs }),
+    matchManagerConfirmed: record.matchManagerConfirmed,
+    observedAt: record.observedAt,
+    providerSource: "api-football",
+    providerSourceId: `api-football:${fixtureKey}:manager:${record.teamSide}`,
+    providerMethod: record.providerMethod,
+  });
+}
+
 function freezeAdvancedShape(
   advanced: FootballAdvancedTeamStats | undefined,
 ): unknown {
@@ -357,6 +395,7 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
     expectedGoals,
     matchContext,
     clubIntelligence,
+    managerIntelligence,
   } = bundle;
   const fixtureKey = fixture.fixtureId;
   const completedScore = fixture.completedScore;
@@ -513,6 +552,15 @@ export function toEvidenceMatchShape(bundle: FootballMatchBundle): unknown {
           clubIntelligence: Object.freeze(
             clubIntelligence.map((record) =>
               toClubIntelligenceShape(record, fixtureKey),
+            ),
+          ),
+        }),
+    ...(managerIntelligence.length === 0
+      ? {}
+      : {
+          managerIntelligence: Object.freeze(
+            managerIntelligence.map((record) =>
+              toManagerIntelligenceShape(record, fixtureKey),
             ),
           ),
         }),

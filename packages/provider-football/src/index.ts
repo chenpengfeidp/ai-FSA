@@ -35,6 +35,8 @@ export type {
   FootballLineupPlayer,
   FootballMatchBundle,
   FootballMatchSquadStatus,
+  FootballManagerIntelligenceRecord,
+  FootballManagerIntelligenceSide,
   FootballPlayer,
   FootballPlayerSeasonStats,
   FootballProviderMethod,
@@ -97,6 +99,7 @@ export {
   mapApiFootballCoachResponse,
   mapCoachNameFromLineupEntry,
 } from "./mapper/map-api-football-coach.js";
+export { mapApiFootballManagerIntelligence } from "./mapper/map-api-football-manager-intelligence.js";
 export { mapClubIntelligenceFromStandings } from "./mapper/map-club-intelligence-from-standings.js";
 export { mapApiFootballStandings } from "./mapper/map-api-football-standings.js";
 export {

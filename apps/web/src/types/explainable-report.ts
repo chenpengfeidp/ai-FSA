@@ -247,6 +247,32 @@ export interface ClubIntelligenceContextView {
   readonly note: string;
 }
 
+export interface ManagerIntelligenceRecordView {
+  readonly teamSide: "away" | "home";
+  readonly teamName: string;
+  readonly managerName: string;
+  readonly managerId: string | null;
+  readonly competitionName: string | null;
+  readonly season: string | null;
+  readonly nationality: string | null;
+  readonly age: number | null;
+  readonly appointmentDate: string | null;
+  readonly tenureDays: number | null;
+  readonly interimManagerStatus: boolean | null;
+  readonly previousClubs: readonly string[] | null;
+  readonly matchManagerConfirmed: boolean;
+  readonly observedAt: string;
+  readonly providerId: string;
+  readonly source: string;
+  readonly provenanceMethod: string;
+}
+
+export interface ManagerIntelligenceContextView {
+  readonly available: boolean;
+  readonly records: readonly ManagerIntelligenceRecordView[];
+  readonly note: string;
+}
+
 export interface MatchContextMetricsView {
   readonly restDays: number | null;
   readonly daysSinceLastMatch: number | null;
@@ -443,6 +469,7 @@ export interface ExplainableReportView {
   readonly advancedStatistics: AdvancedStatisticsContextView;
   readonly expectedGoals: ExpectedGoalsContextView;
   readonly clubIntelligence: ClubIntelligenceContextView;
+  readonly managerIntelligence: ManagerIntelligenceContextView;
   readonly matchContext: MatchContextEvidenceView;
   readonly marketEvidence: MarketEvidenceView;
   readonly availability: AvailabilitySummaryView;

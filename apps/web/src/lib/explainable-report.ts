@@ -25,6 +25,8 @@ import type {
   GoalRangeView,
   LineupPlayerItemView,
   LineupsContextView,
+  ManagerIntelligenceContextView,
+  ManagerIntelligenceRecordView,
   MarketEvidenceRecordView,
   MarketEvidenceSummaryView,
   MarketEvidenceView,
@@ -208,6 +210,7 @@ const EVIDENCE_TITLES: Readonly<Record<EvidenceType, string>> = Object.freeze({
   HEAD_TO_HEAD: "Head-to-head",
   INJURY: "Injury",
   LINEUP: "Lineup",
+  MANAGER_INTELLIGENCE: "Manager Intelligence",
   MATCH_CONTEXT: "Match Context",
   MATCH_INFO: "Match information",
   MATCH_RESULT: "Match Result",
@@ -891,6 +894,93 @@ function buildClubIntelligenceContext(
   });
 }
 
+function optionalStringArray(value: unknown): readonly string[] | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const items = value.filter(
+    (item): item is string => typeof item === "string" && item.trim().length > 0,
+  );
+
+  return items.length === 0 ? null : Object.freeze(items.map((item) => item.trim()));
+}
+
+function mapManagerIntelligenceRecord(
+  item: EvidenceDto,
+): ManagerIntelligenceRecordView | null {
+  if (item.type !== "MANAGER_INTELLIGENCE") {
+    return null;
+  }
+
+  const teamSide =
+    item.payload.teamSide === "home" || item.payload.teamSide === "away"
+      ? item.payload.teamSide
+      : null;
+  const teamName =
+    typeof item.payload.teamName === "string" ? item.payload.teamName : null;
+  const managerName =
+    typeof item.payload.managerName === "string" ? item.payload.managerName : null;
+  const observedAt =
+    typeof item.payload.observedAt === "string" ? item.payload.observedAt : null;
+  const matchManagerConfirmed =
+    typeof item.payload.matchManagerConfirmed === "boolean"
+      ? item.payload.matchManagerConfirmed
+      : null;
+
+  if (
+    teamSide === null ||
+    teamName === null ||
+    managerName === null ||
+    observedAt === null ||
+    matchManagerConfirmed === null
+  ) {
+    return null;
+  }
+
+  return Object.freeze({
+    teamSide,
+    teamName,
+    managerName,
+    managerId: optionalString(item.payload.managerId),
+    competitionName: optionalString(item.payload.competitionName),
+    season: optionalString(item.payload.season),
+    nationality: optionalString(item.payload.nationality),
+    age: optionalNumber(item.payload.age),
+    appointmentDate: optionalString(item.payload.appointmentDate),
+    tenureDays: optionalNumber(item.payload.tenureDays),
+    interimManagerStatus: optionalBoolean(item.payload.interimManagerStatus),
+    previousClubs: optionalStringArray(item.payload.previousClubs),
+    matchManagerConfirmed,
+    observedAt,
+    providerId: item.providerId,
+    source: item.source,
+    provenanceMethod: item.provenance.method,
+  });
+}
+
+function buildManagerIntelligenceContext(
+  evidence: readonly EvidenceDto[],
+): ManagerIntelligenceContextView {
+  const records = evidence
+    .map(mapManagerIntelligenceRecord)
+    .filter((item): item is ManagerIntelligenceRecordView => item !== null);
+
+  if (records.length === 0) {
+    return Object.freeze({
+      available: false,
+      records: Object.freeze([]),
+      note: "Manager Intelligence Evidence is not available for this match (honest absence). Never estimated or fabricated.",
+    });
+  }
+
+  return Object.freeze({
+    available: true,
+    records: Object.freeze(records),
+    note: "Manager Intelligence values are provider Facts only (M1A Evidence; not Features, Rules, Confidence, or Projection). No manager quality or tactical scoring is inferred.",
+  });
+}
+
 function optionalBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
 }
@@ -1439,6 +1529,7 @@ export function buildExplainableReportView(
   const advancedStatisticsContext = buildAdvancedStatisticsContext(evidence);
   const expectedGoalsContext = buildExpectedGoalsContext(evidence);
   const clubIntelligenceContext = buildClubIntelligenceContext(evidence);
+  const managerIntelligenceContext = buildManagerIntelligenceContext(evidence);
   const matchContextEvidence = buildMatchContextEvidence(evidence);
   const marketEvidence = buildMarketEvidence(evidence);
   const availabilityContext = buildAvailabilitySummary(evidence);
@@ -1459,6 +1550,7 @@ export function buildExplainableReportView(
     advancedStatistics: advancedStatisticsContext,
     expectedGoals: expectedGoalsContext,
     clubIntelligence: clubIntelligenceContext,
+    managerIntelligence: managerIntelligenceContext,
     matchContext: matchContextEvidence,
     marketEvidence,
     availability: availabilityContext,

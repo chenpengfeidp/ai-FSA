@@ -8,6 +8,10 @@ import type {
   FootballClubManagerFact,
 } from "../domain/football-club-intelligence.js";
 import type {
+  FootballManagerIntelligenceRecord,
+  FootballManagerIntelligenceSide,
+} from "../domain/football-manager-intelligence.js";
+import type {
   FootballExpectedGoalsMetrics,
   FootballExpectedGoalsRecord,
   FootballExpectedGoalsWindow,
@@ -785,6 +789,97 @@ function parseClubIntelligenceRecord(
   });
 }
 
+function parseManagerIntelligenceRecord(
+  entry: unknown,
+): FootballManagerIntelligenceRecord | undefined {
+  if (!isRecord(entry)) {
+    return undefined;
+  }
+
+  const teamId = typeof entry.teamId === "string" ? entry.teamId.trim() : "";
+  const teamName = typeof entry.teamName === "string" ? entry.teamName.trim() : "";
+  const teamSide: FootballManagerIntelligenceSide | undefined =
+    entry.teamSide === "home" || entry.teamSide === "away"
+      ? entry.teamSide
+      : undefined;
+  const managerName =
+    typeof entry.managerName === "string" ? entry.managerName.trim() : "";
+  const observedAt =
+    typeof entry.observedAt === "string" && entry.observedAt.trim().length > 0
+      ? entry.observedAt.trim()
+      : undefined;
+  const providerMethod =
+    entry.providerMethod === "http-live" ||
+    entry.providerMethod === "recorded-snapshot"
+      ? entry.providerMethod
+      : undefined;
+  const matchManagerConfirmed =
+    typeof entry.matchManagerConfirmed === "boolean"
+      ? entry.matchManagerConfirmed
+      : undefined;
+
+  if (
+    teamId.length === 0 ||
+    teamName.length === 0 ||
+    teamSide === undefined ||
+    managerName.length === 0 ||
+    observedAt === undefined ||
+    providerMethod === undefined ||
+    matchManagerConfirmed === undefined
+  ) {
+    return undefined;
+  }
+
+  const previousClubs =
+    Array.isArray(entry.previousClubs) &&
+    entry.previousClubs.every((club): club is string => typeof club === "string")
+      ? Object.freeze([...entry.previousClubs])
+      : undefined;
+
+  return Object.freeze({
+    teamId,
+    teamName,
+    teamSide,
+    managerName,
+    ...(typeof entry.managerId === "string" && entry.managerId.trim().length > 0
+      ? { managerId: entry.managerId.trim() }
+      : {}),
+    ...(typeof entry.competitionId === "string" &&
+    entry.competitionId.trim().length > 0
+      ? { competitionId: entry.competitionId.trim() }
+      : {}),
+    ...(typeof entry.competitionName === "string" &&
+    entry.competitionName.trim().length > 0
+      ? { competitionName: entry.competitionName.trim() }
+      : {}),
+    ...(typeof entry.season === "string" && entry.season.trim().length > 0
+      ? { season: entry.season.trim() }
+      : typeof entry.season === "number" && Number.isFinite(entry.season)
+        ? { season: String(entry.season) }
+        : {}),
+    ...(typeof entry.nationality === "string" && entry.nationality.trim().length > 0
+      ? { nationality: entry.nationality.trim() }
+      : {}),
+    ...(typeof entry.age === "number" && Number.isFinite(entry.age)
+      ? { age: entry.age }
+      : {}),
+    ...(typeof entry.appointmentDate === "string" &&
+    entry.appointmentDate.trim().length > 0
+      ? { appointmentDate: entry.appointmentDate.trim() }
+      : {}),
+    ...(typeof entry.tenureDays === "number" && Number.isFinite(entry.tenureDays)
+      ? { tenureDays: entry.tenureDays }
+      : {}),
+    ...(typeof entry.interimManagerStatus === "boolean"
+      ? { interimManagerStatus: entry.interimManagerStatus }
+      : {}),
+    ...(previousClubs === undefined ? {} : { previousClubs }),
+    matchManagerConfirmed,
+    observedAt,
+    providerMethod,
+  });
+}
+
 function parseClubManagerFact(entry: unknown): FootballClubManagerFact | undefined {
   if (!isRecord(entry)) {
     return undefined;
@@ -949,6 +1044,50 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
           managers,
         });
 
+  const managerIntelligenceRaw = Array.isArray(raw.managerIntelligence)
+    ? raw.managerIntelligence
+    : [];
+  const parsedManagerIntelligence = Object.freeze(
+    managerIntelligenceRaw.flatMap((entry) => {
+      const mapped = parseManagerIntelligenceRecord(entry);
+      return mapped === undefined ? [] : [mapped];
+    }),
+  );
+  // M1A honest fallback: cassettes without a dedicated managerIntelligence[]
+  // array still expose the minimal season identity carried on legacy
+  // managers[] (name/start/tenure) — never invent nationality/age/career.
+  const managerIntelligence: readonly FootballManagerIntelligenceRecord[] =
+    parsedManagerIntelligence.length > 0
+      ? parsedManagerIntelligence
+      : Object.freeze(
+          managers.flatMap((manager) => {
+            if (manager.managerName === undefined) {
+              return [];
+            }
+
+            return [
+              Object.freeze({
+                teamId: manager.teamId,
+                teamName:
+                  manager.teamSide === "home"
+                    ? fixture.homeTeamName
+                    : fixture.awayTeamName,
+                teamSide: manager.teamSide,
+                managerName: manager.managerName,
+                ...(manager.managerStartDate === undefined
+                  ? {}
+                  : { appointmentDate: manager.managerStartDate }),
+                ...(manager.managerTenureDays === undefined
+                  ? {}
+                  : { tenureDays: manager.managerTenureDays }),
+                matchManagerConfirmed: false,
+                observedAt: fixture.kickoff,
+                providerMethod: fixture.providerMethod,
+              }),
+            ];
+          }),
+        );
+
   const parsedAbsences: readonly FootballAvailabilityAbsence[] = Object.freeze(
     absencesRaw.flatMap((entry) => {
       if (!isRecord(entry)) {
@@ -1078,7 +1217,7 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
     parsedLineups,
   );
 
-  return Object.freeze({
+  const result = Object.freeze({
     fixture,
     homeForm,
     awayForm,
@@ -1102,7 +1241,10 @@ function freezeBundle(raw: unknown): FootballMatchBundle | undefined {
       }),
     ),
     clubIntelligence,
+    managerIntelligence,
   });
+
+  return result;
 }
 
 export class RecordedFootballCatalog

@@ -19,6 +19,63 @@ export type {
   RuleEvaluationOperation,
 } from "./use-case/analyze-match-use-case.js";
 export { computeDeterministicMatchProjection } from "./projection/compute-deterministic-projection.js";
+export { computeMatchProjection } from "./projection/compute-match-projection.js";
+export type { ComputeMatchProjectionResult } from "./projection/compute-match-projection.js";
+export { computeProjectionV2 } from "./projection-v2/compute-projection-v2.js";
+export {
+  BASELINE_PROJECTION_PARAMETER_ARTIFACT,
+  createProjectionParameterArtifact,
+  PROJECTION_FRAMEWORK_VERSION,
+  PROJECTION_PARAMS_BASELINE_ARTIFACT_ID,
+  PROJECTION_PARAMS_POLICY_VERSION,
+  ProjectionParameterArtifactValidationError,
+} from "./projection-v2/projection-parameter-artifact.js";
+export type {
+  CreateProjectionParameterArtifactInput,
+  ProjectionParameterArtifact,
+  ProjectionParameterArtifactStatus,
+} from "./projection-v2/projection-parameter-artifact.js";
+export {
+  DEFAULT_PROJECTION_POLICY_PIN,
+  resolveProjectionParameterArtifact,
+} from "./projection-v2/resolve-projection-policy.js";
+export type { ProjectionPolicyPin } from "./projection-v2/resolve-projection-policy.js";
+export { createProjectionFrameworkMetadata } from "./projection-v2/projection-result.js";
+export type {
+  ProjectionFrameworkMetadata,
+  ProjectionResult,
+} from "./projection-v2/projection-result.js";
+export { computeIdentityFootballState } from "./projection-v2/football-state/compute-identity-football-state.js";
+export {
+  createFootballStateEnvelope,
+  FOOTBALL_STATE_POLICY_VERSION,
+} from "./projection-v2/football-state/football-state-envelope.js";
+export type {
+  CreateFootballStateEnvelopeInput,
+  FootballStateEnvelope,
+  StateDimensionLevel,
+  StateDimensionValue,
+} from "./projection-v2/football-state/football-state-envelope.js";
+export { computeBaselineMatchScriptSet } from "./projection-v2/match-script/compute-baseline-match-script-set.js";
+export {
+  BASELINE_MATCH_SCRIPT_ID,
+  createMatchScriptSet,
+  MATCH_SCRIPT_POLICY_VERSION,
+} from "./projection-v2/match-script/match-script-set.js";
+export type {
+  CreateMatchScriptSetInput,
+  MatchScript,
+  MatchScriptSet,
+} from "./projection-v2/match-script/match-script-set.js";
+export { buildFoundationProbabilityMatrix } from "./projection-v2/probability-matrix/build-foundation-probability-matrix.js";
+export {
+  createProbabilityMatrixFromPoisson,
+  PROBABILITY_MATRIX_MODEL_VERSION,
+} from "./projection-v2/probability-matrix/probability-matrix.js";
+export type {
+  ProbabilityMatrix,
+  ScorelineCell,
+} from "./projection-v2/probability-matrix/probability-matrix.js";
 export {
   CONFIDENCE_MODEL_VERSION,
   createDeterministicMatchProjection,

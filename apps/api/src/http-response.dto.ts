@@ -535,6 +535,14 @@ export class AnalysisReportDto {
     additionalProperties: true,
   })
   declare readonly contribution?: Readonly<Record<string, unknown>>;
+
+  @ApiPropertyOptional({
+    description:
+      "Projection V2 framework metadata when the V2 policy pin is active. Does not alter sealed probability outputs in the foundation pin.",
+    type: "object",
+    additionalProperties: true,
+  })
+  declare readonly projectionFramework?: Readonly<Record<string, unknown>>;
 }
 
 export class AnalysisErrorCauseDto {

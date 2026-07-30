@@ -115,6 +115,9 @@ export class ReportBuilder {
       narrative: buildMvpIntelligenceNarrative(analysis, reportId),
       ...(actualResult === undefined ? {} : { actualResult }),
       ...(evaluation === undefined ? {} : { evaluation }),
+      ...(analysis.projectionFramework === undefined
+        ? {}
+        : { projectionFramework: analysis.projectionFramework }),
     });
   }
 }

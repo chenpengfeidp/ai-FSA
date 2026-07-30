@@ -4,6 +4,7 @@ import { createMatchId, type MatchId } from "@fas/match";
 import type { RuleResult } from "@fas/rule";
 import type { IntelligenceConfidence } from "../confidence/intelligence-confidence.js";
 import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
+import type { ProjectionFrameworkMetadata } from "../projection-v2/projection-result.js";
 import type { ScenarioSet } from "../scenario/scenario-set.js";
 
 export interface AnalysisResult {
@@ -16,6 +17,7 @@ export interface AnalysisResult {
   readonly projection: DeterministicMatchProjection;
   readonly scenarios: ScenarioSet;
   readonly intelligenceConfidence: IntelligenceConfidence;
+  readonly projectionFramework?: ProjectionFrameworkMetadata;
   readonly generatedAt: string;
 }
 
@@ -29,6 +31,7 @@ export interface CreateAnalysisResultInput {
   readonly projection: DeterministicMatchProjection;
   readonly scenarios: ScenarioSet;
   readonly intelligenceConfidence: IntelligenceConfidence;
+  readonly projectionFramework?: ProjectionFrameworkMetadata;
   readonly generatedAt: string;
 }
 
@@ -129,6 +132,9 @@ export function createAnalysisResult(
     projection: input.projection,
     scenarios: input.scenarios,
     intelligenceConfidence: input.intelligenceConfidence,
+    ...(input.projectionFramework === undefined
+      ? {}
+      : { projectionFramework: input.projectionFramework }),
     generatedAt: requireTimestamp(input.generatedAt),
   });
 }

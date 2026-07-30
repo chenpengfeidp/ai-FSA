@@ -13,8 +13,11 @@ import {
   createAnalysisResult,
   type AnalysisResult,
 } from "../domain/analysis-result.js";
-import { computeDeterministicMatchProjection } from "../projection/compute-deterministic-projection.js";
-import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
+import { computeMatchProjection } from "../projection/compute-match-projection.js";
+import {
+  DEFAULT_PROJECTION_POLICY_PIN,
+  type ProjectionPolicyPin,
+} from "../projection-v2/resolve-projection-policy.js";
 import { buildScenarioSet } from "../scenario/scenario-set.js";
 
 export type Result<Value, Failure> =
@@ -129,6 +132,7 @@ export class AnalyzeMatchUseCase {
   readonly #featureExtractor: FeatureExtractionOperation;
   readonly #ruleEvaluator: RuleEvaluationOperation;
   readonly #calibrationArtifact: CalibrationArtifact;
+  readonly #projectionPolicyPin: ProjectionPolicyPin;
 
   constructor(
     importMatch: MatchImportOperation,
@@ -136,12 +140,14 @@ export class AnalyzeMatchUseCase {
     featureExtractor: FeatureExtractionOperation,
     ruleEvaluator: RuleEvaluationOperation,
     calibrationArtifact: CalibrationArtifact = IDENTITY_CALIBRATION_ARTIFACT,
+    projectionPolicyPin: ProjectionPolicyPin = DEFAULT_PROJECTION_POLICY_PIN,
   ) {
     this.#importMatch = importMatch;
     this.#evidenceQuery = evidenceQuery;
     this.#featureExtractor = featureExtractor;
     this.#ruleEvaluator = ruleEvaluator;
     this.#calibrationArtifact = calibrationArtifact;
+    this.#projectionPolicyPin = projectionPolicyPin;
   }
 
   async execute(matchId: MatchId): Promise<AnalyzeMatchResult> {
@@ -206,14 +212,15 @@ export class AnalyzeMatchUseCase {
       );
     }
 
-    let projection: DeterministicMatchProjection;
+    let projectionResult: ReturnType<typeof computeMatchProjection>;
 
     try {
-      projection = computeDeterministicMatchProjection({
+      projectionResult = computeMatchProjection({
         featureBundle,
         ruleResults,
         requiredEvidencePresentCount: countRequiredEvidence(evidenceSet),
         calibrationArtifact: this.#calibrationArtifact,
+        projectionPolicyPin: this.#projectionPolicyPin,
       });
     } catch {
       return failure(
@@ -221,6 +228,8 @@ export class AnalyzeMatchUseCase {
         "Deterministic match projection failed unexpectedly.",
       );
     }
+
+    const { projection, projectionFramework } = projectionResult;
 
     const scenarios = buildScenarioSet(projection);
     const intelligenceConfidence = computeIntelligenceConfidence({
@@ -243,6 +252,7 @@ export class AnalyzeMatchUseCase {
           projection,
           scenarios,
           intelligenceConfidence,
+          ...(projectionFramework === undefined ? {} : { projectionFramework }),
           generatedAt: latestEvaluationTime(ruleResults),
         }),
       );

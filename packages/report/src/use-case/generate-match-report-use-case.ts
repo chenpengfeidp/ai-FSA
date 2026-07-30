@@ -97,6 +97,9 @@ function withOverlays(
       ? {}
       : { actualResult: report.actualResult }),
     ...(report.evaluation === undefined ? {} : { evaluation: report.evaluation }),
+    ...(report.projectionFramework === undefined
+      ? {}
+      : { projectionFramework: report.projectionFramework }),
     ...(evaluationHistory.length === 0 ? {} : { evaluationHistory }),
     calibration,
     validation,

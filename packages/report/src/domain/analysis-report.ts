@@ -1,6 +1,7 @@
 import type {
   DeterministicMatchProjection,
   IntelligenceConfidence,
+  ProjectionFrameworkMetadata,
   ScenarioSet,
 } from "@fas/analysis";
 import type { NarrativeDraft } from "@fas/ai-provider";
@@ -54,6 +55,8 @@ export interface AnalysisReport {
    * claims causation.
    */
   readonly contribution?: ContributionReport;
+  /** Projection V2 framework metadata when V2 policy pin is active. */
+  readonly projectionFramework?: ProjectionFrameworkMetadata;
 }
 
 export interface CreateAnalysisReportInput {
@@ -73,6 +76,7 @@ export interface CreateAnalysisReportInput {
   readonly calibration?: PredictionCalibrationReport;
   readonly validation?: ValidationReport;
   readonly contribution?: ContributionReport;
+  readonly projectionFramework?: ProjectionFrameworkMetadata;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -221,5 +225,8 @@ export function createAnalysisReport(
     ...(input.contribution === undefined
       ? {}
       : { contribution: input.contribution }),
+    ...(input.projectionFramework === undefined
+      ? {}
+      : { projectionFramework: input.projectionFramework }),
   });
 }

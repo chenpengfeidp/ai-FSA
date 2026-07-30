@@ -1,72 +1,34 @@
-import type { Feature, FeatureName } from "@fas/feature";
 import type { FeatureBundle } from "@fas/feature";
-import {
-  buildIndependentPoissonMatrix,
-  computeLambdas,
-} from "../../projection/projection-math.js";
+import { buildIndependentPoissonMatrix } from "../../projection/projection-math.js";
+import { buildLambdasV2 } from "../lambda/lambda-builder-v2.js";
+import type { ProjectionParameterArtifact } from "../projection-parameter-artifact.js";
 import {
   createProbabilityMatrixFromPoisson,
   type ProbabilityMatrix,
 } from "./probability-matrix.js";
 
-const REQUIRED_FOUNDATION_FEATURES = Object.freeze([
-  "attackRatingHome",
-  "attackRatingAway",
-  "defenseRatingHome",
-  "defenseRatingAway",
-  "momentumHome",
-  "momentumAway",
-  "homeAdvantage",
-] as const satisfies readonly FeatureName[]);
-
-function numericFeature(
-  features: ReadonlyMap<FeatureName, Feature>,
-  name: FeatureName,
-): number | undefined {
-  const value = features.get(name)?.value;
-
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-export function buildFoundationProbabilityMatrix(input: {
+export function buildFeatureEnrichedProbabilityMatrix(input: {
   readonly featureBundle: FeatureBundle;
-}): ProbabilityMatrix | undefined {
-  const features = new Map(
-    input.featureBundle.features.map((feature) => [feature.name, feature]),
-  );
-  const attackHome = numericFeature(features, "attackRatingHome");
-  const defenseAway = numericFeature(features, "defenseRatingAway");
-  const attackAway = numericFeature(features, "attackRatingAway");
-  const defenseHome = numericFeature(features, "defenseRatingHome");
-  const momentumHome = numericFeature(features, "momentumHome");
-  const momentumAway = numericFeature(features, "momentumAway");
-  const homeAdvantage = numericFeature(features, "homeAdvantage");
+  readonly parameters: ProjectionParameterArtifact;
+}): ProbabilityMatrix | null {
+  const lambdaResult = buildLambdasV2({
+    featureBundle: input.featureBundle,
+    parameters: input.parameters.lambda,
+  });
 
-  if (
-    attackHome === undefined ||
-    defenseAway === undefined ||
-    attackAway === undefined ||
-    defenseHome === undefined ||
-    momentumHome === undefined ||
-    momentumAway === undefined ||
-    homeAdvantage === undefined
-  ) {
-    return undefined;
+  if (lambdaResult.blocked) {
+    return null;
   }
 
-  const lambdas = computeLambdas({
-    attackRatingHome: attackHome,
-    defenseRatingAway: defenseAway,
-    attackRatingAway: attackAway,
-    defenseRatingHome: defenseHome,
-    homeAdvantage,
-  });
   const poisson = buildIndependentPoissonMatrix(
-    lambdas.lambdaHome,
-    lambdas.lambdaAway,
+    lambdaResult.lambdaHome,
+    lambdaResult.lambdaAway,
   );
 
-  return createProbabilityMatrixFromPoisson(poisson, lambdas);
+  return createProbabilityMatrixFromPoisson(poisson, {
+    lambdaHome: lambdaResult.lambdaHome,
+    lambdaAway: lambdaResult.lambdaAway,
+  });
 }
 
-export { REQUIRED_FOUNDATION_FEATURES };
+export { REQUIRED_FOUNDATION_FEATURES } from "../lambda/lambda-builder-v2.js";

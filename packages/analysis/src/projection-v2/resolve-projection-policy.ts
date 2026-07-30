@@ -1,5 +1,6 @@
 import {
   BASELINE_PROJECTION_PARAMETER_ARTIFACT,
+  FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
   type ProjectionParameterArtifact,
 } from "./projection-parameter-artifact.js";
 
@@ -11,8 +12,10 @@ export function resolveProjectionParameterArtifact(
   pin: ProjectionPolicyPin,
 ): ProjectionParameterArtifact | undefined {
   if (pin === "v2") {
-    return BASELINE_PROJECTION_PARAMETER_ARTIFACT;
+    return FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT;
   }
 
   return undefined;
 }
+
+export { BASELINE_PROJECTION_PARAMETER_ARTIFACT };

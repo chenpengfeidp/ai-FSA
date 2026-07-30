@@ -19,14 +19,17 @@ export type {
   RuleEvaluationOperation,
 } from "./use-case/analyze-match-use-case.js";
 export { computeDeterministicMatchProjection } from "./projection/compute-deterministic-projection.js";
+export { computeDeterministicProjectionV2 } from "./projection/compute-deterministic-projection-v2.js";
 export { computeMatchProjection } from "./projection/compute-match-projection.js";
 export type { ComputeMatchProjectionResult } from "./projection/compute-match-projection.js";
 export { computeProjectionV2 } from "./projection-v2/compute-projection-v2.js";
 export {
   BASELINE_PROJECTION_PARAMETER_ARTIFACT,
   createProjectionParameterArtifact,
+  FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
   PROJECTION_FRAMEWORK_VERSION,
   PROJECTION_PARAMS_BASELINE_ARTIFACT_ID,
+  PROJECTION_PARAMS_FEATURE_LAMBDA_ARTIFACT_ID,
   PROJECTION_PARAMS_POLICY_VERSION,
   ProjectionParameterArtifactValidationError,
 } from "./projection-v2/projection-parameter-artifact.js";
@@ -35,6 +38,17 @@ export type {
   ProjectionParameterArtifact,
   ProjectionParameterArtifactStatus,
 } from "./projection-v2/projection-parameter-artifact.js";
+export { buildLambdasV2 } from "./projection-v2/lambda/lambda-builder-v2.js";
+export type {
+  LambdaBuilderV2Result,
+  LambdaFeatureGroupId,
+  LambdaFeatureScale,
+  LambdaFeatureWeightEntry,
+  LambdaGroupContribution,
+  LambdaParameterSet,
+} from "./projection-v2/lambda/lambda-parameter-set.js";
+export { LAMBDA_FEATURE_GROUPS } from "./projection-v2/lambda/lambda-feature-groups.js";
+export type { LambdaFeatureGroupDefinition } from "./projection-v2/lambda/lambda-feature-groups.js";
 export {
   DEFAULT_PROJECTION_POLICY_PIN,
   resolveProjectionParameterArtifact,
@@ -67,7 +81,10 @@ export type {
   MatchScript,
   MatchScriptSet,
 } from "./projection-v2/match-script/match-script-set.js";
-export { buildFoundationProbabilityMatrix } from "./projection-v2/probability-matrix/build-foundation-probability-matrix.js";
+export {
+  buildFeatureEnrichedProbabilityMatrix,
+  buildFeatureEnrichedProbabilityMatrix as buildFoundationProbabilityMatrix,
+} from "./projection-v2/probability-matrix/build-foundation-probability-matrix.js";
 export {
   createProbabilityMatrixFromPoisson,
   PROBABILITY_MATRIX_MODEL_VERSION,

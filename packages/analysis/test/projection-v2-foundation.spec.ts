@@ -5,12 +5,16 @@ import { RuleEvaluator } from "@fas/rule";
 import { describe, expect, it } from "vitest";
 import {
   BASELINE_MATCH_SCRIPT_ID,
+  BASELINE_PROJECTION_PARAMETER_ARTIFACT,
+  buildLambdasV2,
+  computeLambdas,
   computeMatchProjection,
   computeProjectionV2,
+  FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
   FOOTBALL_STATE_POLICY_VERSION,
   MATCH_SCRIPT_POLICY_VERSION,
   PROJECTION_FRAMEWORK_VERSION,
-  PROJECTION_PARAMS_BASELINE_ARTIFACT_ID,
+  PROJECTION_PARAMS_FEATURE_LAMBDA_ARTIFACT_ID,
 } from "../src/index.js";
 
 function makeMatchInfo(matchId = createMatchId("match-1")) {
@@ -124,12 +128,12 @@ describe("Projection V2 foundation", () => {
     );
     expect(result.matchScriptSet.scripts[0]?.weight).toBe(1);
     expect(result.parameters.artifactId).toBe(
-      PROJECTION_PARAMS_BASELINE_ARTIFACT_ID,
+      PROJECTION_PARAMS_FEATURE_LAMBDA_ARTIFACT_ID,
     );
     expect(result.framework.frameworkVersion).toBe(PROJECTION_FRAMEWORK_VERSION);
   });
 
-  it("wraps the foundation Poisson matrix with valid marginals", () => {
+  it("wraps the feature-enriched Poisson matrix with valid marginals", () => {
     const input = makePipelineInput();
     const result = computeProjectionV2(input);
 
@@ -148,19 +152,16 @@ describe("Projection V2 foundation", () => {
     expect(matrix.topScorelines.length).toBeGreaterThan(0);
   });
 
-  it("matches Projection V1 outputs byte-for-byte on probabilities", () => {
+  it("uses feature-enriched lambda basis without Rule softmax", () => {
     const input = makePipelineInput();
-    const v1 = computeMatchProjection({
-      ...input,
-      projectionPolicyPin: "v1",
-    });
     const v2 = computeMatchProjection({
       ...input,
       projectionPolicyPin: "v2",
     });
 
     expect(v2.projectionFramework).toBeDefined();
-    expect(v2.projection).toEqual(v1.projection);
+    expect(v2.projection.scorelinesBasis).toBe("feature_enriched_lambda_v2");
+    expect(v2.projection.oneXTwoBasis).toBe("post_calibration_only");
   });
 
   it("defaults computeMatchProjection to V1 without framework metadata", () => {
@@ -169,5 +170,40 @@ describe("Projection V2 foundation", () => {
 
     expect(result.projectionFramework).toBeUndefined();
     expect(result.projection.status).toBe("completed_nonempty");
+    expect(result.projection.scorelinesBasis).toBe("pre_rule_adjustment");
+  });
+});
+
+describe("LambdaBuilderV2", () => {
+  it("reproduces V1 lambdas with baseline artifact weights", () => {
+    const input = makePipelineInput();
+    const features = new Map(
+      input.featureBundle.features.map((feature) => [feature.name, feature]),
+    );
+    const v1 = computeLambdas({
+      attackRatingHome: features.get("attackRatingHome")?.value as number,
+      defenseRatingAway: features.get("defenseRatingAway")?.value as number,
+      attackRatingAway: features.get("attackRatingAway")?.value as number,
+      defenseRatingHome: features.get("defenseRatingHome")?.value as number,
+      homeAdvantage: features.get("homeAdvantage")?.value as number,
+    });
+    const v2 = buildLambdasV2({
+      featureBundle: input.featureBundle,
+      parameters: BASELINE_PROJECTION_PARAMETER_ARTIFACT.lambda,
+    });
+
+    expect(v2.lambdaHome).toBeCloseTo(v1.lambdaHome, 9);
+    expect(v2.lambdaAway).toBeCloseTo(v1.lambdaAway, 9);
+  });
+
+  it("records absent optional Features without imputing values", () => {
+    const input = makePipelineInput();
+    const result = buildLambdasV2({
+      featureBundle: input.featureBundle,
+      parameters: FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT.lambda,
+    });
+
+    expect(result.absentOptionalFeatures.length).toBeGreaterThan(0);
+    expect(result.limitations.some((line) => line.includes("neutral"))).toBe(true);
   });
 });

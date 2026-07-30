@@ -30,6 +30,7 @@ export {
   MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
   PROJECTION_FRAMEWORK_VERSION,
   PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
+  PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
   PROJECTION_PARAMS_BASELINE_ARTIFACT_ID,
   PROJECTION_PARAMS_FEATURE_LAMBDA_ARTIFACT_ID,
   PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
@@ -57,12 +58,25 @@ export {
   resolveProjectionParameterArtifact,
 } from "./projection-v2/resolve-projection-policy.js";
 export type { ProjectionPolicyPin } from "./projection-v2/resolve-projection-policy.js";
-export { createProjectionFrameworkMetadata } from "./projection-v2/projection-result.js";
+export { computeMultiScriptProjection } from "./projection-v2/multi-script/compute-multi-script-projection.js";
+export {
+  buildMatchScriptProjectionSummaries,
+  buildMultiScriptMergeSummary,
+} from "./projection-v2/multi-script/build-multi-script-projection-metadata.js";
+export type {
+  MatchScriptProjectionSummary,
+  MultiScriptMergeSummary,
+  ScriptMergeContribution,
+  ScriptScorelineSummary,
+} from "./projection-v2/multi-script/build-multi-script-projection-metadata.js";
+export { MULTI_SCRIPT_MERGE_ALGORITHM } from "./projection-v2/multi-script/compute-multi-script-projection.js";
+export type { PerScriptProjection } from "./projection-v2/multi-script/compute-multi-script-projection.js";
 export type {
   ProjectionFrameworkMetadata,
   MatchScriptSummary,
   ProjectionResult,
 } from "./projection-v2/projection-result.js";
+export { createProjectionFrameworkMetadata } from "./projection-v2/projection-result.js";
 export { computeIdentityFootballState } from "./projection-v2/football-state/compute-identity-football-state.js";
 export { computeFootballState } from "./projection-v2/football-state/compute-football-state.js";
 export {

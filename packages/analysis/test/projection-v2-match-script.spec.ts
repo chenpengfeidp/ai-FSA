@@ -13,7 +13,7 @@ import {
   MATCH_SCRIPT_POLICY_VERSION,
   MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
   mergeProbabilityMatrices,
-  PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
+  PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
   PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
   buildLambdasV2,
 } from "../src/index.js";
@@ -168,7 +168,7 @@ describe("Match Script Generator (P2E)", () => {
       PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
     );
     expect(result.framework.frameworkVersion).toBe(
-      PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
+      PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
     );
     expect(result.matchScriptSet.scripts.length).toBeGreaterThanOrEqual(2);
     expect(result.probabilityMatrix).not.toBeNull();

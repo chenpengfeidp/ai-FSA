@@ -5,9 +5,7 @@ import { computeDeterministicProjectionV2 } from "../projection/compute-determin
 import { computeFootballState } from "./football-state/compute-football-state.js";
 import { buildLambdasV2 } from "./lambda/lambda-builder-v2.js";
 import { generateMatchScriptSet } from "./match-script/match-script-generator.js";
-import { buildScriptProbabilityMatrix } from "./probability-matrix/build-script-probability-matrix.js";
-import { mergeProbabilityMatrices } from "./probability-matrix/merge-probability-matrices.js";
-import type { ProbabilityMatrix } from "./probability-matrix/probability-matrix.js";
+import { computeMultiScriptProjection } from "./multi-script/compute-multi-script-projection.js";
 import {
   MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
   type ProjectionParameterArtifact,
@@ -39,46 +37,17 @@ export function computeProjectionV2(input: {
     footballState,
     parameters: parameters.lambda,
   });
-  const scriptMatrices: Array<{
-    readonly scriptId: string;
-    readonly matrix: ProbabilityMatrix;
-  }> = [];
-
-  if (!lambdaResult.blocked) {
-    for (const script of matchScriptSet.scripts) {
-      scriptMatrices.push(
-        Object.freeze({
-          scriptId: script.scriptId,
-          matrix: buildScriptProbabilityMatrix({
-            baseLambdaHome: lambdaResult.lambdaHome,
-            baseLambdaAway: lambdaResult.lambdaAway,
-            modifiers: script.lambdaModifiers,
-            parameters: parameters.lambda,
-          }),
-        }),
-      );
-    }
-  }
-
-  const probabilityMatrix = lambdaResult.blocked
-    ? null
-    : mergeProbabilityMatrices(
-        matchScriptSet.scripts
-          .map((script, index) =>
-            Object.freeze({
-              weight: script.weight,
-              matrix: scriptMatrices[index]?.matrix,
-            }),
-          )
-          .filter(
-            (
-              entry,
-            ): entry is Readonly<{
-              readonly weight: number;
-              readonly matrix: ProbabilityMatrix;
-            }> => entry.matrix !== undefined,
-          ),
-      );
+  const multiScriptProjection = lambdaResult.blocked
+    ? Object.freeze({
+        perScriptProjections: Object.freeze([]),
+        mergedMatrix: null,
+      })
+    : computeMultiScriptProjection({
+        matchScriptSet,
+        baseLambdaHome: lambdaResult.lambdaHome,
+        baseLambdaAway: lambdaResult.lambdaAway,
+        parameters: parameters.lambda,
+      });
   const projection = computeDeterministicProjectionV2({
     featureBundle: input.featureBundle,
     ruleResults: input.ruleResults,
@@ -89,16 +58,17 @@ export function computeProjectionV2(input: {
     ...(input.calibrationArtifact === undefined
       ? {}
       : { calibrationArtifact: input.calibrationArtifact }),
-    ...(probabilityMatrix === null || probabilityMatrix === undefined
+    ...(multiScriptProjection.mergedMatrix === null ||
+    multiScriptProjection.mergedMatrix === undefined
       ? {}
-      : { mergedProbabilityMatrix: probabilityMatrix }),
+      : { mergedProbabilityMatrix: multiScriptProjection.mergedMatrix }),
   });
   const framework = createProjectionFrameworkMetadata({
     parameters,
     footballState,
     matchScriptSet,
-    probabilityMatrix,
-    scriptMatrices: Object.freeze([...scriptMatrices]),
+    probabilityMatrix: multiScriptProjection.mergedMatrix,
+    perScriptProjections: multiScriptProjection.perScriptProjections,
   });
 
   return Object.freeze({
@@ -106,7 +76,8 @@ export function computeProjectionV2(input: {
     parameters,
     footballState,
     matchScriptSet,
-    probabilityMatrix,
+    probabilityMatrix: multiScriptProjection.mergedMatrix,
+    perScriptProjections: multiScriptProjection.perScriptProjections,
     framework,
   });
 }

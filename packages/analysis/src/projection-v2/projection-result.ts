@@ -1,27 +1,23 @@
 import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
 import {
-  PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
+  PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
   type ProjectionParameterArtifact,
 } from "./projection-parameter-artifact.js";
 import type { FootballStateEnvelope } from "./football-state/football-state-envelope.js";
 import type { MatchScriptSet } from "./match-script/match-script-set.js";
+import {
+  buildMatchScriptProjectionSummaries,
+  buildMultiScriptMergeSummary,
+  type MatchScriptProjectionSummary,
+  type MultiScriptMergeSummary,
+} from "./multi-script/build-multi-script-projection-metadata.js";
+import type { PerScriptProjection } from "./multi-script/compute-multi-script-projection.js";
 import type { ProbabilityMatrix } from "./probability-matrix/probability-matrix.js";
 
-export interface MatchScriptSummary {
-  readonly scriptId: string;
-  readonly label: string;
-  readonly weight: number;
-  readonly activationReason: string;
-  readonly activationReasons: readonly string[];
-  readonly footballStateRefs: readonly string[];
-  readonly activatingRules: readonly string[];
-  readonly strengtheningFeatures: readonly string[];
-  readonly lambdaHome: number;
-  readonly lambdaAway: number;
-}
+export type MatchScriptSummary = MatchScriptProjectionSummary;
 
 export interface ProjectionFrameworkMetadata {
-  readonly frameworkVersion: typeof PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT;
+  readonly frameworkVersion: typeof PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT;
   readonly parameterArtifactId: string;
   readonly parameterArtifactChecksum: string;
   readonly footballStatePolicyVersion: FootballStateEnvelope["policyVersion"];
@@ -29,7 +25,8 @@ export interface ProjectionFrameworkMetadata {
   readonly footballStateChecksum: string;
   readonly matchScriptSetChecksum: string;
   readonly probabilityMatrixChecksum: string | null;
-  readonly activeMatchScripts: readonly MatchScriptSummary[];
+  readonly activeMatchScripts: readonly MatchScriptProjectionSummary[];
+  readonly multiScriptMerge: MultiScriptMergeSummary | null;
 }
 
 export interface ProjectionResult {
@@ -38,6 +35,7 @@ export interface ProjectionResult {
   readonly footballState: FootballStateEnvelope;
   readonly matchScriptSet: MatchScriptSet;
   readonly probabilityMatrix: ProbabilityMatrix | null;
+  readonly perScriptProjections: readonly PerScriptProjection[];
   readonly framework: ProjectionFrameworkMetadata;
 }
 
@@ -46,17 +44,19 @@ export function createProjectionFrameworkMetadata(input: {
   readonly footballState: FootballStateEnvelope;
   readonly matchScriptSet: MatchScriptSet;
   readonly probabilityMatrix: ProbabilityMatrix | null;
-  readonly scriptMatrices: readonly Readonly<{
-    readonly scriptId: string;
-    readonly matrix: ProbabilityMatrix;
-  }>[];
+  readonly perScriptProjections: readonly PerScriptProjection[];
 }): ProjectionFrameworkMetadata {
-  const matrixByScriptId = new Map(
-    input.scriptMatrices.map((entry) => [entry.scriptId, entry.matrix]),
-  );
+  const activeMatchScripts = buildMatchScriptProjectionSummaries({
+    scripts: input.matchScriptSet.scripts,
+    perScriptProjections: input.perScriptProjections,
+  });
+  const multiScriptMerge = buildMultiScriptMergeSummary({
+    perScriptProjections: input.perScriptProjections,
+    mergedMatrix: input.probabilityMatrix,
+  });
 
   return Object.freeze({
-    frameworkVersion: PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
+    frameworkVersion: PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
     parameterArtifactId: input.parameters.artifactId,
     parameterArtifactChecksum: input.parameters.checksum,
     footballStatePolicyVersion: input.footballState.policyVersion,
@@ -64,23 +64,7 @@ export function createProjectionFrameworkMetadata(input: {
     footballStateChecksum: input.footballState.checksum,
     matchScriptSetChecksum: input.matchScriptSet.checksum,
     probabilityMatrixChecksum: input.probabilityMatrix?.checksum ?? null,
-    activeMatchScripts: Object.freeze(
-      input.matchScriptSet.scripts.map((script) => {
-        const matrix = matrixByScriptId.get(script.scriptId);
-
-        return Object.freeze({
-          scriptId: script.scriptId,
-          label: script.label,
-          weight: script.weight,
-          activationReason: script.activationReason,
-          activationReasons: script.activationReasons,
-          footballStateRefs: script.footballStateRefs,
-          activatingRules: script.activatingRules,
-          strengtheningFeatures: script.strengtheningFeatures,
-          lambdaHome: matrix?.lambdaHome ?? 0,
-          lambdaAway: matrix?.lambdaAway ?? 0,
-        });
-      }),
-    ),
+    activeMatchScripts,
+    multiScriptMerge,
   });
 }

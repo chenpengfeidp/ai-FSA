@@ -534,6 +534,19 @@ export interface FootballStateReportDto {
   readonly limitations: readonly string[];
 }
 
+export interface ScriptScorelineDto {
+  readonly homeGoals: number;
+  readonly awayGoals: number;
+  readonly probability: number;
+}
+
+export interface ScriptMergeContributionDto {
+  readonly weight: number;
+  readonly weightedPHome: number;
+  readonly weightedPDraw: number;
+  readonly weightedPAway: number;
+}
+
 export interface MatchScriptSummaryDto {
   readonly scriptId: string;
   readonly label: string;
@@ -545,6 +558,33 @@ export interface MatchScriptSummaryDto {
   readonly strengtheningFeatures: readonly string[];
   readonly lambdaHome: number;
   readonly lambdaAway: number;
+  readonly pHome: number;
+  readonly pDraw: number;
+  readonly pAway: number;
+  readonly mostLikelyScoreline: ScriptScorelineDto;
+  readonly secondScoreline: ScriptScorelineDto | null;
+  readonly goalRange: Readonly<{
+    readonly range01: number;
+    readonly range23: number;
+    readonly range4Plus: number;
+  }>;
+  readonly mergeContribution: ScriptMergeContributionDto;
+}
+
+export interface MultiScriptMergeSummaryDto {
+  readonly algorithm: string;
+  readonly scriptCount: number;
+  readonly explanation: string;
+  readonly mergedPHome: number;
+  readonly mergedPDraw: number;
+  readonly mergedPAway: number;
+  readonly mergedGoalRange: Readonly<{
+    readonly range01: number;
+    readonly range23: number;
+    readonly range4Plus: number;
+  }>;
+  readonly mergedMostLikelyScoreline: ScriptScorelineDto;
+  readonly mergedSecondScoreline: ScriptScorelineDto | null;
 }
 
 export interface ProjectionFrameworkDto {
@@ -557,6 +597,7 @@ export interface ProjectionFrameworkDto {
   readonly matchScriptSetChecksum: string;
   readonly probabilityMatrixChecksum: string | null;
   readonly activeMatchScripts: readonly MatchScriptSummaryDto[];
+  readonly multiScriptMerge: MultiScriptMergeSummaryDto | null;
 }
 
 export interface AnalysisReportDto {

@@ -312,6 +312,22 @@ export const zh = {
     matchScriptFootballStateRefs: "足球状态溯源",
     matchScriptProvenance: (policy: string, checksum: string): string =>
       `溯源：${policy} · checksum ${checksum}`,
+    multiScriptProjection: "多剧本投影",
+    multiScriptProjectionHint:
+      "每个激活剧本独立生成期望进球与比分分布；最终预测为 Match Script 权重下的确定性合并",
+    multiScriptPipeline: "激活剧本 → 分剧本预测 → 合并最终预测",
+    multiScriptProjectionUnavailable: "当前分析未启用多剧本投影（需 V2 投影 pin）",
+    multiScriptMergedFinal: "合并最终预测（校准前）",
+    multiScriptWinner: "胜平负",
+    multiScriptMostLikely: "最可能比分",
+    multiScriptSecond: "次可能比分",
+    multiScriptGoalRange: "进球区间",
+    multiScriptContribution: "合并贡献",
+    multiScriptPostCalibration: (
+      pHome: string,
+      pDraw: string,
+      pAway: string,
+    ): string => `封存预测（校准后）胜平负：主 ${pHome} · 平 ${pDraw} · 客 ${pAway}`,
     validationUnavailable: "暂无评估历史，无法计算验证指标",
     validationTotalSampleSize: "历史预测总量",
     validationMinimumSample: (min: number): string => `最低合格样本量：${min}`,

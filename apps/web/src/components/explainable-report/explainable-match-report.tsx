@@ -9,6 +9,7 @@ import { FeatureImportance } from "./feature-importance";
 import { FinalRecommendation } from "./final-recommendation";
 import { FootballStateSection } from "./football-state-section";
 import { MatchScriptSection } from "./match-script-section";
+import { MultiScriptProjectionSection } from "./multi-script-projection-section";
 import { PredictionHero } from "./prediction-hero";
 import { ReasoningSection } from "./reasoning-section";
 import { RuleEvaluationSection } from "./rule-evaluation-section";
@@ -54,6 +55,10 @@ export function ExplainableMatchReport({
         <WinnerPredictionCard prediction={view.winnerPrediction} />
         <FootballStateSection footballState={report.footballState} />
         <MatchScriptSection projectionFramework={report.projectionFramework} />
+        <MultiScriptProjectionSection
+          projectionFramework={report.projectionFramework}
+          report={report}
+        />
       </WorkspaceSection>
 
       <EvaluationSection

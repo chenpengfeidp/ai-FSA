@@ -193,3 +193,47 @@ export {
 
 export { computeContributionReport } from "./contribution/compute-contribution-report.js";
 export type { ComputeContributionReportInput } from "./contribution/compute-contribution-report.js";
+
+export {
+  PROJECTION_REPLAY_COMPARISON_REPORT_MODEL_VERSION,
+  MINIMUM_QUALIFIED_REPLAY_SEGMENT_SAMPLE_SIZE,
+  ProjectionReplayComparisonReportValidationError,
+} from "./domain/projection-replay-comparison-report.js";
+export type {
+  ProjectionReplayAccuracyBlock,
+  ProjectionReplayAccuracyDelta,
+  ProjectionReplayComparisonReport,
+  ProjectionReplayComparisonSegment,
+  ProjectionReplayMetricSummary,
+} from "./domain/projection-replay-comparison-report.js";
+
+export type {
+  ProjectionReplaySidecar,
+  SealedProjectionReplayContext,
+  SealedReplayFeatureSnapshot,
+  SealedRuleReplaySnapshot,
+} from "./replay/projection-replay-context.js";
+export {
+  computeProjectionReplayMetrics,
+  pearsonCorrelation,
+} from "./replay/projection-replay-metrics.js";
+export type { ProjectionReplayMetrics } from "./replay/projection-replay-metrics.js";
+export { isProjectionReplayResult } from "./replay/projection-replay-port.js";
+export type {
+  ProjectionReplayPort,
+  ProjectionReplayPortInput,
+  ProjectionReplayPortOutcome,
+  ProjectionReplayPortResult,
+  ProjectionReplayPortSkip,
+  ProjectionReplayVersion,
+} from "./replay/projection-replay-port.js";
+export { ReplayRunner } from "./replay/replay-runner.js";
+export type {
+  ProjectionReplayRecordOutcome,
+  ReplayRunnerInput,
+  ReplayRunnerResult,
+} from "./replay/replay-runner.js";
+export { computeProjectionReplayComparisonReport } from "./replay/compute-projection-replay-comparison-report.js";
+export type { ComputeProjectionReplayComparisonReportInput } from "./replay/compute-projection-replay-comparison-report.js";
+export { runProjectionReplayValidation } from "./replay/run-projection-replay-validation.js";
+export type { RunProjectionReplayValidationInput } from "./replay/run-projection-replay-validation.js";

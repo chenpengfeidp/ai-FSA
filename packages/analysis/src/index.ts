@@ -147,3 +147,8 @@ export type {
   EvaluatePredictionCommand,
   EvaluatePredictionResult,
 } from "./use-case/evaluate-prediction-use-case.js";
+export {
+  AnalysisProjectionReplayPort,
+  buildProjectionReplayContext,
+  buildSealedPredictionInputFromAnalysis,
+} from "./replay/analysis-projection-replay-port.js";

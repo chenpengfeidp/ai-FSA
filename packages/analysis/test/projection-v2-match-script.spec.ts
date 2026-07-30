@@ -4,17 +4,18 @@ import { createMatchId } from "@fas/match";
 import { RuleEvaluator } from "@fas/rule";
 import { describe, expect, it } from "vitest";
 import {
+  computeFootballState,
   computeMatchProjection,
   computeProjectionV2,
   generateMatchScriptSet,
   GOVERNED_MATCH_SCRIPT_PARAMETER_SET,
+  MATCH_SCRIPT_IDS,
   MATCH_SCRIPT_POLICY_VERSION,
   MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
   mergeProbabilityMatrices,
   PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
   PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
   buildLambdasV2,
-  computeFootballState,
 } from "../src/index.js";
 import { buildScriptProbabilityMatrix } from "../src/projection-v2/probability-matrix/build-script-probability-matrix.js";
 
@@ -116,16 +117,14 @@ function makePipelineInput(matchId = createMatchId("match-ms-1")) {
   };
 }
 
-describe("Match Script Engine V1 (P2F)", () => {
-  it("activates multiple governed scripts with weights summing to 1", () => {
+describe("Match Script Generator (P2E)", () => {
+  it("activates scripts from Football State only with footballStateRefs", () => {
     const input = makePipelineInput();
     const footballState = computeFootballState({
       featureBundle: input.featureBundle,
       lambdaParameters: MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT.lambda,
     });
     const scriptSet = generateMatchScriptSet({
-      featureBundle: input.featureBundle,
-      ruleResults: input.ruleResults,
       footballState,
       parameters: GOVERNED_MATCH_SCRIPT_PARAMETER_SET,
     });
@@ -138,6 +137,27 @@ describe("Match Script Engine V1 (P2F)", () => {
     expect(scriptSet.scripts.some((script) => script.scriptId === "balanced")).toBe(
       true,
     );
+
+    for (const script of scriptSet.scripts) {
+      expect(script.activatingRules).toEqual([]);
+      expect(script.strengtheningFeatures).toEqual([]);
+      expect(script.activationReasons.length).toBeGreaterThan(0);
+      expect(script.footballStateRefs.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("covers the governed script catalog ids", () => {
+    const input = makePipelineInput();
+    const footballState = computeFootballState({
+      featureBundle: input.featureBundle,
+      lambdaParameters: MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT.lambda,
+    });
+    const scriptSet = generateMatchScriptSet({ footballState });
+    const activeIds = new Set(scriptSet.scripts.map((script) => script.scriptId));
+
+    expect(
+      MATCH_SCRIPT_IDS.every((id) => activeIds.has(id) || id === "balanced"),
+    ).toBe(true);
   });
 
   it("merges per-script matrices into one final probability matrix", () => {
@@ -171,6 +191,11 @@ describe("Match Script Engine V1 (P2F)", () => {
         0,
       ),
     ).toBeCloseTo(1, 9);
+    expect(
+      result.framework.activeMatchScripts.every(
+        (script) => script.footballStateRefs.length > 0,
+      ),
+    ).toBe(true);
   });
 
   it("derives sealed projection outputs from the merged matrix only", () => {
@@ -191,21 +216,19 @@ describe("Match Script Engine V1 (P2F)", () => {
   it("builds distinct per-script lambdas before merge", () => {
     const input = makePipelineInput();
     const result = computeProjectionV2(input);
-    const baseHome = result.framework.activeMatchScripts[0]?.lambdaHome ?? 0;
     const lowEvent = result.framework.activeMatchScripts.find(
       (script) => script.scriptId === "low_event",
     );
+    const balanced = result.framework.activeMatchScripts.find(
+      (script) => script.scriptId === "balanced",
+    );
 
-    if (lowEvent === undefined) {
+    if (lowEvent === undefined || balanced === undefined) {
       return;
     }
 
-    expect(lowEvent.lambdaHome).toBeLessThan(baseHome);
-    expect(lowEvent.lambdaAway).toBeLessThan(
-      result.framework.activeMatchScripts.find(
-        (script) => script.scriptId === "balanced",
-      )?.lambdaAway ?? baseHome,
-    );
+    expect(lowEvent.lambdaHome).toBeLessThan(balanced.lambdaHome);
+    expect(lowEvent.lambdaAway).toBeLessThan(balanced.lambdaAway);
   });
 
   it("convex-combines script matrices with governed weights", () => {

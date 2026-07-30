@@ -13,7 +13,11 @@ export interface MatchScript {
   readonly label: string;
   readonly weight: number;
   readonly activationReason: string;
+  readonly activationReasons: readonly string[];
+  readonly footballStateRefs: readonly string[];
+  /** @deprecated P2E — scripts derive from Football State only; always empty. */
   readonly activatingRules: readonly string[];
+  /** @deprecated P2E — scripts derive from Football State only; always empty. */
   readonly strengtheningFeatures: readonly string[];
   readonly lambdaModifiers: MatchScriptLambdaModifiers;
   readonly limitations: readonly string[];

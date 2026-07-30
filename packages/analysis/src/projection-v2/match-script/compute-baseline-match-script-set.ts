@@ -1,5 +1,3 @@
-import type { FeatureBundle } from "@fas/feature";
-import type { RuleResult } from "@fas/rule";
 import type { FootballStateEnvelope } from "../football-state/football-state-envelope.js";
 import {
   BASELINE_MATCH_SCRIPT_ID,
@@ -8,12 +6,10 @@ import {
 } from "./match-script-set.js";
 
 export function computeBaselineMatchScriptSet(input: {
-  readonly featureBundle: FeatureBundle;
-  readonly ruleResults: readonly RuleResult[];
   readonly footballState: FootballStateEnvelope;
 }): MatchScriptSet {
   return createMatchScriptSet({
-    matchId: input.featureBundle.matchId,
+    matchId: input.footballState.matchId,
     footballStateChecksum: input.footballState.checksum,
     singleScriptFallback: true,
     limitations: Object.freeze([
@@ -27,6 +23,10 @@ export function computeBaselineMatchScriptSet(input: {
         weight: 1,
         activationReason:
           "Pinned baseline script for Projection V2 foundation; delegates probability to V1 logic.",
+        activationReasons: Object.freeze([
+          "Pinned baseline script for Projection V2 foundation; delegates probability to V1 logic.",
+        ]),
+        footballStateRefs: Object.freeze(["identity"]),
         activatingRules: Object.freeze([]),
         strengtheningFeatures: Object.freeze([]),
         lambdaModifiers: Object.freeze({
@@ -35,7 +35,7 @@ export function computeBaselineMatchScriptSet(input: {
           drawBias: 0,
         }),
         limitations: Object.freeze([
-          "Identity script modifiers only; no Feature or Rule weighting applied.",
+          "Identity script modifiers only; no Football State weighting applied.",
         ]),
       }),
     ]),

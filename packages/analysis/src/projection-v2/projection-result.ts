@@ -12,6 +12,8 @@ export interface MatchScriptSummary {
   readonly label: string;
   readonly weight: number;
   readonly activationReason: string;
+  readonly activationReasons: readonly string[];
+  readonly footballStateRefs: readonly string[];
   readonly activatingRules: readonly string[];
   readonly strengtheningFeatures: readonly string[];
   readonly lambdaHome: number;
@@ -71,6 +73,8 @@ export function createProjectionFrameworkMetadata(input: {
           label: script.label,
           weight: script.weight,
           activationReason: script.activationReason,
+          activationReasons: script.activationReasons,
+          footballStateRefs: script.footballStateRefs,
           activatingRules: script.activatingRules,
           strengtheningFeatures: script.strengtheningFeatures,
           lambdaHome: matrix?.lambdaHome ?? 0,

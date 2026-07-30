@@ -23,6 +23,9 @@ export function MatchScriptSection({
             {zh.report.matchScripts}
           </h2>
           <p className="mt-1 text-sm text-zinc-600">{zh.report.matchScriptsHint}</p>
+          <p className="mt-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+            {zh.report.matchScriptPipeline}
+          </p>
         </div>
 
         {scripts.length === 0 ? (
@@ -55,21 +58,24 @@ export function MatchScriptSection({
                     λ_home {script.lambdaHome.toFixed(3)} · λ_away{" "}
                     {script.lambdaAway.toFixed(3)}
                   </p>
-                  <p>{script.activationReason}</p>
-                  {script.activatingRules.length > 0 ? (
+                  {script.activationReasons.length > 0 ? (
+                    <div>
+                      <p className="font-medium">{zh.report.matchScriptReasons}</p>
+                      <ul className="mt-1 list-disc space-y-1 pl-5">
+                        {script.activationReasons.map((reason) => (
+                          <li key={reason}>{reason}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <p>{script.activationReason}</p>
+                  )}
+                  {script.footballStateRefs.length > 0 ? (
                     <p>
                       <span className="font-medium">
-                        {zh.report.matchScriptRules}:{" "}
+                        {zh.report.matchScriptFootballStateRefs}:{" "}
                       </span>
-                      {script.activatingRules.join(", ")}
-                    </p>
-                  ) : null}
-                  {script.strengtheningFeatures.length > 0 ? (
-                    <p>
-                      <span className="font-medium">
-                        {zh.report.matchScriptFeatures}:{" "}
-                      </span>
-                      {script.strengtheningFeatures.join(", ")}
+                      {script.footballStateRefs.join(", ")}
                     </p>
                   ) : null}
                 </CardContent>

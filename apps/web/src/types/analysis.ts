@@ -539,6 +539,8 @@ export interface MatchScriptSummaryDto {
   readonly label: string;
   readonly weight: number;
   readonly activationReason: string;
+  readonly activationReasons: readonly string[];
+  readonly footballStateRefs: readonly string[];
   readonly activatingRules: readonly string[];
   readonly strengtheningFeatures: readonly string[];
   readonly lambdaHome: number;

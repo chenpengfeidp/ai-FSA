@@ -1,4 +1,3 @@
-import type { FeatureName } from "@fas/feature";
 import type { MatchScriptParameterSet } from "./match-script-parameter-set.js";
 
 export const GOVERNED_MATCH_SCRIPT_PARAMETER_SET = {
@@ -15,59 +14,131 @@ export const GOVERNED_MATCH_SCRIPT_PARAMETER_SET = {
         awayMultiplier: 0.92,
         drawBias: 0,
       },
-      activatingRules: [
-        "POSSESSION_HOME_EDGE",
-        "CHANCE_CREATION_HOME_EDGE",
-        "HOME_ATTACK_EDGE",
-        "CLUB_STRENGTH_EDGE",
-      ],
-      strengtheningFeatures: [
-        "possessionHome",
-        "attackRatingHome",
-        "clubStrengthHome",
-        "xgAttackQualityHome",
-      ] as const satisfies readonly FeatureName[],
-      rulePassWeight: 0.35,
-      featurePresenceWeight: 0.15,
       baselineAffinity: 0.05,
+      dimensionBonuses: [
+        {
+          dimensionId: "controlState",
+          minimumLevel: "medium",
+          weight: 0.35,
+          reason:
+            "Control state at medium or higher supports home territorial control.",
+        },
+        {
+          dimensionId: "attackState",
+          minimumLevel: "medium",
+          weight: 0.2,
+          reason: "Attack state at medium or higher supports home chance creation.",
+        },
+      ],
+      compositeTagBonuses: [],
+      asymmetricBonuses: [
+        {
+          side: "home",
+          minimumRatingGap: 0,
+          weight: 0.25,
+          reason: "Home attack rating exceeds away attack rating.",
+        },
+      ],
     },
     {
-      scriptId: "away_counter",
-      label: "Away Counter",
+      scriptId: "away_control",
+      label: "Away Control",
+      lambdaModifiers: {
+        homeMultiplier: 0.92,
+        awayMultiplier: 1.08,
+        drawBias: 0,
+      },
+      baselineAffinity: 0.05,
+      dimensionBonuses: [
+        {
+          dimensionId: "controlState",
+          minimumLevel: "medium",
+          weight: 0.35,
+          reason:
+            "Control state at medium or higher supports away territorial control.",
+        },
+        {
+          dimensionId: "attackState",
+          minimumLevel: "medium",
+          weight: 0.2,
+          reason: "Attack state at medium or higher supports away chance creation.",
+        },
+      ],
+      compositeTagBonuses: [],
+      asymmetricBonuses: [
+        {
+          side: "away",
+          minimumRatingGap: 0,
+          weight: 0.25,
+          reason: "Away attack rating exceeds home attack rating.",
+        },
+      ],
+    },
+    {
+      scriptId: "counter_attack",
+      label: "Counter Attack",
       lambdaModifiers: {
         homeMultiplier: 0.9,
         awayMultiplier: 1.05,
         drawBias: 0,
       },
-      activatingRules: [
-        "POSSESSION_HOME_EDGE",
-        "XG_ATTACK_AWAY_EDGE",
-        "PLAYER_ATTACK_EDGE_AWAY",
-        "DEFENSE_HOME_FRAGILE",
-      ],
-      strengtheningFeatures: [
-        "finishingEfficiencyAway",
-        "xgAttackQualityAway",
-        "attackRatingAway",
-        "defenseRatingHome",
-      ] as const satisfies readonly FeatureName[],
-      rulePassWeight: 0.3,
-      featurePresenceWeight: 0.12,
       baselineAffinity: 0.05,
+      dimensionBonuses: [
+        {
+          dimensionId: "transitionState",
+          minimumLevel: "medium",
+          weight: 0.35,
+          reason: "Transition state at medium or higher supports counter channels.",
+        },
+        {
+          dimensionId: "attackState",
+          minimumLevel: "medium",
+          weight: 0.15,
+          reason: "Attack state supports transition finishing threat.",
+        },
+      ],
+      compositeTagBonuses: [
+        {
+          tag: "TRANSITION_CHANNEL",
+          weight: 0.25,
+          reason: "Football State composite tag TRANSITION_CHANNEL is active.",
+        },
+      ],
+      asymmetricBonuses: [
+        {
+          side: "home",
+          minimumRatingGap: 2,
+          weight: 0.2,
+          reason:
+            "Home is structurally favoured; away counter channel is plausible.",
+        },
+      ],
     },
     {
-      scriptId: "balanced",
-      label: "Balanced",
+      scriptId: "open_match",
+      label: "Open Match",
       lambdaModifiers: {
-        homeMultiplier: 1,
-        awayMultiplier: 1,
+        homeMultiplier: 1.12,
+        awayMultiplier: 1.12,
         drawBias: 0,
       },
-      activatingRules: [],
-      strengtheningFeatures: [] as const satisfies readonly FeatureName[],
-      rulePassWeight: 0,
-      featurePresenceWeight: 0,
-      baselineAffinity: 1,
+      baselineAffinity: 0.05,
+      dimensionBonuses: [
+        {
+          dimensionId: "attackState",
+          minimumLevel: "medium",
+          weight: 0.3,
+          reason: "Elevated attack state supports an open exchange.",
+        },
+      ],
+      compositeTagBonuses: [],
+      asymmetricBonuses: [],
+      maxDimensionLevel: {
+        dimensionId: "defenseState",
+        maximumLevel: "medium",
+        weight: 0.25,
+        reason: "Defense state is not high — both sides may concede chances.",
+      },
     },
     {
       scriptId: "low_event",
@@ -77,17 +148,42 @@ export const GOVERNED_MATCH_SCRIPT_PARAMETER_SET = {
         awayMultiplier: 0.85,
         drawBias: 0.06,
       },
-      activatingRules: ["DEFENSE_HOME_STABLE", "DEFENSE_AWAY_STABLE"],
-      strengtheningFeatures: [
-        "defenseRatingHome",
-        "defenseRatingAway",
-        "chanceCreationHome",
-        "chanceCreationAway",
-        "xgDominance",
-      ] as const satisfies readonly FeatureName[],
-      rulePassWeight: 0.25,
-      featurePresenceWeight: 0.1,
       baselineAffinity: 0.08,
+      dimensionBonuses: [
+        {
+          dimensionId: "defenseState",
+          minimumLevel: "medium",
+          weight: 0.25,
+          reason: "Defense state at medium or higher supports a low-event shape.",
+        },
+      ],
+      compositeTagBonuses: [
+        {
+          tag: "LOW_EVENT_SHAPE",
+          weight: 0.4,
+          reason: "Football State composite tag LOW_EVENT_SHAPE is active.",
+        },
+      ],
+      asymmetricBonuses: [],
+      maxDimensionLevel: {
+        dimensionId: "controlState",
+        maximumLevel: "low",
+        weight: 0.15,
+        reason: "Control state is low — limited chance volume expected.",
+      },
+    },
+    {
+      scriptId: "balanced",
+      label: "Balanced",
+      lambdaModifiers: {
+        homeMultiplier: 1,
+        awayMultiplier: 1,
+        drawBias: 0,
+      },
+      baselineAffinity: 1,
+      dimensionBonuses: [],
+      compositeTagBonuses: [],
+      asymmetricBonuses: [],
     },
   ],
 } as const satisfies MatchScriptParameterSet;

@@ -91,9 +91,12 @@ export type {
 } from "./projection-v2/football-state/football-state-types.js";
 export { computeBaselineMatchScriptSet } from "./projection-v2/match-script/compute-baseline-match-script-set.js";
 export { generateMatchScriptSet } from "./projection-v2/match-script/match-script-generator.js";
+export { scoreMatchScriptFromFootballState } from "./projection-v2/match-script/match-script-football-state-scoring.js";
 export { GOVERNED_MATCH_SCRIPT_PARAMETER_SET } from "./projection-v2/match-script/match-script-governed-parameters.js";
-export { MATCH_SCRIPT_IDS } from "./projection-v2/match-script/match-script-ids.js";
-export type { MatchScriptId } from "./projection-v2/match-script/match-script-ids.js";
+export {
+  MATCH_SCRIPT_IDS,
+  type MatchScriptId,
+} from "./projection-v2/match-script/match-script-ids.js";
 export type { MatchScriptParameterSet } from "./projection-v2/match-script/match-script-parameter-set.js";
 export {
   BASELINE_MATCH_SCRIPT_ID,

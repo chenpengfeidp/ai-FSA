@@ -30,8 +30,6 @@ export function computeProjectionV2(input: {
     lambdaParameters: parameters.lambda,
   });
   const matchScriptSet = generateMatchScriptSet({
-    featureBundle: input.featureBundle,
-    ruleResults: input.ruleResults,
     footballState,
     ...(parameters.matchScript === undefined
       ? {}

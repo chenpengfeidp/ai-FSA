@@ -1,10 +1,11 @@
-import type { Feature, FeatureBundle, FeatureName } from "@fas/feature";
+import type { FeatureBundle } from "@fas/feature";
 import type { RuleResult } from "@fas/rule";
 import {
   applyCalibration,
   type CalibrationArtifact,
   IDENTITY_CALIBRATION_ARTIFACT,
 } from "@fas/statistics";
+import type { FootballStateEnvelope } from "../projection-v2/football-state/football-state-envelope.js";
 import type { ProbabilityMatrix } from "../projection-v2/probability-matrix/probability-matrix.js";
 import { buildLambdasV2 } from "../projection-v2/lambda/lambda-builder-v2.js";
 import type { MatchScriptSet } from "../projection-v2/match-script/match-script-set.js";
@@ -87,15 +88,6 @@ const FOOTBALL_CHANNEL_RULE_NAMES = new Set([
 ]);
 const REQUIRED_EVIDENCE_WEIGHT = 5;
 
-function numericFeature(
-  features: ReadonlyMap<FeatureName, Feature>,
-  name: FeatureName,
-): number | undefined {
-  const value = features.get(name)?.value;
-
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
 function directionalRecommendation(input: {
   readonly pHome: number;
   readonly pDraw: number;
@@ -166,6 +158,7 @@ export function computeDeterministicProjectionV2(input: {
   readonly ruleResults: readonly RuleResult[];
   readonly requiredEvidencePresentCount: number;
   readonly parameters: ProjectionParameterArtifact;
+  readonly footballState: FootballStateEnvelope;
   readonly calibrationArtifact?: CalibrationArtifact;
   readonly mergedProbabilityMatrix?: ProbabilityMatrix;
   readonly matchScriptSet?: MatchScriptSet;
@@ -173,7 +166,7 @@ export function computeDeterministicProjectionV2(input: {
   const calibrationArtifact =
     input.calibrationArtifact ?? IDENTITY_CALIBRATION_ARTIFACT;
   const lambdaResult = buildLambdasV2({
-    featureBundle: input.featureBundle,
+    footballState: input.footballState,
     parameters: input.parameters.lambda,
   });
 
@@ -215,16 +208,15 @@ export function computeDeterministicProjectionV2(input: {
     });
   }
 
-  const features = new Map(
-    input.featureBundle.features.map((feature) => [feature.name, feature]),
-  );
-  const attackHome = numericFeature(features, "attackRatingHome") ?? 0;
-  const attackAway = numericFeature(features, "attackRatingAway") ?? 0;
-  const defenseHome = numericFeature(features, "defenseRatingHome") ?? 0;
-  const defenseAway = numericFeature(features, "defenseRatingAway") ?? 0;
-  const momentumHome = numericFeature(features, "momentumHome") ?? 0;
-  const momentumAway = numericFeature(features, "momentumAway") ?? 0;
-  const homeAdvantage = numericFeature(features, "homeAdvantage") ?? 0;
+  const {
+    homeAttackRating: attackHome,
+    awayAttackRating: attackAway,
+    homeDefenseRating: defenseHome,
+    awayDefenseRating: defenseAway,
+    homeMomentum: momentumHome,
+    awayMomentum: momentumAway,
+    homeAdvantage,
+  } = input.footballState.projectionInputs;
   const mergedMatrix = input.mergedProbabilityMatrix;
   const poisson =
     mergedMatrix === undefined
@@ -327,7 +319,7 @@ export function computeDeterministicProjectionV2(input: {
     ...lambdaResult.limitations,
     ...(input.matchScriptSet?.limitations ?? []),
     mergedMatrix === undefined
-      ? "Scorelines and 1X2 derive from Feature-enriched lambda Poisson matrix without Rule softmax."
+      ? "Scorelines and 1X2 derive from Football State projection inputs via lambda Poisson matrix without Rule softmax."
       : "Scorelines and 1X2 derive from governed Match Script matrix merge without Rule softmax.",
     `Pinned projection parameter artifact ${input.parameters.artifactId} (${input.parameters.status}).`,
     `Pinned calibration artifact ${calibrationArtifact.artifactId} (${calibrationArtifact.status}); Analysis does not train or select maps during a run.`,

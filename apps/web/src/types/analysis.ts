@@ -516,6 +516,24 @@ export interface ContributionReportDto {
   readonly limitations: readonly string[];
 }
 
+export interface FootballStateDimensionDto {
+  readonly id: string;
+  readonly label: string;
+  readonly level: "absent" | "low" | "medium" | "high";
+  readonly score: number;
+  readonly basis: "derived" | "feature" | "identity";
+  readonly sourceRefs: readonly string[];
+}
+
+export interface FootballStateReportDto {
+  readonly policyVersion: string;
+  readonly checksum: string;
+  readonly dimensions: readonly FootballStateDimensionDto[];
+  readonly compositeTags: readonly string[];
+  readonly driverFeatureNames: readonly string[];
+  readonly limitations: readonly string[];
+}
+
 export interface MatchScriptSummaryDto {
   readonly scriptId: string;
   readonly label: string;
@@ -549,6 +567,7 @@ export interface AnalysisReportDto {
   readonly deterministic: DeterministicProjectionDto;
   readonly narrative: NarrativeDraftDto;
   readonly projectionFramework?: ProjectionFrameworkDto;
+  readonly footballState?: FootballStateReportDto;
   readonly actualResult?: ActualMatchResultDto;
   readonly evaluation?: PredictionEvaluationDto;
   readonly evaluationHistory?: readonly EvaluationHistoryRecordDto[];

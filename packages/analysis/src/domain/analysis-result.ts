@@ -5,6 +5,7 @@ import type { RuleResult } from "@fas/rule";
 import type { IntelligenceConfidence } from "../confidence/intelligence-confidence.js";
 import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
 import type { ProjectionFrameworkMetadata } from "../projection-v2/projection-result.js";
+import type { FootballStateReportMetadata } from "../projection-v2/football-state/football-state-report-metadata.js";
 import type { ScenarioSet } from "../scenario/scenario-set.js";
 
 export interface AnalysisResult {
@@ -18,6 +19,7 @@ export interface AnalysisResult {
   readonly scenarios: ScenarioSet;
   readonly intelligenceConfidence: IntelligenceConfidence;
   readonly projectionFramework?: ProjectionFrameworkMetadata;
+  readonly footballState?: FootballStateReportMetadata;
   readonly generatedAt: string;
 }
 
@@ -32,6 +34,7 @@ export interface CreateAnalysisResultInput {
   readonly scenarios: ScenarioSet;
   readonly intelligenceConfidence: IntelligenceConfidence;
   readonly projectionFramework?: ProjectionFrameworkMetadata;
+  readonly footballState?: FootballStateReportMetadata;
   readonly generatedAt: string;
 }
 
@@ -135,6 +138,9 @@ export function createAnalysisResult(
     ...(input.projectionFramework === undefined
       ? {}
       : { projectionFramework: input.projectionFramework }),
+    ...(input.footballState === undefined
+      ? {}
+      : { footballState: input.footballState }),
     generatedAt: requireTimestamp(input.generatedAt),
   });
 }

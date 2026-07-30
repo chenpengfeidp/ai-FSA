@@ -64,6 +64,17 @@ export type {
   ProjectionResult,
 } from "./projection-v2/projection-result.js";
 export { computeIdentityFootballState } from "./projection-v2/football-state/compute-identity-football-state.js";
+export { computeFootballState } from "./projection-v2/football-state/compute-football-state.js";
+export {
+  createFootballStateReportMetadata,
+  type FootballStateDimensionReport,
+  type FootballStateReportMetadata,
+} from "./projection-v2/football-state/football-state-report-metadata.js";
+export {
+  FOOTBALL_STATE_DIMENSION_IDS,
+  FOOTBALL_STATE_DIMENSION_LABELS,
+  type FootballStateDimensionId,
+} from "./projection-v2/football-state/football-state-dimensions.js";
 export {
   createFootballStateEnvelope,
   FOOTBALL_STATE_POLICY_VERSION,
@@ -71,9 +82,13 @@ export {
 export type {
   CreateFootballStateEnvelopeInput,
   FootballStateEnvelope,
+} from "./projection-v2/football-state/football-state-envelope.js";
+export type {
+  FootballStateProjectionInputs,
+  StateDimensionBasis,
   StateDimensionLevel,
   StateDimensionValue,
-} from "./projection-v2/football-state/football-state-envelope.js";
+} from "./projection-v2/football-state/football-state-types.js";
 export { computeBaselineMatchScriptSet } from "./projection-v2/match-script/compute-baseline-match-script-set.js";
 export { generateMatchScriptSet } from "./projection-v2/match-script/match-script-generator.js";
 export { GOVERNED_MATCH_SCRIPT_PARAMETER_SET } from "./projection-v2/match-script/match-script-governed-parameters.js";

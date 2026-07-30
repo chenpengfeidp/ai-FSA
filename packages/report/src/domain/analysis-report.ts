@@ -1,6 +1,7 @@
 import type {
   DeterministicMatchProjection,
   IntelligenceConfidence,
+  FootballStateReportMetadata,
   ProjectionFrameworkMetadata,
   ScenarioSet,
 } from "@fas/analysis";
@@ -57,6 +58,8 @@ export interface AnalysisReport {
   readonly contribution?: ContributionReport;
   /** Projection V2 framework metadata when V2 policy pin is active. */
   readonly projectionFramework?: ProjectionFrameworkMetadata;
+  /** Football State aggregation layer when V2 policy pin is active. */
+  readonly footballState?: FootballStateReportMetadata;
 }
 
 export interface CreateAnalysisReportInput {
@@ -77,6 +80,7 @@ export interface CreateAnalysisReportInput {
   readonly validation?: ValidationReport;
   readonly contribution?: ContributionReport;
   readonly projectionFramework?: ProjectionFrameworkMetadata;
+  readonly footballState?: FootballStateReportMetadata;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -228,5 +232,8 @@ export function createAnalysisReport(
     ...(input.projectionFramework === undefined
       ? {}
       : { projectionFramework: input.projectionFramework }),
+    ...(input.footballState === undefined
+      ? {}
+      : { footballState: input.footballState }),
   });
 }

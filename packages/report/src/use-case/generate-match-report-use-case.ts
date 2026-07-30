@@ -100,6 +100,9 @@ function withOverlays(
     ...(report.projectionFramework === undefined
       ? {}
       : { projectionFramework: report.projectionFramework }),
+    ...(report.footballState === undefined
+      ? {}
+      : { footballState: report.footballState }),
     ...(evaluationHistory.length === 0 ? {} : { evaluationHistory }),
     calibration,
     validation,

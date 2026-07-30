@@ -543,6 +543,7 @@ export class AnalysisReportDto {
     additionalProperties: true,
   })
   declare readonly projectionFramework?: Readonly<Record<string, unknown>>;
+  declare readonly footballState?: Readonly<Record<string, unknown>>;
 }
 
 export class AnalysisErrorCauseDto {

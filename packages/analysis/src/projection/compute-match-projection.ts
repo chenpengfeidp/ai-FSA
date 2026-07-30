@@ -5,6 +5,8 @@ import { computeDeterministicMatchProjection } from "./compute-deterministic-pro
 import type { DeterministicMatchProjection } from "./deterministic-match-projection.js";
 import { computeProjectionV2 } from "../projection-v2/compute-projection-v2.js";
 import type { ProjectionFrameworkMetadata } from "../projection-v2/projection-result.js";
+import { createFootballStateReportMetadata } from "../projection-v2/football-state/football-state-report-metadata.js";
+import type { FootballStateReportMetadata } from "../projection-v2/football-state/football-state-report-metadata.js";
 import {
   DEFAULT_PROJECTION_POLICY_PIN,
   type ProjectionPolicyPin,
@@ -14,6 +16,7 @@ import {
 export interface ComputeMatchProjectionResult {
   readonly projection: DeterministicMatchProjection;
   readonly projectionFramework?: ProjectionFrameworkMetadata;
+  readonly footballState?: FootballStateReportMetadata;
 }
 
 export function computeMatchProjection(input: {
@@ -40,6 +43,7 @@ export function computeMatchProjection(input: {
     return Object.freeze({
       projection: result.projection,
       projectionFramework: result.framework,
+      footballState: createFootballStateReportMetadata(result.footballState),
     });
   }
 

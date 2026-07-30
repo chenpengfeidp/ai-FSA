@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   BASELINE_PROJECTION_PARAMETER_ARTIFACT,
   buildLambdasV2,
+  computeFootballState,
   computeLambdas,
   computeMatchProjection,
   computeProjectionV2,
@@ -115,7 +116,7 @@ function makePipelineInput(matchId = createMatchId("match-1")) {
 }
 
 describe("Projection V2 foundation", () => {
-  it("computes identity Football State and governed Match Script set", () => {
+  it("computes Football State and governed Match Script set", () => {
     const input = makePipelineInput();
     const result = computeProjectionV2(input);
 
@@ -184,8 +185,12 @@ describe("LambdaBuilderV2", () => {
       defenseRatingHome: features.get("defenseRatingHome")?.value as number,
       homeAdvantage: features.get("homeAdvantage")?.value as number,
     });
-    const v2 = buildLambdasV2({
+    const footballState = computeFootballState({
       featureBundle: input.featureBundle,
+      lambdaParameters: BASELINE_PROJECTION_PARAMETER_ARTIFACT.lambda,
+    });
+    const v2 = buildLambdasV2({
+      footballState,
       parameters: BASELINE_PROJECTION_PARAMETER_ARTIFACT.lambda,
     });
 
@@ -195,8 +200,12 @@ describe("LambdaBuilderV2", () => {
 
   it("records absent optional Features without imputing values", () => {
     const input = makePipelineInput();
-    const result = buildLambdasV2({
+    const footballState = computeFootballState({
       featureBundle: input.featureBundle,
+      lambdaParameters: FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT.lambda,
+    });
+    const result = buildLambdasV2({
+      footballState,
       parameters: FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT.lambda,
     });
 

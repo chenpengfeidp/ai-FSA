@@ -288,6 +288,24 @@ export const zh = {
     matchScriptsHint:
       "Projection V2 激活的确定性赛前剧本、权重与溯源；只读展示，不修改预测",
     matchScriptsUnavailable: "当前分析未启用 Match Script 元数据（需 V2 投影 pin）",
+    footballState: "足球状态",
+    footballStateHint:
+      "从现有特征聚合的确定性足球状态层；Projection 只读取此层，不直接读取分散特征",
+    footballStatePipeline: "证据 → 特征 → 足球状态 → 投影",
+    footballStateUnavailable: "当前分析未启用 Football State（需 V2 投影 pin）",
+    footballStateLevel: "状态等级",
+    footballStateBasis: "计算依据",
+    footballStateProvenance: "特征溯源",
+    footballStateNoSources: "无可用特征溯源（derived / identity）",
+    footballStateTags: "复合标签",
+    footballStateChecksum: (policy: string, checksum: string): string =>
+      `溯源：${policy} · checksum ${checksum}`,
+    footballStateLevels: {
+      absent: "缺失",
+      low: "低",
+      medium: "中",
+      high: "高",
+    },
     matchScriptWeight: "权重",
     matchScriptLambdas: "期望进球 λ",
     matchScriptRules: "激活规则",

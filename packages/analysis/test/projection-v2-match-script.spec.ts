@@ -14,8 +14,8 @@ import {
   PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
   PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
   buildLambdasV2,
+  computeFootballState,
 } from "../src/index.js";
-import { computeIdentityFootballState } from "../src/projection-v2/football-state/compute-identity-football-state.js";
 import { buildScriptProbabilityMatrix } from "../src/projection-v2/probability-matrix/build-script-probability-matrix.js";
 
 function makeMatchInfo(matchId = createMatchId("match-ms-1")) {
@@ -119,9 +119,9 @@ function makePipelineInput(matchId = createMatchId("match-ms-1")) {
 describe("Match Script Engine V1 (P2F)", () => {
   it("activates multiple governed scripts with weights summing to 1", () => {
     const input = makePipelineInput();
-    const footballState = computeIdentityFootballState({
+    const footballState = computeFootballState({
       featureBundle: input.featureBundle,
-      ruleResults: input.ruleResults,
+      lambdaParameters: MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT.lambda,
     });
     const scriptSet = generateMatchScriptSet({
       featureBundle: input.featureBundle,
@@ -212,7 +212,7 @@ describe("Match Script Engine V1 (P2F)", () => {
     const input = makePipelineInput();
     const result = computeProjectionV2(input);
     const baseLambdas = buildLambdasV2({
-      featureBundle: input.featureBundle,
+      footballState: result.footballState,
       parameters: MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT.lambda,
     });
     const scripts = result.matchScriptSet.scripts;

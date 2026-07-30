@@ -118,6 +118,9 @@ export class ReportBuilder {
       ...(analysis.projectionFramework === undefined
         ? {}
         : { projectionFramework: analysis.projectionFramework }),
+      ...(analysis.footballState === undefined
+        ? {}
+        : { footballState: analysis.footballState }),
     });
   }
 }

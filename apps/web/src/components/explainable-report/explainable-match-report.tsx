@@ -7,6 +7,7 @@ import { DeveloperDetails } from "./developer-details";
 import { EvidenceTimeline } from "./evidence-timeline";
 import { FeatureImportance } from "./feature-importance";
 import { FinalRecommendation } from "./final-recommendation";
+import { FootballStateSection } from "./football-state-section";
 import { MatchScriptSection } from "./match-script-section";
 import { PredictionHero } from "./prediction-hero";
 import { ReasoningSection } from "./reasoning-section";
@@ -51,6 +52,7 @@ export function ExplainableMatchReport({
           recommendation={view.finalRecommendation}
         />
         <WinnerPredictionCard prediction={view.winnerPrediction} />
+        <FootballStateSection footballState={report.footballState} />
         <MatchScriptSection projectionFramework={report.projectionFramework} />
       </WorkspaceSection>
 

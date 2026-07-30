@@ -2,7 +2,7 @@ import type { FeatureBundle } from "@fas/feature";
 import type { RuleResult } from "@fas/rule";
 import type { CalibrationArtifact } from "@fas/statistics";
 import { computeDeterministicProjectionV2 } from "../projection/compute-deterministic-projection-v2.js";
-import { computeIdentityFootballState } from "./football-state/compute-identity-football-state.js";
+import { computeFootballState } from "./football-state/compute-football-state.js";
 import { buildLambdasV2 } from "./lambda/lambda-builder-v2.js";
 import { generateMatchScriptSet } from "./match-script/match-script-generator.js";
 import { buildScriptProbabilityMatrix } from "./probability-matrix/build-script-probability-matrix.js";
@@ -25,9 +25,9 @@ export function computeProjectionV2(input: {
   readonly parameters?: ProjectionParameterArtifact;
 }): ProjectionResult {
   const parameters = input.parameters ?? MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT;
-  const footballState = computeIdentityFootballState({
+  const footballState = computeFootballState({
     featureBundle: input.featureBundle,
-    ruleResults: input.ruleResults,
+    lambdaParameters: parameters.lambda,
   });
   const matchScriptSet = generateMatchScriptSet({
     featureBundle: input.featureBundle,
@@ -38,7 +38,7 @@ export function computeProjectionV2(input: {
       : { parameters: parameters.matchScript }),
   });
   const lambdaResult = buildLambdasV2({
-    featureBundle: input.featureBundle,
+    footballState,
     parameters: parameters.lambda,
   });
   const scriptMatrices: Array<{
@@ -86,6 +86,7 @@ export function computeProjectionV2(input: {
     ruleResults: input.ruleResults,
     requiredEvidencePresentCount: input.requiredEvidencePresentCount,
     parameters,
+    footballState,
     matchScriptSet,
     ...(input.calibrationArtifact === undefined
       ? {}

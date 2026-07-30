@@ -229,7 +229,7 @@ export class AnalyzeMatchUseCase {
       );
     }
 
-    const { projection, projectionFramework } = projectionResult;
+    const { projection, projectionFramework, footballState } = projectionResult;
 
     const scenarios = buildScenarioSet(projection);
     const intelligenceConfidence = computeIntelligenceConfidence({
@@ -253,6 +253,7 @@ export class AnalyzeMatchUseCase {
           scenarios,
           intelligenceConfidence,
           ...(projectionFramework === undefined ? {} : { projectionFramework }),
+          ...(footballState === undefined ? {} : { footballState }),
           generatedAt: latestEvaluationTime(ruleResults),
         }),
       );

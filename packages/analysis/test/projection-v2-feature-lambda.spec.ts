@@ -4,6 +4,7 @@ import { createMatchId } from "@fas/match";
 import { describe, expect, it } from "vitest";
 import {
   buildLambdasV2,
+  computeFootballState,
   computeLambdas,
   FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
 } from "../src/index.js";
@@ -137,12 +138,20 @@ describe("Projection V2 feature-enriched lambda", () => {
         }),
       ]),
     );
-    const baseline = buildLambdasV2({
+    const baselineFootballState = computeFootballState({
       featureBundle: withoutXg,
+      lambdaParameters: FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT.lambda,
+    });
+    const enrichedFootballState = computeFootballState({
+      featureBundle: withXg,
+      lambdaParameters: FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT.lambda,
+    });
+    const baseline = buildLambdasV2({
+      footballState: baselineFootballState,
       parameters: FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT.lambda,
     });
     const enriched = buildLambdasV2({
-      featureBundle: withXg,
+      footballState: enrichedFootballState,
       parameters: FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT.lambda,
     });
     const features = new Map(

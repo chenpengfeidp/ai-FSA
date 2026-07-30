@@ -5,7 +5,9 @@ import {
   type CalibrationArtifact,
   IDENTITY_CALIBRATION_ARTIFACT,
 } from "@fas/statistics";
+import type { ProbabilityMatrix } from "../projection-v2/probability-matrix/probability-matrix.js";
 import { buildLambdasV2 } from "../projection-v2/lambda/lambda-builder-v2.js";
+import type { MatchScriptSet } from "../projection-v2/match-script/match-script-set.js";
 import type { ProjectionParameterArtifact } from "../projection-v2/projection-parameter-artifact.js";
 import {
   createDeterministicMatchProjection,
@@ -165,6 +167,8 @@ export function computeDeterministicProjectionV2(input: {
   readonly requiredEvidencePresentCount: number;
   readonly parameters: ProjectionParameterArtifact;
   readonly calibrationArtifact?: CalibrationArtifact;
+  readonly mergedProbabilityMatrix?: ProbabilityMatrix;
+  readonly matchScriptSet?: MatchScriptSet;
 }): DeterministicMatchProjection {
   const calibrationArtifact =
     input.calibrationArtifact ?? IDENTITY_CALIBRATION_ARTIFACT;
@@ -221,10 +225,24 @@ export function computeDeterministicProjectionV2(input: {
   const momentumHome = numericFeature(features, "momentumHome") ?? 0;
   const momentumAway = numericFeature(features, "momentumAway") ?? 0;
   const homeAdvantage = numericFeature(features, "homeAdvantage") ?? 0;
-  const poisson = buildIndependentPoissonMatrix(
-    lambdaResult.lambdaHome,
-    lambdaResult.lambdaAway,
-  );
+  const mergedMatrix = input.mergedProbabilityMatrix;
+  const poisson =
+    mergedMatrix === undefined
+      ? buildIndependentPoissonMatrix(
+          lambdaResult.lambdaHome,
+          lambdaResult.lambdaAway,
+        )
+      : {
+          matrix: mergedMatrix.matrix,
+          truncationMass: mergedMatrix.truncationMass,
+          pHome: mergedMatrix.pHome,
+          pDraw: mergedMatrix.pDraw,
+          pAway: mergedMatrix.pAway,
+          topScorelines: mergedMatrix.topScorelines.map((scoreline) =>
+            Object.freeze({ ...scoreline }),
+          ),
+          goalRange: mergedMatrix.goalRange,
+        };
   const calibrated = applyCalibration(
     {
       pHome: poisson.pHome,
@@ -307,7 +325,10 @@ export function computeDeterministicProjectionV2(input: {
   });
   const limitations = [
     ...lambdaResult.limitations,
-    "Scorelines and 1X2 derive from Feature-enriched lambda Poisson matrix without Rule softmax.",
+    ...(input.matchScriptSet?.limitations ?? []),
+    mergedMatrix === undefined
+      ? "Scorelines and 1X2 derive from Feature-enriched lambda Poisson matrix without Rule softmax."
+      : "Scorelines and 1X2 derive from governed Match Script matrix merge without Rule softmax.",
     `Pinned projection parameter artifact ${input.parameters.artifactId} (${input.parameters.status}).`,
     `Pinned calibration artifact ${calibrationArtifact.artifactId} (${calibrationArtifact.status}); Analysis does not train or select maps during a run.`,
     ...calibrationArtifact.limitations,
@@ -321,8 +342,12 @@ export function computeDeterministicProjectionV2(input: {
 
   const projectionBody = {
     matchId: input.featureBundle.matchId,
-    lambdaHome: roundProbability(lambdaResult.lambdaHome),
-    lambdaAway: roundProbability(lambdaResult.lambdaAway),
+    lambdaHome: roundProbability(
+      mergedMatrix?.lambdaHome ?? lambdaResult.lambdaHome,
+    ),
+    lambdaAway: roundProbability(
+      mergedMatrix?.lambdaAway ?? lambdaResult.lambdaAway,
+    ),
     pHome: roundProbability(calibrated.pHome),
     pDraw: roundProbability(calibrated.pDraw),
     pAway: roundProbability(calibrated.pAway),
@@ -355,7 +380,10 @@ export function computeDeterministicProjectionV2(input: {
     calibrationQualified: calibrationArtifact.qualified,
     featureBundleChecksum: input.featureBundle.checksum,
     ruleEvaluationRefs: input.ruleResults.map((rule) => rule.ruleId),
-    scorelinesBasis: "feature_enriched_lambda_v2" as const,
+    scorelinesBasis:
+      mergedMatrix === undefined
+        ? ("feature_enriched_lambda_v2" as const)
+        : ("match_script_merged_v2" as const),
     oneXTwoBasis: "post_calibration_only" as const,
   };
   const checksum = stableChecksum(JSON.stringify(projectionBody));

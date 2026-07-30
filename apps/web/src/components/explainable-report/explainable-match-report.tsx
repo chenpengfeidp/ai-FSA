@@ -7,6 +7,7 @@ import { DeveloperDetails } from "./developer-details";
 import { EvidenceTimeline } from "./evidence-timeline";
 import { FeatureImportance } from "./feature-importance";
 import { FinalRecommendation } from "./final-recommendation";
+import { MatchScriptSection } from "./match-script-section";
 import { PredictionHero } from "./prediction-hero";
 import { ReasoningSection } from "./reasoning-section";
 import { RuleEvaluationSection } from "./rule-evaluation-section";
@@ -50,6 +51,7 @@ export function ExplainableMatchReport({
           recommendation={view.finalRecommendation}
         />
         <WinnerPredictionCard prediction={view.winnerPrediction} />
+        <MatchScriptSection projectionFramework={report.projectionFramework} />
       </WorkspaceSection>
 
       <EvaluationSection

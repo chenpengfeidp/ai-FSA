@@ -284,6 +284,16 @@ export const zh = {
     validation: "足球智能验证",
     validationHint:
       "对同一批已封存的历史预测，按实际观测到的特征组合分组比较；仅做展示，不代表任一配置更优",
+    matchScripts: "赛前剧本",
+    matchScriptsHint:
+      "Projection V2 激活的确定性赛前剧本、权重与溯源；只读展示，不修改预测",
+    matchScriptsUnavailable: "当前分析未启用 Match Script 元数据（需 V2 投影 pin）",
+    matchScriptWeight: "权重",
+    matchScriptLambdas: "期望进球 λ",
+    matchScriptRules: "激活规则",
+    matchScriptFeatures: "强化特征",
+    matchScriptProvenance: (policy: string, checksum: string): string =>
+      `溯源：${policy} · checksum ${checksum}`,
     validationUnavailable: "暂无评估历史，无法计算验证指标",
     validationTotalSampleSize: "历史预测总量",
     validationMinimumSample: (min: number): string => `最低合格样本量：${min}`,

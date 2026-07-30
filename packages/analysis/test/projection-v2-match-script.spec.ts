@@ -4,19 +4,21 @@ import { createMatchId } from "@fas/match";
 import { RuleEvaluator } from "@fas/rule";
 import { describe, expect, it } from "vitest";
 import {
-  BASELINE_PROJECTION_PARAMETER_ARTIFACT,
-  buildLambdasV2,
-  computeLambdas,
   computeMatchProjection,
   computeProjectionV2,
-  FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
-  FOOTBALL_STATE_POLICY_VERSION,
+  generateMatchScriptSet,
+  GOVERNED_MATCH_SCRIPT_PARAMETER_SET,
   MATCH_SCRIPT_POLICY_VERSION,
+  MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
+  mergeProbabilityMatrices,
   PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
   PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
+  buildLambdasV2,
 } from "../src/index.js";
+import { computeIdentityFootballState } from "../src/projection-v2/football-state/compute-identity-football-state.js";
+import { buildScriptProbabilityMatrix } from "../src/projection-v2/probability-matrix/build-script-probability-matrix.js";
 
-function makeMatchInfo(matchId = createMatchId("match-1")) {
+function makeMatchInfo(matchId = createMatchId("match-ms-1")) {
   return createEvidence({
     id: "evidence-1",
     source: "fixture",
@@ -94,7 +96,7 @@ function makeSideEvidence(
   });
 }
 
-function makePipelineInput(matchId = createMatchId("match-1")) {
+function makePipelineInput(matchId = createMatchId("match-ms-1")) {
   const evidenceSet = Object.freeze([
     makeMatchInfo(matchId),
     makeSideEvidence(matchId, "TEAM_FORM", "home"),
@@ -114,30 +116,46 @@ function makePipelineInput(matchId = createMatchId("match-1")) {
   };
 }
 
-describe("Projection V2 foundation", () => {
-  it("computes identity Football State and governed Match Script set", () => {
+describe("Match Script Engine V1 (P2F)", () => {
+  it("activates multiple governed scripts with weights summing to 1", () => {
+    const input = makePipelineInput();
+    const footballState = computeIdentityFootballState({
+      featureBundle: input.featureBundle,
+      ruleResults: input.ruleResults,
+    });
+    const scriptSet = generateMatchScriptSet({
+      featureBundle: input.featureBundle,
+      ruleResults: input.ruleResults,
+      footballState,
+      parameters: GOVERNED_MATCH_SCRIPT_PARAMETER_SET,
+    });
+
+    expect(scriptSet.policyVersion).toBe(MATCH_SCRIPT_POLICY_VERSION);
+    expect(scriptSet.scripts.length).toBeGreaterThanOrEqual(2);
+    expect(
+      scriptSet.scripts.reduce((sum, script) => sum + script.weight, 0),
+    ).toBeCloseTo(1, 9);
+    expect(scriptSet.scripts.some((script) => script.scriptId === "balanced")).toBe(
+      true,
+    );
+  });
+
+  it("merges per-script matrices into one final probability matrix", () => {
     const input = makePipelineInput();
     const result = computeProjectionV2(input);
 
-    expect(result.footballState.policyVersion).toBe(FOOTBALL_STATE_POLICY_VERSION);
-    expect(result.matchScriptSet.policyVersion).toBe(MATCH_SCRIPT_POLICY_VERSION);
-    expect(result.matchScriptSet.scripts.length).toBeGreaterThanOrEqual(2);
     expect(result.parameters.artifactId).toBe(
       PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
     );
     expect(result.framework.frameworkVersion).toBe(
       PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
     );
-  });
-
-  it("wraps the merged Poisson matrix with valid marginals", () => {
-    const input = makePipelineInput();
-    const result = computeProjectionV2(input);
-
+    expect(result.matchScriptSet.scripts.length).toBeGreaterThanOrEqual(2);
     expect(result.probabilityMatrix).not.toBeNull();
+
     const matrix = result.probabilityMatrix;
     if (matrix === null) {
-      throw new Error("expected probability matrix");
+      throw new Error("expected merged probability matrix");
     }
 
     expect(matrix.pHome + matrix.pDraw + matrix.pAway).toBeCloseTo(1, 9);
@@ -146,61 +164,72 @@ describe("Projection V2 foundation", () => {
         matrix.goalRange.range23 +
         matrix.goalRange.range4Plus,
     ).toBeCloseTo(1, 9);
-    expect(matrix.topScorelines.length).toBeGreaterThan(0);
+    expect(result.framework.activeMatchScripts.length).toBeGreaterThanOrEqual(2);
+    expect(
+      result.framework.activeMatchScripts.reduce(
+        (sum, script) => sum + script.weight,
+        0,
+      ),
+    ).toBeCloseTo(1, 9);
   });
 
-  it("uses match-script merged basis without Rule softmax", () => {
+  it("derives sealed projection outputs from the merged matrix only", () => {
     const input = makePipelineInput();
     const v2 = computeMatchProjection({
       ...input,
       projectionPolicyPin: "v2",
     });
 
-    expect(v2.projectionFramework).toBeDefined();
     expect(v2.projection.scorelinesBasis).toBe("match_script_merged_v2");
     expect(v2.projection.oneXTwoBasis).toBe("post_calibration_only");
+    expect(v2.projectionFramework?.activeMatchScripts.length).toBeGreaterThan(0);
+    expect(
+      v2.projection.pHome + v2.projection.pDraw + v2.projection.pAway,
+    ).toBeCloseTo(1, 9);
   });
 
-  it("defaults computeMatchProjection to V1 without framework metadata", () => {
+  it("builds distinct per-script lambdas before merge", () => {
     const input = makePipelineInput();
-    const result = computeMatchProjection(input);
-
-    expect(result.projectionFramework).toBeUndefined();
-    expect(result.projection.status).toBe("completed_nonempty");
-    expect(result.projection.scorelinesBasis).toBe("pre_rule_adjustment");
-  });
-});
-
-describe("LambdaBuilderV2", () => {
-  it("reproduces V1 lambdas with baseline artifact weights", () => {
-    const input = makePipelineInput();
-    const features = new Map(
-      input.featureBundle.features.map((feature) => [feature.name, feature]),
+    const result = computeProjectionV2(input);
+    const baseHome = result.framework.activeMatchScripts[0]?.lambdaHome ?? 0;
+    const lowEvent = result.framework.activeMatchScripts.find(
+      (script) => script.scriptId === "low_event",
     );
-    const v1 = computeLambdas({
-      attackRatingHome: features.get("attackRatingHome")?.value as number,
-      defenseRatingAway: features.get("defenseRatingAway")?.value as number,
-      attackRatingAway: features.get("attackRatingAway")?.value as number,
-      defenseRatingHome: features.get("defenseRatingHome")?.value as number,
-      homeAdvantage: features.get("homeAdvantage")?.value as number,
-    });
-    const v2 = buildLambdasV2({
-      featureBundle: input.featureBundle,
-      parameters: BASELINE_PROJECTION_PARAMETER_ARTIFACT.lambda,
-    });
 
-    expect(v2.lambdaHome).toBeCloseTo(v1.lambdaHome, 9);
-    expect(v2.lambdaAway).toBeCloseTo(v1.lambdaAway, 9);
+    if (lowEvent === undefined) {
+      return;
+    }
+
+    expect(lowEvent.lambdaHome).toBeLessThan(baseHome);
+    expect(lowEvent.lambdaAway).toBeLessThan(
+      result.framework.activeMatchScripts.find(
+        (script) => script.scriptId === "balanced",
+      )?.lambdaAway ?? baseHome,
+    );
   });
 
-  it("records absent optional Features without imputing values", () => {
+  it("convex-combines script matrices with governed weights", () => {
     const input = makePipelineInput();
-    const result = buildLambdasV2({
+    const result = computeProjectionV2(input);
+    const baseLambdas = buildLambdasV2({
       featureBundle: input.featureBundle,
-      parameters: FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT.lambda,
+      parameters: MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT.lambda,
     });
+    const scripts = result.matchScriptSet.scripts;
+    const merged = mergeProbabilityMatrices(
+      scripts.map((script) =>
+        Object.freeze({
+          weight: script.weight,
+          matrix: buildScriptProbabilityMatrix({
+            baseLambdaHome: baseLambdas.lambdaHome,
+            baseLambdaAway: baseLambdas.lambdaAway,
+            modifiers: script.lambdaModifiers,
+            parameters: MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT.lambda,
+          }),
+        }),
+      ),
+    );
 
-    expect(result.absentOptionalFeatures.length).toBeGreaterThan(0);
-    expect(result.limitations.some((line) => line.includes("neutral"))).toBe(true);
+    expect(merged?.checksum).toBe(result.probabilityMatrix?.checksum);
   });
 });

@@ -53,7 +53,10 @@ export interface DeterministicMatchProjection {
   readonly recommendation: RecommendationCode;
   readonly limitations: readonly string[];
   readonly truncationMass: number;
-  readonly scorelinesBasis: "pre_rule_adjustment" | "feature_enriched_lambda_v2";
+  readonly scorelinesBasis:
+    | "pre_rule_adjustment"
+    | "feature_enriched_lambda_v2"
+    | "match_script_merged_v2";
   readonly oneXTwoBasis: "post_rule_and_calibration" | "post_calibration_only";
   readonly calibrationArtifactId: string;
   readonly calibrationModelVersion: string;

@@ -506,6 +506,39 @@ export interface ContributionReportDto {
   readonly limitations: readonly string[];
 }
 
+export interface ContributionReportDto {
+  readonly schemaVersion: string;
+  readonly computedAt: string;
+  readonly totalSampleSize: number;
+  readonly minimumQualifiedSampleSize: number;
+  readonly provenance: ContributionProvenanceDto;
+  readonly domains: readonly DomainContributionRowDto[];
+  readonly limitations: readonly string[];
+}
+
+export interface MatchScriptSummaryDto {
+  readonly scriptId: string;
+  readonly label: string;
+  readonly weight: number;
+  readonly activationReason: string;
+  readonly activatingRules: readonly string[];
+  readonly strengtheningFeatures: readonly string[];
+  readonly lambdaHome: number;
+  readonly lambdaAway: number;
+}
+
+export interface ProjectionFrameworkDto {
+  readonly frameworkVersion: string;
+  readonly parameterArtifactId: string;
+  readonly parameterArtifactChecksum: string;
+  readonly footballStatePolicyVersion: string;
+  readonly matchScriptPolicyVersion: string;
+  readonly footballStateChecksum: string;
+  readonly matchScriptSetChecksum: string;
+  readonly probabilityMatrixChecksum: string | null;
+  readonly activeMatchScripts: readonly MatchScriptSummaryDto[];
+}
+
 export interface AnalysisReportDto {
   readonly reportId: string;
   readonly matchId: string;
@@ -515,6 +548,7 @@ export interface AnalysisReportDto {
   readonly rules: readonly RuleResultDto[];
   readonly deterministic: DeterministicProjectionDto;
   readonly narrative: NarrativeDraftDto;
+  readonly projectionFramework?: ProjectionFrameworkDto;
   readonly actualResult?: ActualMatchResultDto;
   readonly evaluation?: PredictionEvaluationDto;
   readonly evaluationHistory?: readonly EvaluationHistoryRecordDto[];

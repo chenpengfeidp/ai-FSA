@@ -3,10 +3,13 @@ import type { RuleResult } from "@fas/rule";
 import type { CalibrationArtifact } from "@fas/statistics";
 import { computeDeterministicProjectionV2 } from "../projection/compute-deterministic-projection-v2.js";
 import { computeIdentityFootballState } from "./football-state/compute-identity-football-state.js";
-import { computeBaselineMatchScriptSet } from "./match-script/compute-baseline-match-script-set.js";
-import { buildFeatureEnrichedProbabilityMatrix } from "./probability-matrix/build-foundation-probability-matrix.js";
+import { buildLambdasV2 } from "./lambda/lambda-builder-v2.js";
+import { generateMatchScriptSet } from "./match-script/match-script-generator.js";
+import { buildScriptProbabilityMatrix } from "./probability-matrix/build-script-probability-matrix.js";
+import { mergeProbabilityMatrices } from "./probability-matrix/merge-probability-matrices.js";
+import type { ProbabilityMatrix } from "./probability-matrix/probability-matrix.js";
 import {
-  FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
+  MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
   type ProjectionParameterArtifact,
 } from "./projection-parameter-artifact.js";
 import {
@@ -21,36 +24,82 @@ export function computeProjectionV2(input: {
   readonly calibrationArtifact?: CalibrationArtifact;
   readonly parameters?: ProjectionParameterArtifact;
 }): ProjectionResult {
-  const parameters =
-    input.parameters ?? FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT;
+  const parameters = input.parameters ?? MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT;
   const footballState = computeIdentityFootballState({
     featureBundle: input.featureBundle,
     ruleResults: input.ruleResults,
   });
-  const matchScriptSet = computeBaselineMatchScriptSet({
+  const matchScriptSet = generateMatchScriptSet({
     featureBundle: input.featureBundle,
     ruleResults: input.ruleResults,
     footballState,
+    ...(parameters.matchScript === undefined
+      ? {}
+      : { parameters: parameters.matchScript }),
   });
-  const probabilityMatrix =
-    buildFeatureEnrichedProbabilityMatrix({
-      featureBundle: input.featureBundle,
-      parameters,
-    }) ?? null;
+  const lambdaResult = buildLambdasV2({
+    featureBundle: input.featureBundle,
+    parameters: parameters.lambda,
+  });
+  const scriptMatrices: Array<{
+    readonly scriptId: string;
+    readonly matrix: ProbabilityMatrix;
+  }> = [];
+
+  if (!lambdaResult.blocked) {
+    for (const script of matchScriptSet.scripts) {
+      scriptMatrices.push(
+        Object.freeze({
+          scriptId: script.scriptId,
+          matrix: buildScriptProbabilityMatrix({
+            baseLambdaHome: lambdaResult.lambdaHome,
+            baseLambdaAway: lambdaResult.lambdaAway,
+            modifiers: script.lambdaModifiers,
+            parameters: parameters.lambda,
+          }),
+        }),
+      );
+    }
+  }
+
+  const probabilityMatrix = lambdaResult.blocked
+    ? null
+    : mergeProbabilityMatrices(
+        matchScriptSet.scripts
+          .map((script, index) =>
+            Object.freeze({
+              weight: script.weight,
+              matrix: scriptMatrices[index]?.matrix,
+            }),
+          )
+          .filter(
+            (
+              entry,
+            ): entry is Readonly<{
+              readonly weight: number;
+              readonly matrix: ProbabilityMatrix;
+            }> => entry.matrix !== undefined,
+          ),
+      );
   const projection = computeDeterministicProjectionV2({
     featureBundle: input.featureBundle,
     ruleResults: input.ruleResults,
     requiredEvidencePresentCount: input.requiredEvidencePresentCount,
     parameters,
+    matchScriptSet,
     ...(input.calibrationArtifact === undefined
       ? {}
       : { calibrationArtifact: input.calibrationArtifact }),
+    ...(probabilityMatrix === null || probabilityMatrix === undefined
+      ? {}
+      : { mergedProbabilityMatrix: probabilityMatrix }),
   });
   const framework = createProjectionFrameworkMetadata({
     parameters,
     footballState,
     matchScriptSet,
     probabilityMatrix,
+    scriptMatrices: Object.freeze([...scriptMatrices]),
   });
 
   return Object.freeze({

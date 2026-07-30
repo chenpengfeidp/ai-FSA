@@ -1,19 +1,26 @@
 import { stableChecksum } from "../projection/stable-checksum.js";
-import { FEATURE_ENRICHED_LAMBDA_PARAMETER_SET } from "./lambda/feature-enriched-lambda-weights.js";
 import type { LambdaParameterSet } from "./lambda/lambda-parameter-set.js";
+import { FEATURE_ENRICHED_LAMBDA_PARAMETER_SET } from "./lambda/feature-enriched-lambda-weights.js";
+import type { MatchScriptParameterSet } from "./match-script/match-script-parameter-set.js";
+import { GOVERNED_MATCH_SCRIPT_PARAMETER_SET } from "./match-script/match-script-governed-parameters.js";
 
 export const PROJECTION_PARAMS_BASELINE_ARTIFACT_ID =
   "projectionParams:v3.0:baseline";
 export const PROJECTION_PARAMS_FEATURE_LAMBDA_ARTIFACT_ID =
   "projectionParams:v3.0:featureLambda";
+export const PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID =
+  "projectionParams:v3.1:matchScript";
 export const PROJECTION_PARAMS_POLICY_VERSION = "projectionParams.v3.0";
 export const PROJECTION_FRAMEWORK_VERSION_FOUNDATION =
   "projectionFramework.v2.foundation";
 export const PROJECTION_FRAMEWORK_VERSION = "projectionFramework.v2.featureLambda";
+export const PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT =
+  "projectionFramework.v2.matchScript";
 
 export type ProjectionFrameworkVersion =
   | typeof PROJECTION_FRAMEWORK_VERSION
-  | typeof PROJECTION_FRAMEWORK_VERSION_FOUNDATION;
+  | typeof PROJECTION_FRAMEWORK_VERSION_FOUNDATION
+  | typeof PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT;
 
 export type ProjectionParameterArtifactStatus =
   | "uncalibrated_baseline"
@@ -28,6 +35,7 @@ export interface ProjectionParameterArtifact {
   readonly checksum: string;
   readonly limitations: readonly string[];
   readonly lambda: LambdaParameterSet;
+  readonly matchScript?: MatchScriptParameterSet;
 }
 
 export interface CreateProjectionParameterArtifactInput {
@@ -39,6 +47,7 @@ export interface CreateProjectionParameterArtifactInput {
   readonly checksum: string;
   readonly limitations: readonly string[];
   readonly lambda: LambdaParameterSet;
+  readonly matchScript?: MatchScriptParameterSet;
 }
 
 export class ProjectionParameterArtifactValidationError extends Error {
@@ -85,6 +94,14 @@ export function createProjectionParameterArtifact(
       ...input.lambda,
       featureWeights: Object.freeze([...input.lambda.featureWeights]),
     }),
+    ...(input.matchScript === undefined
+      ? {}
+      : {
+          matchScript: Object.freeze({
+            ...input.matchScript,
+            catalog: Object.freeze([...input.matchScript.catalog]),
+          }),
+        }),
   });
 }
 
@@ -136,7 +153,33 @@ export const FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT: ProjectionParameter
     limitations: Object.freeze([
       "Feature-enriched lambda artifact: Intelligence Features contribute directly to expected goals.",
       "RuleResults are explainability-only in Projection V2; they do not adjust 1X2 probabilities.",
-      "Optional Feature factors default to neutral when absent — never imputed.",
+      "Not derived from Evaluation History or offline replay.",
+      "Not Evaluation-qualified for release claims.",
+    ]),
+  });
+
+/**
+ * P2F Match Script artifact — Feature-enriched λ plus governed script mixture.
+ */
+export const MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT: ProjectionParameterArtifact =
+  createProjectionParameterArtifact({
+    artifactId: PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
+    policyVersion: PROJECTION_PARAMS_POLICY_VERSION,
+    frameworkVersion: PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
+    status: "uncalibrated_baseline",
+    qualified: false,
+    checksum: stableChecksum(
+      JSON.stringify({
+        lambda: FEATURE_ENRICHED_LAMBDA_PARAMETER_SET,
+        matchScript: GOVERNED_MATCH_SCRIPT_PARAMETER_SET,
+      }),
+    ),
+    lambda: FEATURE_ENRICHED_LAMBDA_PARAMETER_SET,
+    matchScript: GOVERNED_MATCH_SCRIPT_PARAMETER_SET,
+    limitations: Object.freeze([
+      "Match Script artifact: multiple pre-match scripts merged into one probability matrix.",
+      "Feature-enriched lambda per script; governed script weights from matchScript.v1 tables.",
+      "RuleResults activate scripts only — they do not softmax-adjust 1X2 probabilities.",
       "Not derived from Evaluation History or offline replay.",
       "Not Evaluation-qualified for release claims.",
     ]),

@@ -27,9 +27,12 @@ export {
   BASELINE_PROJECTION_PARAMETER_ARTIFACT,
   createProjectionParameterArtifact,
   FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
+  MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
   PROJECTION_FRAMEWORK_VERSION,
+  PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT,
   PROJECTION_PARAMS_BASELINE_ARTIFACT_ID,
   PROJECTION_PARAMS_FEATURE_LAMBDA_ARTIFACT_ID,
+  PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
   PROJECTION_PARAMS_POLICY_VERSION,
   ProjectionParameterArtifactValidationError,
 } from "./projection-v2/projection-parameter-artifact.js";
@@ -57,6 +60,7 @@ export type { ProjectionPolicyPin } from "./projection-v2/resolve-projection-pol
 export { createProjectionFrameworkMetadata } from "./projection-v2/projection-result.js";
 export type {
   ProjectionFrameworkMetadata,
+  MatchScriptSummary,
   ProjectionResult,
 } from "./projection-v2/projection-result.js";
 export { computeIdentityFootballState } from "./projection-v2/football-state/compute-identity-football-state.js";
@@ -71,6 +75,11 @@ export type {
   StateDimensionValue,
 } from "./projection-v2/football-state/football-state-envelope.js";
 export { computeBaselineMatchScriptSet } from "./projection-v2/match-script/compute-baseline-match-script-set.js";
+export { generateMatchScriptSet } from "./projection-v2/match-script/match-script-generator.js";
+export { GOVERNED_MATCH_SCRIPT_PARAMETER_SET } from "./projection-v2/match-script/match-script-governed-parameters.js";
+export { MATCH_SCRIPT_IDS } from "./projection-v2/match-script/match-script-ids.js";
+export type { MatchScriptId } from "./projection-v2/match-script/match-script-ids.js";
+export type { MatchScriptParameterSet } from "./projection-v2/match-script/match-script-parameter-set.js";
 export {
   BASELINE_MATCH_SCRIPT_ID,
   createMatchScriptSet,
@@ -85,6 +94,8 @@ export {
   buildFeatureEnrichedProbabilityMatrix,
   buildFeatureEnrichedProbabilityMatrix as buildFoundationProbabilityMatrix,
 } from "./projection-v2/probability-matrix/build-foundation-probability-matrix.js";
+export { buildScriptProbabilityMatrix } from "./projection-v2/probability-matrix/build-script-probability-matrix.js";
+export { mergeProbabilityMatrices } from "./projection-v2/probability-matrix/merge-probability-matrices.js";
 export {
   createProbabilityMatrixFromPoisson,
   PROBABILITY_MATRIX_MODEL_VERSION,

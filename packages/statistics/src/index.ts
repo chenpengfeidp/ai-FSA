@@ -235,5 +235,27 @@ export type {
 } from "./replay/replay-runner.js";
 export { computeProjectionReplayComparisonReport } from "./replay/compute-projection-replay-comparison-report.js";
 export type { ComputeProjectionReplayComparisonReportInput } from "./replay/compute-projection-replay-comparison-report.js";
+export {
+  PROJECTION_REPLAY_REPORT_MODEL_VERSION,
+  ProjectionReplayReportValidationError,
+} from "./domain/projection-replay-report.js";
+export type {
+  FootballStateContribution,
+  ProjectionReplayReport,
+  ProjectionVersionComparison,
+  ReplaySummary,
+  ScriptContribution,
+} from "./domain/projection-replay-report.js";
+export type {
+  ProjectionReplayFootballStateSnapshot,
+  ProjectionReplayMatchScriptSnapshot,
+  ProjectionReplayMetadata,
+} from "./replay/projection-replay-metadata.js";
+export type { ProjectionReplaySidecarRepository } from "./repository/projection-replay-sidecar-repository.js";
+export { InMemoryProjectionReplaySidecarRepository } from "./repository/in-memory-projection-replay-sidecar-repository.js";
+export { computeProjectionReplayReport } from "./replay/compute-projection-replay-report.js";
+export type { ComputeProjectionReplayReportInput } from "./replay/compute-projection-replay-report.js";
+export { runProjectionReplayReport } from "./replay/run-projection-replay-report.js";
+export type { RunProjectionReplayReportInput } from "./replay/run-projection-replay-report.js";
 export { runProjectionReplayValidation } from "./replay/run-projection-replay-validation.js";
 export type { RunProjectionReplayValidationInput } from "./replay/run-projection-replay-validation.js";

@@ -24,13 +24,16 @@ import { MatchAnalysisController } from "./match-analysis.controller.js";
 import { CalibrationController } from "./calibration.controller.js";
 import { ValidationController } from "./validation.controller.js";
 import { ContributionController } from "./contribution.controller.js";
+import { ProjectionReplayController } from "./projection-replay.controller.js";
 import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
 import { EvaluationHistoryController } from "./evaluation-history.controller.js";
 import { EvaluationHistoryRepositoryBridge } from "./evaluation-history-repository.bridge.js";
+import { ProjectionReplaySidecarRepositoryBridge } from "./projection-replay-sidecar-repository.bridge.js";
 import {
   evaluationHistoryRepositoryToken,
   matchProviderToken,
+  projectionReplaySidecarRepositoryToken,
 } from "./evidence.tokens.js";
 import { ImportController } from "./import.controller.js";
 import { MatchesController } from "./matches.controller.js";
@@ -41,6 +44,7 @@ import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 import {
   createApiEvaluationHistoryRepository,
   createApiEvidenceRepository,
+  createApiProjectionReplaySidecarRepository,
 } from "./runtime-database.js";
 import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
 import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
@@ -73,6 +77,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     CalibrationController,
     ValidationController,
     ContributionController,
+    ProjectionReplayController,
     ProvidersController,
     ImportController,
     MatchesController,
@@ -94,6 +99,19 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
         repository: EvaluationHistoryRepository,
       ): EvaluationHistoryRepositoryBridge =>
         new EvaluationHistoryRepositoryBridge(repository),
+    },
+    {
+      provide: projectionReplaySidecarRepositoryToken,
+      useFactory: (): import("@fas/statistics").ProjectionReplaySidecarRepository =>
+        createApiProjectionReplaySidecarRepository(),
+    },
+    {
+      provide: ProjectionReplaySidecarRepositoryBridge,
+      inject: [projectionReplaySidecarRepositoryToken],
+      useFactory: (
+        repository: import("@fas/statistics").ProjectionReplaySidecarRepository,
+      ): ProjectionReplaySidecarRepositoryBridge =>
+        new ProjectionReplaySidecarRepositoryBridge(repository),
     },
     {
       provide: EvidenceService,
@@ -182,16 +200,23 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     },
     {
       provide: GenerateMatchReportUseCase,
-      inject: [AnalyzeMatchUseCase, ReportBuilder, evaluationHistoryRepositoryToken],
+      inject: [
+        AnalyzeMatchUseCase,
+        ReportBuilder,
+        evaluationHistoryRepositoryToken,
+        projectionReplaySidecarRepositoryToken,
+      ],
       useFactory: (
         analyzeMatch: AnalyzeMatchUseCase,
         reportBuilder: ReportBuilder,
         evaluationHistoryRepository: EvaluationHistoryRepository,
+        projectionReplaySidecarRepository: import("@fas/statistics").ProjectionReplaySidecarRepository,
       ): GenerateMatchReportUseCase =>
         new GenerateMatchReportUseCase(
           analyzeMatch,
           reportBuilder,
           evaluationHistoryRepository,
+          projectionReplaySidecarRepository,
         ),
     },
     EvidenceExampleInitializer,

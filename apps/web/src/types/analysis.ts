@@ -632,6 +632,83 @@ export interface AnalysisReportDto {
   readonly calibration?: PredictionCalibrationReportDto;
   readonly validation?: ValidationReportDto;
   readonly contribution?: ContributionReportDto;
+  readonly projectionReplay?: ProjectionReplayReportDto;
+}
+
+export interface ProjectionReplayMetricSummaryDto {
+  readonly value: number | undefined;
+  readonly sampleSize: number;
+  readonly qualified: boolean;
+}
+
+export interface ProjectionReplayAccuracyBlockDto {
+  readonly sampleSize: number;
+  readonly scoredSampleSize: number;
+  readonly v2ReplaySampleSize: number;
+  readonly winnerAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly drawAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly scoreAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly goalRangeAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly bttsAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly overUnderAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly confidenceCorrelation: ProjectionReplayMetricSummaryDto;
+}
+
+export interface ProjectionReplayAccuracyDeltaDto {
+  readonly winnerAccuracyDelta: number | undefined;
+  readonly drawAccuracyDelta: number | undefined;
+  readonly scoreAccuracyDelta: number | undefined;
+  readonly goalRangeAccuracyDelta: number | undefined;
+  readonly bttsAccuracyDelta: number | undefined;
+  readonly overUnderAccuracyDelta: number | undefined;
+  readonly confidenceCorrelationDelta: number | undefined;
+}
+
+export interface ProjectionVersionComparisonDto {
+  readonly v1: ProjectionReplayAccuracyBlockDto;
+  readonly v2: ProjectionReplayAccuracyBlockDto;
+  readonly improvement: ProjectionReplayAccuracyDeltaDto;
+}
+
+export interface ReplaySummaryDto {
+  readonly populationSampleSize: number;
+  readonly v1ScoredSampleSize: number;
+  readonly v2ScoredSampleSize: number;
+  readonly v2ReplayCoverage: ProjectionReplayMetricSummaryDto;
+  readonly replayedAt: string;
+}
+
+export interface ScriptContributionDto {
+  readonly scriptId: string;
+  readonly label: string;
+  readonly activationCount: number;
+  readonly activationFrequency: number;
+  readonly averageWeight: number;
+  readonly averageConfidence: number;
+  readonly winnerAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly goalRangeAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly scoreAccuracy: ProjectionReplayMetricSummaryDto;
+}
+
+export interface FootballStateContributionDto {
+  readonly dimensionId: string;
+  readonly dimensionLabel: string;
+  readonly level: string;
+  readonly sampleSize: number;
+  readonly winnerAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly goalRangeAccuracy: ProjectionReplayMetricSummaryDto;
+  readonly scoreAccuracy: ProjectionReplayMetricSummaryDto;
+}
+
+export interface ProjectionReplayReportDto {
+  readonly modelVersion: string;
+  readonly computedAt: string;
+  readonly summary: ReplaySummaryDto;
+  readonly versionComparison: ProjectionVersionComparisonDto;
+  readonly scriptContributions: readonly ScriptContributionDto[];
+  readonly footballStateContributions: readonly FootballStateContributionDto[];
+  readonly limitations: readonly string[];
+  readonly checksum: string;
 }
 
 export interface BackendErrorDto {

@@ -6,6 +6,7 @@ import {
   type ProjectionReplayPortInput,
 } from "./projection-replay-port.js";
 import type { ProjectionReplaySidecar } from "./projection-replay-context.js";
+import type { ProjectionReplayMetadata } from "./projection-replay-metadata.js";
 import {
   computeProjectionReplayMetrics,
   type ProjectionReplayMetrics,
@@ -18,6 +19,7 @@ export interface ProjectionReplayRecordOutcome {
   readonly v2Prediction: SealedPredictionInput | null;
   readonly v2ReplayStatus: "completed" | "skipped";
   readonly v2SkipReason?: string;
+  readonly v2Metadata: ProjectionReplayMetadata | null;
   readonly v1Metrics: ProjectionReplayMetrics;
   readonly v2Metrics: ProjectionReplayMetrics | null;
 }
@@ -71,6 +73,7 @@ export class ReplayRunner {
             v2Prediction: null,
             v2ReplayStatus: "skipped",
             v2SkipReason: v2Outcome.reason,
+            v2Metadata: null,
             v1Metrics,
             v2Metrics: null,
           }),
@@ -91,6 +94,7 @@ export class ReplayRunner {
           v1Prediction: v1Outcome.prediction,
           v2Prediction: v2Outcome.prediction,
           v2ReplayStatus: "completed",
+          v2Metadata: v2Outcome.metadata ?? null,
           v1Metrics,
           v2Metrics,
         }),

@@ -1,6 +1,8 @@
 import {
+  buildProjectionReplayContext,
   buildSealedPredictionInput,
   extractMatchContextForHistory,
+  AnalysisProjectionReplayPort,
   type AnalysisResult,
   type AnalyzeMatchResult,
 } from "@fas/analysis";
@@ -10,10 +12,13 @@ import {
   computeContributionReport,
   computePredictionCalibrationReport,
   computeValidationReport,
+  runProjectionReplayReport,
   type ContributionReport,
   type EvaluationHistoryRecord,
   type EvaluationHistoryRepository,
   type PredictionCalibrationReport,
+  type ProjectionReplayReport,
+  type ProjectionReplaySidecarRepository,
   type ValidationReport,
 } from "@fas/statistics";
 import type { AnalysisReport } from "../domain/analysis-report.js";
@@ -34,6 +39,7 @@ export type ReportGenerationErrorCode =
   | "CALIBRATION_REPORT_FAILED"
   | "CONTRIBUTION_REPORT_FAILED"
   | "EVALUATION_HISTORY_FAILED"
+  | "PROJECTION_REPLAY_REPORT_FAILED"
   | "REPORT_BUILD_FAILED"
   | "VALIDATION_REPORT_FAILED";
 
@@ -81,6 +87,7 @@ function withOverlays(
   calibration: PredictionCalibrationReport,
   validation: ValidationReport,
   contribution: ContributionReport,
+  projectionReplay: ProjectionReplayReport | undefined,
 ): AnalysisReport {
   return createAnalysisReport({
     reportId: report.reportId,
@@ -107,6 +114,7 @@ function withOverlays(
     calibration,
     validation,
     contribution,
+    ...(projectionReplay === undefined ? {} : { projectionReplay }),
   });
 }
 
@@ -114,6 +122,7 @@ async function persistAndLoadHistory(
   analysis: AnalysisResult,
   report: AnalysisReport,
   repository: EvaluationHistoryRepository,
+  sidecarRepository: ProjectionReplaySidecarRepository | undefined,
 ): Promise<readonly EvaluationHistoryRecord[]> {
   const evaluation = report.evaluation;
   const actualResult = report.actualResult;
@@ -139,6 +148,15 @@ async function persistAndLoadHistory(
   });
 
   await repository.save(historyRecord);
+
+  if (sidecarRepository !== undefined) {
+    await sidecarRepository.save({
+      historyId: historyRecord.historyId,
+      matchId: historyRecord.matchId,
+      context: buildProjectionReplayContext(analysis),
+    });
+  }
+
   return repository.findByMatch(analysis.matchId);
 }
 
@@ -146,15 +164,21 @@ export class GenerateMatchReportUseCase {
   readonly #analyzeMatch: AnalyzeMatchOperation;
   readonly #reportBuilder: AnalysisReportBuilder;
   readonly #evaluationHistoryRepository: EvaluationHistoryRepository | undefined;
+  readonly #projectionReplaySidecarRepository:
+    | ProjectionReplaySidecarRepository
+    | undefined;
+  readonly #projectionReplayPort = new AnalysisProjectionReplayPort();
 
   constructor(
     analyzeMatch: AnalyzeMatchOperation,
     reportBuilder: AnalysisReportBuilder,
     evaluationHistoryRepository?: EvaluationHistoryRepository,
+    projectionReplaySidecarRepository?: ProjectionReplaySidecarRepository,
   ) {
     this.#analyzeMatch = analyzeMatch;
     this.#reportBuilder = reportBuilder;
     this.#evaluationHistoryRepository = evaluationHistoryRepository;
+    this.#projectionReplaySidecarRepository = projectionReplaySidecarRepository;
   }
 
   async execute(matchId: MatchId): Promise<GenerateMatchReportResult> {
@@ -192,6 +216,7 @@ export class GenerateMatchReportUseCase {
         analysis.value,
         report,
         this.#evaluationHistoryRepository,
+        this.#projectionReplaySidecarRepository,
       );
     } catch {
       return failure(
@@ -256,12 +281,32 @@ export class GenerateMatchReportUseCase {
       );
     }
 
+    let projectionReplay: ProjectionReplayReport | undefined;
+
+    if (this.#projectionReplaySidecarRepository !== undefined) {
+      try {
+        const replayResult = await runProjectionReplayReport({
+          repository: this.#evaluationHistoryRepository,
+          sidecarRepository: this.#projectionReplaySidecarRepository,
+          replayPort: this.#projectionReplayPort,
+          computedAt,
+        });
+        projectionReplay = replayResult.report;
+      } catch {
+        return failure(
+          "PROJECTION_REPLAY_REPORT_FAILED",
+          "Projection Replay Validation computation failed unexpectedly.",
+        );
+      }
+    }
+
     return withOverlays(
       report,
       evaluationHistory,
       calibration,
       validation,
       contribution,
+      projectionReplay,
     );
   }
 }

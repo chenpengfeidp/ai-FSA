@@ -493,6 +493,27 @@ describe("HTTP import and Evidence query workflow", () => {
     );
   });
 
+  it("serves the P2H Projection Replay report from GET /api/projection-replay", async () => {
+    const response = await request(baseUrl, "/api/projection-replay");
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      modelVersion: "projectionReplayReport.v1.p2h",
+      summary: expect.objectContaining({
+        populationSampleSize: expect.any(Number),
+      }),
+      versionComparison: expect.objectContaining({
+        v1: expect.any(Object),
+        v2: expect.any(Object),
+        improvement: expect.any(Object),
+      }),
+    });
+    expect(Array.isArray(report.scriptContributions)).toBe(true);
+    expect(Array.isArray(report.footballStateContributions)).toBe(true);
+    expect(Array.isArray(report.limitations)).toBe(true);
+  });
+
   it("lists upcoming Match Center fixtures from the recorded football-data board", async () => {
     const response = await request(baseUrl, "/api/matches/upcoming");
     const body = requireRecord(response.body);

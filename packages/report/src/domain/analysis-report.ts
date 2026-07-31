@@ -15,6 +15,7 @@ import type {
   EvaluationHistoryRecord,
   PredictionCalibrationReport,
   PredictionEvaluationRecord,
+  ProjectionReplayReport,
   ValidationReport,
 } from "@fas/statistics";
 
@@ -56,6 +57,11 @@ export interface AnalysisReport {
    * claims causation.
    */
   readonly contribution?: ContributionReport;
+  /**
+   * P2H Projection Replay Validation — population-level V1 vs V2 replay over
+   * sealed Evaluation History. Display-only; never mutates History or Prediction.
+   */
+  readonly projectionReplay?: ProjectionReplayReport;
   /** Projection V2 framework metadata when V2 policy pin is active. */
   readonly projectionFramework?: ProjectionFrameworkMetadata;
   /** Football State aggregation layer when V2 policy pin is active. */
@@ -79,6 +85,7 @@ export interface CreateAnalysisReportInput {
   readonly calibration?: PredictionCalibrationReport;
   readonly validation?: ValidationReport;
   readonly contribution?: ContributionReport;
+  readonly projectionReplay?: ProjectionReplayReport;
   readonly projectionFramework?: ProjectionFrameworkMetadata;
   readonly footballState?: FootballStateReportMetadata;
 }
@@ -229,6 +236,9 @@ export function createAnalysisReport(
     ...(input.contribution === undefined
       ? {}
       : { contribution: input.contribution }),
+    ...(input.projectionReplay === undefined
+      ? {}
+      : { projectionReplay: input.projectionReplay }),
     ...(input.projectionFramework === undefined
       ? {}
       : { projectionFramework: input.projectionFramework }),

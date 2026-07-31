@@ -1,6 +1,7 @@
 import type { EvaluationHistoryRecord } from "../domain/evaluation-history.js";
 import type { SealedPredictionInput } from "../domain/prediction-evaluation.js";
 import type { SealedProjectionReplayContext } from "./projection-replay-context.js";
+import type { ProjectionReplayMetadata } from "./projection-replay-metadata.js";
 
 export type ProjectionReplayVersion = "v1" | "v2";
 
@@ -12,6 +13,7 @@ export interface ProjectionReplayPortInput {
 export interface ProjectionReplayPortResult {
   readonly version: ProjectionReplayVersion;
   readonly prediction: SealedPredictionInput;
+  readonly metadata?: ProjectionReplayMetadata;
 }
 
 export interface ProjectionReplayPortSkip {

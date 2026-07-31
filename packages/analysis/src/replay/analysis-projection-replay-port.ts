@@ -5,12 +5,17 @@ import type {
   ProjectionReplayPort,
   ProjectionReplayPortInput,
   ProjectionReplayPortOutcome,
+  ProjectionReplayMetadata,
   SealedPredictionInput,
   SealedProjectionReplayContext,
 } from "@fas/statistics";
 import type { AnalysisResult } from "../domain/analysis-result.js";
 import { buildSealedPredictionInput } from "../evaluation/build-sealed-prediction-input.js";
 import { computeMatchProjection } from "../projection/compute-match-projection.js";
+import {
+  FOOTBALL_STATE_DIMENSION_IDS,
+  FOOTBALL_STATE_DIMENSION_LABELS,
+} from "../projection-v2/football-state/football-state-dimensions.js";
 import { buildScenarioSet } from "../scenario/scenario-set.js";
 
 type EvaluationHistoryConfidence = Readonly<{
@@ -193,6 +198,56 @@ export function buildProjectionReplayContext(
   });
 }
 
+function buildReplayMetadata(input: {
+  readonly projectionResult: ReturnType<typeof computeMatchProjection>;
+  readonly confidence: EvaluationHistoryConfidence;
+}): ProjectionReplayMetadata | undefined {
+  const footballState = input.projectionResult.footballState;
+  const framework = input.projectionResult.projectionFramework;
+
+  if (footballState === undefined && framework === undefined) {
+    return undefined;
+  }
+
+  const footballStateDimensions = Object.freeze(
+    (footballState?.dimensions ?? []).map((dimension) =>
+      Object.freeze({
+        dimensionId: dimension.id,
+        dimensionLabel: dimension.label,
+        level: dimension.level,
+      }),
+    ),
+  );
+  const activeMatchScripts = Object.freeze(
+    (framework?.activeMatchScripts ?? []).map((script) =>
+      Object.freeze({
+        scriptId: script.scriptId,
+        label: script.label,
+        weight: script.weight,
+      }),
+    ),
+  );
+
+  if (footballStateDimensions.length === 0 && activeMatchScripts.length === 0) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    projectionConfidence: input.confidence.predictionConfidence,
+    footballStateDimensions:
+      footballStateDimensions.length > 0
+        ? footballStateDimensions
+        : FOOTBALL_STATE_DIMENSION_IDS.map((dimensionId) =>
+            Object.freeze({
+              dimensionId,
+              dimensionLabel: FOOTBALL_STATE_DIMENSION_LABELS[dimensionId],
+              level: "absent" as const,
+            }),
+          ),
+    activeMatchScripts,
+  });
+}
+
 export class AnalysisProjectionReplayPort implements ProjectionReplayPort {
   replayV1(input: ProjectionReplayPortInput): ProjectionReplayPortOutcome {
     return Object.freeze({
@@ -233,10 +288,15 @@ export class AnalysisProjectionReplayPort implements ProjectionReplayPort {
       scenarios,
       confidence: input.record.confidence,
     });
+    const metadata = buildReplayMetadata({
+      projectionResult,
+      confidence: input.record.confidence,
+    });
 
     return Object.freeze({
       version: "v2",
       prediction,
+      ...(metadata === undefined ? {} : { metadata }),
     });
   }
 }

@@ -10,10 +10,15 @@ import { type EvidenceRepository, InMemoryEvidenceRepository } from "@fas/eviden
 import {
   type EvaluationHistoryRepository,
   InMemoryEvaluationHistoryRepository,
+  type ProjectionReplaySidecarRepository,
+  InMemoryProjectionReplaySidecarRepository,
 } from "@fas/statistics";
 
 let cachedPostgres: FasDatabaseHandle | undefined;
 let cachedMemoryEvaluationHistory: EvaluationHistoryRepository | undefined;
+let cachedMemoryProjectionReplaySidecar:
+  | ProjectionReplaySidecarRepository
+  | undefined;
 
 function getPostgresDatabase(): FasDatabaseHandle {
   if (cachedPostgres !== undefined) {
@@ -70,4 +75,17 @@ export function createApiEvaluationHistoryRepository(): EvaluationHistoryReposit
   }
 
   return cachedMemoryEvaluationHistory;
+}
+
+/**
+ * Projection replay sidecar store (P2H).
+ * Memory mode shares one process-local map keyed by historyId/matchId.
+ */
+export function createApiProjectionReplaySidecarRepository(): ProjectionReplaySidecarRepository {
+  if (cachedMemoryProjectionReplaySidecar === undefined) {
+    cachedMemoryProjectionReplaySidecar =
+      new InMemoryProjectionReplaySidecarRepository();
+  }
+
+  return cachedMemoryProjectionReplaySidecar;
 }

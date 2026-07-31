@@ -25,6 +25,7 @@ import { CalibrationController } from "./calibration.controller.js";
 import { ValidationController } from "./validation.controller.js";
 import { ContributionController } from "./contribution.controller.js";
 import { ProjectionReplayController } from "./projection-replay.controller.js";
+import { ProjectionDiagnosticsController } from "./projection-diagnostics.controller.js";
 import { EvidenceExampleInitializer } from "./evidence-example.initializer.js";
 import { EvidenceController } from "./evidence.controller.js";
 import { EvaluationHistoryController } from "./evaluation-history.controller.js";
@@ -78,6 +79,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     ValidationController,
     ContributionController,
     ProjectionReplayController,
+    ProjectionDiagnosticsController,
     ProvidersController,
     ImportController,
     MatchesController,

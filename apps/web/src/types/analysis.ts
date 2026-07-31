@@ -633,6 +633,7 @@ export interface AnalysisReportDto {
   readonly validation?: ValidationReportDto;
   readonly contribution?: ContributionReportDto;
   readonly projectionReplay?: ProjectionReplayReportDto;
+  readonly projectionDiagnostics?: ProjectionDiagnosticsReportDto;
 }
 
 export interface ProjectionReplayMetricSummaryDto {
@@ -707,6 +708,113 @@ export interface ProjectionReplayReportDto {
   readonly versionComparison: ProjectionVersionComparisonDto;
   readonly scriptContributions: readonly ScriptContributionDto[];
   readonly footballStateContributions: readonly FootballStateContributionDto[];
+  readonly limitations: readonly string[];
+  readonly checksum: string;
+}
+
+export interface FailureCategoryCountDto {
+  readonly category: string;
+  readonly label: string;
+  readonly count: number;
+  readonly rate: ProjectionReplayMetricSummaryDto;
+}
+
+export interface FailureDistributionDto {
+  readonly sampleSize: number;
+  readonly categories: readonly FailureCategoryCountDto[];
+  readonly topFailureReasons: readonly FailureCategoryCountDto[];
+}
+
+export interface ScriptDiagnosticsRowDto {
+  readonly scriptId: string;
+  readonly label: string;
+  readonly activationCount: number;
+  readonly accuracy: ProjectionReplayMetricSummaryDto;
+  readonly averageConfidence: number;
+  readonly averageScoreError: number;
+  readonly averageGoalError: number;
+}
+
+export interface ScriptDiagnosticsDto {
+  readonly rows: readonly ScriptDiagnosticsRowDto[];
+  readonly worstScripts: readonly ScriptDiagnosticsRowDto[];
+  readonly bestScripts: readonly ScriptDiagnosticsRowDto[];
+}
+
+export interface FootballStateDiagnosticsRowDto {
+  readonly dimensionId: string;
+  readonly dimensionLabel: string;
+  readonly level: string;
+  readonly sampleSize: number;
+  readonly accuracy: ProjectionReplayMetricSummaryDto;
+  readonly falsePositive: number;
+  readonly falseNegative: number;
+}
+
+export interface FootballStateDiagnosticsDto {
+  readonly rows: readonly FootballStateDiagnosticsRowDto[];
+}
+
+export interface RuleActivationRowDto {
+  readonly ruleName: string;
+  readonly activationCount: number;
+  readonly activationRate: number;
+}
+
+export interface RuleIncorrectCorrelationRowDto {
+  readonly ruleName: string;
+  readonly incorrectCount: number;
+  readonly incorrectRate: number;
+  readonly activationCount: number;
+}
+
+export interface RuleConflictPairRowDto {
+  readonly homeRule: string;
+  readonly awayRule: string;
+  readonly coActivationCount: number;
+  readonly incorrectCount: number;
+  readonly incorrectRate: number;
+}
+
+export interface RuleSaturationSummaryDto {
+  readonly averagePassRules: number;
+  readonly averageApplicableRules: number;
+  readonly maxPassRules: number;
+  readonly saturatedMatchCount: number;
+  readonly saturationThreshold: number;
+}
+
+export interface RuleDiagnosticsDto {
+  readonly mostFrequentlyActivated: readonly RuleActivationRowDto[];
+  readonly correlatedWithIncorrect: readonly RuleIncorrectCorrelationRowDto[];
+  readonly conflictPairs: readonly RuleConflictPairRowDto[];
+  readonly saturation: RuleSaturationSummaryDto;
+}
+
+export interface ConfidenceBucketRowDto {
+  readonly band: "high" | "low" | "medium" | "very_high";
+  readonly sampleSize: number;
+  readonly accuracy: ProjectionReplayMetricSummaryDto;
+  readonly incorrectCount: number;
+}
+
+export interface ConfidenceDiagnosticsDto {
+  readonly highConfidenceWrong: number;
+  readonly lowConfidenceCorrect: number;
+  readonly highConfidenceWrongRate: ProjectionReplayMetricSummaryDto;
+  readonly lowConfidenceCorrectRate: ProjectionReplayMetricSummaryDto;
+  readonly calibrationBuckets: readonly ConfidenceBucketRowDto[];
+}
+
+export interface ProjectionDiagnosticsReportDto {
+  readonly modelVersion: string;
+  readonly computedAt: string;
+  readonly sampleSize: number;
+  readonly failureDistribution: FailureDistributionDto;
+  readonly scriptDiagnostics: ScriptDiagnosticsDto;
+  readonly footballStateDiagnostics: FootballStateDiagnosticsDto;
+  readonly ruleDiagnostics: RuleDiagnosticsDto;
+  readonly confidenceDiagnostics: ConfidenceDiagnosticsDto;
   readonly limitations: readonly string[];
   readonly checksum: string;
 }

@@ -11,12 +11,14 @@ import {
   buildEvaluationHistoryRecord,
   computeContributionReport,
   computePredictionCalibrationReport,
+  computeProjectionDiagnosticsReport,
   computeValidationReport,
   runProjectionReplayReport,
   type ContributionReport,
   type EvaluationHistoryRecord,
   type EvaluationHistoryRepository,
   type PredictionCalibrationReport,
+  type ProjectionDiagnosticsReport,
   type ProjectionReplayReport,
   type ProjectionReplaySidecarRepository,
   type ValidationReport,
@@ -40,6 +42,7 @@ export type ReportGenerationErrorCode =
   | "CONTRIBUTION_REPORT_FAILED"
   | "EVALUATION_HISTORY_FAILED"
   | "PROJECTION_REPLAY_REPORT_FAILED"
+  | "PROJECTION_DIAGNOSTICS_REPORT_FAILED"
   | "REPORT_BUILD_FAILED"
   | "VALIDATION_REPORT_FAILED";
 
@@ -88,6 +91,7 @@ function withOverlays(
   validation: ValidationReport,
   contribution: ContributionReport,
   projectionReplay: ProjectionReplayReport | undefined,
+  projectionDiagnostics: ProjectionDiagnosticsReport | undefined,
 ): AnalysisReport {
   return createAnalysisReport({
     reportId: report.reportId,
@@ -115,6 +119,7 @@ function withOverlays(
     validation,
     contribution,
     ...(projectionReplay === undefined ? {} : { projectionReplay }),
+    ...(projectionDiagnostics === undefined ? {} : { projectionDiagnostics }),
   });
 }
 
@@ -282,6 +287,7 @@ export class GenerateMatchReportUseCase {
     }
 
     let projectionReplay: ProjectionReplayReport | undefined;
+    let projectionDiagnostics: ProjectionDiagnosticsReport | undefined;
 
     if (this.#projectionReplaySidecarRepository !== undefined) {
       try {
@@ -292,6 +298,11 @@ export class GenerateMatchReportUseCase {
           computedAt,
         });
         projectionReplay = replayResult.report;
+        projectionDiagnostics = computeProjectionDiagnosticsReport({
+          replayResult: replayResult.replayResult,
+          sourceRecords: populationRecords,
+          computedAt,
+        });
       } catch {
         return failure(
           "PROJECTION_REPLAY_REPORT_FAILED",
@@ -307,6 +318,7 @@ export class GenerateMatchReportUseCase {
       validation,
       contribution,
       projectionReplay,
+      projectionDiagnostics,
     );
   }
 }

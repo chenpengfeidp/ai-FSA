@@ -514,6 +514,37 @@ describe("HTTP import and Evidence query workflow", () => {
     expect(Array.isArray(report.limitations)).toBe(true);
   });
 
+  it("serves the P2I Projection Diagnostics report from GET /api/projection-diagnostics", async () => {
+    const response = await request(baseUrl, "/api/projection-diagnostics");
+    const report = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(report).toMatchObject({
+      modelVersion: "projectionDiagnosticsReport.v1.p2i",
+      sampleSize: expect.any(Number),
+      failureDistribution: expect.objectContaining({
+        sampleSize: expect.any(Number),
+        topFailureReasons: expect.any(Array),
+      }),
+      scriptDiagnostics: expect.objectContaining({
+        rows: expect.any(Array),
+        worstScripts: expect.any(Array),
+        bestScripts: expect.any(Array),
+      }),
+      footballStateDiagnostics: expect.objectContaining({
+        rows: expect.any(Array),
+      }),
+      ruleDiagnostics: expect.objectContaining({
+        mostFrequentlyActivated: expect.any(Array),
+        conflictPairs: expect.any(Array),
+      }),
+      confidenceDiagnostics: expect.objectContaining({
+        calibrationBuckets: expect.any(Array),
+      }),
+    });
+    expect(Array.isArray(report.limitations)).toBe(true);
+  });
+
   it("lists upcoming Match Center fixtures from the recorded football-data board", async () => {
     const response = await request(baseUrl, "/api/matches/upcoming");
     const body = requireRecord(response.body);

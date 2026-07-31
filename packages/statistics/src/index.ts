@@ -259,3 +259,30 @@ export { runProjectionReplayReport } from "./replay/run-projection-replay-report
 export type { RunProjectionReplayReportInput } from "./replay/run-projection-replay-report.js";
 export { runProjectionReplayValidation } from "./replay/run-projection-replay-validation.js";
 export type { RunProjectionReplayValidationInput } from "./replay/run-projection-replay-validation.js";
+
+export {
+  PROJECTION_DIAGNOSTICS_REPORT_MODEL_VERSION,
+  MINIMUM_QUALIFIED_DIAGNOSTICS_SAMPLE_SIZE,
+  ProjectionDiagnosticsReportValidationError,
+} from "./domain/projection-diagnostics-report.js";
+export type {
+  ConfidenceBucketRow,
+  ConfidenceDiagnostics,
+  FailureCategory,
+  FailureCategoryCount,
+  FailureDistribution,
+  FootballStateDiagnostics,
+  FootballStateDiagnosticsRow,
+  ProjectionDiagnosticsReport,
+  RuleActivationRow,
+  RuleConflictPairRow,
+  RuleDiagnostics,
+  RuleIncorrectCorrelationRow,
+  RuleSaturationSummary,
+  ScriptDiagnostics,
+  ScriptDiagnosticsRow,
+} from "./domain/projection-diagnostics-report.js";
+export { computeProjectionDiagnosticsReport } from "./diagnostics/compute-projection-diagnostics-report.js";
+export type { ComputeProjectionDiagnosticsReportInput } from "./diagnostics/compute-projection-diagnostics-report.js";
+export { runProjectionDiagnosticsReport } from "./diagnostics/run-projection-diagnostics-report.js";
+export type { RunProjectionDiagnosticsReportInput } from "./diagnostics/run-projection-diagnostics-report.js";

@@ -459,6 +459,10 @@ describe("ExplainableMatchReport", () => {
     expect(
       screen.getByText(zh.report.projectionReplayUnavailable),
     ).toBeInTheDocument();
+    expect(screen.getByText(zh.report.projectionDiagnostics)).toBeInTheDocument();
+    expect(
+      screen.getByText(zh.report.projectionDiagnosticsUnavailable),
+    ).toBeInTheDocument();
   });
 
   it("renders A2 Prediction Calibration metrics with provenance and insufficient-sample flags", () => {

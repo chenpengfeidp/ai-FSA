@@ -105,6 +105,8 @@ describe("AnalysisProjectionReplayPort (P2E.5)", () => {
       new EvidenceQueryService(repository),
       new FeatureExtractor(),
       new RuleEvaluator(),
+      undefined,
+      "v2",
     );
 
     const analysisResult = await analyzeMatch.execute(matchId);
@@ -164,6 +166,9 @@ describe("AnalysisProjectionReplayPort (P2E.5)", () => {
     }
 
     expect(v2Outcome.prediction.matchId).toBe(analysis.matchId);
+    expect(replayContext.parameterVersionLabel).toBe("projection.v3.replay");
+    expect(replayContext.parameterArtifactId).toBeDefined();
+    expect(replayContext.parameterArtifactChecksum).toBeDefined();
     expect(
       v2Outcome.prediction.pHome +
         v2Outcome.prediction.pDraw +

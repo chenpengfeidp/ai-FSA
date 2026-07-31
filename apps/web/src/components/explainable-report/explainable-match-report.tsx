@@ -28,6 +28,7 @@ import { CalibrationSection } from "./calibration-section";
 import { ContributionSection } from "./contribution-section";
 import { ProjectionReplaySection } from "./projection-replay-section";
 import { ProjectionDiagnosticsSection } from "./projection-diagnostics-section";
+import { ProjectionParametersSection } from "./projection-parameters-section";
 import { EvaluationHistorySection } from "./evaluation-history-section";
 import { EvaluationSection } from "./evaluation-section";
 import { ValidationSection } from "./validation-section";
@@ -80,6 +81,10 @@ export function ExplainableMatchReport({
 
       <ProjectionDiagnosticsSection
         projectionDiagnostics={report.projectionDiagnostics}
+      />
+
+      <ProjectionParametersSection
+        projectionParameters={report.projectionParameters}
       />
 
       <ReasoningSection />

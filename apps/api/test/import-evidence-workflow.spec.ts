@@ -545,6 +545,21 @@ describe("HTTP import and Evidence query workflow", () => {
     expect(Array.isArray(report.limitations)).toBe(true);
   });
 
+  it("serves the P2J Projection Parameter catalog from GET /api/projection-parameters", async () => {
+    const response = await request(baseUrl, "/api/projection-parameters");
+    const catalog = requireRecord(response.body);
+
+    expect(response.status).toBe(200);
+    expect(catalog).toMatchObject({
+      modelVersion: "projectionParameterCatalog.v1.p2j",
+      activeVersionLabel: "projection.v3.replay",
+      artifacts: expect.any(Array),
+    });
+    expect(Array.isArray(catalog.artifacts)).toBe(true);
+    expect((catalog.artifacts as unknown[]).length).toBe(3);
+    expect(Array.isArray(catalog.limitations)).toBe(true);
+  });
+
   it("lists upcoming Match Center fixtures from the recorded football-data board", async () => {
     const response = await request(baseUrl, "/api/matches/upcoming");
     const body = requireRecord(response.body);

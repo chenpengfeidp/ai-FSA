@@ -7,6 +7,7 @@ import { computeProjectionV2 } from "../projection-v2/compute-projection-v2.js";
 import type { ProjectionFrameworkMetadata } from "../projection-v2/projection-result.js";
 import { createFootballStateReportMetadata } from "../projection-v2/football-state/football-state-report-metadata.js";
 import type { FootballStateReportMetadata } from "../projection-v2/football-state/football-state-report-metadata.js";
+import type { ProjectionParameterArtifact } from "../projection-v2/projection-parameter-artifact.js";
 import {
   DEFAULT_PROJECTION_POLICY_PIN,
   type ProjectionPolicyPin,
@@ -25,11 +26,12 @@ export function computeMatchProjection(input: {
   readonly requiredEvidencePresentCount: number;
   readonly calibrationArtifact?: CalibrationArtifact;
   readonly projectionPolicyPin?: ProjectionPolicyPin;
+  readonly parameters?: ProjectionParameterArtifact;
 }): ComputeMatchProjectionResult {
   const pin = input.projectionPolicyPin ?? DEFAULT_PROJECTION_POLICY_PIN;
 
   if (pin === "v2") {
-    const parameters = resolveProjectionParameterArtifact(pin);
+    const parameters = input.parameters ?? resolveProjectionParameterArtifact(pin);
     const result = computeProjectionV2({
       featureBundle: input.featureBundle,
       ruleResults: input.ruleResults,

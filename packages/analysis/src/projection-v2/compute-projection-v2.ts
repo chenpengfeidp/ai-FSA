@@ -26,6 +26,7 @@ export function computeProjectionV2(input: {
   const footballState = computeFootballState({
     featureBundle: input.featureBundle,
     lambdaParameters: parameters.lambda,
+    footballStateParameters: parameters.footballState,
   });
   const matchScriptSet = generateMatchScriptSet({
     footballState,

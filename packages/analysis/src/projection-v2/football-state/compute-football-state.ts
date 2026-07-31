@@ -1,5 +1,9 @@
 import type { Feature, FeatureBundle, FeatureName } from "@fas/feature";
 import type { LambdaParameterSet } from "../lambda/lambda-parameter-set.js";
+import {
+  DEFAULT_FOOTBALL_STATE_PARAMETERS,
+  type FootballStateParameterSet,
+} from "../projection-parameter-groups.js";
 import { buildFootballStateProjectionInputs } from "./build-football-state-projection-inputs.js";
 import {
   FOOTBALL_STATE_DIMENSION_IDS,
@@ -102,10 +106,12 @@ const DIMENSION_FEATURES: Readonly<
 function buildDimension(
   id: FootballStateDimensionId,
   features: ReadonlyMap<FeatureName, Feature>,
+  thresholds: FootballStateParameterSet,
 ): StateDimensionValue {
   const scored = scoreDimension({
     features,
     featureNames: DIMENSION_FEATURES[id],
+    thresholds,
   });
 
   return Object.freeze({
@@ -149,7 +155,10 @@ function buildCompositeTags(
 export function computeFootballState(input: {
   readonly featureBundle: FeatureBundle;
   readonly lambdaParameters: LambdaParameterSet;
+  readonly footballStateParameters?: FootballStateParameterSet;
 }): FootballStateEnvelope {
+  const thresholds =
+    input.footballStateParameters ?? DEFAULT_FOOTBALL_STATE_PARAMETERS;
   const features = new Map(
     input.featureBundle.features.map((feature) => [feature.name, feature]),
   );
@@ -159,7 +168,10 @@ export function computeFootballState(input: {
   });
   const dimensions = Object.freeze(
     Object.fromEntries(
-      FOOTBALL_STATE_DIMENSION_IDS.map((id) => [id, buildDimension(id, features)]),
+      FOOTBALL_STATE_DIMENSION_IDS.map((id) => [
+        id,
+        buildDimension(id, features, thresholds),
+      ]),
     ) as Record<FootballStateDimensionId, StateDimensionValue>,
   );
   const driverFeatureNames = Object.freeze([

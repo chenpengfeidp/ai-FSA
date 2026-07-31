@@ -21,6 +21,7 @@ export type MatchScriptSummary = MatchScriptProjectionSummary;
 export interface ProjectionFrameworkMetadata {
   readonly frameworkVersion: typeof PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX;
   readonly parameterArtifactId: string;
+  readonly parameterVersionLabel: string;
   readonly parameterArtifactChecksum: string;
   readonly footballStatePolicyVersion: FootballStateEnvelope["policyVersion"];
   readonly matchScriptPolicyVersion: MatchScriptSet["policyVersion"];
@@ -60,6 +61,7 @@ export function createProjectionFrameworkMetadata(input: {
   return Object.freeze({
     frameworkVersion: PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX,
     parameterArtifactId: input.parameters.artifactId,
+    parameterVersionLabel: input.parameters.versionLabel,
     parameterArtifactChecksum: input.parameters.checksum,
     footballStatePolicyVersion: input.footballState.policyVersion,
     matchScriptPolicyVersion: input.matchScriptSet.policyVersion,

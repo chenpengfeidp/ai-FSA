@@ -17,6 +17,7 @@ import {
   FOOTBALL_STATE_DIMENSION_LABELS,
 } from "../projection-v2/football-state/football-state-dimensions.js";
 import { buildScenarioSet } from "../scenario/scenario-set.js";
+import { getProjectionParameterArtifactByVersionLabel } from "../projection-v2/projection-parameter-registry.js";
 
 type EvaluationHistoryConfidence = Readonly<{
   predictionConfidence: number;
@@ -161,6 +162,8 @@ function buildSealedPredictionFromReplayProjection(input: {
 export function buildProjectionReplayContext(
   analysis: AnalysisResult,
 ): SealedProjectionReplayContext {
+  const framework = analysis.projectionFramework;
+
   return Object.freeze({
     matchId: analysis.matchId,
     featureModelVersion: analysis.featureBundle.featureModelVersion,
@@ -195,6 +198,13 @@ export function buildProjectionReplayContext(
     ),
     requiredEvidencePresentCount: countRequiredEvidence(analysis),
     generatedAt: analysis.generatedAt,
+    ...(framework === undefined
+      ? {}
+      : {
+          parameterArtifactId: framework.parameterArtifactId,
+          parameterVersionLabel: framework.parameterVersionLabel,
+          parameterArtifactChecksum: framework.parameterArtifactChecksum,
+        }),
   });
 }
 
@@ -245,6 +255,13 @@ function buildReplayMetadata(input: {
             }),
           ),
     activeMatchScripts,
+    ...(framework === undefined
+      ? {}
+      : {
+          parameterArtifactId: framework.parameterArtifactId,
+          parameterVersionLabel: framework.parameterVersionLabel,
+          parameterArtifactChecksum: framework.parameterArtifactChecksum,
+        }),
   });
 }
 
@@ -275,11 +292,18 @@ export class AnalysisProjectionReplayPort implements ProjectionReplayPort {
 
     const featureBundle = buildFeatureBundle(context);
     const ruleResults = buildRuleResults(context);
+    const parameters =
+      context.parameterVersionLabel === undefined
+        ? undefined
+        : getProjectionParameterArtifactByVersionLabel(
+            context.parameterVersionLabel,
+          );
     const projectionResult = computeMatchProjection({
       featureBundle,
       ruleResults,
       requiredEvidencePresentCount: context.requiredEvidencePresentCount,
       projectionPolicyPin: "v2",
+      ...(parameters === undefined ? {} : { parameters }),
     });
     const scenarios = buildScenarioSet(projectionResult.projection);
     const prediction = buildSealedPredictionFromReplayProjection({

@@ -605,6 +605,7 @@ export interface UnifiedMatrixSummaryDto {
 export interface ProjectionFrameworkDto {
   readonly frameworkVersion: string;
   readonly parameterArtifactId: string;
+  readonly parameterVersionLabel: string;
   readonly parameterArtifactChecksum: string;
   readonly footballStatePolicyVersion: string;
   readonly matchScriptPolicyVersion: string;
@@ -613,6 +614,27 @@ export interface ProjectionFrameworkDto {
   readonly probabilityMatrixChecksum: string | null;
   readonly activeMatchScripts: readonly MatchScriptSummaryDto[];
   readonly unifiedMatrix: UnifiedMatrixSummaryDto | null;
+}
+
+export interface ProjectionParameterArtifactSummaryDto {
+  readonly versionLabel: string;
+  readonly artifactId: string;
+  readonly checksum: string;
+  readonly frameworkVersion: string;
+  readonly policyVersion: string;
+  readonly status: string;
+  readonly qualified: boolean;
+  readonly isActive: boolean;
+  readonly parameterGroups: readonly string[];
+  readonly limitations: readonly string[];
+  readonly usedInAnalysis: boolean;
+}
+
+export interface ProjectionParameterCatalogDto {
+  readonly modelVersion: string;
+  readonly activeVersionLabel: string;
+  readonly artifacts: readonly ProjectionParameterArtifactSummaryDto[];
+  readonly limitations: readonly string[];
 }
 
 export interface AnalysisReportDto {
@@ -634,6 +656,7 @@ export interface AnalysisReportDto {
   readonly contribution?: ContributionReportDto;
   readonly projectionReplay?: ProjectionReplayReportDto;
   readonly projectionDiagnostics?: ProjectionDiagnosticsReportDto;
+  readonly projectionParameters?: ProjectionParameterCatalogDto;
 }
 
 export interface ProjectionReplayMetricSummaryDto {

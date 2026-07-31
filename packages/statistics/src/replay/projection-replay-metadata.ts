@@ -20,4 +20,7 @@ export interface ProjectionReplayMetadata {
   readonly projectionConfidence: number;
   readonly footballStateDimensions: readonly ProjectionReplayFootballStateSnapshot[];
   readonly activeMatchScripts: readonly ProjectionReplayMatchScriptSnapshot[];
+  readonly parameterArtifactId?: string;
+  readonly parameterVersionLabel?: string;
+  readonly parameterArtifactChecksum?: string;
 }

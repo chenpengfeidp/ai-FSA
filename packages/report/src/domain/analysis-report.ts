@@ -3,6 +3,7 @@ import type {
   IntelligenceConfidence,
   FootballStateReportMetadata,
   ProjectionFrameworkMetadata,
+  ProjectionParameterCatalog,
   ScenarioSet,
 } from "@fas/analysis";
 import type { NarrativeDraft } from "@fas/ai-provider";
@@ -69,6 +70,11 @@ export interface AnalysisReport {
    * Prediction, or parameters.
    */
   readonly projectionDiagnostics?: ProjectionDiagnosticsReport;
+  /**
+   * P2J Projection Parameter Artifact catalog — versioned parameter provenance.
+   * Display-only; never tunes or mutates parameters.
+   */
+  readonly projectionParameters?: ProjectionParameterCatalog;
   /** Projection V2 framework metadata when V2 policy pin is active. */
   readonly projectionFramework?: ProjectionFrameworkMetadata;
   /** Football State aggregation layer when V2 policy pin is active. */
@@ -94,6 +100,7 @@ export interface CreateAnalysisReportInput {
   readonly contribution?: ContributionReport;
   readonly projectionReplay?: ProjectionReplayReport;
   readonly projectionDiagnostics?: ProjectionDiagnosticsReport;
+  readonly projectionParameters?: ProjectionParameterCatalog;
   readonly projectionFramework?: ProjectionFrameworkMetadata;
   readonly footballState?: FootballStateReportMetadata;
 }
@@ -250,6 +257,9 @@ export function createAnalysisReport(
     ...(input.projectionDiagnostics === undefined
       ? {}
       : { projectionDiagnostics: input.projectionDiagnostics }),
+    ...(input.projectionParameters === undefined
+      ? {}
+      : { projectionParameters: input.projectionParameters }),
     ...(input.projectionFramework === undefined
       ? {}
       : { projectionFramework: input.projectionFramework }),

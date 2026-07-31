@@ -1,4 +1,8 @@
 import type { Feature, FeatureName } from "@fas/feature";
+import {
+  DEFAULT_FOOTBALL_STATE_PARAMETERS,
+  type FootballStateParameterSet,
+} from "../projection-parameter-groups.js";
 import type { StateDimensionLevel } from "./football-state-types.js";
 
 export function numericFeatureValue(
@@ -51,16 +55,17 @@ export function normalizeFeatureSignal(name: FeatureName, value: number): number
 export function levelFromScore(
   score: number,
   sourceCount: number,
+  thresholds: FootballStateParameterSet = DEFAULT_FOOTBALL_STATE_PARAMETERS,
 ): StateDimensionLevel {
   if (sourceCount === 0 || score <= 0) {
     return "absent";
   }
 
-  if (score < 0.34) {
+  if (score < thresholds.lowThreshold) {
     return "low";
   }
 
-  if (score < 0.67) {
+  if (score < thresholds.mediumThreshold) {
     return "medium";
   }
 
@@ -70,11 +75,13 @@ export function levelFromScore(
 export function scoreDimension(input: {
   readonly features: ReadonlyMap<FeatureName, Feature>;
   readonly featureNames: readonly FeatureName[];
+  readonly thresholds?: FootballStateParameterSet;
 }): {
   readonly score: number;
   readonly level: StateDimensionLevel;
   readonly sourceRefs: readonly string[];
 } {
+  const thresholds = input.thresholds ?? DEFAULT_FOOTBALL_STATE_PARAMETERS;
   const sourceRefs: string[] = [];
   let total = 0;
 
@@ -93,7 +100,7 @@ export function scoreDimension(input: {
 
   return Object.freeze({
     score,
-    level: levelFromScore(score, sourceRefs.length),
+    level: levelFromScore(score, sourceRefs.length, thresholds),
     sourceRefs: Object.freeze([...sourceRefs]),
   });
 }

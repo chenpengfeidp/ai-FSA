@@ -4,6 +4,7 @@ import {
   MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
   type ProjectionParameterArtifact,
 } from "./projection-parameter-artifact.js";
+import { getActiveProjectionParameterArtifact } from "./projection-parameter-registry.js";
 
 export type ProjectionPolicyPin = "v1" | "v2";
 
@@ -13,7 +14,7 @@ export function resolveProjectionParameterArtifact(
   pin: ProjectionPolicyPin,
 ): ProjectionParameterArtifact | undefined {
   if (pin === "v2") {
-    return MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT;
+    return getActiveProjectionParameterArtifact();
   }
 
   return undefined;
@@ -22,4 +23,5 @@ export function resolveProjectionParameterArtifact(
 export {
   BASELINE_PROJECTION_PARAMETER_ARTIFACT,
   FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
+  MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
 };

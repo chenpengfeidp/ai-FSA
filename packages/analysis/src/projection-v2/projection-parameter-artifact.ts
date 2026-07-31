@@ -3,6 +3,16 @@ import type { LambdaParameterSet } from "./lambda/lambda-parameter-set.js";
 import { FEATURE_ENRICHED_LAMBDA_PARAMETER_SET } from "./lambda/feature-enriched-lambda-weights.js";
 import type { MatchScriptParameterSet } from "./match-script/match-script-parameter-set.js";
 import { GOVERNED_MATCH_SCRIPT_PARAMETER_SET } from "./match-script/match-script-governed-parameters.js";
+import {
+  DEFAULT_CONFIDENCE_PARAMETERS,
+  DEFAULT_FOOTBALL_STATE_PARAMETERS,
+  DEFAULT_MATRIX_MERGE_PARAMETERS,
+  DEFAULT_RECOMMENDATION_PARAMETERS,
+  type ConfidenceParameterSet,
+  type FootballStateParameterSet,
+  type MatrixMergeParameterSet,
+  type RecommendationParameterSet,
+} from "./projection-parameter-groups.js";
 
 export const PROJECTION_PARAMS_BASELINE_ARTIFACT_ID =
   "projectionParams:v3.0:baseline";
@@ -21,6 +31,17 @@ export const PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT =
 export const PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX =
   "projectionFramework.v2.unifiedMatrix";
 
+export const PROJECTION_PARAMETER_VERSION_BASELINE =
+  "projection.v3.baseline" as const;
+export const PROJECTION_PARAMETER_VERSION_EXPERIMENTAL =
+  "projection.v3.experimental" as const;
+export const PROJECTION_PARAMETER_VERSION_REPLAY = "projection.v3.replay" as const;
+
+export type ProjectionParameterVersionLabel =
+  | typeof PROJECTION_PARAMETER_VERSION_BASELINE
+  | typeof PROJECTION_PARAMETER_VERSION_EXPERIMENTAL
+  | typeof PROJECTION_PARAMETER_VERSION_REPLAY;
+
 export type ProjectionFrameworkVersion =
   | typeof PROJECTION_FRAMEWORK_VERSION
   | typeof PROJECTION_FRAMEWORK_VERSION_FOUNDATION
@@ -34,6 +55,7 @@ export type ProjectionParameterArtifactStatus =
 
 export interface ProjectionParameterArtifact {
   readonly artifactId: string;
+  readonly versionLabel: ProjectionParameterVersionLabel;
   readonly policyVersion: typeof PROJECTION_PARAMS_POLICY_VERSION;
   readonly frameworkVersion: ProjectionFrameworkVersion;
   readonly status: ProjectionParameterArtifactStatus;
@@ -42,10 +64,15 @@ export interface ProjectionParameterArtifact {
   readonly limitations: readonly string[];
   readonly lambda: LambdaParameterSet;
   readonly matchScript?: MatchScriptParameterSet;
+  readonly footballState: FootballStateParameterSet;
+  readonly confidence: ConfidenceParameterSet;
+  readonly recommendation: RecommendationParameterSet;
+  readonly matrixMerge: MatrixMergeParameterSet;
 }
 
 export interface CreateProjectionParameterArtifactInput {
   readonly artifactId: string;
+  readonly versionLabel: ProjectionParameterVersionLabel;
   readonly policyVersion: typeof PROJECTION_PARAMS_POLICY_VERSION;
   readonly frameworkVersion: ProjectionFrameworkVersion;
   readonly status: ProjectionParameterArtifactStatus;
@@ -54,6 +81,10 @@ export interface CreateProjectionParameterArtifactInput {
   readonly limitations: readonly string[];
   readonly lambda: LambdaParameterSet;
   readonly matchScript?: MatchScriptParameterSet;
+  readonly footballState?: FootballStateParameterSet;
+  readonly confidence?: ConfidenceParameterSet;
+  readonly recommendation?: RecommendationParameterSet;
+  readonly matrixMerge?: MatrixMergeParameterSet;
 }
 
 export class ProjectionParameterArtifactValidationError extends Error {
@@ -75,8 +106,26 @@ function requireNonEmpty(value: string, field: string): string {
   return normalized;
 }
 
-function checksumForLambda(lambda: LambdaParameterSet): string {
-  return stableChecksum(JSON.stringify(lambda));
+export function checksumForProjectionParameterPayload(input: {
+  readonly versionLabel: ProjectionParameterVersionLabel;
+  readonly lambda: LambdaParameterSet;
+  readonly matchScript?: MatchScriptParameterSet;
+  readonly footballState: FootballStateParameterSet;
+  readonly confidence: ConfidenceParameterSet;
+  readonly recommendation: RecommendationParameterSet;
+  readonly matrixMerge: MatrixMergeParameterSet;
+}): string {
+  return stableChecksum(
+    JSON.stringify({
+      versionLabel: input.versionLabel,
+      lambda: input.lambda,
+      matchScript: input.matchScript ?? null,
+      footballState: input.footballState,
+      confidence: input.confidence,
+      recommendation: input.recommendation,
+      matrixMerge: input.matrixMerge,
+    }),
+  );
 }
 
 export function createProjectionParameterArtifact(
@@ -88,8 +137,14 @@ export function createProjectionParameterArtifact(
     );
   }
 
+  const footballState = input.footballState ?? DEFAULT_FOOTBALL_STATE_PARAMETERS;
+  const confidence = input.confidence ?? DEFAULT_CONFIDENCE_PARAMETERS;
+  const recommendation = input.recommendation ?? DEFAULT_RECOMMENDATION_PARAMETERS;
+  const matrixMerge = input.matrixMerge ?? DEFAULT_MATRIX_MERGE_PARAMETERS;
+
   return Object.freeze({
     artifactId: requireNonEmpty(input.artifactId, "artifactId"),
+    versionLabel: input.versionLabel,
     policyVersion: input.policyVersion,
     frameworkVersion: input.frameworkVersion,
     status: input.status,
@@ -100,6 +155,10 @@ export function createProjectionParameterArtifact(
       ...input.lambda,
       featureWeights: Object.freeze([...input.lambda.featureWeights]),
     }),
+    footballState: Object.freeze({ ...footballState }),
+    confidence: Object.freeze({ ...confidence }),
+    recommendation: Object.freeze({ ...recommendation }),
+    matrixMerge: Object.freeze({ ...matrixMerge }),
     ...(input.matchScript === undefined
       ? {}
       : {
@@ -122,64 +181,91 @@ const FOUNDATION_ONLY_LAMBDA_PARAMETER_SET: LambdaParameterSet = Object.freeze({
   featureWeights: Object.freeze([]),
 });
 
+function buildPinnedArtifact(input: {
+  readonly artifactId: string;
+  readonly versionLabel: ProjectionParameterVersionLabel;
+  readonly frameworkVersion: ProjectionFrameworkVersion;
+  readonly lambda: LambdaParameterSet;
+  readonly matchScript?: MatchScriptParameterSet;
+  readonly limitations: readonly string[];
+}): ProjectionParameterArtifact {
+  const footballState = DEFAULT_FOOTBALL_STATE_PARAMETERS;
+  const confidence = DEFAULT_CONFIDENCE_PARAMETERS;
+  const recommendation = DEFAULT_RECOMMENDATION_PARAMETERS;
+  const matrixMerge = DEFAULT_MATRIX_MERGE_PARAMETERS;
+
+  return createProjectionParameterArtifact({
+    artifactId: input.artifactId,
+    versionLabel: input.versionLabel,
+    policyVersion: PROJECTION_PARAMS_POLICY_VERSION,
+    frameworkVersion: input.frameworkVersion,
+    status: "uncalibrated_baseline",
+    qualified: false,
+    checksum: checksumForProjectionParameterPayload({
+      versionLabel: input.versionLabel,
+      lambda: input.lambda,
+      footballState,
+      confidence,
+      recommendation,
+      matrixMerge,
+      ...(input.matchScript === undefined ? {} : { matchScript: input.matchScript }),
+    }),
+    lambda: input.lambda,
+    ...(input.matchScript === undefined ? {} : { matchScript: input.matchScript }),
+    footballState,
+    confidence,
+    recommendation,
+    matrixMerge,
+    limitations: input.limitations,
+  });
+}
+
 /**
  * Pinned baseline parameters for Projection V2 foundation parity.
  * No optional Feature weights — reproduces V1 λ on foundation fixtures.
  */
 export const BASELINE_PROJECTION_PARAMETER_ARTIFACT: ProjectionParameterArtifact =
-  createProjectionParameterArtifact({
+  buildPinnedArtifact({
     artifactId: PROJECTION_PARAMS_BASELINE_ARTIFACT_ID,
-    policyVersion: PROJECTION_PARAMS_POLICY_VERSION,
+    versionLabel: PROJECTION_PARAMETER_VERSION_BASELINE,
     frameworkVersion: PROJECTION_FRAMEWORK_VERSION_FOUNDATION,
-    status: "uncalibrated_baseline",
-    qualified: false,
-    checksum: checksumForLambda(FOUNDATION_ONLY_LAMBDA_PARAMETER_SET),
     lambda: FOUNDATION_ONLY_LAMBDA_PARAMETER_SET,
     limitations: Object.freeze([
       "Baseline projection parameters: identity Football State and single baseline Match Script only.",
       "LambdaBuilderV2 uses foundation attack/defence ratings only.",
       "Not derived from Evaluation History or offline replay.",
       "Not Evaluation-qualified for release claims.",
+      "No Dixon–Coles ρ — independent Poisson scorelines only.",
     ]),
   });
 
 /**
- * P2E Feature-enriched lambda artifact.
+ * P2E Feature-enriched lambda artifact (experimental catalog entry).
  * All football coefficients live in the artifact — not in Projection logic.
  */
 export const FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT: ProjectionParameterArtifact =
-  createProjectionParameterArtifact({
+  buildPinnedArtifact({
     artifactId: PROJECTION_PARAMS_FEATURE_LAMBDA_ARTIFACT_ID,
-    policyVersion: PROJECTION_PARAMS_POLICY_VERSION,
+    versionLabel: PROJECTION_PARAMETER_VERSION_EXPERIMENTAL,
     frameworkVersion: PROJECTION_FRAMEWORK_VERSION,
-    status: "uncalibrated_baseline",
-    qualified: false,
-    checksum: checksumForLambda(FEATURE_ENRICHED_LAMBDA_PARAMETER_SET),
     lambda: FEATURE_ENRICHED_LAMBDA_PARAMETER_SET,
     limitations: Object.freeze([
       "Feature-enriched lambda artifact: Intelligence Features contribute directly to expected goals.",
       "RuleResults are explainability-only in Projection V2; they do not adjust 1X2 probabilities.",
       "Not derived from Evaluation History or offline replay.",
       "Not Evaluation-qualified for release claims.",
+      "No Dixon–Coles ρ — independent Poisson scorelines only.",
     ]),
   });
 
 /**
- * P2F Match Script artifact — Feature-enriched λ plus governed script mixture.
+ * P2F/P2G Match Script artifact — active V2 / replay catalog entry.
  */
 export const MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT: ProjectionParameterArtifact =
-  createProjectionParameterArtifact({
+  buildPinnedArtifact({
     artifactId: PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
-    policyVersion: PROJECTION_PARAMS_POLICY_VERSION,
+    versionLabel: PROJECTION_PARAMETER_VERSION_REPLAY,
     frameworkVersion: PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX,
-    status: "uncalibrated_baseline",
-    qualified: false,
-    checksum: stableChecksum(
-      JSON.stringify({
-        lambda: FEATURE_ENRICHED_LAMBDA_PARAMETER_SET,
-        matchScript: GOVERNED_MATCH_SCRIPT_PARAMETER_SET,
-      }),
-    ),
     lambda: FEATURE_ENRICHED_LAMBDA_PARAMETER_SET,
     matchScript: GOVERNED_MATCH_SCRIPT_PARAMETER_SET,
     limitations: Object.freeze([
@@ -188,5 +274,7 @@ export const MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT: ProjectionParameterArti
       "RuleResults activate scripts only — they do not softmax-adjust 1X2 probabilities.",
       "Not derived from Evaluation History or offline replay.",
       "Not Evaluation-qualified for release claims.",
+      "No Dixon–Coles ρ — independent Poisson scorelines only.",
+      "No ML or automatic parameter tuning — version selection is operator/pin only.",
     ]),
   });

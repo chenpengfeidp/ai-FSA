@@ -31,6 +31,10 @@ export interface SealedProjectionReplayContext {
   readonly rules: readonly SealedRuleReplaySnapshot[];
   readonly requiredEvidencePresentCount: number;
   readonly generatedAt: string;
+  /** P2J — parameter version used when the sidecar was sealed (optional for legacy). */
+  readonly parameterArtifactId?: string;
+  readonly parameterVersionLabel?: string;
+  readonly parameterArtifactChecksum?: string;
 }
 
 export type ProjectionReplaySidecar = Readonly<

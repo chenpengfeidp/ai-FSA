@@ -1,10 +1,12 @@
 import {
+  buildProjectionParameterCatalog,
   buildProjectionReplayContext,
   buildSealedPredictionInput,
   extractMatchContextForHistory,
   AnalysisProjectionReplayPort,
   type AnalysisResult,
   type AnalyzeMatchResult,
+  type ProjectionParameterCatalog,
 } from "@fas/analysis";
 import type { MatchId } from "@fas/match";
 import {
@@ -92,6 +94,7 @@ function withOverlays(
   contribution: ContributionReport,
   projectionReplay: ProjectionReplayReport | undefined,
   projectionDiagnostics: ProjectionDiagnosticsReport | undefined,
+  projectionParameters: ProjectionParameterCatalog,
 ): AnalysisReport {
   return createAnalysisReport({
     reportId: report.reportId,
@@ -120,6 +123,7 @@ function withOverlays(
     contribution,
     ...(projectionReplay === undefined ? {} : { projectionReplay }),
     ...(projectionDiagnostics === undefined ? {} : { projectionDiagnostics }),
+    projectionParameters,
   });
 }
 
@@ -319,6 +323,13 @@ export class GenerateMatchReportUseCase {
       contribution,
       projectionReplay,
       projectionDiagnostics,
+      buildProjectionParameterCatalog(
+        report.projectionFramework === undefined
+          ? undefined
+          : {
+              usedVersionLabel: report.projectionFramework.parameterVersionLabel,
+            },
+      ),
     );
   }
 }

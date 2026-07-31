@@ -10,6 +10,10 @@ import type { ProbabilityMatrix } from "../projection-v2/probability-matrix/prob
 import { buildLambdasV2 } from "../projection-v2/lambda/lambda-builder-v2.js";
 import type { MatchScriptSet } from "../projection-v2/match-script/match-script-set.js";
 import type { ProjectionParameterArtifact } from "../projection-v2/projection-parameter-artifact.js";
+import type {
+  ConfidenceParameterSet,
+  RecommendationParameterSet,
+} from "../projection-v2/projection-parameter-groups.js";
 import {
   createDeterministicMatchProjection,
   type DeterministicMatchProjection,
@@ -86,17 +90,31 @@ const FOOTBALL_CHANNEL_RULE_NAMES = new Set([
   "GOALKEEPER_EDGE_HOME",
   "GOALKEEPER_EDGE_AWAY",
 ]);
-const REQUIRED_EVIDENCE_WEIGHT = 5;
 
-function directionalRecommendation(input: {
-  readonly pHome: number;
-  readonly pDraw: number;
-  readonly pAway: number;
-}): RecommendationCode {
+function directionalRecommendation(
+  input: {
+    readonly pHome: number;
+    readonly pDraw: number;
+    readonly pAway: number;
+  },
+  recommendation: RecommendationParameterSet,
+): RecommendationCode {
   const ordered = [
-    { code: "lean_home" as const, value: input.pHome, margin: 0.08 },
-    { code: "lean_away" as const, value: input.pAway, margin: 0.08 },
-    { code: "lean_draw" as const, value: input.pDraw, margin: 0.05 },
+    {
+      code: "lean_home" as const,
+      value: input.pHome,
+      margin: recommendation.leanHomeMargin,
+    },
+    {
+      code: "lean_away" as const,
+      value: input.pAway,
+      margin: recommendation.leanAwayMargin,
+    },
+    {
+      code: "lean_draw" as const,
+      value: input.pDraw,
+      margin: recommendation.leanDrawMargin,
+    },
   ].sort((left, right) => right.value - left.value);
   const [first, second] = ordered;
 
@@ -127,30 +145,55 @@ function marketConflictsWithFootball(input: {
   return false;
 }
 
-function recommendationFor(input: {
-  readonly requiredEvidenceMissing: boolean;
-  readonly confidence: number;
-  readonly A: number;
-  readonly X: number;
-  readonly pHome: number;
-  readonly pDraw: number;
-  readonly pAway: number;
-  readonly marketConflict: boolean;
-}): RecommendationCode {
-  if (input.requiredEvidenceMissing || input.confidence < 0.4) {
+function recommendationFor(
+  input: {
+    readonly requiredEvidenceMissing: boolean;
+    readonly confidence: number;
+    readonly A: number;
+    readonly X: number;
+    readonly pHome: number;
+    readonly pDraw: number;
+    readonly pAway: number;
+    readonly marketConflict: boolean;
+  },
+  recommendation: RecommendationParameterSet,
+): RecommendationCode {
+  if (
+    input.requiredEvidenceMissing ||
+    input.confidence < recommendation.insufficientConfidence
+  ) {
     return "insufficient_evidence";
   }
 
   if (
     input.marketConflict ||
-    input.confidence < 0.55 ||
-    input.A < 0.5 ||
+    input.confidence < recommendation.cautiousConfidence ||
+    input.A < recommendation.cautiousAlignment ||
     input.X >= 1
   ) {
     return "cautious";
   }
 
-  return directionalRecommendation(input);
+  return directionalRecommendation(input, recommendation);
+}
+
+function composeConfidence(input: {
+  readonly A: number;
+  readonly C: number;
+  readonly S: number;
+  readonly X: number;
+  readonly confidence: ConfidenceParameterSet;
+}): number {
+  const confidenceRaw =
+    input.confidence.alignmentWeight * input.A +
+    input.confidence.coverageWeight * input.C +
+    input.confidence.strengthWeight * input.S;
+
+  return clamp(
+    confidenceRaw * (1 - input.confidence.conflictPenalty * input.X),
+    0,
+    input.confidence.maxConfidence,
+  );
 }
 
 export function computeDeterministicProjectionV2(input: {
@@ -165,6 +208,8 @@ export function computeDeterministicProjectionV2(input: {
 }): DeterministicMatchProjection {
   const calibrationArtifact =
     input.calibrationArtifact ?? IDENTITY_CALIBRATION_ARTIFACT;
+  const confidenceParams = input.parameters.confidence;
+  const recommendationParams = input.parameters.recommendation;
   const lambdaResult = buildLambdasV2({
     footballState: input.footballState,
     parameters: input.parameters.lambda,
@@ -181,18 +226,21 @@ export function computeDeterministicProjectionV2(input: {
       topScorelines: [],
       goalRange: { range01: 0, range23: 0, range4Plus: 0 },
       confidence: Math.min(
-        0.4,
-        input.requiredEvidencePresentCount / REQUIRED_EVIDENCE_WEIGHT,
+        recommendationParams.insufficientConfidence,
+        input.requiredEvidencePresentCount / confidenceParams.requiredEvidenceWeight,
       ),
       confidenceComponents: {
         A: 0,
-        C: input.requiredEvidencePresentCount / REQUIRED_EVIDENCE_WEIGHT,
+        C:
+          input.requiredEvidencePresentCount /
+          confidenceParams.requiredEvidenceWeight,
         S: 0,
         X: 0,
       },
       recommendation: "insufficient_evidence",
       limitations: Object.freeze([
         ...lambdaResult.limitations,
+        `Pinned projection parameter artifact ${input.parameters.artifactId} (${input.parameters.versionLabel}).`,
         `Pinned calibration artifact ${calibrationArtifact.artifactId} (${calibrationArtifact.status}).`,
       ]),
       truncationMass: 0,
@@ -261,7 +309,7 @@ export function computeDeterministicProjectionV2(input: {
   }
 
   if (matchedByName.has("MOMENTUM_HOME") && matchedByName.has("MOMENTUM_AWAY")) {
-    X += 0.5;
+    X += confidenceParams.momentumConflictIncrement;
   }
 
   const alignedWeight = footballRules
@@ -271,7 +319,8 @@ export function computeDeterministicProjectionV2(input: {
     .filter((rule) => rule.status !== "INAPPLICABLE")
     .reduce((sum, rule) => sum + rule.weight, 0);
   const A = alignedWeight / Math.max(applicableWeight, 1e-12);
-  const C = input.requiredEvidencePresentCount / REQUIRED_EVIDENCE_WEIGHT;
+  const C =
+    input.requiredEvidencePresentCount / confidenceParams.requiredEvidenceWeight;
   const strengthValues = [
     Math.abs(attackHome - 50) / 50,
     Math.abs(attackAway - 50) / 50,
@@ -283,8 +332,13 @@ export function computeDeterministicProjectionV2(input: {
   ];
   const S =
     strengthValues.reduce((sum, value) => sum + value, 0) / strengthValues.length;
-  const confidenceRaw = 0.35 * A + 0.3 * C + 0.35 * S;
-  const confidence = clamp(confidenceRaw * (1 - 0.5 * X), 0, 0.95);
+  const confidence = composeConfidence({
+    A,
+    C,
+    S,
+    X,
+    confidence: confidenceParams,
+  });
   const marketRules = input.ruleResults.filter(
     (rule) =>
       rule.ruleName === "MARKET_LEAN_HOME" || rule.ruleName === "MARKET_LEAN_AWAY",
@@ -295,33 +349,39 @@ export function computeDeterministicProjectionV2(input: {
   const marketLeanAway = marketRules.some(
     (rule) => rule.ruleName === "MARKET_LEAN_AWAY" && rule.status === "PASS",
   );
-  const footballRecommendation = directionalRecommendation({
-    pHome: calibrated.pHome,
-    pDraw: calibrated.pDraw,
-    pAway: calibrated.pAway,
-  });
+  const footballRecommendation = directionalRecommendation(
+    {
+      pHome: calibrated.pHome,
+      pDraw: calibrated.pDraw,
+      pAway: calibrated.pAway,
+    },
+    recommendationParams,
+  );
   const marketConflict = marketConflictsWithFootball({
     footballRecommendation,
     marketLeanHome,
     marketLeanAway,
   });
-  const recommendation = recommendationFor({
-    requiredEvidenceMissing: false,
-    confidence,
-    A,
-    X,
-    pHome: calibrated.pHome,
-    pDraw: calibrated.pDraw,
-    pAway: calibrated.pAway,
-    marketConflict,
-  });
+  const recommendation = recommendationFor(
+    {
+      requiredEvidenceMissing: false,
+      confidence,
+      A,
+      X,
+      pHome: calibrated.pHome,
+      pDraw: calibrated.pDraw,
+      pAway: calibrated.pAway,
+      marketConflict,
+    },
+    recommendationParams,
+  );
   const limitations = [
     ...lambdaResult.limitations,
     ...(input.matchScriptSet?.limitations ?? []),
     mergedMatrix === undefined
       ? "Scorelines and 1X2 derive from Football State projection inputs via lambda Poisson matrix without Rule softmax."
       : "Scorelines, goal range, BTTS, and Over/Under derive from the unified Match Script probability matrix; 1X2 marginals receive calibration only.",
-    `Pinned projection parameter artifact ${input.parameters.artifactId} (${input.parameters.status}).`,
+    `Pinned projection parameter artifact ${input.parameters.artifactId} (${input.parameters.versionLabel}; ${input.parameters.status}).`,
     `Pinned calibration artifact ${calibrationArtifact.artifactId} (${calibrationArtifact.status}); Analysis does not train or select maps during a run.`,
     ...calibrationArtifact.limitations,
   ];

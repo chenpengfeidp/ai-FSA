@@ -26,6 +26,7 @@ export { computeProjectionV2 } from "./projection-v2/compute-projection-v2.js";
 export {
   BASELINE_PROJECTION_PARAMETER_ARTIFACT,
   createProjectionParameterArtifact,
+  checksumForProjectionParameterPayload,
   FEATURE_ENRICHED_PROJECTION_PARAMETER_ARTIFACT,
   MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT,
   PROJECTION_FRAMEWORK_VERSION,
@@ -35,13 +36,43 @@ export {
   PROJECTION_PARAMS_FEATURE_LAMBDA_ARTIFACT_ID,
   PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
   PROJECTION_PARAMS_POLICY_VERSION,
+  PROJECTION_PARAMETER_VERSION_BASELINE,
+  PROJECTION_PARAMETER_VERSION_EXPERIMENTAL,
+  PROJECTION_PARAMETER_VERSION_REPLAY,
   ProjectionParameterArtifactValidationError,
 } from "./projection-v2/projection-parameter-artifact.js";
 export type {
   CreateProjectionParameterArtifactInput,
   ProjectionParameterArtifact,
   ProjectionParameterArtifactStatus,
+  ProjectionParameterVersionLabel,
 } from "./projection-v2/projection-parameter-artifact.js";
+export {
+  ACTIVE_PROJECTION_PARAMETER_VERSION_LABEL,
+  buildProjectionParameterCatalog,
+  getActiveProjectionParameterArtifact,
+  getProjectionParameterArtifactByVersionLabel,
+  listProjectionParameterArtifacts,
+  parameterGroupsForArtifact,
+} from "./projection-v2/projection-parameter-registry.js";
+export type {
+  ProjectionParameterArtifactSummary,
+  ProjectionParameterCatalog,
+} from "./projection-v2/projection-parameter-registry.js";
+export {
+  DEFAULT_CONFIDENCE_PARAMETERS,
+  DEFAULT_FOOTBALL_STATE_PARAMETERS,
+  DEFAULT_MATRIX_MERGE_PARAMETERS,
+  DEFAULT_RECOMMENDATION_PARAMETERS,
+  PROJECTION_PARAMETER_GROUP_IDS,
+} from "./projection-v2/projection-parameter-groups.js";
+export type {
+  ConfidenceParameterSet,
+  FootballStateParameterSet,
+  MatrixMergeParameterSet,
+  ProjectionParameterGroupId,
+  RecommendationParameterSet,
+} from "./projection-v2/projection-parameter-groups.js";
 export { buildLambdasV2 } from "./projection-v2/lambda/lambda-builder-v2.js";
 export type {
   LambdaBuilderV2Result,

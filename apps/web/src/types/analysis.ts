@@ -569,22 +569,37 @@ export interface MatchScriptSummaryDto {
     readonly range4Plus: number;
   }>;
   readonly mergeContribution: ScriptMergeContributionDto;
+  readonly pBttsYes: number;
+  readonly pBttsNo: number;
+  readonly pOver25: number;
+  readonly pUnder25: number;
 }
 
-export interface MultiScriptMergeSummaryDto {
-  readonly algorithm: string;
-  readonly scriptCount: number;
-  readonly explanation: string;
-  readonly mergedPHome: number;
-  readonly mergedPDraw: number;
-  readonly mergedPAway: number;
-  readonly mergedGoalRange: Readonly<{
+export interface MatrixDerivedPredictionsDto {
+  readonly pHome: number;
+  readonly pDraw: number;
+  readonly pAway: number;
+  readonly goalRange: Readonly<{
     readonly range01: number;
     readonly range23: number;
     readonly range4Plus: number;
   }>;
-  readonly mergedMostLikelyScoreline: ScriptScorelineDto;
-  readonly mergedSecondScoreline: ScriptScorelineDto | null;
+  readonly mostLikelyScoreline: ScriptScorelineDto;
+  readonly secondScoreline: ScriptScorelineDto | null;
+  readonly pBttsYes: number;
+  readonly pBttsNo: number;
+  readonly pOver25: number;
+  readonly pUnder25: number;
+}
+
+export interface UnifiedMatrixSummaryDto {
+  readonly policyVersion: string;
+  readonly mergeAlgorithm: string;
+  readonly matrixChecksum: string;
+  readonly scriptCount: number;
+  readonly explanation: string;
+  readonly derived: MatrixDerivedPredictionsDto;
+  readonly derivationNotes: readonly string[];
 }
 
 export interface ProjectionFrameworkDto {
@@ -597,7 +612,7 @@ export interface ProjectionFrameworkDto {
   readonly matchScriptSetChecksum: string;
   readonly probabilityMatrixChecksum: string | null;
   readonly activeMatchScripts: readonly MatchScriptSummaryDto[];
-  readonly multiScriptMerge: MultiScriptMergeSummaryDto | null;
+  readonly unifiedMatrix: UnifiedMatrixSummaryDto | null;
 }
 
 export interface AnalysisReportDto {

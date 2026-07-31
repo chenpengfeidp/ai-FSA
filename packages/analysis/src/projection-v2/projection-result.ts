@@ -1,23 +1,25 @@
 import type { DeterministicMatchProjection } from "../projection/deterministic-match-projection.js";
 import {
-  PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
+  PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX,
   type ProjectionParameterArtifact,
 } from "./projection-parameter-artifact.js";
 import type { FootballStateEnvelope } from "./football-state/football-state-envelope.js";
 import type { MatchScriptSet } from "./match-script/match-script-set.js";
 import {
   buildMatchScriptProjectionSummaries,
-  buildMultiScriptMergeSummary,
   type MatchScriptProjectionSummary,
-  type MultiScriptMergeSummary,
 } from "./multi-script/build-multi-script-projection-metadata.js";
 import type { PerScriptProjection } from "./multi-script/compute-multi-script-projection.js";
 import type { ProbabilityMatrix } from "./probability-matrix/probability-matrix.js";
+import {
+  buildUnifiedMatrixSummary,
+  type UnifiedMatrixSummary,
+} from "./unified-matrix/build-unified-matrix-summary.js";
 
 export type MatchScriptSummary = MatchScriptProjectionSummary;
 
 export interface ProjectionFrameworkMetadata {
-  readonly frameworkVersion: typeof PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT;
+  readonly frameworkVersion: typeof PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX;
   readonly parameterArtifactId: string;
   readonly parameterArtifactChecksum: string;
   readonly footballStatePolicyVersion: FootballStateEnvelope["policyVersion"];
@@ -26,7 +28,7 @@ export interface ProjectionFrameworkMetadata {
   readonly matchScriptSetChecksum: string;
   readonly probabilityMatrixChecksum: string | null;
   readonly activeMatchScripts: readonly MatchScriptProjectionSummary[];
-  readonly multiScriptMerge: MultiScriptMergeSummary | null;
+  readonly unifiedMatrix: UnifiedMatrixSummary | null;
 }
 
 export interface ProjectionResult {
@@ -50,13 +52,13 @@ export function createProjectionFrameworkMetadata(input: {
     scripts: input.matchScriptSet.scripts,
     perScriptProjections: input.perScriptProjections,
   });
-  const multiScriptMerge = buildMultiScriptMergeSummary({
+  const unifiedMatrix = buildUnifiedMatrixSummary({
     perScriptProjections: input.perScriptProjections,
-    mergedMatrix: input.probabilityMatrix,
+    unifiedMatrix: input.probabilityMatrix,
   });
 
   return Object.freeze({
-    frameworkVersion: PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
+    frameworkVersion: PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX,
     parameterArtifactId: input.parameters.artifactId,
     parameterArtifactChecksum: input.parameters.checksum,
     footballStatePolicyVersion: input.footballState.policyVersion,
@@ -65,6 +67,6 @@ export function createProjectionFrameworkMetadata(input: {
     matchScriptSetChecksum: input.matchScriptSet.checksum,
     probabilityMatrixChecksum: input.probabilityMatrix?.checksum ?? null,
     activeMatchScripts,
-    multiScriptMerge,
+    unifiedMatrix,
   });
 }

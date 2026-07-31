@@ -320,7 +320,7 @@ export function computeDeterministicProjectionV2(input: {
     ...(input.matchScriptSet?.limitations ?? []),
     mergedMatrix === undefined
       ? "Scorelines and 1X2 derive from Football State projection inputs via lambda Poisson matrix without Rule softmax."
-      : "Scorelines and 1X2 derive from governed Match Script matrix merge without Rule softmax.",
+      : "Scorelines, goal range, BTTS, and Over/Under derive from the unified Match Script probability matrix; 1X2 marginals receive calibration only.",
     `Pinned projection parameter artifact ${input.parameters.artifactId} (${input.parameters.status}).`,
     `Pinned calibration artifact ${calibrationArtifact.artifactId} (${calibrationArtifact.status}); Analysis does not train or select maps during a run.`,
     ...calibrationArtifact.limitations,

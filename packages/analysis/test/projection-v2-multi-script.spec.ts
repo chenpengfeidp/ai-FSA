@@ -9,7 +9,7 @@ import {
   computeProjectionV2,
   generateMatchScriptSet,
   MULTI_SCRIPT_MERGE_ALGORITHM,
-  PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
+  PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX,
 } from "../src/index.js";
 import { computeFootballState } from "../src/projection-v2/football-state/compute-football-state.js";
 import { MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT } from "../src/projection-v2/projection-parameter-artifact.js";
@@ -145,14 +145,14 @@ describe("Projection V2 Multi-Script Engine (P2F)", () => {
   it("merges script marginals using Match Script weights only", () => {
     const input = makePipelineInput();
     const result = computeProjectionV2(input);
-    const merge = result.framework.multiScriptMerge;
+    const unified = result.framework.unifiedMatrix;
 
-    if (merge === null) {
-      throw new Error("expected multi-script merge summary");
+    if (unified === null) {
+      throw new Error("expected unified matrix summary");
     }
 
-    expect(merge.algorithm).toBe(MULTI_SCRIPT_MERGE_ALGORITHM);
-    expect(merge.scriptCount).toBe(result.matchScriptSet.scripts.length);
+    expect(unified.mergeAlgorithm).toBe(MULTI_SCRIPT_MERGE_ALGORITHM);
+    expect(unified.scriptCount).toBe(result.matchScriptSet.scripts.length);
 
     const summedPHome = result.framework.activeMatchScripts.reduce(
       (sum, script) => sum + script.mergeContribution.weightedPHome,
@@ -167,9 +167,9 @@ describe("Projection V2 Multi-Script Engine (P2F)", () => {
       0,
     );
 
-    expect(summedPHome).toBeCloseTo(merge.mergedPHome, 6);
-    expect(summedPDraw).toBeCloseTo(merge.mergedPDraw, 6);
-    expect(summedPAway).toBeCloseTo(merge.mergedPAway, 6);
+    expect(summedPHome).toBeCloseTo(unified.derived.pHome, 6);
+    expect(summedPDraw).toBeCloseTo(unified.derived.pDraw, 6);
+    expect(summedPAway).toBeCloseTo(unified.derived.pAway, 6);
   });
 
   it("exposes per-script winner, scorelines, and goal range in framework metadata", () => {
@@ -177,7 +177,7 @@ describe("Projection V2 Multi-Script Engine (P2F)", () => {
     const result = computeProjectionV2(input);
 
     expect(result.framework.frameworkVersion).toBe(
-      PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
+      PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX,
     );
     expect(result.perScriptProjections.length).toBeGreaterThanOrEqual(2);
 

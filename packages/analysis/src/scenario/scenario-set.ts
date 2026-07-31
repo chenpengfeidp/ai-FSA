@@ -54,6 +54,13 @@ function labelFor(
   return `${side} ${homeGoals}-${awayGoals}`;
 }
 
+function usesMatrixScorelines(projection: DeterministicMatchProjection): boolean {
+  return (
+    projection.scorelinesBasis === "match_script_merged_v2" ||
+    projection.scorelinesBasis === "feature_enriched_lambda_v2"
+  );
+}
+
 function oneXTwoWorlds(projection: DeterministicMatchProjection): readonly Readonly<{
   winner: ScenarioWinner;
   homeGoals: number;
@@ -100,6 +107,36 @@ function buildScenario(
   });
 }
 
+function alternateScoreline(
+  ranked: readonly Readonly<{
+    readonly homeGoals: number;
+    readonly awayGoals: number;
+    readonly probability: number;
+  }>[],
+  excludeKey: string,
+  winnerFilter?: ScenarioWinner,
+):
+  | Readonly<{
+      homeGoals: number;
+      awayGoals: number;
+      probability: number;
+    }>
+  | undefined {
+  return ranked.find((entry) => {
+    const key = scoreKey(entry.homeGoals, entry.awayGoals);
+
+    if (key === excludeKey) {
+      return false;
+    }
+
+    if (winnerFilter === undefined) {
+      return true;
+    }
+
+    return winnerOf(entry.homeGoals, entry.awayGoals) !== winnerFilter;
+  });
+}
+
 /**
  * Deterministic scenario trio from sealed projection scorelines + 1X2 mass.
  */
@@ -107,6 +144,7 @@ export function buildScenarioSet(
   projection: DeterministicMatchProjection,
 ): ScenarioSet {
   const matchId = createMatchId(projection.matchId);
+  const matrixScorelines = usesMatrixScorelines(projection);
   const ranked = [...projection.topScorelines].sort(
     (left, right) =>
       right.probability - left.probability ||
@@ -125,17 +163,21 @@ export function buildScenarioSet(
           mostSource.probability,
         );
 
-  const secondSource = ranked.find(
-    (entry) =>
-      scoreKey(entry.homeGoals, entry.awayGoals) !==
-        scoreKey(mostLikely.homeGoals, mostLikely.awayGoals) &&
-      (winnerOf(entry.homeGoals, entry.awayGoals) !== mostLikely.winner ||
-        scoreKey(entry.homeGoals, entry.awayGoals) !==
-          scoreKey(mostLikely.homeGoals, mostLikely.awayGoals)),
-  );
+  const mostKey = scoreKey(mostLikely.homeGoals, mostLikely.awayGoals);
+  const secondSource =
+    ranked.find(
+      (entry) =>
+        scoreKey(entry.homeGoals, entry.awayGoals) !== mostKey &&
+        (winnerOf(entry.homeGoals, entry.awayGoals) !== mostLikely.winner ||
+          scoreKey(entry.homeGoals, entry.awayGoals) !== mostKey),
+    ) ?? alternateScoreline(ranked, mostKey);
   const secondLikely =
     secondSource === undefined
       ? (() => {
+          if (matrixScorelines) {
+            return buildScenario("secondLikely", 0, 0, 0);
+          }
+
           const fallback = oneXTwoWorlds(projection)
             .filter((world) => world.winner !== mostLikely.winner)
             .sort((left, right) => right.probability - left.probability)[0];
@@ -154,9 +196,10 @@ export function buildScenarioSet(
           secondSource.probability,
         );
 
-  const contradictingScoreline = ranked.find(
-    (entry) => winnerOf(entry.homeGoals, entry.awayGoals) !== mostLikely.winner,
-  );
+  const contradictingScoreline =
+    ranked.find(
+      (entry) => winnerOf(entry.homeGoals, entry.awayGoals) !== mostLikely.winner,
+    ) ?? alternateScoreline(ranked, mostKey, mostLikely.winner);
   let upset: Scenario;
 
   if (contradictingScoreline !== undefined) {
@@ -166,6 +209,8 @@ export function buildScenarioSet(
       contradictingScoreline.awayGoals,
       contradictingScoreline.probability,
     );
+  } else if (matrixScorelines) {
+    upset = buildScenario("upset", 0, 0, 0);
   } else {
     const worlds = oneXTwoWorlds(projection);
     const upsetWorld =

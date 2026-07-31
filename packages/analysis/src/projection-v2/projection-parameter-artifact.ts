@@ -18,12 +18,15 @@ export const PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT =
   "projectionFramework.v2.matchScript";
 export const PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT =
   "projectionFramework.v2.multiScript";
+export const PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX =
+  "projectionFramework.v2.unifiedMatrix";
 
 export type ProjectionFrameworkVersion =
   | typeof PROJECTION_FRAMEWORK_VERSION
   | typeof PROJECTION_FRAMEWORK_VERSION_FOUNDATION
   | typeof PROJECTION_FRAMEWORK_VERSION_MATCH_SCRIPT
-  | typeof PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT;
+  | typeof PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT
+  | typeof PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX;
 
 export type ProjectionParameterArtifactStatus =
   | "uncalibrated_baseline"
@@ -168,7 +171,7 @@ export const MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT: ProjectionParameterArti
   createProjectionParameterArtifact({
     artifactId: PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
     policyVersion: PROJECTION_PARAMS_POLICY_VERSION,
-    frameworkVersion: PROJECTION_FRAMEWORK_VERSION_MULTI_SCRIPT,
+    frameworkVersion: PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX,
     status: "uncalibrated_baseline",
     qualified: false,
     checksum: stableChecksum(

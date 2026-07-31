@@ -63,6 +63,18 @@ export {
   buildMatchScriptProjectionSummaries,
   buildMultiScriptMergeSummary,
 } from "./projection-v2/multi-script/build-multi-script-projection-metadata.js";
+export {
+  deriveMatrixPredictions,
+  UNIFIED_MATRIX_DERIVATION_POLICY,
+  buildUnifiedMatrixDerivationNotes,
+} from "./projection-v2/unified-matrix/derive-matrix-predictions.js";
+export type { MatrixDerivedPredictions } from "./projection-v2/unified-matrix/derive-matrix-predictions.js";
+export {
+  buildUnifiedMatrixSummary,
+  derivePerScriptMatrixPredictions,
+} from "./projection-v2/unified-matrix/build-unified-matrix-summary.js";
+export type { UnifiedMatrixSummary } from "./projection-v2/unified-matrix/build-unified-matrix-summary.js";
+export { PROJECTION_FRAMEWORK_VERSION_UNIFIED_MATRIX } from "./projection-v2/projection-parameter-artifact.js";
 export type {
   MatchScriptProjectionSummary,
   MultiScriptMergeSummary,

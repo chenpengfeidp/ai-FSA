@@ -6,6 +6,7 @@ import type {
 } from "../probability-matrix/probability-matrix.js";
 import type { PerScriptProjection } from "./compute-multi-script-projection.js";
 import { MULTI_SCRIPT_MERGE_ALGORITHM } from "./compute-multi-script-projection.js";
+import { derivePerScriptMatrixPredictions } from "../unified-matrix/build-unified-matrix-summary.js";
 
 export interface ScriptScorelineSummary {
   readonly homeGoals: number;
@@ -42,6 +43,10 @@ export interface MatchScriptProjectionSummary {
     readonly range4Plus: number;
   }>;
   readonly mergeContribution: ScriptMergeContribution;
+  readonly pBttsYes: number;
+  readonly pBttsNo: number;
+  readonly pOver25: number;
+  readonly pUnder25: number;
 }
 
 export interface MultiScriptMergeSummary {
@@ -99,6 +104,8 @@ export function buildMatchScriptProjectionSummaries(input: {
         weightedPAway: roundProbability(script.weight * matrix.pAway),
       });
 
+      const matrixDerived = derivePerScriptMatrixPredictions(matrix);
+
       return Object.freeze({
         scriptId: script.scriptId,
         label: script.label,
@@ -127,6 +134,10 @@ export function buildMatchScriptProjectionSummaries(input: {
           range4Plus: roundProbability(matrix.goalRange.range4Plus),
         }),
         mergeContribution,
+        pBttsYes: matrixDerived.pBttsYes,
+        pBttsNo: matrixDerived.pBttsNo,
+        pOver25: matrixDerived.pOver25,
+        pUnder25: matrixDerived.pUnder25,
       });
     }),
   );

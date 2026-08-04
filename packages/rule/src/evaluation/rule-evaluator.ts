@@ -60,10 +60,14 @@ const TAU_CLUB_FORM_STRENGTH = 15;
 const TAU_CLUB_ATTACK_STRENGTH = 10;
 const TAU_CLUB_DEFENSE_STRENGTH = 10;
 const TAU_MANAGER_STABILITY = 20;
+const TAU_MANAGER_TENURE_STABILITY = 15;
+const TAU_MANAGER_EXPERIENCE = 12;
+const TAU_MANAGER_CONTINUITY = 12;
+const TAU_MANAGER_CHANGE_RISK = 55;
 const TAU_PLAYER_AVAILABILITY = 10;
 const TAU_PLAYER_ATTACK = 15;
 const TAU_GOALKEEPER_EDGE = 15;
-const RULE_POLICY = "rule.mvp.p1b.player";
+const RULE_POLICY = "rule.mvp.m1b.manager";
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";
@@ -1362,6 +1366,163 @@ const ruleDefinitions: readonly RuleDefinition[] = Object.freeze([
         away !== undefined &&
         away - home >= TAU_GOALKEEPER_EDGE
       );
+    },
+  }) satisfies FootballRuleDefinition,
+  // M1B Manager Intelligence — Features from MANAGER_INTELLIGENCE Evidence only.
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-stability-edge:v1",
+    ruleName: "MANAGER_STABILITY_EDGE",
+    weight: 0.35,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "managerTenureStabilityHome",
+      "managerTenureStabilityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerTenureStabilityHome"));
+      const away = numericValue(features.get("managerTenureStabilityAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_MANAGER_TENURE_STABILITY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-stability-edge-away:v1",
+    ruleName: "MANAGER_STABILITY_EDGE_AWAY",
+    weight: 0.35,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "managerTenureStabilityHome",
+      "managerTenureStabilityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerTenureStabilityHome"));
+      const away = numericValue(features.get("managerTenureStabilityAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_MANAGER_TENURE_STABILITY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-experience-edge:v1",
+    ruleName: "MANAGER_EXPERIENCE_EDGE",
+    weight: 0.3,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "managerExperienceHome",
+      "managerExperienceAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerExperienceHome"));
+      const away = numericValue(features.get("managerExperienceAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_MANAGER_EXPERIENCE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-experience-edge-away:v1",
+    ruleName: "MANAGER_EXPERIENCE_EDGE_AWAY",
+    weight: 0.3,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "managerExperienceHome",
+      "managerExperienceAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerExperienceHome"));
+      const away = numericValue(features.get("managerExperienceAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_MANAGER_EXPERIENCE
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-continuity-edge:v1",
+    ruleName: "MANAGER_CONTINUITY_EDGE",
+    weight: 0.3,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "managerContinuityHome",
+      "managerContinuityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerContinuityHome"));
+      const away = numericValue(features.get("managerContinuityAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        home - away >= TAU_MANAGER_CONTINUITY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-continuity-edge-away:v1",
+    ruleName: "MANAGER_CONTINUITY_EDGE_AWAY",
+    weight: 0.3,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "managerContinuityHome",
+      "managerContinuityAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerContinuityHome"));
+      const away = numericValue(features.get("managerContinuityAway"));
+
+      return (
+        home !== undefined &&
+        away !== undefined &&
+        away - home >= TAU_MANAGER_CONTINUITY
+      );
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-change-risk-home:v1",
+    ruleName: "MANAGER_CHANGE_RISK_HOME",
+    weight: 0.4,
+    channel: "away+",
+    requiredFeatures: Object.freeze([
+      "managerChangeRiskHome",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const home = numericValue(features.get("managerChangeRiskHome"));
+
+      return home !== undefined && home >= TAU_MANAGER_CHANGE_RISK;
+    },
+  }) satisfies FootballRuleDefinition,
+  Object.freeze({
+    kind: "football",
+    ruleId: "rule:manager-change-risk-away:v1",
+    ruleName: "MANAGER_CHANGE_RISK_AWAY",
+    weight: 0.4,
+    channel: "home+",
+    requiredFeatures: Object.freeze([
+      "managerChangeRiskAway",
+    ] as const satisfies readonly FeatureName[]),
+    matched: (features: ReadonlyMap<FeatureName, Feature>): boolean => {
+      const away = numericValue(features.get("managerChangeRiskAway"));
+
+      return away !== undefined && away >= TAU_MANAGER_CHANGE_RISK;
     },
   }) satisfies FootballRuleDefinition,
   // Market rules use channel "none" — findings only; never enter football softmax.

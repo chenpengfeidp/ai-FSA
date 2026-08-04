@@ -70,9 +70,9 @@ function basePrediction(
       }),
     ]),
     featureNames: Object.freeze(["homeTeam", "awayTeam"]),
-    projectionModelVersion: "projection.v2.p1b.player",
-    featureModelVersion: "feature.v2.p1b.player",
-    ruleSetVersion: "rule.mvp.p1b.player",
+    projectionModelVersion: "projection.v2.m1b.manager",
+    featureModelVersion: "feature.v2.m1b.manager",
+    ruleSetVersion: "rule.mvp.m1b.manager",
     ...overrides,
   });
 }
@@ -186,7 +186,7 @@ describe("computeContributionReport (O1)", () => {
 
     expect(report.schemaVersion).toBe("contribution-report.mvp.o1");
     expect(report.totalSampleSize).toBe(0);
-    expect(report.domains).toHaveLength(8);
+    expect(report.domains).toHaveLength(9);
     expect(report.domains.every((row) => row.sampleSize === 0)).toBe(true);
     expect(report.domains.every((row) => row.qualified === false)).toBe(true);
     expect(report.limitations).toEqual(
@@ -198,7 +198,7 @@ describe("computeContributionReport (O1)", () => {
     expect(Object.isFrozen(report)).toBe(true);
   });
 
-  it("lists all eight domains in the fixed canonical order regardless of population content", () => {
+  it("lists all nine domains in the fixed canonical order regardless of population content", () => {
     const report = computeContributionReport({
       records: [],
       computedAt: "2026-07-24T00:00:00.000Z",
@@ -212,6 +212,7 @@ describe("computeContributionReport (O1)", () => {
       "match_context",
       "club_intelligence",
       "player_intelligence",
+      "manager_intelligence",
       "market_intelligence",
     ]);
   });

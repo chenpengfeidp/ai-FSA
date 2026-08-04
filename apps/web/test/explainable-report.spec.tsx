@@ -102,7 +102,7 @@ const report: AnalysisReportDto = {
     },
   ],
   deterministic: {
-    projectionModelVersion: "projection.v2.p1b.player",
+    projectionModelVersion: "projection.v2.m1b.manager",
     matchId: "match-example-1",
     lambdaHome: 1.8,
     lambdaAway: 1.1,
@@ -482,7 +482,7 @@ describe("ExplainableMatchReport", () => {
           sourceRecordCount: 3,
           evaluationHistorySchemaVersions: ["evaluation-history.mvp.a1"],
           evaluationModelVersions: ["evaluation.mvp.a1"],
-          projectionModelVersions: ["projection.v2.p1b.player"],
+          projectionModelVersions: ["projection.v2.m1b.manager"],
           earliestMatchDate: "2026-07-01T10:00:00.000Z",
           latestMatchDate: "2026-07-20T10:00:00.000Z",
         },
@@ -593,7 +593,7 @@ describe("ExplainableMatchReport", () => {
         sourceRecordCount: 1,
         evaluationHistorySchemaVersions: ["evaluation-history.mvp.a15"],
         evaluationModelVersions: ["evaluation.mvp.a1"],
-        projectionModelVersions: ["projection.v2.p1b.player"],
+        projectionModelVersions: ["projection.v2.m1b.manager"],
       },
       confidenceBucketAccuracy: [],
       confidenceDistribution: [],
@@ -616,7 +616,7 @@ describe("ExplainableMatchReport", () => {
           sourceRecordCount: 1,
           evaluationHistorySchemaVersions: ["evaluation-history.mvp.a15"],
           evaluationModelVersions: ["evaluation.mvp.a1"],
-          projectionModelVersions: ["projection.v2.p1b.player"],
+          projectionModelVersions: ["projection.v2.m1b.manager"],
         },
         profiles: [
           {
@@ -755,7 +755,7 @@ describe("ExplainableMatchReport", () => {
           sourceRecordCount: 1,
           evaluationHistorySchemaVersions: ["evaluation-history.mvp.a15"],
           evaluationModelVersions: ["evaluation.mvp.a1"],
-          projectionModelVersions: ["projection.v2.p1b.player"],
+          projectionModelVersions: ["projection.v2.m1b.manager"],
         },
         domains: [
           {

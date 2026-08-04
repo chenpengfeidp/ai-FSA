@@ -371,6 +371,7 @@ export const zh = {
       match_context: "赛程语境",
       club_intelligence: "俱乐部智能",
       player_intelligence: "球员智能",
+      manager_intelligence: "教练智能",
       market_intelligence: "市场智能",
     },
     contributionSampleSize: "样本量",

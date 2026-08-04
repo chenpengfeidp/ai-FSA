@@ -444,6 +444,118 @@ export function computeManagerStability(managerTenureDays: number): number {
   return clamp((managerTenureDays / BASELINE_MANAGER_TENURE_DAYS) * 100, 0, 100);
 }
 
+export const BASELINE_MANAGER_EXPERIENCE_AGE_MIN = 30;
+export const BASELINE_MANAGER_EXPERIENCE_AGE_SPAN = 40;
+export const BASELINE_MANAGER_PREVIOUS_CLUBS_FOR_EXPERIENCE = 8;
+export const BASELINE_MANAGER_PREVIOUS_CLUBS_FOR_CAREER = 8;
+
+/**
+ * M1B Manager Tenure Stability — same scale as L1B tenure stability, sourced
+ * only from MANAGER_INTELLIGENCE.tenureDays (never estimated).
+ */
+export function computeManagerTenureStability(tenureDays: number): number {
+  return computeManagerStability(tenureDays);
+}
+
+/**
+ * M1B Manager Experience in [0, 100] from age and/or previous-club count.
+ * Omits when neither age nor previousClubs is available (caller responsibility).
+ */
+export function computeManagerExperience(input: {
+  readonly age?: number;
+  readonly previousClubCount?: number;
+}): number | undefined {
+  const ageScore =
+    input.age === undefined
+      ? undefined
+      : clamp(
+          ((input.age - BASELINE_MANAGER_EXPERIENCE_AGE_MIN) /
+            BASELINE_MANAGER_EXPERIENCE_AGE_SPAN) *
+            100,
+          0,
+          100,
+        );
+  const clubScore =
+    input.previousClubCount === undefined
+      ? undefined
+      : clamp(
+          (input.previousClubCount /
+            BASELINE_MANAGER_PREVIOUS_CLUBS_FOR_EXPERIENCE) *
+            100,
+          0,
+          100,
+        );
+
+  if (ageScore === undefined && clubScore === undefined) {
+    return undefined;
+  }
+
+  if (ageScore === undefined) {
+    return clubScore;
+  }
+
+  if (clubScore === undefined) {
+    return ageScore;
+  }
+
+  return clamp(0.5 * ageScore + 0.5 * clubScore, 0, 100);
+}
+
+/**
+ * M1B Manager Continuity in [0, 100]. Requires match-day confirmation.
+ * Unconfirmed managers never receive a continuity Feature (honest absence).
+ */
+export function computeManagerContinuity(input: {
+  readonly matchManagerConfirmed: boolean;
+  readonly tenureDays?: number;
+}): number | undefined {
+  if (!input.matchManagerConfirmed) {
+    return undefined;
+  }
+
+  if (input.tenureDays === undefined) {
+    return 50;
+  }
+
+  return clamp(0.7 * computeManagerTenureStability(input.tenureDays) + 30, 0, 100);
+}
+
+/**
+ * M1B Manager Change Risk in [0, 100]. Higher = more change risk.
+ * interimManagerStatus=true → elevated risk; else inverse of tenure stability.
+ * Omits when neither tenureDays nor interim status is present.
+ */
+export function computeManagerChangeRisk(input: {
+  readonly tenureDays?: number;
+  readonly interimManagerStatus?: boolean;
+}): number | undefined {
+  if (input.interimManagerStatus === true) {
+    const tenureComponent =
+      input.tenureDays === undefined
+        ? 85
+        : 100 - computeManagerTenureStability(input.tenureDays);
+    return clamp(Math.max(85, tenureComponent), 0, 100);
+  }
+
+  if (input.tenureDays === undefined) {
+    return undefined;
+  }
+
+  return clamp(100 - computeManagerTenureStability(input.tenureDays), 0, 100);
+}
+
+/**
+ * M1B Manager Career Stability in [0, 100] from previousClubs length.
+ * Fewer previous clubs → higher stability. Requires the array to be present.
+ */
+export function computeManagerCareerStability(previousClubCount: number): number {
+  return clamp(
+    100 - (previousClubCount / BASELINE_MANAGER_PREVIOUS_CLUBS_FOR_CAREER) * 100,
+    0,
+    100,
+  );
+}
+
 export const BASELINE_PLAYER_CONTRIBUTION_PER_MATCH = 0.5;
 export const BASELINE_PLAYER_RATING = 7.0;
 export const BASELINE_PLAYER_MINUTES_PER_MATCH = 90;

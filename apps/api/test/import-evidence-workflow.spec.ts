@@ -264,7 +264,7 @@ describe("HTTP import and Evidence query workflow", () => {
       ]),
     });
     expect(Array.isArray(requireRecord(report.contribution).domains)).toBe(true);
-    expect(requireRecord(report.contribution).domains).toHaveLength(8);
+    expect(requireRecord(report.contribution).domains).toHaveLength(9);
     expect(report.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "homeTeam", value: "Liverpool" }),
@@ -461,7 +461,7 @@ describe("HTTP import and Evidence query workflow", () => {
       minimumQualifiedSampleSize: 20,
     });
     expect(Array.isArray(report.domains)).toBe(true);
-    expect(report.domains).toHaveLength(8);
+    expect(report.domains).toHaveLength(9);
     const domainIds = (report.domains as readonly Record<string, unknown>[]).map(
       (row) => row.domain,
     );
@@ -473,6 +473,7 @@ describe("HTTP import and Evidence query workflow", () => {
       "match_context",
       "club_intelligence",
       "player_intelligence",
+      "manager_intelligence",
       "market_intelligence",
     ]);
     for (const row of report.domains as readonly Record<string, unknown>[]) {
@@ -758,7 +759,7 @@ describe("HTTP import and Evidence query workflow", () => {
       );
       expect(report.deterministic).toMatchObject({
         status: "completed_nonempty",
-        projectionModelVersion: "projection.v2.p1b.player",
+        projectionModelVersion: "projection.v2.m1b.manager",
       });
       const deterministic = requireRecord(report.deterministic);
       expect(

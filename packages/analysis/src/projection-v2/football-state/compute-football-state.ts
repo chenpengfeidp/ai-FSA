@@ -77,6 +77,14 @@ const PRESSURE_FEATURES = Object.freeze([
   "rotationPressureHome",
   "rotationPressureAway",
   "homeStability",
+  "managerTenureStabilityHome",
+  "managerTenureStabilityAway",
+  "managerContinuityHome",
+  "managerContinuityAway",
+  "managerExperienceHome",
+  "managerExperienceAway",
+  "managerCareerStabilityHome",
+  "managerCareerStabilityAway",
 ] as const satisfies readonly FeatureName[]);
 
 const RISK_FEATURES = Object.freeze([
@@ -90,6 +98,8 @@ const RISK_FEATURES = Object.freeze([
   "squadAvailabilityScoreAway",
   "disciplineRiskHome",
   "disciplineRiskAway",
+  "managerChangeRiskHome",
+  "managerChangeRiskAway",
 ] as const satisfies readonly FeatureName[]);
 
 const DIMENSION_FEATURES: Readonly<

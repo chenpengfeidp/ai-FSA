@@ -44,6 +44,20 @@ export const PLAYER_INTELLIGENCE_FEATURE_NAMES: ReadonlySet<string> = new Set([
   "goalkeeperReliabilityAway",
 ]);
 
+/** M1B Manager Intelligence Feature names (see feature-extractor.ts extractManagerIntelligenceFeatures). */
+export const MANAGER_INTELLIGENCE_FEATURE_NAMES: ReadonlySet<string> = new Set([
+  "managerExperienceHome",
+  "managerExperienceAway",
+  "managerTenureStabilityHome",
+  "managerTenureStabilityAway",
+  "managerContinuityHome",
+  "managerContinuityAway",
+  "managerChangeRiskHome",
+  "managerChangeRiskAway",
+  "managerCareerStabilityHome",
+  "managerCareerStabilityAway",
+]);
+
 /** F1.3 Expected Goals Feature names (see feature-extractor.ts extractExpectedGoalsFeatures). */
 export const EXPECTED_GOALS_FEATURE_NAMES: ReadonlySet<string> = new Set([
   "xgAttackQualityHome",

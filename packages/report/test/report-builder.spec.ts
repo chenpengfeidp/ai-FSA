@@ -526,7 +526,7 @@ describe("GenerateMatchReportUseCase — O1 Football Intelligence Contribution o
     expect(result.contribution?.totalSampleSize).toBe(
       result.calibration?.sampleSize,
     );
-    expect(result.contribution?.domains).toHaveLength(8);
+    expect(result.contribution?.domains).toHaveLength(9);
     expect(result.contribution?.domains.map((row) => row.domain)).toEqual([
       "venue_intelligence",
       "availability_intelligence",
@@ -535,6 +535,7 @@ describe("GenerateMatchReportUseCase — O1 Football Intelligence Contribution o
       "match_context",
       "club_intelligence",
       "player_intelligence",
+      "manager_intelligence",
       "market_intelligence",
     ]);
   });

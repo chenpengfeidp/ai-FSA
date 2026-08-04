@@ -17,7 +17,7 @@ export const MINIMUM_QUALIFIED_DOMAIN_SAMPLE_SIZE = 20;
 export const MINIMUM_QUALIFIED_DOMAIN_SEGMENT_SAMPLE_SIZE = 5;
 
 /**
- * The eight Football Intelligence domains named by the O1 task brief, in
+ * The nine Football Intelligence domains (O1 eight plus M1B Manager), in
  * canonical, fixed display order. This order is never re-sorted by measured
  * performance — the report computes no ranking of any kind.
  */
@@ -29,6 +29,7 @@ export type IntelligenceDomainId =
   | "match_context"
   | "club_intelligence"
   | "player_intelligence"
+  | "manager_intelligence"
   | "market_intelligence";
 
 export const INTELLIGENCE_DOMAIN_IDS: readonly IntelligenceDomainId[] =
@@ -40,6 +41,7 @@ export const INTELLIGENCE_DOMAIN_IDS: readonly IntelligenceDomainId[] =
     "match_context",
     "club_intelligence",
     "player_intelligence",
+    "manager_intelligence",
     "market_intelligence",
   ]);
 
@@ -53,6 +55,7 @@ export const INTELLIGENCE_DOMAIN_LABELS: Readonly<
   match_context: "Match Context",
   club_intelligence: "Club Intelligence",
   player_intelligence: "Player Intelligence",
+  manager_intelligence: "Manager Intelligence",
   market_intelligence: "Market Intelligence",
 });
 

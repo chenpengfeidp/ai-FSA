@@ -286,7 +286,7 @@ describe("FeatureExtractor", () => {
     });
     const bundle = new FeatureExtractor().extractBundle([matchInfo, odds]);
 
-    expect(bundle.featureModelVersion).toBe("feature.v2.p1b.player");
+    expect(bundle.featureModelVersion).toBe("feature.v2.m1b.manager");
     expect(bundle.features).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "marketConsensus" }),
@@ -539,7 +539,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.p1b.player");
+    expect(bundle.featureModelVersion).toBe("feature.v2.m1b.manager");
     expect(
       bundle.features.some((feature) => feature.name === "availabilityPenaltyAway"),
     ).toBe(false);
@@ -824,7 +824,7 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.p1b.player");
+    expect(bundle.featureModelVersion).toBe("feature.v2.m1b.manager");
   });
 
   it("keeps xG Features absent when EXPECTED_GOALS Evidence is missing", () => {
@@ -1030,7 +1030,7 @@ describe("FeatureExtractor", () => {
         expect.objectContaining({ name: "knockoutContext", value: 0 }),
       ]),
     );
-    expect(bundle.featureModelVersion).toBe("feature.v2.p1b.player");
+    expect(bundle.featureModelVersion).toBe("feature.v2.m1b.manager");
   });
 
   it("keeps Context Features absent when MATCH_CONTEXT Evidence is missing", () => {
@@ -1147,5 +1147,99 @@ describe("FeatureExtractor", () => {
         }),
       ]),
     );
+  });
+
+  it("extracts M1B Manager Intelligence Features from MANAGER_INTELLIGENCE Evidence", () => {
+    const matchInfo = makeEvidence();
+    const matchId = createMatchId("match-1");
+    const manager = (side: "away" | "home", id: string): Evidence =>
+      createEvidence({
+        id,
+        source: "fixture",
+        sourceId: `${id}-source`,
+        type: "MANAGER_INTELLIGENCE",
+        matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: "fresh",
+        quality: "verified",
+        provenance: {
+          collector: "@fas/evidence-normalizer",
+          method: "fixture",
+        },
+        payload: {
+          teamId: `${side}-team`,
+          teamName: side === "home" ? "Home FC" : "Away United",
+          teamSide: side,
+          managerName: side === "home" ? "Home Coach" : "Away Coach",
+          age: side === "home" ? 52 : 40,
+          tenureDays: side === "home" ? 900 : 60,
+          previousClubs:
+            side === "home"
+              ? Object.freeze(["Club A", "Club B"])
+              : Object.freeze([
+                  "Club A",
+                  "Club B",
+                  "Club C",
+                  "Club D",
+                  "Club E",
+                  "Club F",
+                ]),
+          matchManagerConfirmed: true,
+          observedAt: "2026-07-17T10:00:00Z",
+        },
+      });
+
+    const bundle = new FeatureExtractor().extractBundle([
+      matchInfo,
+      manager("home", "evidence-manager-home"),
+      manager("away", "evidence-manager-away"),
+    ]);
+
+    expect(bundle.featureModelVersion).toBe("feature.v2.m1b.manager");
+    expect(bundle.features).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "managerTenureStabilityHome",
+          sourceEvidenceId: "evidence-manager-home",
+        }),
+        expect.objectContaining({
+          name: "managerTenureStabilityAway",
+          sourceEvidenceId: "evidence-manager-away",
+        }),
+        expect.objectContaining({
+          name: "managerExperienceHome",
+          sourceEvidenceId: "evidence-manager-home",
+        }),
+        expect.objectContaining({
+          name: "managerContinuityHome",
+          sourceEvidenceId: "evidence-manager-home",
+        }),
+        expect.objectContaining({
+          name: "managerChangeRiskAway",
+          sourceEvidenceId: "evidence-manager-away",
+        }),
+        expect.objectContaining({
+          name: "managerCareerStabilityHome",
+          sourceEvidenceId: "evidence-manager-home",
+        }),
+      ]),
+    );
+  });
+
+  it("omits Manager Intelligence Features when MANAGER_INTELLIGENCE Evidence is missing", () => {
+    const matchInfo = makeEvidence();
+    const bundle = new FeatureExtractor().extractBundle([matchInfo]);
+
+    expect(
+      bundle.features.filter(
+        (feature) =>
+          feature.name.startsWith("managerTenure") ||
+          feature.name.startsWith("managerExperience") ||
+          feature.name.startsWith("managerContinuity") ||
+          feature.name.startsWith("managerChangeRisk") ||
+          feature.name.startsWith("managerCareer"),
+      ),
+    ).toEqual([]);
   });
 });

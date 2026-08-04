@@ -68,9 +68,9 @@ function predictionFixture(
       }),
     ]),
     featureNames: Object.freeze(["homeTeam", "awayTeam", "kickoff"]),
-    projectionModelVersion: "projection.v2.p1b.player",
-    featureModelVersion: "feature.v2.p1b.player",
-    ruleSetVersion: "rule.mvp.p1b.player",
+    projectionModelVersion: "projection.v2.m1b.manager",
+    featureModelVersion: "feature.v2.m1b.manager",
+    ruleSetVersion: "rule.mvp.m1b.manager",
     ...overrides,
   });
 }

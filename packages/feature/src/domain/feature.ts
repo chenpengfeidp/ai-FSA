@@ -54,8 +54,18 @@ export type FeatureName =
   | "knockoutContext"
   | "leagueStrengthAway"
   | "leagueStrengthHome"
+  | "managerCareerStabilityAway"
+  | "managerCareerStabilityHome"
+  | "managerChangeRiskAway"
+  | "managerChangeRiskHome"
+  | "managerContinuityAway"
+  | "managerContinuityHome"
+  | "managerExperienceAway"
+  | "managerExperienceHome"
   | "managerStabilityAway"
   | "managerStabilityHome"
+  | "managerTenureStabilityAway"
+  | "managerTenureStabilityHome"
   | "marketConsensus"
   | "marketImpliedAway"
   | "marketImpliedDraw"
@@ -172,8 +182,18 @@ const featureNames: ReadonlySet<string> = new Set([
   "knockoutContext",
   "leagueStrengthAway",
   "leagueStrengthHome",
+  "managerCareerStabilityAway",
+  "managerCareerStabilityHome",
+  "managerChangeRiskAway",
+  "managerChangeRiskHome",
+  "managerContinuityAway",
+  "managerContinuityHome",
+  "managerExperienceAway",
+  "managerExperienceHome",
   "managerStabilityAway",
   "managerStabilityHome",
+  "managerTenureStabilityAway",
+  "managerTenureStabilityHome",
   "marketConsensus",
   "marketImpliedAway",
   "marketImpliedDraw",

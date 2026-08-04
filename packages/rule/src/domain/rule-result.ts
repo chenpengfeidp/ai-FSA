@@ -48,8 +48,16 @@ export type RuleId =
   | "rule:knockout-context:v1"
   | "rule:league-strength-edge:v1"
   | "rule:league-strength-edge-away:v1"
+  | "rule:manager-change-risk-away:v1"
+  | "rule:manager-change-risk-home:v1"
+  | "rule:manager-continuity-edge:v1"
+  | "rule:manager-continuity-edge-away:v1"
+  | "rule:manager-experience-edge:v1"
+  | "rule:manager-experience-edge-away:v1"
   | "rule:manager-stability:v1"
   | "rule:manager-stability-away:v1"
+  | "rule:manager-stability-edge:v1"
+  | "rule:manager-stability-edge-away:v1"
   | "rule:market-ah-lean-away:v1"
   | "rule:market-ah-lean-home:v1"
   | "rule:market-consensus:v1"
@@ -129,8 +137,16 @@ export type RuleName =
   | "KNOCKOUT_CONTEXT"
   | "LEAGUE_STRENGTH_EDGE"
   | "LEAGUE_STRENGTH_EDGE_AWAY"
+  | "MANAGER_CHANGE_RISK_AWAY"
+  | "MANAGER_CHANGE_RISK_HOME"
+  | "MANAGER_CONTINUITY_EDGE"
+  | "MANAGER_CONTINUITY_EDGE_AWAY"
+  | "MANAGER_EXPERIENCE_EDGE"
+  | "MANAGER_EXPERIENCE_EDGE_AWAY"
   | "MANAGER_STABILITY"
   | "MANAGER_STABILITY_AWAY"
+  | "MANAGER_STABILITY_EDGE"
+  | "MANAGER_STABILITY_EDGE_AWAY"
   | "MARKET_AH_LEAN_AWAY"
   | "MARKET_AH_LEAN_HOME"
   | "MARKET_CONSENSUS"
@@ -247,8 +263,16 @@ const ruleIds: ReadonlySet<string> = new Set([
   "rule:knockout-context:v1",
   "rule:league-strength-edge:v1",
   "rule:league-strength-edge-away:v1",
+  "rule:manager-change-risk-away:v1",
+  "rule:manager-change-risk-home:v1",
+  "rule:manager-continuity-edge:v1",
+  "rule:manager-continuity-edge-away:v1",
+  "rule:manager-experience-edge:v1",
+  "rule:manager-experience-edge-away:v1",
   "rule:manager-stability:v1",
   "rule:manager-stability-away:v1",
+  "rule:manager-stability-edge:v1",
+  "rule:manager-stability-edge-away:v1",
   "rule:market-ah-lean-away:v1",
   "rule:market-ah-lean-home:v1",
   "rule:market-consensus:v1",
@@ -328,8 +352,16 @@ const ruleNames: ReadonlySet<string> = new Set([
   "KNOCKOUT_CONTEXT",
   "LEAGUE_STRENGTH_EDGE",
   "LEAGUE_STRENGTH_EDGE_AWAY",
+  "MANAGER_CHANGE_RISK_AWAY",
+  "MANAGER_CHANGE_RISK_HOME",
+  "MANAGER_CONTINUITY_EDGE",
+  "MANAGER_CONTINUITY_EDGE_AWAY",
+  "MANAGER_EXPERIENCE_EDGE",
+  "MANAGER_EXPERIENCE_EDGE_AWAY",
   "MANAGER_STABILITY",
   "MANAGER_STABILITY_AWAY",
+  "MANAGER_STABILITY_EDGE",
+  "MANAGER_STABILITY_EDGE_AWAY",
   "MARKET_AH_LEAN_AWAY",
   "MARKET_AH_LEAN_HOME",
   "MARKET_CONSENSUS",

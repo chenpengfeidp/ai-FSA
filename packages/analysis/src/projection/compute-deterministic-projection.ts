@@ -233,6 +233,15 @@ export function computeDeterministicMatchProjection(input: {
     "DEFENSE_STRENGTH_EDGE_AWAY",
     "MANAGER_STABILITY",
     "MANAGER_STABILITY_AWAY",
+    // M1B Manager Intelligence — MANAGER_INTELLIGENCE-derived edges.
+    "MANAGER_STABILITY_EDGE",
+    "MANAGER_STABILITY_EDGE_AWAY",
+    "MANAGER_EXPERIENCE_EDGE",
+    "MANAGER_EXPERIENCE_EDGE_AWAY",
+    "MANAGER_CONTINUITY_EDGE",
+    "MANAGER_CONTINUITY_EDGE_AWAY",
+    "MANAGER_CHANGE_RISK_HOME",
+    "MANAGER_CHANGE_RISK_AWAY",
     // P1B Player Intelligence — comparative player edges participate in the
     // existing football channel like other rule edges (no softmax redesign).
     "PLAYER_AVAILABILITY_EDGE_HOME",

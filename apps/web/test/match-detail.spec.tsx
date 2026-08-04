@@ -106,7 +106,7 @@ const report: AnalysisReportDto = {
     },
   ],
   deterministic: {
-    projectionModelVersion: "projection.v2.p1b.player",
+    projectionModelVersion: "projection.v2.m1b.manager",
     matchId: "match-example-1",
     lambdaHome: 1.8,
     lambdaAway: 1.1,

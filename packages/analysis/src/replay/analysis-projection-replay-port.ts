@@ -155,7 +155,7 @@ function buildSealedPredictionFromReplayProjection(input: {
     ),
     projectionModelVersion: input.projection.projectionModelVersion,
     featureModelVersion: input.context.featureModelVersion,
-    ruleSetVersion: "rule.mvp.p1b.player",
+    ruleSetVersion: "rule.mvp.m1b.manager",
   });
 }
 

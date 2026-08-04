@@ -72,6 +72,15 @@ const P1_CHANNEL_RULES = new Set([
   "DEFENSE_STRENGTH_EDGE_AWAY",
   "MANAGER_STABILITY",
   "MANAGER_STABILITY_AWAY",
+  // M1B Manager Intelligence — MANAGER_INTELLIGENCE-derived edges.
+  "MANAGER_STABILITY_EDGE",
+  "MANAGER_STABILITY_EDGE_AWAY",
+  "MANAGER_EXPERIENCE_EDGE",
+  "MANAGER_EXPERIENCE_EDGE_AWAY",
+  "MANAGER_CONTINUITY_EDGE",
+  "MANAGER_CONTINUITY_EDGE_AWAY",
+  "MANAGER_CHANGE_RISK_HOME",
+  "MANAGER_CHANGE_RISK_AWAY",
   // P1B Player Intelligence — comparative player edges participate like other P1 edges.
   "PLAYER_AVAILABILITY_EDGE_HOME",
   "PLAYER_AVAILABILITY_EDGE_AWAY",
@@ -191,6 +200,16 @@ function evidenceCompleteness(evidences: readonly Evidence[]): number {
     evidences.some(
       (evidence) =>
         evidence.type === "PLAYER" && evidence.payload.teamSide === "away",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "MANAGER_INTELLIGENCE" &&
+        evidence.payload.teamSide === "home",
+    ),
+    evidences.some(
+      (evidence) =>
+        evidence.type === "MANAGER_INTELLIGENCE" &&
+        evidence.payload.teamSide === "away",
     ),
   ];
   const present = checks.filter(Boolean).length;
@@ -516,6 +535,23 @@ export function computeIntelligenceConfidence(input: {
   if (!hasPlayerHome || !hasPlayerAway) {
     limitations.push(
       "PLAYER Evidence incomplete; player availability/attack/goalkeeper Features may be absent (never estimated from unlisted squads).",
+    );
+  }
+
+  const hasManagerHome = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "MANAGER_INTELLIGENCE" &&
+      evidence.payload.teamSide === "home",
+  );
+  const hasManagerAway = input.evidenceSet.some(
+    (evidence) =>
+      evidence.type === "MANAGER_INTELLIGENCE" &&
+      evidence.payload.teamSide === "away",
+  );
+
+  if (!hasManagerHome || !hasManagerAway) {
+    limitations.push(
+      "MANAGER_INTELLIGENCE Evidence incomplete; manager tenure/experience/continuity/change-risk Features may be absent (never estimated).",
     );
   }
 

@@ -29,7 +29,12 @@ import {
   computeHomeStability,
   computeImpliedProbabilities,
   computeKnockoutContext,
+  computeManagerCareerStability,
+  computeManagerChangeRisk,
+  computeManagerContinuity,
+  computeManagerExperience,
   computeManagerStability,
+  computeManagerTenureStability,
   computeMarketConsensus,
   computeMarketLean,
   computeMarketVolatility,
@@ -1587,6 +1592,223 @@ function extractPlayerIntelligenceFeatures(input: {
   return Object.freeze(features);
 }
 
+type ManagerIntelligenceMetrics = Readonly<{
+  age?: number;
+  tenureDays?: number;
+  previousClubs?: readonly string[];
+  interimManagerStatus?: boolean;
+  matchManagerConfirmed: boolean;
+}>;
+
+function readManagerIntelligenceMetrics(
+  payload: Evidence["payload"],
+): ManagerIntelligenceMetrics | undefined {
+  if (typeof payload.matchManagerConfirmed !== "boolean") {
+    return undefined;
+  }
+
+  const age = asFiniteNumber(payload.age);
+  const tenureDays = asFiniteNumber(payload.tenureDays);
+  let previousClubs: readonly string[] | undefined;
+
+  if (payload.previousClubs !== undefined) {
+    if (
+      !Array.isArray(payload.previousClubs) ||
+      !payload.previousClubs.every(
+        (club): club is string => typeof club === "string",
+      )
+    ) {
+      return undefined;
+    }
+
+    previousClubs = Object.freeze([...payload.previousClubs]);
+  }
+
+  const interimManagerStatus =
+    typeof payload.interimManagerStatus === "boolean"
+      ? payload.interimManagerStatus
+      : undefined;
+
+  return Object.freeze({
+    matchManagerConfirmed: payload.matchManagerConfirmed,
+    ...(age === undefined ? {} : { age }),
+    ...(tenureDays === undefined ? {} : { tenureDays }),
+    ...(previousClubs === undefined ? {} : { previousClubs }),
+    ...(interimManagerStatus === undefined ? {} : { interimManagerStatus }),
+  });
+}
+
+function findManagerIntelligenceEvidence(
+  evidences: readonly Evidence[],
+  side: "away" | "home",
+): Evidence | undefined {
+  return evidences.find(
+    (evidence) =>
+      evidence.type === "MANAGER_INTELLIGENCE" && evidence.payload.teamSide === side,
+  );
+}
+
+/**
+ * M1B: derived Manager Intelligence Features from MANAGER_INTELLIGENCE Evidence
+ * only. Missing Evidence or required fields omit Features — never estimate.
+ */
+function extractManagerIntelligenceFeaturesForSide(input: {
+  readonly evidence: Evidence;
+  readonly side: "away" | "home";
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { evidence, side, matchId, generatedAt } = input;
+
+  if (matchId === undefined) {
+    return emptyFeatures;
+  }
+
+  const metrics = readManagerIntelligenceMetrics(evidence.payload);
+
+  if (metrics === undefined) {
+    return emptyFeatures;
+  }
+
+  const features: Feature[] = [];
+  const suffix = side === "home" ? "Home" : "Away";
+
+  if (metrics.tenureDays !== undefined) {
+    const value = roundFeature(computeManagerTenureStability(metrics.tenureDays));
+    const name = `managerTenureStability${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Manager tenure stability ${value} from MANAGER_INTELLIGENCE tenureDays=${metrics.tenureDays} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const experience = computeManagerExperience({
+    ...(metrics.age === undefined ? {} : { age: metrics.age }),
+    ...(metrics.previousClubs === undefined
+      ? {}
+      : { previousClubCount: metrics.previousClubs.length }),
+  });
+
+  if (experience !== undefined) {
+    const value = roundFeature(experience);
+    const name = `managerExperience${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Manager experience ${value} from MANAGER_INTELLIGENCE age=${metrics.age ?? "n/a"} previousClubs=${metrics.previousClubs?.length ?? "n/a"} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const continuity = computeManagerContinuity({
+    matchManagerConfirmed: metrics.matchManagerConfirmed,
+    ...(metrics.tenureDays === undefined ? {} : { tenureDays: metrics.tenureDays }),
+  });
+
+  if (continuity !== undefined) {
+    const value = roundFeature(continuity);
+    const name = `managerContinuity${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Manager continuity ${value} from MANAGER_INTELLIGENCE matchManagerConfirmed=${String(metrics.matchManagerConfirmed)} tenureDays=${metrics.tenureDays ?? "n/a"} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  const changeRisk = computeManagerChangeRisk({
+    ...(metrics.tenureDays === undefined ? {} : { tenureDays: metrics.tenureDays }),
+    ...(metrics.interimManagerStatus === undefined
+      ? {}
+      : { interimManagerStatus: metrics.interimManagerStatus }),
+  });
+
+  if (changeRisk !== undefined) {
+    const value = roundFeature(changeRisk);
+    const name = `managerChangeRisk${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Manager change risk ${value} from MANAGER_INTELLIGENCE tenureDays=${metrics.tenureDays ?? "n/a"} interimManagerStatus=${metrics.interimManagerStatus ?? "n/a"} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  if (metrics.previousClubs !== undefined) {
+    const value = roundFeature(
+      computeManagerCareerStability(metrics.previousClubs.length),
+    );
+    const name = `managerCareerStability${suffix}` as FeatureName;
+    features.push(
+      createFeature({
+        featureId: featureId(evidence.id, name),
+        matchId,
+        name,
+        value,
+        explanation: `Manager career stability ${value} from MANAGER_INTELLIGENCE previousClubs.length=${metrics.previousClubs.length} (Evidence ${evidence.id}).`,
+        sourceEvidenceId: evidence.id,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
+/**
+ * M1B: derived Manager Intelligence Features from MANAGER_INTELLIGENCE Evidence only.
+ * Rules consume these Features; never Provider data directly.
+ */
+function extractManagerIntelligenceFeatures(input: {
+  readonly evidences: readonly Evidence[];
+  readonly matchId: Evidence["matchId"];
+  readonly generatedAt: string;
+}): readonly Feature[] {
+  const { evidences, matchId, generatedAt } = input;
+  const features: Feature[] = [];
+
+  for (const side of ["home", "away"] as const) {
+    const evidence = findManagerIntelligenceEvidence(evidences, side);
+
+    if (evidence === undefined) {
+      continue;
+    }
+
+    features.push(
+      ...extractManagerIntelligenceFeaturesForSide({
+        evidence,
+        side,
+        matchId,
+        generatedAt,
+      }),
+    );
+  }
+
+  return Object.freeze(features);
+}
+
 /**
  * I2B: derived Market Intelligence Features from ODDS Evidence only.
  * Omit Feature (→ Rule INAPPLICABLE) when required movement / public / sharp facts are absent.
@@ -1940,6 +2162,14 @@ export class FeatureExtractor {
 
     features.push(
       ...extractPlayerIntelligenceFeatures({
+        evidences,
+        matchId,
+        generatedAt,
+      }),
+    );
+
+    features.push(
+      ...extractManagerIntelligenceFeatures({
         evidences,
         matchId,
         generatedAt,

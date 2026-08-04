@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 / A1.5 Evaluation History / A2 Prediction Calibration / V1A Football Intelligence Validation / O1 Football Intelligence Contribution Analysis** 均已完成；下一步 **M1A Manager Intelligence Evidence**（`docs/40_PRODUCT_ROADMAP.md` / `PROJECT_STATE`）。**治理提示：** `V1A` 与 `O1` 均尚未作为 Sprint id 写入 doc 40，由任务发起人直接授权作为 A1/A1.5/A2/V1A 信任轨道的度量型延伸（不改 Provider/Feature/Rule/Projection/Confidence/Evaluation/Calibration，不引入 ML，不改 schema，不重跑 Prediction）；建议后续文档补丁把 `V1` 与 `O1` 补写进 doc 40。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
+一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 / A1.5 / A2 / V1A / O1 / M1A / M1B** 均已完成；下一步 **L2A** 或任务授权的 P2K / 后续 Intelligence。**治理提示：** `V1A`、`O1`、`P2A–P2J`、`M1B` 部分尚未作为 Sprint id 写入 doc 40，由任务发起人直接授权。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
 
 ---
 
@@ -253,14 +253,14 @@ Match Center (web)
 9. **P1B Player Intelligence Features** — 已完成（`docs/sprints/P1/P1B_PLAYER_INTELLIGENCE_COMPLETION_REPORT.md`；Feature → Rule → Confidence → Projection）  
 10. **A2 Prediction Calibration** — 已完成（`docs/sprints/A2/A2_PREDICTION_CALIBRATION_COMPLETION_REPORT.md`；并行信任轨道；消费 Evaluation History；勿与 Provider 混写）  
 11. **V1A Football Intelligence Validation** — 已完成（`docs/sprints/V1A/V1A_FOOTBALL_INTELLIGENCE_VALIDATION_COMPLETION_REPORT.md`；并行信任轨道；按 Feature 族对已封存 History 做观察性分区比较；从不重跑 Prediction，从不断言改进）  
-12. **O1 Football Intelligence Contribution Analysis** — 已完成（`docs/sprints/O1/O1_FOOTBALL_INTELLIGENCE_CONTRIBUTION_COMPLETION_REPORT.md`；并行信任轨道；对 8 个 Football Intelligence 领域做独立、非互斥的观察性度量；从不重跑 Prediction，从不排名领域，从不断言因果）  
-13. **M1A Manager Intelligence Evidence** — 已完成（`docs/sprints/M1/M1A_MANAGER_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`；仅 Evidence，无 Feature/Rule/Confidence/Projection）  
-14. **M1B Manager Intelligence Features** — 推荐的下一 Intelligence 编码冲刺（Feature → Rule → Confidence → Projection）  
+12. **O1 Football Intelligence Contribution Analysis** — 已完成（`docs/sprints/O1/O1_FOOTBALL_INTELLIGENCE_CONTRIBUTION_COMPLETION_REPORT.md`；并行信任轨道；对 Football Intelligence 领域做独立、非互斥的观察性度量；从不重跑 Prediction，从不排名领域，从不断言因果；M1B 后含 Manager 共 9 个领域）  
+13. **M1A Manager Intelligence Evidence** — 已完成（`docs/sprints/M1/M1A_MANAGER_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`；仅 Evidence）  
+14. **M1B Manager Intelligence Features** — 已完成（`docs/sprints/M1/M1B_MANAGER_INTELLIGENCE_COMPLETION_REPORT.md`；Feature → Rule → Football State → Confidence → Projection → Contribution）  
 15. **Football Intelligence v3 Knowledge Model Design**（设计评审，非编码冲刺）— 已完成（`docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`；分析 9 个现有领域 + 提出 10 个候选新领域 + Rule 组合式 Match Tactical Tags 设计 + 优先级矩阵 + 预期影响排名 + 路线图 + 风险 + 建议编码顺序；未写生产代码，未改架构，未新增 Engine；提出的 Sprint id 均待人工评审并计入 doc 40 后方可开工）  
 16. **L2A Squad Intelligence Evidence** — 其后候选  
 17. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0  
 
-历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · V3-KM（设计）  
+历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · V3-KM（设计） · P2A–P2J  
 
 平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 

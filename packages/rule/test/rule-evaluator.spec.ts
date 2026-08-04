@@ -279,6 +279,26 @@ describe("RuleEvaluator", () => {
       { ruleName: "PLAYER_ATTACK_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "GOALKEEPER_EDGE_HOME", status: "INAPPLICABLE", score: 0 },
       { ruleName: "GOALKEEPER_EDGE_AWAY", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "MANAGER_STABILITY_EDGE", status: "INAPPLICABLE", score: 0 },
+      {
+        ruleName: "MANAGER_STABILITY_EDGE_AWAY",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      { ruleName: "MANAGER_EXPERIENCE_EDGE", status: "INAPPLICABLE", score: 0 },
+      {
+        ruleName: "MANAGER_EXPERIENCE_EDGE_AWAY",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      { ruleName: "MANAGER_CONTINUITY_EDGE", status: "INAPPLICABLE", score: 0 },
+      {
+        ruleName: "MANAGER_CONTINUITY_EDGE_AWAY",
+        status: "INAPPLICABLE",
+        score: 0,
+      },
+      { ruleName: "MANAGER_CHANGE_RISK_HOME", status: "INAPPLICABLE", score: 0 },
+      { ruleName: "MANAGER_CHANGE_RISK_AWAY", status: "INAPPLICABLE", score: 0 },
       { ruleName: "MARKET_LEAN_HOME", status: "PASS", score: 1 },
       { ruleName: "MARKET_LEAN_AWAY", status: "FAIL", score: 0 },
       { ruleName: "MARKET_AH_LEAN_HOME", status: "INAPPLICABLE", score: 0 },
@@ -1244,6 +1264,167 @@ describe("RuleEvaluator", () => {
             "PLAYER_ATTACK_EDGE_AWAY",
             "GOALKEEPER_EDGE_HOME",
             "GOALKEEPER_EDGE_AWAY",
+          ].includes(result.ruleName),
+        )
+        .every((result) => result.status === "INAPPLICABLE" && result.score === 0),
+    ).toBe(true);
+  });
+
+  it("evaluates M1B Manager Intelligence Rules from MANAGER_INTELLIGENCE Features", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+      createFeature({
+        featureId: "feature:evidence-1:managerTenureStabilityHome",
+        matchId: createMatchId("match-1"),
+        name: "managerTenureStabilityHome",
+        value: 80,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:managerTenureStabilityAway",
+        matchId: createMatchId("match-1"),
+        name: "managerTenureStabilityAway",
+        value: 20,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:managerExperienceHome",
+        matchId: createMatchId("match-1"),
+        name: "managerExperienceHome",
+        value: 70,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:managerExperienceAway",
+        matchId: createMatchId("match-1"),
+        name: "managerExperienceAway",
+        value: 40,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:managerContinuityHome",
+        matchId: createMatchId("match-1"),
+        name: "managerContinuityHome",
+        value: 75,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:managerContinuityAway",
+        matchId: createMatchId("match-1"),
+        name: "managerContinuityAway",
+        value: 40,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:managerChangeRiskHome",
+        matchId: createMatchId("match-1"),
+        name: "managerChangeRiskHome",
+        value: 20,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+      createFeature({
+        featureId: "feature:evidence-1:managerChangeRiskAway",
+        matchId: createMatchId("match-1"),
+        name: "managerChangeRiskAway",
+        value: 70,
+        sourceEvidenceId: "evidence-1",
+        generatedAt: "2026-07-17T10:00:00Z",
+      }),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "MANAGER_STABILITY_EDGE",
+            "MANAGER_STABILITY_EDGE_AWAY",
+            "MANAGER_EXPERIENCE_EDGE",
+            "MANAGER_EXPERIENCE_EDGE_AWAY",
+            "MANAGER_CONTINUITY_EDGE",
+            "MANAGER_CONTINUITY_EDGE_AWAY",
+            "MANAGER_CHANGE_RISK_HOME",
+            "MANAGER_CHANGE_RISK_AWAY",
+          ].includes(result.ruleName),
+        )
+        .map(({ ruleName, status, channel }) => ({
+          ruleName,
+          status,
+          channel,
+        })),
+    ).toEqual(
+      expect.arrayContaining([
+        {
+          ruleName: "MANAGER_STABILITY_EDGE",
+          status: "PASS",
+          channel: "home+",
+        },
+        {
+          ruleName: "MANAGER_STABILITY_EDGE_AWAY",
+          status: "FAIL",
+          channel: "away+",
+        },
+        {
+          ruleName: "MANAGER_EXPERIENCE_EDGE",
+          status: "PASS",
+          channel: "home+",
+        },
+        {
+          ruleName: "MANAGER_CONTINUITY_EDGE",
+          status: "PASS",
+          channel: "home+",
+        },
+        {
+          ruleName: "MANAGER_CHANGE_RISK_AWAY",
+          status: "PASS",
+          channel: "home+",
+        },
+        {
+          ruleName: "MANAGER_CHANGE_RISK_HOME",
+          status: "FAIL",
+          channel: "away+",
+        },
+      ]),
+    );
+  });
+
+  it("marks M1B Manager Intelligence Rules INAPPLICABLE when Features are absent", () => {
+    const results = new RuleEvaluator().evaluate([
+      ...allFeatures(),
+      makeFeature("attackRatingHome"),
+      makeFeature("attackRatingAway"),
+      makeFeature("defenseRatingHome"),
+      makeFeature("defenseRatingAway"),
+      makeFeature("momentumHome"),
+      makeFeature("momentumAway"),
+      makeFeature("homeAdvantage"),
+    ]);
+
+    expect(
+      results
+        .filter((result) =>
+          [
+            "MANAGER_STABILITY_EDGE",
+            "MANAGER_STABILITY_EDGE_AWAY",
+            "MANAGER_EXPERIENCE_EDGE",
+            "MANAGER_EXPERIENCE_EDGE_AWAY",
+            "MANAGER_CONTINUITY_EDGE",
+            "MANAGER_CONTINUITY_EDGE_AWAY",
+            "MANAGER_CHANGE_RISK_HOME",
+            "MANAGER_CHANGE_RISK_AWAY",
           ].includes(result.ruleName),
         )
         .every((result) => result.status === "INAPPLICABLE" && result.score === 0),

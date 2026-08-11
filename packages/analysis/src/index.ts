@@ -151,10 +151,38 @@ export { generateMatchScriptSet } from "./projection-v2/match-script/match-scrip
 export { scoreMatchScriptFromFootballState } from "./projection-v2/match-script/match-script-football-state-scoring.js";
 export { GOVERNED_MATCH_SCRIPT_PARAMETER_SET } from "./projection-v2/match-script/match-script-governed-parameters.js";
 export {
+  MATCH_SCRIPT_BASELINE_V1_PARAMETER_SET,
+  MATCH_SCRIPT_R1B_CANDIDATE_B_PARAMETER_SET,
+  MATCH_SCRIPT_R1B_CANDIDATE_C_PARAMETER_SET,
+} from "./projection-v2/match-script/match-script-calibration-candidates.js";
+export {
+  R1B_MATCH_SCRIPT_CALIBRATION_GOVERNANCE,
+  getProductionMatchScriptParameterSet,
+  getR1BCandidateCMatchScriptParameterSet,
+  resolveMatchScriptParameterSet,
+} from "./projection-v2/match-script/match-script-calibration-governance.js";
+export type {
+  R1BCalibrationGovernanceStatus,
+  R1BMatchScriptCalibrationGovernance,
+} from "./projection-v2/match-script/match-script-calibration-governance.js";
+export {
+  R1B_CALIBRATION_COHORT_ID,
+  buildR1BSyntheticCalibrationCohort,
+  compareR1BCandidates,
+  computeR1BScriptLayerMetrics,
+  evaluateR1BPromotionGate,
+} from "./projection-v2/match-script/match-script-calibration-cohort.js";
+export type {
+  R1BCalibrationScenario,
+  R1BCandidateComparisonRow,
+  R1BScenarioClass,
+  R1BScriptLayerMetrics,
+} from "./projection-v2/match-script/match-script-calibration-cohort.js";
+export type { MatchScriptParameterSet } from "./projection-v2/match-script/match-script-parameter-set.js";
+export {
   MATCH_SCRIPT_IDS,
   type MatchScriptId,
 } from "./projection-v2/match-script/match-script-ids.js";
-export type { MatchScriptParameterSet } from "./projection-v2/match-script/match-script-parameter-set.js";
 export {
   BASELINE_MATCH_SCRIPT_ID,
   createMatchScriptSet,

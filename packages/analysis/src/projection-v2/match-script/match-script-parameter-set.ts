@@ -23,9 +23,24 @@ export interface MatchScriptCompositeTagBonus {
   readonly reason: string;
 }
 
+/**
+ * Attack-rating asymmetry bonus for Control / Counter scripts.
+ * Optional `minimumAttackVsOpponentDefenseGap` uses existing projectionInputs
+ * defense ratings (no new Football State dimension).
+ */
 export interface MatchScriptAsymmetricBonus {
   readonly side: "home" | "away";
   readonly minimumRatingGap: number;
+  readonly weight: number;
+  readonly reason: string;
+  readonly minimumAttackVsOpponentDefenseGap?: number;
+}
+
+/**
+ * Open-match bilateral attack threat using existing side attack ratings.
+ */
+export interface MatchScriptBilateralAttackBonus {
+  readonly minimumEachAttackRating: number;
   readonly weight: number;
   readonly reason: string;
 }
@@ -38,6 +53,7 @@ export interface MatchScriptCatalogEntry {
   readonly dimensionBonuses: readonly MatchScriptDimensionBonus[];
   readonly compositeTagBonuses: readonly MatchScriptCompositeTagBonus[];
   readonly asymmetricBonuses: readonly MatchScriptAsymmetricBonus[];
+  readonly bilateralAttackBonuses?: readonly MatchScriptBilateralAttackBonus[];
   readonly maxDimensionLevel?: {
     readonly dimensionId: FootballStateDimensionId;
     readonly maximumLevel: StateDimensionLevel;
@@ -48,6 +64,7 @@ export interface MatchScriptCatalogEntry {
 
 export interface MatchScriptParameterSet {
   readonly policyVersion: typeof MATCH_SCRIPT_PARAMETER_POLICY_VERSION;
+  readonly calibrationLabel?: string;
   readonly temperature: number;
   readonly minScriptWeight: number;
   readonly minActiveScripts: number;

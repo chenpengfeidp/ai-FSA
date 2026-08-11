@@ -69,15 +69,42 @@ export function scoreMatchScriptFromFootballState(input: {
     }
   }
 
-  const { homeAttackRating, awayAttackRating } = footballState.projectionInputs;
+  const {
+    homeAttackRating,
+    awayAttackRating,
+    homeDefenseRating,
+    awayDefenseRating,
+  } = footballState.projectionInputs;
 
   for (const bonus of entry.asymmetricBonuses) {
     const gap =
       bonus.side === "home"
         ? homeAttackRating - awayAttackRating
         : awayAttackRating - homeAttackRating;
+    const attackVsOpponentDefense =
+      bonus.side === "home"
+        ? homeAttackRating - awayDefenseRating
+        : awayAttackRating - homeDefenseRating;
+    const defenseGate =
+      bonus.minimumAttackVsOpponentDefenseGap === undefined ||
+      attackVsOpponentDefense > bonus.minimumAttackVsOpponentDefenseGap;
 
-    if (gap > bonus.minimumRatingGap) {
+    if (gap > bonus.minimumRatingGap && defenseGate) {
+      score += bonus.weight;
+      activationReasons.push(bonus.reason);
+      pushUnique(footballStateRefs, "attackState");
+      pushUnique(footballStateRefs, "projectionInputs");
+      if (bonus.minimumAttackVsOpponentDefenseGap !== undefined) {
+        pushUnique(footballStateRefs, "defenseState");
+      }
+    }
+  }
+
+  for (const bonus of entry.bilateralAttackBonuses ?? []) {
+    if (
+      homeAttackRating >= bonus.minimumEachAttackRating &&
+      awayAttackRating >= bonus.minimumEachAttackRating
+    ) {
       score += bonus.weight;
       activationReasons.push(bonus.reason);
       pushUnique(footballStateRefs, "attackState");

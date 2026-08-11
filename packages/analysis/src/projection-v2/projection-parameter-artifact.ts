@@ -271,8 +271,10 @@ export const MATCH_SCRIPT_PROJECTION_PARAMETER_ARTIFACT: ProjectionParameterArti
     limitations: Object.freeze([
       "Match Script artifact: multiple pre-match scripts merged into one probability matrix.",
       "Feature-enriched lambda per script; governed script weights from matchScript.v1 tables.",
-      "RuleResults activate scripts only — they do not softmax-adjust 1X2 probabilities.",
-      "Not derived from Evaluation History or offline replay.",
+      "Production Match Script pin is Baseline A (MATCH_SCRIPT_BASELINE_V1_PARAMETER_SET).",
+      "R1B Candidate C (r1b.candidate.c.sideAwareOpen) is NON-DEFAULT: structurally validated on synthetic cohort only; NOT population validated; NOT production promoted.",
+      "Durable Evaluation History + P2H/P2I is required before Candidate C may become production default.",
+      "RuleResults do not activate scripts and do not softmax-adjust 1X2 probabilities.",
       "Not Evaluation-qualified for release claims.",
       "No Dixon–Coles ρ — independent Poisson scorelines only.",
       "No ML or automatic parameter tuning — version selection is operator/pin only.",

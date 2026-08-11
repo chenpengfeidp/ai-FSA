@@ -107,6 +107,9 @@ export function generateMatchScriptSet(input: {
     "Match Script set derived from governed matchScript.v1 Football State activation tables.",
     "Script weights are softmax-normalized affinities over Football State only — not learned.",
     "No ML, LLM, randomization, or live in-match events.",
+    ...(parameters.calibrationLabel === undefined
+      ? []
+      : [`Active Match Script calibration label: ${parameters.calibrationLabel}.`]),
   ];
 
   if (singleScriptFallback) {

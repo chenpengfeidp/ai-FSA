@@ -258,6 +258,29 @@ export {
   PROJECTION_REPLAY_SIDECAR_SCHEMA_VERSION,
 } from "./repository/projection-replay-sidecar-repository.js";
 export { InMemoryProjectionReplaySidecarRepository } from "./repository/in-memory-projection-replay-sidecar-repository.js";
+export type { ProjectionReplaySidecarRecord } from "./replay/projection-replay-sidecar-record.js";
+export {
+  SUPPORTED_PROJECTION_REPLAY_SIDECAR_SCHEMA_VERSIONS,
+  canonicalSidecarContextJson,
+  isSupportedProjectionReplaySidecarSchemaVersion,
+} from "./replay/projection-replay-sidecar-record.js";
+export { computeProjectionReplaySidecarContentSha256 } from "./replay/sidecar-content-sha256.js";
+export type {
+  ProjectionReplayEligibilityAssessment,
+  ProjectionReplayEligibilityReason,
+  SidecarContentSha256Fn,
+} from "./replay/assess-projection-replay-eligibility.js";
+export { assessProjectionReplayEligibility } from "./replay/assess-projection-replay-eligibility.js";
+export type {
+  SidecarBackfillAssessment,
+  SidecarBackfillClassification,
+} from "./replay/classify-sidecar-backfill.js";
+export { classifySidecarBackfill } from "./replay/classify-sidecar-backfill.js";
+export type { ProjectionReplayEligibilitySummary } from "./replay/summarize-projection-replay-eligibility.js";
+export {
+  assessHistoryProjectionReplayEligibility,
+  summarizeProjectionReplayEligibility,
+} from "./replay/summarize-projection-replay-eligibility.js";
 export { computeProjectionReplayReport } from "./replay/compute-projection-replay-report.js";
 export type { ComputeProjectionReplayReportInput } from "./replay/compute-projection-replay-report.js";
 export { runProjectionReplayReport } from "./replay/run-projection-replay-report.js";

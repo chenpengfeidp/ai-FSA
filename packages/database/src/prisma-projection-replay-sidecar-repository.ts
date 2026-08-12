@@ -1,19 +1,15 @@
-import { createHash } from "node:crypto";
-
 import {
   ConflictProjectionReplaySidecarError,
+  computeProjectionReplaySidecarContentSha256,
   PROJECTION_REPLAY_SIDECAR_SCHEMA_VERSION,
   type ProjectionReplaySidecar,
+  type ProjectionReplaySidecarRecord,
   type ProjectionReplaySidecarRepository,
   type SealedProjectionReplayContext,
 } from "@fas/statistics";
 import type { Prisma } from "../generated/prisma/client.js";
 import type { PrismaClient } from "../generated/prisma/client.js";
 import { FAS_EVIDENCE_NAMESPACE, uuidV5 } from "./uuid-v5.js";
-
-function sha256Hex(value: string): string {
-  return createHash("sha256").update(value, "utf8").digest("hex");
-}
 
 function sidecarIdToUuid(historyId: string): string {
   return uuidV5(`projection-replay-sidecar:${historyId}`, FAS_EVIDENCE_NAMESPACE);
@@ -118,7 +114,7 @@ export class PrismaProjectionReplaySidecarRepository
     readonly context: SealedProjectionReplayContext;
   }): Promise<void> {
     const contextJson = input.context as unknown as Prisma.InputJsonValue;
-    const contentSha256 = sha256Hex(JSON.stringify(input.context));
+    const contentSha256 = computeProjectionReplaySidecarContentSha256(input.context);
     const existing = await this.#client.projectionReplaySidecarItem.findUnique({
       where: { historyId: input.historyId },
     });
@@ -147,11 +143,34 @@ export class PrismaProjectionReplaySidecarRepository
   async findByHistoryId(
     historyId: string,
   ): Promise<SealedProjectionReplayContext | undefined> {
+    const record = await this.findRecordByHistoryId(historyId);
+    return record?.context;
+  }
+
+  async findRecordByHistoryId(
+    historyId: string,
+  ): Promise<ProjectionReplaySidecarRecord | undefined> {
     const row = await this.#client.projectionReplaySidecarItem.findUnique({
       where: { historyId },
     });
 
-    return row === null ? undefined : reviveContext(row.contextJson);
+    if (row === null) {
+      return undefined;
+    }
+
+    const context = reviveContext(row.contextJson);
+
+    if (context === undefined) {
+      return undefined;
+    }
+
+    return Object.freeze({
+      historyId: row.historyId,
+      matchId: row.matchId,
+      schemaVersion: row.schemaVersion,
+      contentSha256: row.contentSha256,
+      context,
+    });
   }
 
   async buildSidecarMap(): Promise<ProjectionReplaySidecar> {

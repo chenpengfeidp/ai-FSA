@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@fas/tsconfig": "workspace:*",
+    "@types/node": "24.13.3",
     "typescript": "6.0.3"
   }
 }

@@ -19,6 +19,12 @@ export class ProjectionReplaySidecarRepositoryBridge
     return this.repository.findByHistoryId(historyId);
   }
 
+  findRecordByHistoryId(
+    historyId: string,
+  ): ReturnType<ProjectionReplaySidecarRepository["findRecordByHistoryId"]> {
+    return this.repository.findRecordByHistoryId(historyId);
+  }
+
   buildSidecarMap(): ReturnType<
     ProjectionReplaySidecarRepository["buildSidecarMap"]
   > {

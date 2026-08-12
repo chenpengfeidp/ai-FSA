@@ -1,8 +1,8 @@
 import type { SealedProjectionReplayContext } from "../replay/projection-replay-context.js";
 import type { ProjectionReplaySidecar } from "../replay/projection-replay-context.js";
+import type { ProjectionReplaySidecarRecord } from "../replay/projection-replay-sidecar-record.js";
 
-export const PROJECTION_REPLAY_SIDECAR_SCHEMA_VERSION =
-  "projection-replay-sidecar.p2k.b" as const;
+export { PROJECTION_REPLAY_SIDECAR_SCHEMA_VERSION } from "../replay/projection-replay-sidecar-record.js";
 
 export interface ProjectionReplaySidecarRepository {
   save(input: {
@@ -13,6 +13,10 @@ export interface ProjectionReplaySidecarRepository {
   findByHistoryId(
     historyId: string,
   ): Promise<SealedProjectionReplayContext | undefined>;
+  /** P2K-C — metadata + context for eligibility / integrity. */
+  findRecordByHistoryId(
+    historyId: string,
+  ): Promise<ProjectionReplaySidecarRecord | undefined>;
   buildSidecarMap(): Promise<ProjectionReplaySidecar>;
 }
 

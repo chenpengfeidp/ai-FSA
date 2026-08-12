@@ -113,3 +113,93 @@ export function resolveMatchScriptParameterSet(input?: {
 
   return GOVERNED_MATCH_SCRIPT_PARAMETER_SET;
 }
+
+/**
+ * Offline-only Match Script calibration labels accepted by P2K-D replay.
+ * Explicit selection only — never inferred from arbitrary strings.
+ */
+export const OFFLINE_MATCH_SCRIPT_CALIBRATION_LABELS = Object.freeze([
+  "r1b.candidate.a.baseline",
+  "r1b.candidate.c.sideAwareOpen",
+] as const);
+
+export type OfflineMatchScriptCalibrationLabel =
+  (typeof OFFLINE_MATCH_SCRIPT_CALIBRATION_LABELS)[number];
+
+export type OfflineMatchScriptParameterResolveErrorCode =
+  | "INVALID_PARAMETER_LABEL"
+  | "PRODUCTION_IMPLICIT_OVERRIDE";
+
+export type OfflineMatchScriptParameterResolveResult =
+  | {
+      readonly ok: true;
+      readonly value: MatchScriptParameterSet;
+      readonly label: OfflineMatchScriptCalibrationLabel;
+      readonly isProductionDefault: boolean;
+      readonly productionPromoted: false;
+    }
+  | {
+      readonly ok: false;
+      readonly error: {
+        readonly code: OfflineMatchScriptParameterResolveErrorCode;
+        readonly message: string;
+      };
+    };
+
+/**
+ * Strict offline resolver for P2K-D A/B replay.
+ *
+ * Unlike {@link resolveMatchScriptParameterSet}, this fails closed on empty
+ * or unknown labels and never silently falls back to Baseline A.
+ * Candidate C remains NON-DEFAULT and is never implied as production.
+ */
+export function resolveOfflineMatchScriptParameterSet(input: {
+  readonly calibrationLabel: string | undefined;
+}): OfflineMatchScriptParameterResolveResult {
+  const label = input.calibrationLabel?.trim();
+
+  if (label === undefined || label.length === 0) {
+    return Object.freeze({
+      ok: false,
+      error: Object.freeze({
+        code: "PRODUCTION_IMPLICIT_OVERRIDE" as const,
+        message:
+          "Offline Match Script replay requires an explicit calibrationLabel; production Baseline A must not be inferred.",
+      }),
+    });
+  }
+
+  if (
+    label === MATCH_SCRIPT_BASELINE_V1_PARAMETER_SET.calibrationLabel ||
+    label === "r1b.candidate.a.baseline"
+  ) {
+    return Object.freeze({
+      ok: true,
+      value: MATCH_SCRIPT_BASELINE_V1_PARAMETER_SET,
+      label: "r1b.candidate.a.baseline" as const,
+      isProductionDefault: true,
+      productionPromoted: false as const,
+    });
+  }
+
+  if (
+    label === MATCH_SCRIPT_R1B_CANDIDATE_C_PARAMETER_SET.calibrationLabel ||
+    label === "r1b.candidate.c.sideAwareOpen"
+  ) {
+    return Object.freeze({
+      ok: true,
+      value: MATCH_SCRIPT_R1B_CANDIDATE_C_PARAMETER_SET,
+      label: "r1b.candidate.c.sideAwareOpen" as const,
+      isProductionDefault: false,
+      productionPromoted: false as const,
+    });
+  }
+
+  return Object.freeze({
+    ok: false,
+    error: Object.freeze({
+      code: "INVALID_PARAMETER_LABEL" as const,
+      message: `Unsupported offline Match Script calibrationLabel: ${label}`,
+    }),
+  });
+}

@@ -156,12 +156,17 @@ export {
   MATCH_SCRIPT_R1B_CANDIDATE_C_PARAMETER_SET,
 } from "./projection-v2/match-script/match-script-calibration-candidates.js";
 export {
+  OFFLINE_MATCH_SCRIPT_CALIBRATION_LABELS,
   R1B_MATCH_SCRIPT_CALIBRATION_GOVERNANCE,
   getProductionMatchScriptParameterSet,
   getR1BCandidateCMatchScriptParameterSet,
   resolveMatchScriptParameterSet,
+  resolveOfflineMatchScriptParameterSet,
 } from "./projection-v2/match-script/match-script-calibration-governance.js";
 export type {
+  OfflineMatchScriptCalibrationLabel,
+  OfflineMatchScriptParameterResolveErrorCode,
+  OfflineMatchScriptParameterResolveResult,
   R1BCalibrationGovernanceStatus,
   R1BMatchScriptCalibrationGovernance,
 } from "./projection-v2/match-script/match-script-calibration-governance.js";
@@ -266,3 +271,14 @@ export {
   buildProjectionReplayContext,
   buildSealedPredictionInputFromAnalysis,
 } from "./replay/analysis-projection-replay-port.js";
+export { runOfflineMatchScriptReplay } from "./replay/offline-match-script-replay.js";
+export type {
+  OfflineHistoricalReplayContextIdentity,
+  OfflineMatchScriptReplayErrorCode,
+  OfflineMatchScriptReplayOutcome,
+  OfflineMatchScriptReplayResult,
+} from "./replay/offline-match-script-replay.js";
+export {
+  buildFeatureBundleFromSealedReplayContext,
+  buildRuleResultsFromSealedReplayContext,
+} from "./replay/sealed-replay-context-builders.js";

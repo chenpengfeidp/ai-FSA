@@ -1,6 +1,3 @@
-import { createFeature, createFeatureBundle } from "@fas/feature";
-import { createMatchId } from "@fas/match";
-import { createRuleResult } from "@fas/rule";
 import type {
   ProjectionReplayPort,
   ProjectionReplayPortInput,
@@ -18,6 +15,10 @@ import {
 } from "../projection-v2/football-state/football-state-dimensions.js";
 import { buildScenarioSet } from "../scenario/scenario-set.js";
 import { getProjectionParameterArtifactByVersionLabel } from "../projection-v2/projection-parameter-registry.js";
+import {
+  buildFeatureBundleFromSealedReplayContext,
+  buildRuleResultsFromSealedReplayContext,
+} from "./sealed-replay-context-builders.js";
 
 type EvaluationHistoryConfidence = Readonly<{
   predictionConfidence: number;
@@ -49,52 +50,6 @@ function countRequiredEvidence(analysis: AnalysisResult): number {
   return [hasMatchInfo, hasHomeForm, hasAwayForm, hasHomeStats, hasAwayStats].filter(
     Boolean,
   ).length;
-}
-
-function buildFeatureBundle(context: SealedProjectionReplayContext) {
-  const matchId = createMatchId(context.matchId);
-  const features = Object.freeze(
-    context.features.map((feature) =>
-      createFeature({
-        featureId: `replay:${context.matchId}:${feature.name}`,
-        matchId,
-        name: feature.name,
-        value: feature.value,
-        explanation: `Replay feature ${feature.name}.`,
-        sourceEvidenceId: context.evidenceRefs[0] ?? "replay:evidence",
-        generatedAt: context.generatedAt,
-      }),
-    ),
-  );
-
-  return createFeatureBundle({
-    matchId,
-    features,
-    evidenceRefs: Object.freeze([...context.evidenceRefs]),
-    checksum: context.featureBundleChecksum,
-    status: context.featureBundleStatus,
-  });
-}
-
-function buildRuleResults(context: SealedProjectionReplayContext) {
-  const matchId = createMatchId(context.matchId);
-
-  return Object.freeze(
-    context.rules.map((rule) =>
-      createRuleResult({
-        ruleId: rule.ruleId,
-        matchId,
-        ruleName: rule.ruleName,
-        status: rule.status,
-        score: rule.score,
-        weight: rule.weight,
-        channel: rule.channel,
-        explanation: `Replay rule ${rule.ruleName}.`,
-        sourceFeatureIds: Object.freeze([]),
-        evaluatedAt: context.generatedAt,
-      }),
-    ),
-  );
 }
 
 function buildSealedPredictionFromReplayProjection(input: {
@@ -290,8 +245,8 @@ export class AnalysisProjectionReplayPort implements ProjectionReplayPort {
       });
     }
 
-    const featureBundle = buildFeatureBundle(context);
-    const ruleResults = buildRuleResults(context);
+    const featureBundle = buildFeatureBundleFromSealedReplayContext(context);
+    const ruleResults = buildRuleResultsFromSealedReplayContext(context);
     const parameters =
       context.parameterVersionLabel === undefined
         ? undefined

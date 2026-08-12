@@ -279,6 +279,15 @@ export type {
   OfflineMatchScriptReplayResult,
 } from "./replay/offline-match-script-replay.js";
 export {
+  executeSealedCohortOfflineReplayPair,
+  executeSealedCohortOfflineReplayRun,
+} from "./replay/execute-sealed-cohort-offline-replay-run.js";
+export type {
+  ExecuteSealedCohortOfflineReplayPairOutcome,
+  ExecuteSealedCohortOfflineReplayRunOutcome,
+  SealedCohortOfflineReplayPair,
+} from "./replay/execute-sealed-cohort-offline-replay-run.js";
+export {
   buildFeatureBundleFromSealedReplayContext,
   buildRuleResultsFromSealedReplayContext,
 } from "./replay/sealed-replay-context-builders.js";

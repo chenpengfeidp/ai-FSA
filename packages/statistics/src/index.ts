@@ -314,6 +314,25 @@ export {
   SealedReplayCohortImmutableError,
 } from "./repository/replay-cohort-repository.js";
 export { InMemoryReplayCohortRepository } from "./repository/in-memory-replay-cohort-repository.js";
+export {
+  SEALED_COHORT_OFFLINE_REPLAY_CALIBRATION_LABELS,
+  SEALED_COHORT_OFFLINE_REPLAY_RUN_SCHEMA_VERSION,
+  SealedCohortOfflineReplayRunValidationError,
+  isSealedCohortOfflineReplayCalibrationLabel,
+} from "./domain/sealed-cohort-offline-replay-run.js";
+export type {
+  SealedCohortOfflineReplayCalibrationLabel,
+  SealedCohortOfflineReplayContextIdentity,
+  SealedCohortOfflineReplayMemberFailureCode,
+  SealedCohortOfflineReplayMemberResult,
+  SealedCohortOfflineReplayRun,
+  SealedCohortOfflineReplayRunStatus,
+  SealedCohortOfflineReplayRunValidationErrorCode,
+} from "./domain/sealed-cohort-offline-replay-run.js";
+export { validateSealedCohortForOfflineRun } from "./replay/validate-sealed-cohort-for-offline-run.js";
+export type { ReplayRunRepository } from "./repository/replay-run-repository.js";
+export { ConflictReplayRunError } from "./repository/replay-run-repository.js";
+export { InMemoryReplayRunRepository } from "./repository/in-memory-replay-run-repository.js";
 export { computeProjectionReplayReport } from "./replay/compute-projection-replay-report.js";
 export type { ComputeProjectionReplayReportInput } from "./replay/compute-projection-replay-report.js";
 export { runProjectionReplayReport } from "./replay/run-projection-replay-report.js";

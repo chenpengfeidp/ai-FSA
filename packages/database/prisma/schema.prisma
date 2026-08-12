@@ -217,3 +217,26 @@ model ReplayCohortMemberItem {
   @@index([historyId])
   @@map("replay_cohort_member_items")
 }
+
+/// P2K-F durable sealed-cohort offline Replay Run (measurement dataset; no population metrics).
+model ReplayRunItem {
+  id                         String   @id @db.Uuid
+  replayRunId                String   @unique @map("replay_run_id")
+  cohortId                   String   @map("cohort_id")
+  membershipDigestSha256     String   @map("membership_digest_sha256") @db.Char(64)
+  matchScriptCalibrationLabel String  @map("match_script_calibration_label")
+  schemaVersion              String   @map("schema_version")
+  status                     String
+  createdAt                  DateTime @map("created_at") @db.Timestamptz(3)
+  completedAt                DateTime @map("completed_at") @db.Timestamptz(3)
+  memberCount                Int      @map("member_count")
+  successCount               Int      @map("success_count")
+  failureCount               Int      @map("failure_count")
+  isProductionDefault        Boolean  @map("is_production_default")
+  productionPromoted         Boolean  @map("production_promoted")
+  runJson                    Json     @map("run_json")
+
+  @@index([cohortId, matchScriptCalibrationLabel])
+  @@index([createdAt(sort: Desc)])
+  @@map("replay_run_items")
+}

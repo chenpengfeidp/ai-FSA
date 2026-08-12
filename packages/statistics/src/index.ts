@@ -281,6 +281,39 @@ export {
   assessHistoryProjectionReplayEligibility,
   summarizeProjectionReplayEligibility,
 } from "./replay/summarize-projection-replay-eligibility.js";
+export {
+  REPLAY_COHORT_ORDERING_HISTORY_ID_ASC,
+  REPLAY_COHORT_SCHEMA_VERSION,
+  REPLAY_ELIGIBILITY_CONTRACT_VERSION,
+  ReplayCohortValidationError,
+  createDefaultReplayCohortSpecification,
+} from "./domain/replay-cohort.js";
+export type {
+  ReplayCohort,
+  ReplayCohortMember,
+  ReplayCohortOrdering,
+  ReplayCohortSpecification,
+  ReplayCohortStatus,
+} from "./domain/replay-cohort.js";
+export {
+  computeReplayCohortMembershipDigestSha256,
+  canonicalReplayCohortMembershipJson,
+} from "./replay/compute-replay-cohort-membership-digest.js";
+export { selectReplayCohortMembers } from "./replay/select-replay-cohort-members.js";
+export type { ReplayCohortMembershipSelection } from "./replay/select-replay-cohort-members.js";
+export { buildReplayCohort } from "./replay/build-replay-cohort.js";
+export {
+  createAndSealReplayCohort,
+  resolveSealedReplayCohort,
+} from "./replay/create-sealed-replay-cohort.js";
+export type { CreateSealedReplayCohortOutcome } from "./replay/create-sealed-replay-cohort.js";
+export type { ReplayCohortRepository } from "./repository/replay-cohort-repository.js";
+export {
+  ConflictReplayCohortError,
+  ReplayCohortNotFoundError,
+  SealedReplayCohortImmutableError,
+} from "./repository/replay-cohort-repository.js";
+export { InMemoryReplayCohortRepository } from "./repository/in-memory-replay-cohort-repository.js";
 export { computeProjectionReplayReport } from "./replay/compute-projection-replay-report.js";
 export type { ComputeProjectionReplayReportInput } from "./replay/compute-projection-replay-report.js";
 export { runProjectionReplayReport } from "./replay/run-projection-replay-report.js";

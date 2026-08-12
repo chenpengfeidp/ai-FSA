@@ -183,3 +183,37 @@ model ProjectionReplaySidecarItem {
   @@index([matchId])
   @@map("projection_replay_sidecar_items")
 }
+
+/// P2K-E durable Sealed Replay Cohort (membership snapshot only).
+model ReplayCohortItem {
+  id                           String                   @id @db.Uuid
+  cohortId                     String                   @unique @map("cohort_id")
+  schemaVersion                String                   @map("schema_version")
+  status                       String
+  specificationJson            Json                     @map("specification_json")
+  eligibilityContractVersion   String                   @map("eligibility_contract_version")
+  sidecarSchemaVersion         String                   @map("sidecar_schema_version")
+  createdAt                    DateTime                 @map("created_at") @db.Timestamptz(3)
+  membershipCreatedAt          DateTime                 @map("membership_created_at") @db.Timestamptz(3)
+  sealedAt                     DateTime?                @map("sealed_at") @db.Timestamptz(3)
+  membershipDigestSha256       String                   @map("membership_digest_sha256") @db.Char(64)
+  limitationsJson              Json                     @map("limitations_json")
+  members                      ReplayCohortMemberItem[]
+
+  @@index([status, createdAt(sort: Desc)])
+  @@map("replay_cohort_items")
+}
+
+model ReplayCohortMemberItem {
+  id        String          @id @db.Uuid
+  cohortId  String          @map("cohort_id")
+  historyId String          @map("history_id")
+  matchId   String          @map("match_id")
+  position  Int
+  cohort    ReplayCohortItem @relation(fields: [cohortId], references: [cohortId], onDelete: Restrict)
+
+  @@unique([cohortId, historyId])
+  @@unique([cohortId, position])
+  @@index([historyId])
+  @@map("replay_cohort_member_items")
+}

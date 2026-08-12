@@ -8,4 +8,5 @@ export {
 export { PrismaEvidenceRepository } from "./prisma-evidence-repository.js";
 export { PrismaEvaluationHistoryRepository } from "./prisma-evaluation-history-repository.js";
 export { PrismaProjectionReplaySidecarRepository } from "./prisma-projection-replay-sidecar-repository.js";
+export { PrismaReplayCohortRepository } from "./prisma-replay-cohort-repository.js";
 export { evidenceIdToUuid, FAS_EVIDENCE_NAMESPACE, uuidV5 } from "./uuid-v5.js";

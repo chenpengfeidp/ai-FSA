@@ -10,4 +10,5 @@ export { PrismaEvaluationHistoryRepository } from "./prisma-evaluation-history-r
 export { PrismaProjectionReplaySidecarRepository } from "./prisma-projection-replay-sidecar-repository.js";
 export { PrismaReplayCohortRepository } from "./prisma-replay-cohort-repository.js";
 export { PrismaReplayRunRepository } from "./prisma-replay-run-repository.js";
+export { PrismaPopulationEvaluationRepository } from "./prisma-population-evaluation-repository.js";
 export { evidenceIdToUuid, FAS_EVIDENCE_NAMESPACE, uuidV5 } from "./uuid-v5.js";

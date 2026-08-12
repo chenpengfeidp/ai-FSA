@@ -333,6 +333,27 @@ export { validateSealedCohortForOfflineRun } from "./replay/validate-sealed-coho
 export type { ReplayRunRepository } from "./repository/replay-run-repository.js";
 export { ConflictReplayRunError } from "./repository/replay-run-repository.js";
 export { InMemoryReplayRunRepository } from "./repository/in-memory-replay-run-repository.js";
+export {
+  SEALED_COHORT_POPULATION_EVALUATION_SCHEMA_VERSION,
+  SealedCohortPopulationEvaluationError,
+} from "./domain/sealed-cohort-population-evaluation.js";
+export type {
+  PopulationEvaluationCoverage,
+  PopulationMetricAvailability,
+  PopulationMetricComparisonRow,
+  PopulationMetricValue,
+  PopulationWinnerBreakdown,
+  SealedCohortPopulationEvaluation,
+  SealedCohortPopulationEvaluationErrorCode,
+} from "./domain/sealed-cohort-population-evaluation.js";
+export { computeSealedCohortPopulationEvaluation } from "./evaluation/compute-sealed-cohort-population-evaluation.js";
+export type {
+  ComputeSealedCohortPopulationEvaluationInput,
+  ComputeSealedCohortPopulationEvaluationOutcome,
+} from "./evaluation/compute-sealed-cohort-population-evaluation.js";
+export type { PopulationEvaluationRepository } from "./repository/population-evaluation-repository.js";
+export { ConflictPopulationEvaluationError } from "./repository/population-evaluation-repository.js";
+export { InMemoryPopulationEvaluationRepository } from "./repository/in-memory-population-evaluation-repository.js";
 export { computeProjectionReplayReport } from "./replay/compute-projection-replay-report.js";
 export type { ComputeProjectionReplayReportInput } from "./replay/compute-projection-replay-report.js";
 export { runProjectionReplayReport } from "./replay/run-projection-replay-report.js";

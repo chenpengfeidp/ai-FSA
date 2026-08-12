@@ -240,3 +240,20 @@ model ReplayRunItem {
   @@index([createdAt(sort: Desc)])
   @@map("replay_run_items")
 }
+
+/// P2K-G durable sealed-cohort population evaluation (A vs C; evidence only; no promotion).
+model PopulationEvaluationItem {
+  id                     String   @id @db.Uuid
+  evaluationRunId        String   @unique @map("evaluation_run_id")
+  cohortId               String   @map("cohort_id")
+  membershipDigestSha256 String   @map("membership_digest_sha256") @db.Char(64)
+  baselineReplayRunId    String   @map("baseline_replay_run_id")
+  candidateReplayRunId   String   @map("candidate_replay_run_id")
+  schemaVersion          String   @map("schema_version")
+  createdAt              DateTime @map("created_at") @db.Timestamptz(3)
+  checksum               String   @db.Char(64)
+  evaluationJson         Json     @map("evaluation_json")
+
+  @@index([cohortId, createdAt(sort: Desc)])
+  @@map("population_evaluation_items")
+}

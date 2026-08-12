@@ -2,15 +2,15 @@
 
 ## Snapshot
 
-- Last updated: 2026-08-12 (P2K-F Sealed Cohort Offline Replay Run)
+- Last updated: 2026-08-12 (P2K-G Population Evaluation)
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **P2K-F COMPLETED**. Offline Replay Runs on SEALED cohorts (`executeSealedCohortOfflineReplayPair` → P2K-D) for Baseline A vs Candidate C with same historical context; Prisma `ReplayRunItem` persistence. No population metrics. Production default Baseline A; Candidate C NON-DEFAULT. Product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
+- Current task status: **P2K-G COMPLETED**. Paired population evaluation of Baseline A vs Candidate C on the same SEALED cohort using P2K-F offline Replay Runs + History outcomes (`computeSealedCohortPopulationEvaluation`); Prisma `PopulationEvaluationItem` persistence. Candidate C remains NON-DEFAULT / not promoted. Production Match Script unchanged. Product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **P2K-F** complete (`docs/sprints/P2K/P2K_F_SEALED_COHORT_OFFLINE_REPLAY_RUN_COMPLETION_REPORT.md`). Population evaluation **not** implemented. **Governance note:** R1A/R1B / P2A–P2K / M1B not yet listed in doc 40 (doc 40 **R1** = AI Review ≠ R1B).
-- Last completed delivery: Sprint **P2K-F** (`docs/sprints/P2K/P2K_F_SEALED_COHORT_OFFLINE_REPLAY_RUN_COMPLETION_REPORT.md`); prior P2K-E, P2K-D, P2K-C, P2K-A/B, P2K planning, R1B, R1A, M1B, P2J, P2I, P2H, P2G, P2F, P2E, P2D, M1A, O1, V1A, A2, P1B, P1A, L1B, L1A, DA, P0, A1.5, A1
+- Current sprint: **P2K-G** complete (`docs/sprints/P2K/P2K_G_POPULATION_EVALUATION_COMPLETION_REPORT.md`). **Governance note:** R1A/R1B / P2A–P2K / M1B not yet listed in doc 40 (doc 40 **R1** = AI Review ≠ R1B).
+- Last completed delivery: Sprint **P2K-G** (`docs/sprints/P2K/P2K_G_POPULATION_EVALUATION_COMPLETION_REPORT.md`); prior P2K-F, P2K-E, P2K-D, P2K-C, P2K-A/B, P2K planning, R1B, R1A, M1B, P2J, P2I, P2H, P2G, P2F, P2E, P2D, M1A, O1, V1A, A2, P1B, P1A, L1B, L1A, DA, P0, A1.5, A1
 - Demo: recorded cassette `football:100001` includes full xG windows + Match Context + Club Intelligence + Manager Intelligence (both sides; confirmed match managers with identity/tenure/previous clubs) + enriched Player Intelligence (season stats/age/captain/availability/match squad status); odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`; evaluation demo population + Evaluation History + Prediction Calibration report + Football Intelligence Validation report + Football Intelligence Contribution report (9 domains incl. Manager) in `@fas/statistics`
-- Next authorized work: **P2K-G** Population evaluation on sealed cohort offline Replay Runs. Do not promote Candidate C. Parallel: **L2A** or doc 40 items. Design-only: `docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`.
+- Next authorized work: Human governance / Candidate C promotion gate (not automatic). Parallel: **L2A** or doc 40 items. Design-only: `docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`. Do not implement P2K-H unless separately authorized.
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
@@ -239,18 +239,18 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-**P2K-F** sealed cohort offline Replay Run is complete (`executeSealedCohortOfflineReplayPair` + durable `ReplayRunItem`; same-context A vs C; no population metrics). Next authorized coding slice: **P2K-G** Population evaluation. Do **not** promote Candidate C.
+**P2K-G** population evaluation is complete (`computeSealedCohortPopulationEvaluation` + durable `PopulationEvaluationItem`; same sealed cohort; paired A/C; A1/A2/P2H metrics reused). Candidate C remains NON-DEFAULT and is **not** auto-promoted. Production Match Script unchanged.
 
 Recommended follow-ons (ordered):
 
-1. **P2K-G** Population evaluation on sealed cohort offline Replay Runs (explicit gate; no auto-promotion);
+1. Human governance / Candidate C promotion decision (explicit gate; no auto-promotion in code);
 2. **L2A** Squad Intelligence Evidence (or other doc 40 items);
 3. Follow **`docs/40_PRODUCT_ROADMAP.md`** for trust-track governance listing of P2*/R1B/M1B;
 4. Keep Odds as optional market layer only;
 5. Compose migrate automation / postgres-mode smoke evidence (platform companion);
 6. Do not start Redis/BullMQ/pgvector, public auth, or network AI without a separate approved milestone.
 
-Recently delivered: **P2K-F** (`docs/sprints/P2K/P2K_F_SEALED_COHORT_OFFLINE_REPLAY_RUN_COMPLETION_REPORT.md`); **P2K-E**; **P2K-D**; **P2K-C**; **P2K-A/B**; **P2K** planning; **R1B** / **R1A**; **M1B** / **M1A**; **P2J**–**P2A**; **O1**; **V1A**; **A2**; **P1B** / **P1A**; **L1B** / **L1A**; **A1.5** / **A1**; Freeze **v0.3**.
+Recently delivered: **P2K-G** (`docs/sprints/P2K/P2K_G_POPULATION_EVALUATION_COMPLETION_REPORT.md`); **P2K-F**; **P2K-E**; **P2K-D**; **P2K-C**; **P2K-A/B**; **P2K** planning; **R1B** / **R1A**; **M1B** / **M1A**; **P2J**–**P2A**; **O1**; **V1A**; **A2**; **P1B** / **P1A**; **L1B** / **L1A**; **A1.5** / **A1**; Freeze **v0.3**.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

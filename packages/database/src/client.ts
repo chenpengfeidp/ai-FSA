@@ -1,6 +1,7 @@
 import type { EvidenceRepository } from "@fas/evidence";
 import type {
   EvaluationHistoryRepository,
+  PopulationEvaluationRepository,
   ProjectionReplaySidecarRepository,
   ReplayCohortRepository,
   ReplayRunRepository,
@@ -10,6 +11,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaEvidenceRepository } from "./prisma-evidence-repository.js";
 import { PrismaEvaluationHistoryRepository } from "./prisma-evaluation-history-repository.js";
+import { PrismaPopulationEvaluationRepository } from "./prisma-population-evaluation-repository.js";
 import { PrismaProjectionReplaySidecarRepository } from "./prisma-projection-replay-sidecar-repository.js";
 import { PrismaReplayCohortRepository } from "./prisma-replay-cohort-repository.js";
 import { PrismaReplayRunRepository } from "./prisma-replay-run-repository.js";
@@ -28,6 +30,7 @@ export interface FasDatabaseHandle {
   readonly projectionReplaySidecarRepository: ProjectionReplaySidecarRepository;
   readonly replayCohortRepository: ReplayCohortRepository;
   readonly replayRunRepository: ReplayRunRepository;
+  readonly populationEvaluationRepository: PopulationEvaluationRepository;
 }
 
 function createPrismaClient(connectionString: string): PrismaClient {
@@ -68,6 +71,7 @@ export function createFasDatabase(connectionString: string): FasDatabaseHandle {
     ),
     replayCohortRepository: new PrismaReplayCohortRepository(client),
     replayRunRepository: new PrismaReplayRunRepository(client),
+    populationEvaluationRepository: new PrismaPopulationEvaluationRepository(client),
   });
 }
 

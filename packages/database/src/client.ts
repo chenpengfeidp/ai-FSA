@@ -1,10 +1,14 @@
 import type { EvidenceRepository } from "@fas/evidence";
-import type { EvaluationHistoryRepository } from "@fas/statistics";
+import type {
+  EvaluationHistoryRepository,
+  ProjectionReplaySidecarRepository,
+} from "@fas/statistics";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaEvidenceRepository } from "./prisma-evidence-repository.js";
 import { PrismaEvaluationHistoryRepository } from "./prisma-evaluation-history-repository.js";
+import { PrismaProjectionReplaySidecarRepository } from "./prisma-projection-replay-sidecar-repository.js";
 
 export interface DatabaseClientLifecycle {
   connect(): Promise<void>;
@@ -17,6 +21,7 @@ export interface FasDatabaseHandle {
   readonly lifecycle: DatabaseClientLifecycle;
   readonly evidenceRepository: EvidenceRepository;
   readonly evaluationHistoryRepository: EvaluationHistoryRepository;
+  readonly projectionReplaySidecarRepository: ProjectionReplaySidecarRepository;
 }
 
 function createPrismaClient(connectionString: string): PrismaClient {
@@ -44,7 +49,7 @@ export function createDatabaseClient(
   return toLifecycle(createPrismaClient(connectionString));
 }
 
-/** Shared Prisma client for readiness ping and durable Evidence repository. */
+/** Shared Prisma client for readiness ping and durable platform repositories. */
 export function createFasDatabase(connectionString: string): FasDatabaseHandle {
   const client = createPrismaClient(connectionString);
 
@@ -52,6 +57,9 @@ export function createFasDatabase(connectionString: string): FasDatabaseHandle {
     lifecycle: toLifecycle(client),
     evidenceRepository: new PrismaEvidenceRepository(client),
     evaluationHistoryRepository: new PrismaEvaluationHistoryRepository(client),
+    projectionReplaySidecarRepository: new PrismaProjectionReplaySidecarRepository(
+      client,
+    ),
   });
 }
 

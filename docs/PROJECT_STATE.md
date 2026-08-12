@@ -2,15 +2,15 @@
 
 ## Snapshot
 
-- Last updated: 2026-08-11 (R1B Match Script Calibration — governance correction)
+- Last updated: 2026-08-12 (P2K-A/B Durable Evaluation History + Projection Replay Sidecar)
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **R1B COMPLETED — STRUCTURAL CALIBRATION** (governance-corrected). Production default = `MATCH_SCRIPT_BASELINE_V1_PARAMETER_SET`. Candidate `r1b.candidate.c.sideAwareOpen` = NON-DEFAULT / STRUCTURALLY VALIDATED / PENDING POPULATION VALIDATION. Prior **R1A** audit + **M1B** + **P2J** + **O1** + **V1A** + **A2** + **P1B** complete; product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
+- Current task status: **P2K-A + P2K-B COMPLETED**. Platform persistence mode is explicit (`platformPersistence` / `EVIDENCE_REPOSITORY_MODE`). Evaluation History + Projection Replay Sidecar are dual-writable to PostgreSQL when mode=postgres. **R1B** remains structural-only: production default = Baseline A; Candidate C = NON-DEFAULT / PENDING POPULATION VALIDATION. Product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **R1B** structural calibration complete. **Production default:** Baseline A. **Candidate C:** retained for A/B; not population validated; not production promoted. Durable Evaluation History required before any Candidate C production promotion. Prior **M1B** / **P2J** / **P2I**. **Governance note:** R1A/R1B / P2A–P2J / M1B not yet listed in doc 40 (doc 40 **R1** = AI Review ≠ R1B).
-- Last completed delivery: Sprint **R1B** governance-corrected (`docs/sprints/R1B/R1B_MATCH_SCRIPT_CALIBRATION_COMPLETION_REPORT.md`); prior R1A audit, M1B, P2J, P2I, P2H, P2G, P2F, P2E, P2D, M1A, O1, V1A, A2, P1B, P1A, L1B, L1A, DA, P0, A1.5, A1
+- Current sprint: **P2K-A/B** complete (`docs/sprints/P2K/P2K_AB_DURABLE_HISTORY_SIDECAR_COMPLETION_REPORT.md`). Replay Cohort / Replay Run / Candidate A/B override **not** implemented. **Governance note:** R1A/R1B / P2A–P2K / M1B not yet listed in doc 40 (doc 40 **R1** = AI Review ≠ R1B).
+- Last completed delivery: Sprint **P2K-A/B** (`docs/sprints/P2K/P2K_AB_DURABLE_HISTORY_SIDECAR_COMPLETION_REPORT.md`); prior P2K planning, R1B, R1A, M1B, P2J, P2I, P2H, P2G, P2F, P2E, P2D, M1A, O1, V1A, A2, P1B, P1A, L1B, L1A, DA, P0, A1.5, A1
 - Demo: recorded cassette `football:100001` includes full xG windows + Match Context + Club Intelligence + Manager Intelligence (both sides; confirmed match managers with identity/tenure/previous clubs) + enriched Player Intelligence (season stats/age/captain/availability/match squad status); odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`; evaluation demo population + Evaluation History + Prediction Calibration report + Football Intelligence Validation report + Football Intelligence Contribution report (9 domains incl. Manager) in `@fas/statistics`
-- Next authorized work: **Durable Evaluation History** (explicit gate) before Candidate C population promotion; or **L2A** Squad Intelligence Evidence; or task-authorized **P2K** durable replay sidecar. Do not claim R1B population improvement. Parallel follow-ons require doc 40 or explicit authorization. A parallel **design-only** deliverable, `docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`, remains design-only.
+- Next authorized work: **P2K-C** Sidecar completeness + backfill policy; then P2K-D… for sealed cohort / A vs C replay. Do not promote Candidate C. Parallel: **L2A** or doc 40 items. Design-only: `docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`.
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
@@ -224,7 +224,7 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Market odds are market signals, not ground truth; slice 1.2 does not blend them into 1X2.
 - Default calibration is pinned `calibration:population-demo:v1` (frequency-ratio over a recorded demo population); still not Evaluation-qualified; match runs do not retrain.
 - Demo evidence is fixture-backed and may be `unverified`.
-- Prisma now includes the first Evidence/Match catalog models (P.2); default API mode remains in-memory Evidence unless `EVIDENCE_REPOSITORY_MODE=postgres` after migrate.
+- Prisma includes Evidence/Match catalog (P.2), Evaluation History (A1.5), and Projection Replay Sidecar (P2K-B). Default API mode remains in-memory unless `EVIDENCE_REPOSITORY_MODE=postgres` (`platformPersistence`) after migrate; that mode makes Evidence + Evaluation History + Sidecar durable together.
 - Durable jobs, Redis, BullMQ, pgvector, analysis snapshots, and object storage are not implemented.
 - Web ZH-1/ZH-2 Chinese copy covers Match Center/Session/Workspace/Library/report chrome; team and competition names stay English.
 - No OpenAI or other network provider SDK is installed for narrative generation.
@@ -239,19 +239,19 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Next Work
 
-No numbered sprint is active. Intelligence MVP + A1 Evaluation + A1.5 Evaluation History + A2 Prediction Calibration + V1A Football Intelligence Validation + O1 Football Intelligence Contribution Analysis are implemented with default offline recorded + memory Evidence/History. Wave 2 of the Football Intelligence v2 DA (L1 Club, L3 Player) is complete through Feature/Rule/Confidence/Projection consume; **M1A Manager Intelligence Evidence** (Wave 3 per task authorization) is now complete (Evidence only — no Feature/Rule/Confidence/Projection); next authorized work is **M1B Manager Intelligence Features → Rules → Confidence → Projection**.
+**P2K-A/B** durable History + Sidecar foundation is complete. Default remains memory; enable `EVIDENCE_REPOSITORY_MODE=postgres` + migrate for durability. Next authorized coding slice: **P2K-C** Sidecar completeness + backfill. Do **not** promote Candidate C. Replay Cohort / Run / A vs C override remain later P2K slices.
 
 Recommended follow-ons (ordered):
 
-1. **M1B Manager Intelligence Features → Rules → Confidence → Projection** (Wave 3, DA L-track), consuming `MANAGER_INTELLIGENCE` Evidence only (never Provider directly);
-2. Follow **`docs/40_PRODUCT_ROADMAP.md`** in parallel for the trust track: a documentation pass to add `V1` and `O1` Sprint ids to doc 40 retroactively citing the **V1A** Validation and **O1** Contribution deliveries (see governance note above), then a follow-up sprint on how **A2 Calibration**, **V1A Validation**, and **O1 Contribution** inform future Confidence reporting (display-only; no pipeline change), then **K1/C1/S1/R1 → v1.0 → v2.0** as authorized;
-3. Review **`docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`** (design only) and, if accepted, add its recommended coding-sequence ids (`TT1` Match Tactical Tags, `AV1B` Availability role-weighting, `FD1` Momentum enhancement, `CTX1B` Schedule Pressure extension, `LU1B` Formation-family, `TS1` Team Style, `TX1` Transition/goal-timing, `TM1` Tactical Matchup, `RF1A`/`RF1B` Referee Intelligence) to doc 40 before starting any of them as code;
-4. Keep Odds as optional market layer only; do not re-merge schedule ownership into Odds;
-5. Compose migrate automation / postgres-mode smoke evidence (platform companion);
-6. Do not start a sprint without citing doc 40 Sprint id (and, for Wave Intelligence sprints, the DA + Scope Review);
-7. Later product items only as listed in doc 40 (no ad-hoc engine invention).
+1. **P2K-C** Sidecar completeness + backfill policy;
+2. Later P2K-D… sealed cohort / run-scoped Baseline A vs Candidate C (explicit gate; no auto-promotion);
+3. **L2A** Squad Intelligence Evidence (or other doc 40 items);
+4. Follow **`docs/40_PRODUCT_ROADMAP.md`** for trust-track governance listing of P2*/R1B/M1B;
+5. Keep Odds as optional market layer only;
+6. Compose migrate automation / postgres-mode smoke evidence (platform companion);
+7. Do not start Redis/BullMQ/pgvector, public auth, or network AI without a separate approved milestone.
 
-Recently delivered: **P2F** Projection V2 Multi-Script Engine (`docs/sprints/P2F/P2F_PROJECTION_V2_MULTI_SCRIPT_ENGINE_COMPLETION_REPORT.md`); **P2E** Match Script Generator (`docs/sprints/P2E/P2E_MATCH_SCRIPT_GENERATOR_COMPLETION_REPORT.md`); **P2D** Football State Engine (`docs/sprints/P2D/P2D_FOOTBALL_STATE_ENGINE_COMPLETION_REPORT.md`); **P2E** Feature-Enriched Lambda (`docs/sprints/P2E/P2E_FEATURE_ENRICHED_LAMBDA_COMPLETION_REPORT.md`); **P2D** Projection V2 Foundation; **P2C** Projection V2 Mathematical Model (design only); **P2B** Football State & Scenario Architecture (design only); **P2A** Prediction Intelligence Architecture Review (design only); **Football Intelligence v3 Knowledge Model Design** (design only); **M1A** Manager Intelligence Evidence (`docs/sprints/M1/M1A_MANAGER_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`); **O1** Football Intelligence Contribution Analysis (`docs/sprints/O1/O1_FOOTBALL_INTELLIGENCE_CONTRIBUTION_COMPLETION_REPORT.md`); **V1A** Football Intelligence Validation (`docs/sprints/V1A/V1A_FOOTBALL_INTELLIGENCE_VALIDATION_COMPLETION_REPORT.md`); **A2** Prediction Calibration (`docs/sprints/A2/A2_PREDICTION_CALIBRATION_COMPLETION_REPORT.md`); **P1B** Player Intelligence Feature/Rule/Confidence/Projection (`docs/sprints/P1/P1B_PLAYER_INTELLIGENCE_COMPLETION_REPORT.md`); **P1A** Player Intelligence Evidence; **L1B** Club Intelligence Feature/Rule/Confidence/Projection; **L1A** Club Intelligence Evidence; **A1.5** Evaluation Platform Foundation; **A1** Prediction Evaluation; Architecture Freeze Review **v0.3**; Intelligence MVP (F1.2–I2B); prior Freeze v0.2; F.1 Football Data Provider; Match Center; ZH-2; `docs/PROJECT_INDEX.md`.
+Recently delivered: **P2K-A/B** (`docs/sprints/P2K/P2K_AB_DURABLE_HISTORY_SIDECAR_COMPLETION_REPORT.md`); **P2K** planning; **R1B** / **R1A**; **M1B** / **M1A**; **P2J**–**P2A**; **O1**; **V1A**; **A2**; **P1B** / **P1A**; **L1B** / **L1A**; **A1.5** / **A1**; Freeze **v0.3**.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

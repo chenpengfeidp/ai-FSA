@@ -52,6 +52,11 @@ describe("@fas/config environment loading", () => {
       evidenceRepository: {
         mode: "memory",
       },
+      platformPersistence: {
+        mode: "memory",
+        controlledBy: "EVIDENCE_REPOSITORY_MODE",
+        stores: ["evidence", "evaluationHistory", "projectionReplaySidecar"],
+      },
     });
   });
 
@@ -106,6 +111,11 @@ describe("@fas/config environment loading", () => {
       evidenceRepository: {
         mode: "memory",
       },
+      platformPersistence: {
+        mode: "memory",
+        controlledBy: "EVIDENCE_REPOSITORY_MODE",
+        stores: ["evidence", "evaluationHistory", "projectionReplaySidecar"],
+      },
     });
   });
 
@@ -156,6 +166,11 @@ describe("@fas/config environment loading", () => {
       },
       evidenceRepository: {
         mode: "memory",
+      },
+      platformPersistence: {
+        mode: "memory",
+        controlledBy: "EVIDENCE_REPOSITORY_MODE",
+        stores: ["evidence", "evaluationHistory", "projectionReplaySidecar"],
       },
     });
   });
@@ -240,6 +255,24 @@ describe("@fas/config environment loading", () => {
         EVIDENCE_REPOSITORY_MODE: "postgres",
       }).evidenceRepository.mode,
     ).toBe("postgres");
+  });
+
+  it("exposes platform persistence mode for History and Sidecar (P2K-A)", () => {
+    const memory = loadApiConfig({});
+    expect(memory.platformPersistence).toEqual({
+      mode: "memory",
+      controlledBy: "EVIDENCE_REPOSITORY_MODE",
+      stores: ["evidence", "evaluationHistory", "projectionReplaySidecar"],
+    });
+
+    const postgres = loadApiConfig({
+      DATABASE_CLIENT_MODE: "live",
+      EVIDENCE_REPOSITORY_MODE: "postgres",
+    });
+    expect(postgres.platformPersistence.mode).toBe("postgres");
+    expect(postgres.platformPersistence.mode).toBe(postgres.evidenceRepository.mode);
+    expect(postgres.platformPersistence.stores).toContain("evaluationHistory");
+    expect(postgres.platformPersistence.stores).toContain("projectionReplaySidecar");
   });
 
   it("rejects postgres evidence mode with stub database", () => {

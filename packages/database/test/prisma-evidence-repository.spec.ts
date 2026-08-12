@@ -20,19 +20,26 @@ async function tryConnect(): Promise<FasDatabaseHandle | undefined> {
 
 const connected = await tryConnect();
 
+function requireConnected(): FasDatabaseHandle {
+  if (connected === undefined) {
+    throw new Error("PostgreSQL required for this suite.");
+  }
+
+  return connected;
+}
+
 describe.skipIf(connected === undefined)(
   "PrismaEvidenceRepository (postgres)",
   () => {
-    const database = connected as FasDatabaseHandle;
-    const repository = database.evidenceRepository;
     const runId = `c2-${Date.now()}`;
     const matchId = createMatchId(`match-${runId}`);
 
     afterAll(async () => {
-      await database.lifecycle.disconnect();
+      await connected?.lifecycle.disconnect();
     });
 
     it("persists imported Evidence and loads it by id", async () => {
+      const repository = requireConnected().evidenceRepository;
       const evidence = createEvidence({
         id: `evidence-${runId}-match-info`,
         source: "c2-fixture",
@@ -57,6 +64,7 @@ describe.skipIf(connected === undefined)(
     });
 
     it("loads Evidence by match id without returning other matches", async () => {
+      const repository = requireConnected().evidenceRepository;
       const otherMatchId = createMatchId(`match-${runId}-other`);
       const target = createEvidence({
         id: `evidence-${runId}-odds`,
@@ -108,6 +116,7 @@ describe.skipIf(connected === undefined)(
     });
 
     it("rejects duplicate Evidence identities", async () => {
+      const repository = requireConnected().evidenceRepository;
       const evidence = createEvidence({
         id: `evidence-${runId}-match-info`,
         source: "c2-fixture",

@@ -13,6 +13,12 @@ export class ProjectionReplaySidecarRepositoryBridge
     return this.repository.save(input);
   }
 
+  findByHistoryId(
+    historyId: string,
+  ): ReturnType<ProjectionReplaySidecarRepository["findByHistoryId"]> {
+    return this.repository.findByHistoryId(historyId);
+  }
+
   buildSidecarMap(): ReturnType<
     ProjectionReplaySidecarRepository["buildSidecarMap"]
   > {

@@ -1,6 +1,7 @@
 import { Controller, Get, HttpException, HttpStatus } from "@nestjs/common";
 // biome-ignore lint/style/useImportType: NestJS uses the bridge class as constructor metadata.
 import { DatabaseClientBridge } from "./database-client.bridge.js";
+import { getApiPlatformPersistenceMode } from "./runtime-database.js";
 
 @Controller()
 export class AppController {
@@ -36,10 +37,15 @@ export class AppController {
   }
 
   @Get("version")
-  getVersion(): Readonly<{ name: string; version: string }> {
+  getVersion(): Readonly<{
+    name: string;
+    version: string;
+    platformPersistenceMode: "memory" | "postgres";
+  }> {
     return {
       name: "@fas/api",
       version: "0.0.0",
+      platformPersistenceMode: getApiPlatformPersistenceMode(),
     };
   }
 }

@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 / A1.5 / A2 / V1A / O1 / M1A / M1B / R1A（审计）/ R1B（结构校准，Baseline A 为生产默认；Candidate C 非默认待人口验证）** 均已完成；下一步需 **Durable Evaluation History** 后方可人口级晋升 Candidate C，或 **L2A** / 任务授权的 P2K。**治理提示：** `V1A`、`O1`、`P2A–P2J`、`M1B`、`R1A`/`R1B` 部分尚未作为 Sprint id 写入 doc 40（且 doc 40 **R1** = AI Review ≠ R1B），由任务发起人直接授权。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
+一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 / A1.5 / A2 / V1A / O1 / M1A / M1B / R1A（审计）/ R1B（结构校准）/ P2K-A+B（History+Sidecar 持久化基础）** 均已完成。生产默认仍为 Baseline A；Candidate C 非默认。下一步 **P2K-C**（sidecar 完备/回填）后方可密封 cohort 与诚实 A/C 人口复验，或 **L2A**。**治理提示：** `V1A`、`O1`、`P2A–P2K`、`M1B`、`R1A`/`R1B` 部分尚未作为 Sprint id 写入 doc 40（且 doc 40 **R1** = AI Review ≠ R1B），由任务发起人直接授权。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
 
 ---
 
@@ -258,11 +258,14 @@ Match Center (web)
 14. **M1B Manager Intelligence Features** — 已完成（`docs/sprints/M1/M1B_MANAGER_INTELLIGENCE_COMPLETION_REPORT.md`；Feature → Rule → Football State → Confidence → Projection → Contribution）  
 15. **R1A Match Script Calibration Audit** — 已完成（`docs/sprints/R1A/R1A_MATCH_SCRIPT_CALIBRATION_AUDIT.md`；审计-only；≠ doc 40 R1 AI Review）  
 16. **R1B Match Script Calibration** — 已完成 — **STRUCTURAL CALIBRATION**（`docs/sprints/R1B/R1B_MATCH_SCRIPT_CALIBRATION_COMPLETION_REPORT.md`；生产默认 = `MATCH_SCRIPT_BASELINE_V1_PARAMETER_SET`；Candidate `r1b.candidate.c.sideAwareOpen` = NON-DEFAULT / STRUCTURALLY VALIDATED / PENDING POPULATION VALIDATION；无人口级 Prediction Performance 声称；Durable Evaluation History 为真实晋升前提）  
-17. **Football Intelligence v3 Knowledge Model Design**（设计评审，非编码冲刺）— 已完成（`docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`；分析 9 个现有领域 + 提出 10 个候选新领域 + Rule 组合式 Match Tactical Tags 设计 + 优先级矩阵 + 预期影响排名 + 路线图 + 风险 + 建议编码顺序；未写生产代码，未改架构，未新增 Engine；提出的 Sprint id 均待人工评审并计入 doc 40 后方可开工）  
-18. **L2A Squad Intelligence Evidence** — 其后候选（或先做持久 History 复验 R1B）  
-19. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0  
+17. **P2K Planning** — 已完成（`docs/sprints/P2K/P2K_DURABLE_EVALUATION_HISTORY_PLANNING.md`）  
+18. **P2K-A + P2K-B Durable History + Sidecar** — 已完成（`docs/sprints/P2K/P2K_AB_DURABLE_HISTORY_SIDECAR_COMPLETION_REPORT.md`；`platformPersistence` 可观测；Postgres 下 History+Sidecar 双写；无 Cohort/Run；未晋升 Candidate C）  
+19. **P2K-C Sidecar completeness + backfill** — 下一步  
+20. **Football Intelligence v3 Knowledge Model Design**（设计评审，非编码冲刺）— 已完成（`docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`）  
+21. **L2A Squad Intelligence Evidence** — 其后候选  
+22. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0  
 
-历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J  
+历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B  
 
 平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 

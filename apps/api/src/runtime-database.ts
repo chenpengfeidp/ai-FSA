@@ -30,11 +30,19 @@ function getPostgresDatabase(): FasDatabaseHandle {
   return cachedPostgres;
 }
 
+/**
+ * Platform persistence mode (P2K-A): Evidence + Evaluation History + Sidecar.
+ * Controlled by EVIDENCE_REPOSITORY_MODE; postgres never silently falls back to memory.
+ */
+function isPostgresPlatformPersistence(): boolean {
+  return loadApiConfig().platformPersistence.mode === "postgres";
+}
+
 /** Readiness lifecycle: stub/live client, or shared Postgres handle. */
 export function createApiDatabaseLifecycle(): DatabaseClientLifecycle {
   const config = loadApiConfig();
 
-  if (config.evidenceRepository.mode === "postgres") {
+  if (isPostgresPlatformPersistence()) {
     return getPostgresDatabase().lifecycle;
   }
 
@@ -49,9 +57,7 @@ export function createApiDatabaseLifecycle(): DatabaseClientLifecycle {
  * Postgres mode shares one Prisma-backed repository.
  */
 export function createApiEvidenceRepository(): EvidenceRepository {
-  const config = loadApiConfig();
-
-  if (config.evidenceRepository.mode === "postgres") {
+  if (isPostgresPlatformPersistence()) {
     return getPostgresDatabase().evidenceRepository;
   }
 
@@ -59,14 +65,13 @@ export function createApiEvidenceRepository(): EvidenceRepository {
 }
 
 /**
- * Evaluation History repository (A1.5).
- * Follows EVIDENCE_REPOSITORY_MODE: memory (process-local) or postgres.
+ * Evaluation History repository (A1.5 / P2K-A).
+ * Follows platformPersistence (EVIDENCE_REPOSITORY_MODE): memory or postgres.
+ * Postgres mode uses PrismaEvaluationHistoryRepository — no silent memory fallback.
  * Memory mode is shared for the Nest process so history survives across analyzes.
  */
 export function createApiEvaluationHistoryRepository(): EvaluationHistoryRepository {
-  const config = loadApiConfig();
-
-  if (config.evidenceRepository.mode === "postgres") {
+  if (isPostgresPlatformPersistence()) {
     return getPostgresDatabase().evaluationHistoryRepository;
   }
 
@@ -78,14 +83,24 @@ export function createApiEvaluationHistoryRepository(): EvaluationHistoryReposit
 }
 
 /**
- * Projection replay sidecar store (P2H).
- * Memory mode shares one process-local map keyed by historyId/matchId.
+ * Projection replay sidecar store (P2H / P2K-B).
+ * Postgres platform mode → durable Prisma adapter.
+ * Memory mode → process-local map keyed by historyId/matchId.
  */
 export function createApiProjectionReplaySidecarRepository(): ProjectionReplaySidecarRepository {
+  if (isPostgresPlatformPersistence()) {
+    return getPostgresDatabase().projectionReplaySidecarRepository;
+  }
+
   if (cachedMemoryProjectionReplaySidecar === undefined) {
     cachedMemoryProjectionReplaySidecar =
       new InMemoryProjectionReplaySidecarRepository();
   }
 
   return cachedMemoryProjectionReplaySidecar;
+}
+
+/** Observable platform persistence mode for operators and diagnostics (P2K-A). */
+export function getApiPlatformPersistenceMode(): "memory" | "postgres" {
+  return loadApiConfig().platformPersistence.mode;
 }

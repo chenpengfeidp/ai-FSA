@@ -159,10 +159,27 @@ model EvaluationHistoryItem {
   recordedAt             DateTime @map("recorded_at") @db.Timestamptz(3)
   contentSha256          String   @map("content_sha256") @db.Char(64)
   recordJson             Json     @map("record_json")
+  projectionReplaySidecar ProjectionReplaySidecarItem?
 
   @@index([matchId, recordedAt(sort: Desc)])
   @@index([competitionId, season, matchDate])
   @@index([season, matchDate])
   @@index([matchDate])
   @@map("evaluation_history_items")
+}
+
+/// P2K-B durable Projection Replay Sidecar (compact SealedProjectionReplayContext).
+/// Linked by domain historyId; optional for legacy History rows (V1-only).
+model ProjectionReplaySidecarItem {
+  id              String                @id @db.Uuid
+  historyId       String                @unique @map("history_id")
+  matchId         String                @map("match_id")
+  schemaVersion   String                @map("schema_version")
+  contentSha256   String                @map("content_sha256") @db.Char(64)
+  contextJson     Json                  @map("context_json")
+  savedAt         DateTime              @map("saved_at") @db.Timestamptz(3)
+  evaluationHistory EvaluationHistoryItem @relation(fields: [historyId], references: [historyId], onDelete: Restrict)
+
+  @@index([matchId])
+  @@map("projection_replay_sidecar_items")
 }

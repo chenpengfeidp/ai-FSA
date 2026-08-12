@@ -253,6 +253,10 @@ export type {
   ProjectionReplayMetadata,
 } from "./replay/projection-replay-metadata.js";
 export type { ProjectionReplaySidecarRepository } from "./repository/projection-replay-sidecar-repository.js";
+export {
+  ConflictProjectionReplaySidecarError,
+  PROJECTION_REPLAY_SIDECAR_SCHEMA_VERSION,
+} from "./repository/projection-replay-sidecar-repository.js";
 export { InMemoryProjectionReplaySidecarRepository } from "./repository/in-memory-projection-replay-sidecar-repository.js";
 export { computeProjectionReplayReport } from "./replay/compute-projection-replay-report.js";
 export type { ComputeProjectionReplayReportInput } from "./replay/compute-projection-replay-report.js";

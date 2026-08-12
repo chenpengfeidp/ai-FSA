@@ -19,6 +19,8 @@ export type {
   HttpConfig,
   OddsProviderConfig,
   OddsProviderMode,
+  PlatformPersistenceConfig,
+  PlatformPersistenceMode,
   RuntimeConfig,
   RuntimeEnvironment,
   WorkerConfig,

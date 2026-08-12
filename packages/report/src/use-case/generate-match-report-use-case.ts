@@ -15,6 +15,7 @@ import {
   computePredictionCalibrationReport,
   computeProjectionDiagnosticsReport,
   computeValidationReport,
+  ConflictProjectionReplaySidecarError,
   runProjectionReplayReport,
   type ContributionReport,
   type EvaluationHistoryRecord,
@@ -43,6 +44,7 @@ export type ReportGenerationErrorCode =
   | "CALIBRATION_REPORT_FAILED"
   | "CONTRIBUTION_REPORT_FAILED"
   | "EVALUATION_HISTORY_FAILED"
+  | "PROJECTION_REPLAY_SIDECAR_FAILED"
   | "PROJECTION_REPLAY_REPORT_FAILED"
   | "PROJECTION_DIAGNOSTICS_REPORT_FAILED"
   | "REPORT_BUILD_FAILED"
@@ -159,11 +161,23 @@ async function persistAndLoadHistory(
   await repository.save(historyRecord);
 
   if (sidecarRepository !== undefined) {
-    await sidecarRepository.save({
-      historyId: historyRecord.historyId,
-      matchId: historyRecord.matchId,
-      context: buildProjectionReplayContext(analysis),
-    });
+    try {
+      await sidecarRepository.save({
+        historyId: historyRecord.historyId,
+        matchId: historyRecord.matchId,
+        context: buildProjectionReplayContext(analysis),
+      });
+    } catch (error) {
+      if (error instanceof ConflictProjectionReplaySidecarError) {
+        throw error;
+      }
+
+      const reason =
+        error instanceof Error ? error.message : "unknown sidecar persistence error";
+      throw new Error(
+        `Projection Replay Sidecar persistence failed after Evaluation History was saved (${reason}).`,
+      );
+    }
   }
 
   return repository.findByMatch(analysis.matchId);
@@ -227,7 +241,20 @@ export class GenerateMatchReportUseCase {
         this.#evaluationHistoryRepository,
         this.#projectionReplaySidecarRepository,
       );
-    } catch {
+    } catch (error) {
+      if (error instanceof ConflictProjectionReplaySidecarError) {
+        return failure("PROJECTION_REPLAY_SIDECAR_FAILED", error.message);
+      }
+
+      if (
+        error instanceof Error &&
+        error.message.startsWith(
+          "Projection Replay Sidecar persistence failed after Evaluation History was saved",
+        )
+      ) {
+        return failure("PROJECTION_REPLAY_SIDECAR_FAILED", error.message);
+      }
+
       return failure(
         "EVALUATION_HISTORY_FAILED",
         "Evaluation History persistence failed unexpectedly.",

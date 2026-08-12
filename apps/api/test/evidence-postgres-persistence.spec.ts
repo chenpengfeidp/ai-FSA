@@ -60,6 +60,11 @@ describe.skipIf(!canUsePostgres)(
     let baseUrl = "";
 
     beforeAll(async () => {
+      // Vitest may still invoke hooks for skipIf suites; never abort the worker.
+      if (!canUsePostgres) {
+        return;
+      }
+
       process.env.EVIDENCE_REPOSITORY_MODE = "postgres";
       process.env.DATABASE_CLIENT_MODE = "live";
       process.env.DATABASE_URL = databaseUrl;
@@ -90,7 +95,10 @@ describe.skipIf(!canUsePostgres)(
         await seeder.lifecycle.disconnect();
       }
 
-      app = await NestFactory.create(AppModule, { logger: false });
+      app = await NestFactory.create(AppModule, {
+        abortOnError: false,
+        logger: false,
+      });
       configureOpenApi(app);
       await app.listen(0, "127.0.0.1");
       baseUrl = await app.getUrl();

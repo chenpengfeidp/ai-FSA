@@ -57,6 +57,28 @@ export interface EvidenceRepositoryConfig {
   readonly mode: EvidenceRepositoryMode;
 }
 
+/**
+ * P2K-A — explicit platform persistence mode for Evidence + Evaluation History
+ * + Projection Replay Sidecar.
+ *
+ * Mode is still controlled by `EVIDENCE_REPOSITORY_MODE` (existing composition
+ * root contract). This surface makes that decision observable so operators do
+ * not mistake memory History/Sidecar for durable PostgreSQL stores.
+ */
+export type PlatformPersistenceMode = EvidenceRepositoryMode;
+
+export interface PlatformPersistenceConfig {
+  readonly mode: PlatformPersistenceMode;
+  /** Environment variable that selects the mode (not a separate switch yet). */
+  readonly controlledBy: "EVIDENCE_REPOSITORY_MODE";
+  /** Stores that follow this mode in the API composition root. */
+  readonly stores: readonly [
+    "evidence",
+    "evaluationHistory",
+    "projectionReplaySidecar",
+  ];
+}
+
 export interface ApiConfig {
   readonly runtime: RuntimeConfig;
   readonly http: HttpConfig;
@@ -65,6 +87,7 @@ export interface ApiConfig {
   readonly calibration: CalibrationConfig;
   readonly database: DatabaseConfig;
   readonly evidenceRepository: EvidenceRepositoryConfig;
+  readonly platformPersistence: PlatformPersistenceConfig;
 }
 
 export interface WorkerConfig {
@@ -488,6 +511,15 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
     }),
     evidenceRepository: Object.freeze({
       mode: evidenceRepositoryMode,
+    }),
+    platformPersistence: Object.freeze({
+      mode: evidenceRepositoryMode,
+      controlledBy: "EVIDENCE_REPOSITORY_MODE" as const,
+      stores: Object.freeze([
+        "evidence",
+        "evaluationHistory",
+        "projectionReplaySidecar",
+      ] as const),
     }),
   });
 }

@@ -291,3 +291,9 @@ export {
   buildFeatureBundleFromSealedReplayContext,
   buildRuleResultsFromSealedReplayContext,
 } from "./replay/sealed-replay-context-builders.js";
+export { assessSealedReplayRuleRebuild } from "./replay/assess-sealed-replay-rule-rebuild.js";
+export type {
+  SealedReplayRuleRebuildAssessment,
+  SealedReplayRuleRebuildIssue,
+  SealedReplayRuleRebuildIssueCode,
+} from "./replay/assess-sealed-replay-rule-rebuild.js";

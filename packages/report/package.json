@@ -21,14 +21,19 @@
   "dependencies": {
     "@fas/ai-provider": "workspace:*",
     "@fas/analysis": "workspace:*",
+    "@fas/application": "workspace:*",
+    "@fas/evidence": "workspace:*",
+    "@fas/evidence-import": "workspace:*",
+    "@fas/evidence-normalizer": "workspace:*",
+    "@fas/evidence-query": "workspace:*",
     "@fas/feature": "workspace:*",
     "@fas/match": "workspace:*",
     "@fas/prompt": "workspace:*",
+    "@fas/provider-fixture": "workspace:*",
     "@fas/rule": "workspace:*",
     "@fas/statistics": "workspace:*"
   },
   "devDependencies": {
-    "@fas/evidence": "workspace:*",
     "@fas/tsconfig": "workspace:*",
     "typescript": "6.0.3"
   }

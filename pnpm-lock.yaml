@@ -513,6 +513,21 @@ importers:
       '@fas/analysis':
         specifier: workspace:*
         version: link:../analysis
+      '@fas/application':
+        specifier: workspace:*
+        version: link:../application
+      '@fas/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+      '@fas/evidence-import':
+        specifier: workspace:*
+        version: link:../evidence-import
+      '@fas/evidence-normalizer':
+        specifier: workspace:*
+        version: link:../evidence-normalizer
+      '@fas/evidence-query':
+        specifier: workspace:*
+        version: link:../evidence-query
       '@fas/feature':
         specifier: workspace:*
         version: link:../feature
@@ -522,6 +537,9 @@ importers:
       '@fas/prompt':
         specifier: workspace:*
         version: link:../prompt
+      '@fas/provider-fixture':
+        specifier: workspace:*
+        version: link:../provider-fixture
       '@fas/rule':
         specifier: workspace:*
         version: link:../rule
@@ -529,9 +547,6 @@ importers:
         specifier: workspace:*
         version: link:../statistics
     devDependencies:
-      '@fas/evidence':
-        specifier: workspace:*
-        version: link:../evidence
       '@fas/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig

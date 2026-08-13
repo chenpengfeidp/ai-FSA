@@ -297,3 +297,9 @@ export type {
   SealedReplayRuleRebuildIssue,
   SealedReplayRuleRebuildIssueCode,
 } from "./replay/assess-sealed-replay-rule-rebuild.js";
+export { createAndSealOfflineRebuildableReplayCohort } from "./replay/create-and-seal-offline-rebuildable-replay-cohort.js";
+export type {
+  CreateAndSealOfflineRebuildableReplayCohortOutcome,
+  OfflineRebuildableCohortExclusion,
+  OfflineRebuildableCohortExclusionReason,
+} from "./replay/create-and-seal-offline-rebuildable-replay-cohort.js";

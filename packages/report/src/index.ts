@@ -30,3 +30,17 @@ export type {
   ValidationBootstrapResult,
   ValidationBootstrapRuleAudit,
 } from "./validation/bootstrap-validation-history-sidecar.js";
+export {
+  P2KG_RECOVERY_V2_MATCH_IDS,
+  P2KG_RECOVERY_V2_OUTCOMES,
+  P2KG_RECOVERY_V2_PROJECTION_POLICY_PIN,
+  P2KG_RECOVERY_V2_TEMPLATE_MATCH_IDS,
+  ProjectionV2BootstrapError,
+  bootstrapProjectionV2ValidationHistorySidecar,
+} from "./validation/bootstrap-projection-v2-validation-history-sidecar.js";
+export type {
+  ProjectionV2BootstrapMatchResult,
+  ProjectionV2BootstrapParameterProvenance,
+  ProjectionV2BootstrapResult,
+  ProjectionV2BootstrapRuleAudit,
+} from "./validation/bootstrap-projection-v2-validation-history-sidecar.js";

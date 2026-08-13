@@ -14,7 +14,6 @@ import {
   REPLAY_ELIGIBILITY_CONTRACT_VERSION,
   SealedReplayCohortImmutableError,
   type EvaluationHistoryRecord,
-  type ProjectionReplaySidecarRecord,
   type SealedProjectionReplayContext,
 } from "@fas/statistics";
 import { describe, expect, it } from "vitest";
@@ -138,19 +137,6 @@ function context(
     parameterArtifactId: "artifact-1",
     parameterVersionLabel: "projection.v3.replay",
     parameterArtifactChecksum: "param-1",
-  });
-}
-
-function sidecarRecord(
-  history: EvaluationHistoryRecord,
-  ctx: SealedProjectionReplayContext,
-): ProjectionReplaySidecarRecord {
-  return Object.freeze({
-    historyId: history.historyId,
-    matchId: history.matchId,
-    schemaVersion: PROJECTION_REPLAY_SIDECAR_SCHEMA_VERSION,
-    contentSha256: computeProjectionReplaySidecarContentSha256(ctx),
-    context: ctx,
   });
 }
 

@@ -309,3 +309,9 @@ export type {
   OfflineRebuildableCohortExclusion,
   OfflineRebuildableCohortExclusionReason,
 } from "./replay/create-and-seal-offline-rebuildable-replay-cohort.js";
+export { createAndSealOfflineExecutableReplayCohort } from "./replay/create-and-seal-offline-executable-replay-cohort.js";
+export type {
+  CreateAndSealOfflineExecutableReplayCohortOutcome,
+  OfflineExecutableCohortExclusion,
+  OfflineExecutableCohortExclusionReason,
+} from "./replay/create-and-seal-offline-executable-replay-cohort.js";

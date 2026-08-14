@@ -44,3 +44,25 @@ export type {
   ProjectionV2BootstrapResult,
   ProjectionV2BootstrapRuleAudit,
 } from "./validation/bootstrap-projection-v2-validation-history-sidecar.js";
+export {
+  EXPANSION_V2_MATCH_IDS,
+  EXPANSION_V2_OUTCOMES,
+  EXPANSION_V2_PROJECTION_POLICY_PIN,
+  EXPANSION_V2_TEMPLATES,
+  expansionFixtureShape,
+  isExpansionFixtureShape,
+} from "./validation/expansion-validation-templates.js";
+export type {
+  ExpansionV2FtOutcome,
+  ExpansionTemplateShape,
+} from "./validation/expansion-validation-templates.js";
+export {
+  ExpansionV2BootstrapError,
+  bootstrapExpansionV2ValidationHistorySidecar,
+} from "./validation/bootstrap-expansion-v2-validation-history-sidecar.js";
+export type {
+  ExpansionV2BootstrapMatchResult,
+  ExpansionV2BootstrapParameterProvenance,
+  ExpansionV2BootstrapResult,
+  ExpansionV2BootstrapRuleAudit,
+} from "./validation/bootstrap-expansion-v2-validation-history-sidecar.js";

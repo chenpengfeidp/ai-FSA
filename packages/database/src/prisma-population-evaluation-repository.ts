@@ -16,7 +16,16 @@ function sameEvaluation(
   left: SealedCohortPopulationEvaluation,
   right: SealedCohortPopulationEvaluation,
 ): boolean {
-  return JSON.stringify(left) === JSON.stringify(right);
+  // Postgres JSON omits `undefined` keys and may reorder object keys.
+  // Checksum is the durable content identity computed by P2K-G.
+  return (
+    left.evaluationRunId === right.evaluationRunId &&
+    left.checksum === right.checksum &&
+    left.cohortId === right.cohortId &&
+    left.membershipDigestSha256 === right.membershipDigestSha256 &&
+    left.baselineReplayRunId === right.baselineReplayRunId &&
+    left.candidateReplayRunId === right.candidateReplayRunId
+  );
 }
 
 function reviveEvaluation(value: unknown): SealedCohortPopulationEvaluation {

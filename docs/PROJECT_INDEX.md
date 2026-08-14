@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 / A1.5 / A2 / V1A / O1 / M1A / M1B / R1A（审计）/ R1B（结构校准）/ P2K-A+B（History+Sidecar 持久化）/ P2K-C（replay 完备性与回填策略）/ P2K-D（离线 Match Script override）/ P2K-E（密封 Replay Cohort）/ P2K-F（密封 Cohort 离线 Replay Run）/ P2K-G（密封 Cohort 人口评估）/ P2K Validation Data Bootstrap（真实 AnalyzeMatch 历史数据）/ P2K-E Validation Sealed Cohort（bootstrap 6 人 SEALED）/ P2K-G-RECOVERY（Projection V2 新行）/ P2K-E Recovery V2 Sealed Cohort（`p2k.e.validation.recovery.v2.analyzematch.v1` SEALED）/ P2K-F Recovery V2 Replay（A 6/6、C 6/6、paired 6）** 均已完成。生产默认仍为 Baseline A；Candidate C 非默认、未自动晋升。下一步为单独授权的 **P2K-G**（对新 v2 A/C runs，勿复用旧 v1），或 **L2A**。**治理提示：** `V1A`、`O1`、`P2A–P2K`、`M1B`、`R1A`/`R1B` 部分尚未作为 Sprint id 写入 doc 40（且 doc 40 **R1** = AI Review ≠ R1B），由任务发起人直接授权。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
+一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 / A1.5 / A2 / V1A / O1 / M1A / M1B / R1A（审计）/ R1B（结构校准）/ P2K-A+B（History+Sidecar 持久化）/ P2K-C（replay 完备性与回填策略）/ P2K-D（离线 Match Script override）/ P2K-E（密封 Replay Cohort）/ P2K-F（密封 Cohort 离线 Replay Run）/ P2K-G（密封 Cohort 人口评估）/ P2K Validation Data Bootstrap（真实 AnalyzeMatch 历史数据）/ P2K-E Validation Sealed Cohort（bootstrap 6 人 SEALED）/ P2K-G-RECOVERY（Projection V2 新行）/ P2K-E Recovery V2 Sealed Cohort（`p2k.e.validation.recovery.v2.analyzematch.v1` SEALED）/ P2K-F Recovery V2 Replay（A 6/6、C 6/6、paired 6）/ P2K-G Recovery V2 Population Evaluation（paired sample 6；描述性证据；未晋升 Candidate C）** 均已完成。生产默认仍为 Baseline A；Candidate C 非默认、未自动晋升。下一步为人工治理审阅（勿据 n=6 宣称 C 更优）或 **L2A**；**P2K-H 未授权**。**治理提示：** `V1A`、`O1`、`P2A–P2K`、`M1B`、`R1A`/`R1B` 部分尚未作为 Sprint id 写入 doc 40（且 doc 40 **R1** = AI Review ≠ R1B），由任务发起人直接授权。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
 
 ---
 
@@ -271,12 +271,13 @@ Match Center (web)
 27. **P2K-G-RECOVERY Projection V2 Bootstrap** — 已完成（`docs/sprints/P2K/P2K_G_RECOVERY_PROJECTION_V2_VALIDATION_DATA_BOOTSTRAP_COMPLETION_REPORT.md`；`match-p2kg-recovery-v2-*` ×6；parameter provenance 完整；offlineReplayExecutable=6；未自动 E/F/G）  
 28. **P2K-E Validation Recovery V2 Sealed Cohort** — 已完成（`docs/sprints/P2K/P2K_E_VALIDATION_RECOVERY_V2_SEALED_COHORT_COMPLETION_REPORT.md`；`p2k.e.validation.recovery.v2.analyzematch.v1` SEALED；6 offline-executable members；digest `3b707860…`；旧 v1 cohort 未改）  
 29. **P2K-F Validation Recovery V2 Offline Replay** — 已完成（`docs/sprints/P2K/P2K_F_VALIDATION_RECOVERY_V2_SEALED_COHORT_OFFLINE_REPLAY_RUN_COMPLETION_REPORT.md`；A 6/6、C 6/6、paired 6；测量数据集；未跑 G/H；未晋升 Candidate C）  
-30. **Football Intelligence v3 Knowledge Model Design**（设计评审，非编码冲刺）— 已完成（`docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`）  
-31. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后  
-32. **L2A Squad Intelligence Evidence** — 其后候选  
-33. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0  
+30. **P2K-G Validation Recovery V2 Population Evaluation** — 已完成（`docs/sprints/P2K/P2K_G_VALIDATION_RECOVERY_V2_POPULATION_EVALUATION_COMPLETION_REPORT.md`；`eval.p2k.g.validation.recovery.v2.analyzematch.v1`；paired sample 6；描述性证据；未晋升；P2K-H 未授权）  
+31. **Football Intelligence v3 Knowledge Model Design**（设计评审，非编码冲刺）— 已完成（`docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`）  
+32. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后  
+33. **L2A Squad Intelligence Evidence** — 其后候选  
+34. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0  
 
-历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B · P2K-C · P2K-D · P2K-E · P2K-F · P2K-G · Validation Data Bootstrap · P2K-E Validation Seal · P2K-F Validation（fail closed） · P2K-G-RECOVERY V2 Bootstrap · P2K-E Recovery V2 Seal · P2K-F Recovery V2 Replay  
+历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B · P2K-C · P2K-D · P2K-E · P2K-F · P2K-G · Validation Data Bootstrap · P2K-E Validation Seal · P2K-F Validation（fail closed） · P2K-G-RECOVERY V2 Bootstrap · P2K-E Recovery V2 Seal · P2K-F Recovery V2 Replay · P2K-G Recovery V2 Population Evaluation  
 
 平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 

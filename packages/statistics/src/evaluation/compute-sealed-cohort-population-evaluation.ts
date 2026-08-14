@@ -88,9 +88,16 @@ function contextsEqual(
 }
 
 function availableMetric(hits: number, sampleSize: number): PopulationMetricValue {
+  if (sampleSize === 0) {
+    return notAvailableMetric(
+      0,
+      "Subgroup sample size is zero; accuracy is not available.",
+    );
+  }
+
   return Object.freeze({
     availability: "available",
-    value: sampleSize === 0 ? undefined : roundRatio(hits / sampleSize),
+    value: roundRatio(hits / sampleSize),
     hitCount: hits,
     sampleSize,
     unavailableReason: undefined,

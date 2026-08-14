@@ -829,6 +829,56 @@ describe("P2K-G Sealed Cohort Population Evaluation", () => {
     }
   });
 
+  it("marks zero-size winner subgroups as not_available (not available+undefined)", async () => {
+    const h1 = historyFixture("match-p2kg-home-only-1", "home");
+    const h2 = historyFixture("match-p2kg-home-only-2", "home");
+    const seeded = await seedPair({
+      cohortId: "cohort.p2k.g.home-only",
+      histories: [h1, h2],
+    });
+
+    const outcome = await computeSealedCohortPopulationEvaluation({
+      evaluationRunId: "eval.p2k.g.home-only",
+      cohortId: seeded.cohort.cohortId,
+      baselineReplayRunId: seeded.baseline.replayRunId,
+      candidateReplayRunId: seeded.candidate.replayRunId,
+      computedAt: "2026-08-12T18:00:00.000Z",
+      cohortRepository: seeded.cohortRepository,
+      replayRunRepository: seeded.replayRunRepository,
+      historyRepository: seeded.historyRepository,
+    });
+
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) {
+      return;
+    }
+
+    expect(outcome.value.coverage.finalEvaluationSampleSize).toBe(2);
+    expect(outcome.value.winnerBreakdown.actualHome.baseline.availability).toBe(
+      "available",
+    );
+    expect(outcome.value.winnerBreakdown.actualHome.baseline.sampleSize).toBe(2);
+    expect(outcome.value.winnerBreakdown.actualHome.baseline.value).toBeTypeOf(
+      "number",
+    );
+
+    for (const row of [
+      outcome.value.winnerBreakdown.actualDraw,
+      outcome.value.winnerBreakdown.actualAway,
+    ]) {
+      expect(row.baseline.availability).toBe("not_available");
+      expect(row.candidate.availability).toBe("not_available");
+      expect(row.baseline.value).toBeUndefined();
+      expect(row.candidate.value).toBeUndefined();
+      expect(row.baseline.sampleSize).toBe(0);
+      expect(row.candidate.sampleSize).toBe(0);
+      expect(row.baseline.unavailableReason).toContain(
+        "Subgroup sample size is zero",
+      );
+      expect(row.delta).toBeUndefined();
+    }
+  });
+
   it("fails closed when history outcome is missing", async () => {
     const history = historyFixture("match-p2kg-missing-history");
     const seeded = await seedPair({

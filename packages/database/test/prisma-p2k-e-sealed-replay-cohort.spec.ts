@@ -164,10 +164,12 @@ describe.skipIf(connected === undefined)("P2K-E Prisma Sealed Replay Cohort", ()
 
   it("persists sealed cohort membership across process boundary", async () => {
     const database = requireConnected();
-    const runId = `pg-${Date.now()}`;
-    const recordedAt = new Date(
-      Date.UTC(2026, 7, 12, 18, Number(String(runId).slice(-4)) % 60, 0, 0),
-    ).toISOString();
+    const stamp = Date.now();
+    const runId = `pg-${stamp}`;
+    // Unique 1ms recordedAt window — avoids selecting leftover histories from prior
+    // fas_validation runs that collided on minute-bucket timestamps.
+    const recordedAt = new Date(stamp).toISOString();
+    const windowEnd = new Date(stamp + 1).toISOString();
     const base = scoredHistory(runId);
     const isolated = buildEvaluationHistoryRecord({
       predictionSnapshot: base.predictionSnapshot,
@@ -186,7 +188,6 @@ describe.skipIf(connected === undefined)("P2K-E Prisma Sealed Replay Cohort", ()
     });
 
     const cohortId = `cohort.p2k.e.pg.${runId}`;
-    const windowEnd = new Date(Date.parse(recordedAt) + 1000).toISOString();
     const created = await createAndSealReplayCohort({
       cohortId,
       specification: createDefaultReplayCohortSpecification({

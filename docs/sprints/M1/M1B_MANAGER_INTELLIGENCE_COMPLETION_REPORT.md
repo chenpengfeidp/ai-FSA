@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Sprint | **M1B** Manager Intelligence Features / Rule / Football State / Confidence / Projection / Contribution |
-| Date | 2026-08-04 |
+| Date | 2026-08-18 (verified; E2E acceptance test added) |
 | Authority | Architecture Freeze v0.3 · B2 Coding Law · DA FI v2 Domain Architecture (Manager track) · `docs/sprints/M1/M1A_MANAGER_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md` · L1B/P1B pattern precedent · task-authorized production coding (doc 40 cite pending) |
 | Scope | Deterministic Feature → Rule → Football State → Confidence → Match Script → Projection → Replay → Contribution → Workspace consume of M1A `MANAGER_INTELLIGENCE` Evidence |
 | Explicit exclusions | Provider changes · Evaluation / Evaluation History schema · database schema · Architecture redesign · new Engines · Projection mathematics redesign · direct Manager→λ injection · ML / LLM · new Football State dimensions |
@@ -146,6 +146,7 @@ No new dimensions. Match Script activation continues from existing FS levels/tag
 - Confidence completeness + agreement + limitations
 - V1/V2 football channel rule sets
 - Projection / sealed / replay pins
+- `test/m1b-manager-intelligence-pipeline.spec.ts` — full acceptance path: Evidence → Features → Rules → Football State → Match Script → Projection V2 → Sealed Prediction; honest absence when Evidence missing
 
 ### Statistics (`@fas/statistics`)
 - `manager_intelligence` domain + Feature family
@@ -177,12 +178,12 @@ No new dimensions. Match Script activation continues from existing FS levels/tag
 
 | Gate | Result |
 |------|--------|
-| `pnpm quality` | Pass |
-| `pnpm lint` | Pass (`biome lint .`) |
-| `pnpm typecheck` | Pass |
-| `pnpm test` (M1B packages) | Pass — feature 40, rule 34, analysis 51, statistics 63, report 14, api 28, web 42 |
-| `pnpm build` (M1B packages) | Pass — feature, rule, analysis, statistics, report, api, web |
-| Full `pnpm test` | Toolchain packages pass; `@fas/database` prisma-evidence-repository blocked without live PostgreSQL (`DATABASE_URL`) — env/infra, not M1B |
+| `pnpm quality` | Pass (2026-08-18) |
+| `pnpm lint` | Pass |
+| `pnpm typecheck` | Pass (requires `DATABASE_URL` for `@fas/database` prisma generate) |
+| `pnpm test` | Pass — analysis 91 (+2 M1B E2E), feature 40, rule 34, statistics 63, report 14, api 30, web 42, database 22 |
+| `pnpm build` | Pass |
+| Full `pnpm test` without `DATABASE_URL` | `@fas/database` typecheck blocked — env/infra limitation, not M1B |
 
 ---
 

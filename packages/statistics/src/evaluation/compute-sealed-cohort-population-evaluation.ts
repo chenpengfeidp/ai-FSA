@@ -297,6 +297,12 @@ function buildLimitations(input: {
     );
   }
 
+  if (input.calibrationQualified && input.sampleSize > 0) {
+    limitations.push(
+      "A2 calibration sample meets the minimum qualified threshold; calibration qualification is not Candidate C superiority and is not a promotion decision.",
+    );
+  }
+
   return Object.freeze(limitations);
 }
 

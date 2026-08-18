@@ -493,6 +493,47 @@ describe("P2K-G Sealed Cohort Population Evaluation", () => {
     expect(again.value).toEqual(outcome.value);
   });
 
+  it("records that A2 calibration qualification is not Candidate superiority", async () => {
+    const histories = Array.from({ length: 20 }, (_, index) =>
+      historyFixture(
+        `match-p2kg-qualified-${index + 1}`,
+        index % 2 === 0 ? "home" : "away",
+      ),
+    );
+    const seeded = await seedPair({
+      cohortId: "cohort.p2k.g.qualified-not-superior",
+      histories,
+    });
+
+    const outcome = await computeSealedCohortPopulationEvaluation({
+      evaluationRunId: "eval.p2k.g.qualified-not-superior",
+      cohortId: seeded.cohort.cohortId,
+      baselineReplayRunId: seeded.baseline.replayRunId,
+      candidateReplayRunId: seeded.candidate.replayRunId,
+      computedAt: "2026-08-12T18:00:00.000Z",
+      cohortRepository: seeded.cohortRepository,
+      replayRunRepository: seeded.replayRunRepository,
+      historyRepository: seeded.historyRepository,
+    });
+
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) {
+      return;
+    }
+    expect(outcome.value.coverage.finalEvaluationSampleSize).toBe(20);
+    expect(outcome.value.candidateCProductionPromoted).toBe(false);
+    expect(
+      outcome.value.limitations.some((line) =>
+        line.includes("calibration qualification is not Candidate C superiority"),
+      ),
+    ).toBe(true);
+    expect(
+      outcome.value.limitations.some((line) =>
+        line.includes("below the qualified threshold"),
+      ),
+    ).toBe(false);
+  });
+
   it("rejects membership digest mismatch fail-closed", async () => {
     const history = historyFixture("match-p2kg-digest");
     const seeded = await seedPair({

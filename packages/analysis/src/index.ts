@@ -37,6 +37,7 @@ export {
   PROJECTION_PARAMS_MATCH_SCRIPT_ARTIFACT_ID,
   PROJECTION_PARAMS_POLICY_VERSION,
   PROJECTION_PARAMETER_VERSION_BASELINE,
+  PROJECTION_PARAMETER_VERSION_CALIBRATION_CANDIDATE1,
   PROJECTION_PARAMETER_VERSION_EXPERIMENTAL,
   PROJECTION_PARAMETER_VERSION_REPLAY,
   ProjectionParameterArtifactValidationError,
@@ -69,10 +70,40 @@ export {
 export type {
   ConfidenceParameterSet,
   FootballStateParameterSet,
+  LowScoreDependenceParameterSet,
   MatrixMergeParameterSet,
   ProjectionParameterGroupId,
   RecommendationParameterSet,
 } from "./projection-v2/projection-parameter-groups.js";
+export {
+  CALIBRATION_CANDIDATE1_LAMBDA_FEATURE_WEIGHTS,
+  CALIBRATION_CANDIDATE1_LAMBDA_PARAMETER_SET,
+  CALIBRATION_CANDIDATE1_PROJECTION_NORMALIZATION_POLICY,
+} from "./projection-v2/lambda/calibration-candidate1-lambda-weights.js";
+export {
+  CALIBRATION_CANDIDATE1_MATRIX_MERGE_PARAMETERS,
+  PROJECTION_CALIBRATION_CANDIDATE1_ARTIFACT,
+  PROJECTION_CALIBRATION_CANDIDATE1_ARTIFACT_ID,
+  PROJECTION_CALIBRATION_CANDIDATE1_VERSION_LABEL,
+} from "./projection-v2/projection-calibration-candidate1.js";
+export {
+  getCalibrationCandidate1ProjectionParameterArtifact,
+  getProductionProjectionParameterArtifact,
+  OFFLINE_PROJECTION_CALIBRATION_LABELS,
+  PROJECTION_CALIBRATION_GOVERNANCE,
+  resolveOfflineProjectionCalibrationArtifact,
+} from "./projection-v2/projection-calibration-governance.js";
+export type {
+  OfflineProjectionCalibrationLabel,
+  OfflineProjectionCalibrationResolveErrorCode,
+  OfflineProjectionCalibrationResolveResult,
+  ProjectionCalibrationGovernanceRecord,
+} from "./projection-v2/projection-calibration-governance.js";
+export {
+  applyDixonColesToProbabilityMatrix,
+  applyGovernedLowScoreDependence,
+  type GovernedLowScoreDependence,
+} from "./projection-v2/probability-matrix/apply-dixon-coles.js";
 export { buildLambdasV2 } from "./projection-v2/lambda/lambda-builder-v2.js";
 export type {
   LambdaBuilderV2Result,
@@ -272,12 +303,18 @@ export {
   buildSealedPredictionInputFromAnalysis,
 } from "./replay/analysis-projection-replay-port.js";
 export { runOfflineMatchScriptReplay } from "./replay/offline-match-script-replay.js";
+export { runOfflineProjectionCalibrationReplay } from "./replay/offline-projection-calibration-replay.js";
 export type {
   OfflineHistoricalReplayContextIdentity,
   OfflineMatchScriptReplayErrorCode,
   OfflineMatchScriptReplayOutcome,
   OfflineMatchScriptReplayResult,
 } from "./replay/offline-match-script-replay.js";
+export type {
+  OfflineProjectionCalibrationReplayErrorCode,
+  OfflineProjectionCalibrationReplayOutcome,
+  OfflineProjectionCalibrationReplayResult,
+} from "./replay/offline-projection-calibration-replay.js";
 export {
   executeSealedCohortOfflineReplayPair,
   executeSealedCohortOfflineReplayRun,

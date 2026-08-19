@@ -46,10 +46,18 @@ export interface RecommendationParameterSet {
 /**
  * Matrix merge governance (algorithm id only — script weights drive coefficients).
  */
+export interface LowScoreDependenceParameterSet {
+  readonly enabled: boolean;
+  /** Dixon–Coles ρ; 0 disables correction even when enabled=true. */
+  readonly rho: number;
+}
+
 export interface MatrixMergeParameterSet {
   readonly policyVersion: typeof MATRIX_MERGE_PARAMETER_POLICY_VERSION;
   readonly algorithm: typeof MULTI_SCRIPT_MERGE_ALGORITHM;
   readonly normalizeWeights: boolean;
+  /** Optional governed low-score dependence (Dixon–Coles). Absent = independent Poisson. */
+  readonly lowScoreDependence?: LowScoreDependenceParameterSet;
 }
 
 export const DEFAULT_FOOTBALL_STATE_PARAMETERS: FootballStateParameterSet =

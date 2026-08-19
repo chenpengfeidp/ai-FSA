@@ -71,7 +71,7 @@ describe("P2J Projection Parameter Artifact", () => {
 
     expect(catalog.modelVersion).toBe("projectionParameterCatalog.v1.p2j");
     expect(catalog.activeVersionLabel).toBe(PROJECTION_PARAMETER_VERSION_REPLAY);
-    expect(catalog.artifacts).toHaveLength(3);
+    expect(catalog.artifacts).toHaveLength(4);
 
     const used = catalog.artifacts.find((row) => row.usedInAnalysis);
     expect(used?.versionLabel).toBe(PROJECTION_PARAMETER_VERSION_REPLAY);

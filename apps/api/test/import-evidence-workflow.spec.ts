@@ -557,7 +557,7 @@ describe("HTTP import and Evidence query workflow", () => {
       artifacts: expect.any(Array),
     });
     expect(Array.isArray(catalog.artifacts)).toBe(true);
-    expect((catalog.artifacts as unknown[]).length).toBe(3);
+    expect((catalog.artifacts as unknown[]).length).toBe(4);
     expect(Array.isArray(catalog.limitations)).toBe(true);
   });
 

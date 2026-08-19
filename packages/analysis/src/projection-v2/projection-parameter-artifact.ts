@@ -36,11 +36,14 @@ export const PROJECTION_PARAMETER_VERSION_BASELINE =
 export const PROJECTION_PARAMETER_VERSION_EXPERIMENTAL =
   "projection.v3.experimental" as const;
 export const PROJECTION_PARAMETER_VERSION_REPLAY = "projection.v3.replay" as const;
+export const PROJECTION_PARAMETER_VERSION_CALIBRATION_CANDIDATE1 =
+  "projection.v3.calibration.candidate1" as const;
 
 export type ProjectionParameterVersionLabel =
   | typeof PROJECTION_PARAMETER_VERSION_BASELINE
   | typeof PROJECTION_PARAMETER_VERSION_EXPERIMENTAL
-  | typeof PROJECTION_PARAMETER_VERSION_REPLAY;
+  | typeof PROJECTION_PARAMETER_VERSION_REPLAY
+  | typeof PROJECTION_PARAMETER_VERSION_CALIBRATION_CANDIDATE1;
 
 export type ProjectionFrameworkVersion =
   | typeof PROJECTION_FRAMEWORK_VERSION

@@ -32,6 +32,12 @@ export interface LambdaParameterSet {
   readonly ratingScale: number;
   readonly defenseFloor: number;
   readonly featureWeights: readonly LambdaFeatureWeightEntry[];
+  /** Upper clamp for multiplier group factors (default 2.5 when omitted). */
+  readonly groupFactorMax?: number;
+  /** Lower clamp for multiplier group factors (default 0.05 when omitted). */
+  readonly groupFactorMin?: number;
+  /** Optional post-composition scalar per Feature group (default 1). */
+  readonly groupScalars?: Readonly<Partial<Record<LambdaFeatureGroupId, number>>>;
 }
 
 export interface LambdaGroupContribution {

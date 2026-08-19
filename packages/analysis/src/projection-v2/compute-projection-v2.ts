@@ -48,6 +48,9 @@ export function computeProjectionV2(input: {
         baseLambdaHome: lambdaResult.lambdaHome,
         baseLambdaAway: lambdaResult.lambdaAway,
         parameters: parameters.lambda,
+        ...(parameters.matrixMerge.lowScoreDependence === undefined
+          ? {}
+          : { lowScoreDependence: parameters.matrixMerge.lowScoreDependence }),
       });
   const projection = computeDeterministicProjectionV2({
     featureBundle: input.featureBundle,

@@ -61,6 +61,9 @@ function computeGroupFactor(input: {
   readonly featureNames: readonly FeatureName[];
   readonly weights: readonly LambdaFeatureWeightEntry[];
   readonly mode: "multiplier" | "suppressor";
+  readonly groupFactorMax: number;
+  readonly groupFactorMin: number;
+  readonly groupScalar: number;
 }): LambdaGroupContribution {
   let delta = 0;
   const appliedFeatures: string[] = [];
@@ -91,10 +94,11 @@ function computeGroupFactor(input: {
     appliedFeatures.push(featureName);
   }
 
-  const factor =
+  const rawFactor =
     input.mode === "suppressor"
       ? clamp(1 + delta, 0.05, 1)
-      : clamp(1 + delta, 0.05, 2.5);
+      : clamp(1 + delta, input.groupFactorMin, input.groupFactorMax);
+  const factor = rawFactor * input.groupScalar;
 
   return Object.freeze({
     group: input.group,
@@ -109,6 +113,9 @@ function computeSharedContextFactor(input: {
   readonly features: ReadonlyMap<FeatureName, Feature>;
   readonly side: "home" | "away";
   readonly weights: readonly LambdaFeatureWeightEntry[];
+  readonly groupFactorMax: number;
+  readonly groupFactorMin: number;
+  readonly groupScalar: number;
 }): LambdaGroupContribution {
   let delta = 0;
   const appliedFeatures: string[] = [];
@@ -141,7 +148,9 @@ function computeSharedContextFactor(input: {
   return Object.freeze({
     group: "matchContext",
     side: input.side,
-    factor: clamp(1 + delta, 0.05, 2.5),
+    factor:
+      clamp(1 + delta, input.groupFactorMin, input.groupFactorMax) *
+      input.groupScalar,
     appliedFeatures: Object.freeze([...appliedFeatures]),
     absentFeatures: Object.freeze([...absentFeatures]),
   });
@@ -192,6 +201,10 @@ export function buildFootballStateProjectionInputs(input: {
   const contributions: LambdaGroupContribution[] = [];
   const absentOptionalFeatures: string[] = [];
 
+  const groupFactorMax = input.parameters.groupFactorMax ?? 2.5;
+  const groupFactorMin = input.parameters.groupFactorMin ?? 0.05;
+  const groupScalars = input.parameters.groupScalars ?? {};
+
   for (const side of ["home", "away"] as const) {
     for (const groupDefinition of LAMBDA_FEATURE_GROUPS) {
       const sideFeatures =
@@ -207,6 +220,9 @@ export function buildFootballStateProjectionInputs(input: {
         featureNames: sideFeatures,
         weights: input.parameters.featureWeights,
         mode,
+        groupFactorMax,
+        groupFactorMin,
+        groupScalar: groupScalars[groupDefinition.group] ?? 1,
       });
 
       if (
@@ -222,6 +238,9 @@ export function buildFootballStateProjectionInputs(input: {
       features,
       side,
       weights: input.parameters.featureWeights,
+      groupFactorMax,
+      groupFactorMin,
+      groupScalar: groupScalars.matchContext ?? 1,
     });
 
     if (

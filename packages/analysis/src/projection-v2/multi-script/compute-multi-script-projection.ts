@@ -1,5 +1,9 @@
 import type { LambdaParameterSet } from "../lambda/lambda-parameter-set.js";
 import type { MatchScriptSet } from "../match-script/match-script-set.js";
+import {
+  applyGovernedLowScoreDependence,
+  type GovernedLowScoreDependence,
+} from "../probability-matrix/apply-dixon-coles.js";
 import { buildScriptProbabilityMatrix } from "../probability-matrix/build-script-probability-matrix.js";
 import { mergeProbabilityMatrices } from "../probability-matrix/merge-probability-matrices.js";
 import type { ProbabilityMatrix } from "../probability-matrix/probability-matrix.js";
@@ -23,6 +27,7 @@ export function computeMultiScriptProjection(input: {
   readonly baseLambdaHome: number;
   readonly baseLambdaAway: number;
   readonly parameters: LambdaParameterSet;
+  readonly lowScoreDependence?: GovernedLowScoreDependence;
 }): MultiScriptProjectionOutput {
   const perScriptProjections: PerScriptProjection[] = [];
 
@@ -44,13 +49,16 @@ export function computeMultiScriptProjection(input: {
     );
   }
 
-  const mergedMatrix = mergeProbabilityMatrices(
-    perScriptProjections.map((entry) =>
-      Object.freeze({
-        weight: entry.weight,
-        matrix: entry.matrix,
-      }),
+  const mergedMatrix = applyGovernedLowScoreDependence(
+    mergeProbabilityMatrices(
+      perScriptProjections.map((entry) =>
+        Object.freeze({
+          weight: entry.weight,
+          matrix: entry.matrix,
+        }),
+      ),
     ),
+    input.lowScoreDependence,
   );
 
   return Object.freeze({

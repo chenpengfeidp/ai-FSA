@@ -1,8 +1,9 @@
 import {
   AnalyzeMatchUseCase,
   resolvePinnedCalibrationArtifact,
+  type ProjectionPolicyPin,
 } from "@fas/analysis";
-import { ImportMatchUseCase } from "@fas/application";
+import { DiscoverFixtureByTeamsUseCase, ImportMatchUseCase } from "@fas/application";
 import { loadApiConfig } from "@fas/config";
 
 import { type EvidenceRepository, EvidenceService } from "@fas/evidence";
@@ -50,11 +51,14 @@ import {
 } from "./runtime-database.js";
 import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
 import { UpcomingMatchesBoardBridge } from "./upcoming-matches-board.bridge.js";
+import { UpcomingFixtureCatalogBridge } from "./upcoming-fixture-catalog.bridge.js";
 import { createUpcomingMatchesBoard } from "./upcoming-matches.factory.js";
 
 const evidenceRepositoryToken = Symbol("EvidenceRepository");
 
 const apiConfig = loadApiConfig();
+const productionProjectionPolicyPin: ProjectionPolicyPin =
+  apiConfig.projection.policyPin;
 const matchProviderWiring = createMatchProviderWiring(
   apiConfig.oddsProvider,
   apiConfig.footballDataProvider,
@@ -153,6 +157,20 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
       useValue: new UpcomingMatchesBoardBridge(upcomingMatchesBoard),
     },
     {
+      provide: UpcomingFixtureCatalogBridge,
+      inject: [UpcomingMatchesBoardBridge],
+      useFactory: (
+        board: UpcomingMatchesBoardBridge,
+      ): UpcomingFixtureCatalogBridge => new UpcomingFixtureCatalogBridge(board),
+    },
+    {
+      provide: DiscoverFixtureByTeamsUseCase,
+      inject: [UpcomingFixtureCatalogBridge],
+      useFactory: (
+        catalog: UpcomingFixtureCatalogBridge,
+      ): DiscoverFixtureByTeamsUseCase => new DiscoverFixtureByTeamsUseCase(catalog),
+    },
+    {
       provide: ScoresSnapshotPrimerBridge,
       useValue: new ScoresSnapshotPrimerBridge(matchProviderWiring.scoresPrimer),
     },
@@ -195,6 +213,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
           featureExtractor,
           ruleEvaluator,
           resolvePinnedCalibrationArtifact(apiConfig.calibration.artifactMode),
+          productionProjectionPolicyPin,
         ),
     },
     {
@@ -221,6 +240,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
           reportBuilder,
           evaluationHistoryRepository,
           projectionReplaySidecarRepository,
+          productionProjectionPolicyPin,
         ),
     },
     EvidenceExampleInitializer,

@@ -18,3 +18,15 @@ export type {
   SuccessfulMatchImport,
   UnexpectedImportFailureReason,
 } from "./import-matches-use-case.js";
+export { DiscoverFixtureByTeamsUseCase } from "./discover-fixture-by-teams-use-case.js";
+export type { UpcomingFixtureCatalog } from "./discover-fixture-by-teams-use-case.js";
+export { discoverFixtureByTeams } from "./fixture/discover-fixture-by-teams.js";
+export type {
+  DiscoverFixtureByTeamsResult,
+  FixtureDiscoveryCandidate,
+  FixtureDiscoveryError,
+  FixtureDiscoveryErrorCode,
+  FixtureResolutionMetadata,
+  FixtureScheduleRow,
+} from "./fixture/discover-fixture-by-teams.js";
+export { normalizeTeamName } from "./fixture/normalize-team-name.js";

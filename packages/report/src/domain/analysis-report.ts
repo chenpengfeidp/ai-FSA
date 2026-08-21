@@ -5,6 +5,7 @@ import type {
   ProjectionFrameworkMetadata,
   ProjectionParameterCatalog,
   ScenarioSet,
+  AnalysisProvenanceMetadata,
 } from "@fas/analysis";
 import type { NarrativeDraft } from "@fas/ai-provider";
 import type { Feature } from "@fas/feature";
@@ -79,6 +80,8 @@ export interface AnalysisReport {
   readonly projectionFramework?: ProjectionFrameworkMetadata;
   /** Football State aggregation layer when V2 policy pin is active. */
   readonly footballState?: FootballStateReportMetadata;
+  /** Runtime observability: projection policy pin and optional fixture resolution. */
+  readonly analysisProvenance?: AnalysisProvenanceMetadata;
 }
 
 export interface CreateAnalysisReportInput {
@@ -103,6 +106,7 @@ export interface CreateAnalysisReportInput {
   readonly projectionParameters?: ProjectionParameterCatalog;
   readonly projectionFramework?: ProjectionFrameworkMetadata;
   readonly footballState?: FootballStateReportMetadata;
+  readonly analysisProvenance?: AnalysisProvenanceMetadata;
 }
 
 export class AnalysisReportValidationError extends Error {
@@ -266,5 +270,8 @@ export function createAnalysisReport(
     ...(input.footballState === undefined
       ? {}
       : { footballState: input.footballState }),
+    ...(input.analysisProvenance === undefined
+      ? {}
+      : { analysisProvenance: input.analysisProvenance }),
   });
 }

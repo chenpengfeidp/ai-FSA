@@ -6,6 +6,13 @@ export type {
   AnalysisResult,
   CreateAnalysisResultInput,
 } from "./domain/analysis-result.js";
+export { createAnalysisProvenanceMetadata } from "./domain/analysis-provenance.js";
+export type {
+  AnalysisProvenanceMetadata,
+  CreateAnalysisProvenanceInput,
+  FixtureDiscoveryCandidate,
+  FixtureResolutionMetadata,
+} from "./domain/analysis-provenance.js";
 export { AnalyzeMatchUseCase } from "./use-case/analyze-match-use-case.js";
 export type {
   AnalysisError,

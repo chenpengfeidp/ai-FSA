@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** Intelligence MVP 完成且 Freeze v0.3 复审通过；**A1 / A1.5 / A2 / V1A / O1 / M1A / M1B / R1A（审计）/ R1B（结构校准）/ P2K-A+B～P2K-G / Validation Bootstrap / Recovery V2 E→F→G / P2K-G2-A Diversity Expansion / Expansion V2 E→F→G（`eval.p2k.g.validation.expansion.v2.analyzematch.v1`，paired sample 30；描述性证据；A2 sample-qualified ≠ Candidate C better）** 均已完成。生产默认仍为 Baseline A；Candidate C 非默认、未自动晋升。下一步为人工治理审阅（勿据 n=30 宣称 C 更优）或 **L2A**；**P2K-H 未授权**。**治理提示：** `V1A`、`O1`、`P2A–P2K`、`M1B`、`R1A`/`R1B` 部分尚未作为 Sprint id 写入 doc 40（且 doc 40 **R1** = AI Review ≠ R1B），由任务发起人直接授权。禁止擅自新增 Architecture 文档 / Engine / Redis/微服务/网络 AI。
+一句话：**已进入产品研发阶段。** PVS-1 完成：生产 API 默认 **Projection V2**（`PROJECTION_POLICY_PIN=v2`）；`POST /api/analyze` 支持队名→赛程解析；报告含 `analysisProvenance`。recorded 示例：`FC Seoul` vs `Ulsan Hyundai FC` → `football:100001`。下一步 **PVS-2**（Workspace 队名分析 + live smoke）；**非** P2K-CAL-3。Candidate C / calibration candidate1 均 NON-DEFAULT。
 
 ---
 
@@ -119,6 +119,9 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/VERTICAL_SLICE_P1_DATABASE_READY_SPEC.md` | `/health/ready` DB ping。 |
 | `docs/sprints/VERTICAL_SLICE_P2_EVIDENCE_PERSISTENCE_SPEC.md` | 首批 Evidence/Match Prisma 持久化。 |
 | `docs/sprints/VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` | Football Data≠Odds；Match Center 事实源（**已落地**；xG 现归路线图 **Sprint F1.3**）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/PREDICTION_VERTICAL_SLICE_READINESS_AUDIT.md` | 预测垂直切片运行时就绪审计（2026-08-20；**PARTIAL**；API V1 pin 缺口）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/PREDICTION_VERTICAL_SLICE_READINESS_AUDIT_COMPLETION_REPORT.md` | 上述审计完成报告；推荐 **PVS-1**。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-1_PRODUCTION_PREDICTION_VERTICAL_SLICE_COMPLETION_REPORT.md` | **PVS-1** — 生产 API V2 pin + 队名赛程解析 + `POST /api/analyze`。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 

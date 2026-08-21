@@ -6,6 +6,7 @@ import type { MatchSummary } from "../../types/match-center";
 import { DeveloperDetails } from "./developer-details";
 import { EvidenceTimeline } from "./evidence-timeline";
 import { FeatureImportance } from "./feature-importance";
+import { FixtureResolutionSection } from "./fixture-resolution-section";
 import { FinalRecommendation } from "./final-recommendation";
 import { FootballStateSection } from "./football-state-section";
 import { MatchScriptSection } from "./match-script-section";
@@ -49,6 +50,7 @@ export function ExplainableMatchReport({
   return (
     <div className="space-y-10 sm:space-y-12">
       <WorkspaceSection id="prediction">
+        <FixtureResolutionSection provenance={report.analysisProvenance} />
         <PredictionHero
           confidence={view.confidence}
           header={view.header}

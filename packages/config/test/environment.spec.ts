@@ -45,6 +45,9 @@ describe("@fas/config environment loading", () => {
       calibration: {
         artifactMode: "population_demo_v1",
       },
+      projection: {
+        policyPin: "v2",
+      },
       database: {
         url: "postgresql://fas_local:change_me_local_only@127.0.0.1:5432/fas_local",
         clientMode: "live",
@@ -104,6 +107,9 @@ describe("@fas/config environment loading", () => {
       calibration: {
         artifactMode: "population_demo_v1",
       },
+      projection: {
+        policyPin: "v2",
+      },
       database: {
         url: "postgresql://fas_validation:fas_validation@127.0.0.1:5432/fas_validation",
         clientMode: "stub",
@@ -160,6 +166,9 @@ describe("@fas/config environment loading", () => {
       calibration: {
         artifactMode: "identity",
       },
+      projection: {
+        policyPin: "v2",
+      },
       database: {
         url: "postgresql://fas_local:change_me_local_only@127.0.0.1:5432/fas_local",
         clientMode: "live",
@@ -173,6 +182,14 @@ describe("@fas/config environment loading", () => {
         stores: ["evidence", "evaluationHistory", "projectionReplaySidecar"],
       },
     });
+  });
+
+  it("loads projection policy pin override", () => {
+    expect(
+      loadApiConfig({
+        PROJECTION_POLICY_PIN: "v1",
+      }).projection.policyPin,
+    ).toBe("v1");
   });
 
   it("loads live football data mode when an API key is provided", () => {

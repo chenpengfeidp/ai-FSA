@@ -4,9 +4,13 @@ import {
   buildSealedPredictionInput,
   extractMatchContextForHistory,
   AnalysisProjectionReplayPort,
+  createAnalysisProvenanceMetadata,
+  type AnalysisProvenanceMetadata,
   type AnalysisResult,
   type AnalyzeMatchResult,
+  type FixtureResolutionMetadata,
   type ProjectionParameterCatalog,
+  type ProjectionPolicyPin,
 } from "@fas/analysis";
 import type { MatchId } from "@fas/match";
 import {
@@ -60,10 +64,46 @@ export type ReportGenerationFailure = Readonly<{
   ok: false;
 }>;
 
+export interface GenerateMatchReportOptions {
+  readonly fixtureResolution?: FixtureResolutionMetadata;
+}
+
 export type GenerateMatchReportResult =
   | AnalysisFailure
   | AnalysisReport
   | ReportGenerationFailure;
+
+function attachAnalysisProvenance(
+  report: AnalysisReport,
+  provenance: AnalysisProvenanceMetadata,
+): AnalysisReport {
+  return createAnalysisReport({
+    reportId: report.reportId,
+    matchId: report.matchId,
+    generatedAt: report.generatedAt,
+    summary: report.summary,
+    features: report.features,
+    rules: report.rules,
+    deterministic: report.deterministic,
+    scenarios: report.scenarios,
+    intelligenceConfidence: report.intelligenceConfidence,
+    narrative: report.narrative,
+    analysisProvenance: provenance,
+    ...(report.actualResult === undefined
+      ? {}
+      : { actualResult: report.actualResult }),
+    ...(report.evaluation === undefined ? {} : { evaluation: report.evaluation }),
+    ...(report.projectionFramework === undefined
+      ? {}
+      : { projectionFramework: report.projectionFramework }),
+    ...(report.footballState === undefined
+      ? {}
+      : { footballState: report.footballState }),
+    ...(report.analysisProvenance === undefined
+      ? {}
+      : { analysisProvenance: report.analysisProvenance }),
+  });
+}
 
 function failure(
   code: ReportGenerationErrorCode,
@@ -119,6 +159,9 @@ function withOverlays(
     ...(report.footballState === undefined
       ? {}
       : { footballState: report.footballState }),
+    ...(report.analysisProvenance === undefined
+      ? {}
+      : { analysisProvenance: report.analysisProvenance }),
     ...(evaluationHistory.length === 0 ? {} : { evaluationHistory }),
     calibration,
     validation,
@@ -191,20 +234,26 @@ export class GenerateMatchReportUseCase {
     | ProjectionReplaySidecarRepository
     | undefined;
   readonly #projectionReplayPort = new AnalysisProjectionReplayPort();
+  readonly #projectionPolicyPin: ProjectionPolicyPin;
 
   constructor(
     analyzeMatch: AnalyzeMatchOperation,
     reportBuilder: AnalysisReportBuilder,
     evaluationHistoryRepository?: EvaluationHistoryRepository,
     projectionReplaySidecarRepository?: ProjectionReplaySidecarRepository,
+    projectionPolicyPin: ProjectionPolicyPin = "v2",
   ) {
     this.#analyzeMatch = analyzeMatch;
     this.#reportBuilder = reportBuilder;
     this.#evaluationHistoryRepository = evaluationHistoryRepository;
     this.#projectionReplaySidecarRepository = projectionReplaySidecarRepository;
+    this.#projectionPolicyPin = projectionPolicyPin;
   }
 
-  async execute(matchId: MatchId): Promise<GenerateMatchReportResult> {
+  async execute(
+    matchId: MatchId,
+    options?: GenerateMatchReportOptions,
+  ): Promise<GenerateMatchReportResult> {
     let analysis: AnalyzeMatchResult;
 
     try {
@@ -221,6 +270,15 @@ export class GenerateMatchReportUseCase {
 
     try {
       report = this.#reportBuilder.build(analysis.value);
+      report = attachAnalysisProvenance(
+        report,
+        createAnalysisProvenanceMetadata({
+          projectionPolicyPin: this.#projectionPolicyPin,
+          ...(options?.fixtureResolution === undefined
+            ? {}
+            : { fixtureResolution: options.fixtureResolution }),
+        }),
+      );
     } catch {
       return failure(
         "REPORT_BUILD_FAILED",

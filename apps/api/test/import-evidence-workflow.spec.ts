@@ -679,7 +679,7 @@ describe("HTTP import and Evidence query workflow", () => {
     const deterministic = requireRecord(report.deterministic);
     expect(deterministic.limitations).toEqual(
       expect.arrayContaining([
-        "STATISTICS shots/xG fields are goals-implied proxies from Odds API scores; not provider shot/xG measurements.",
+        "Scorelines, goal range, BTTS, and Over/Under derive from the unified Match Script probability matrix; 1X2 marginals receive calibration only.",
       ]),
     );
   });

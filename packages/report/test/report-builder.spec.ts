@@ -263,7 +263,12 @@ describe("GenerateMatchReportUseCase", () => {
 
     const result = await useCase.execute(matchId);
 
-    expect(result).toEqual(createReportBuilder().build(analysis));
+    expect(result).toEqual({
+      ...createReportBuilder().build(analysis),
+      analysisProvenance: {
+        projectionPolicyPin: "v2",
+      },
+    });
     expect("ok" in result).toBe(false);
   });
 

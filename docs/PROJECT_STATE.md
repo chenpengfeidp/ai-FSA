@@ -2,15 +2,15 @@
 
 ## Snapshot
 
-- Last updated: 2026-08-18 (P2K-CAL-2 Projection λ & Goal Distribution Calibration)
+- Last updated: 2026-08-21 (PVS-1 Production Prediction Vertical Slice)
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **P2K-CAL-2 Projection λ & Goal Distribution Calibration COMPLETED**. Governed NON-DEFAULT candidate `projection.v3.calibration.candidate1` (`productionPromoted=false`); percent-scale Feature normalization fix; feature-group λ governance; optional Dixon–Coles draw correction; offline Expansion V2 replay validation. Production default remains `projection.v3.replay`. Candidate C unchanged. P2K-H **not authorized**. Product roadmap remains `docs/40_PRODUCT_ROADMAP.md`
+- Current task status: **PVS-1 COMPLETED** — production API pins **Projection V2** (`PROJECTION_POLICY_PIN` default `"v2"`); `POST /api/analyze` resolves fixtures by team names against Match Center catalog; reports expose `analysisProvenance` (policy pin + fixture resolution). Prior: Prediction Vertical Slice Readiness Audit (PARTIAL); P2K-CAL-2 calibration candidate (NON-DEFAULT).
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: P2K-CAL-2 Projection λ & Goal Distribution Calibration complete (`docs/sprints/P2K/P2K_CAL_2_PROJECTION_LAMBDA_CALIBRATION_COMPLETION_REPORT.md`). Prior P2K-CAL-1 diagnosis plan, P2K-G3 Validation Prediction Distribution Audit, P2K-G Validation Expansion V2 Population Evaluation, P2K-F Validation Expansion V2 Offline Replay, P2K-E Validation Expansion V2 Sealed Cohort, P2K-G2-A Validation Dataset Diversity Expansion, P2K-G2 planning/audit, P2K-G Recovery V2 population evaluation, P2K-F Recovery V2 replay, P2K-E Recovery V2 seal, P2K-G-RECOVERY v2 bootstrap, prior P2K-F validation fail-closed on v1 cohort. **Governance note:** R1A/R1B / P2A–P2K / M1B not yet listed in doc 40 (doc 40 **R1** = AI Review ≠ R1B).
-- Last completed delivery: **P2K-CAL-2 Projection λ & Goal Distribution Calibration** (`docs/sprints/P2K/P2K_CAL_2_PROJECTION_LAMBDA_CALIBRATION_COMPLETION_REPORT.md`); prior P2K-CAL-1 Projection / Match Script Calibration Diagnosis Plan, P2K-G3 Validation Prediction Distribution Audit, P2K-G Validation Expansion V2 Population Evaluation, P2K-F Validation Expansion V2 Sealed Cohort Offline Replay Run, P2K-E Validation Expansion V2 Sealed Replay Cohort, P2K-G2-A Validation Dataset Diversity Expansion, P2K-G2 Planning/Audit, P2K-G Validation Recovery V2 Population Evaluation, P2K-F Validation Recovery V2 Offline Replay, P2K-E Validation Recovery V2 Sealed Cohort, P2K-G-RECOVERY Projection V2 Bootstrap, P2K-F Validation FAIL CLOSED, P2K-E Validation Sealed Cohort, Validation Data Bootstrap, P2K-G, P2K-F (implementation), P2K-E (implementation), P2K-D, P2K-C, P2K-A/B, P2K planning, R1B, R1A, M1B, P2J, P2I, P2H, P2G, P2F, P2E, P2D, M1A, O1, V1A, A2, P1B, P1A, L1B, L1A, DA, P0, A1.5, A1
-- Demo: recorded cassette `football:100001` includes full xG windows + Match Context + Club Intelligence + Manager Intelligence (both sides; confirmed match managers with identity/tenure/previous clubs) + enriched Player Intelligence (season stats/age/captain/availability/match squad status); odds cassette `match-example` includes O/U + optional market depth; Evidence catalog: `docs/50_EVIDENCE_CATALOG.md`; evaluation demo population + Evaluation History + Prediction Calibration report + Football Intelligence Validation report + Football Intelligence Contribution report (9 domains incl. Manager) in `@fas/statistics`
-- Next authorized work: Human governance on calibration candidate promotion (candidate1 remains NON-DEFAULT) or authorize P2K-CAL-3 tuning pass (baseRate / group scalars). Do **not** auto-promote candidate1 or Candidate C. Do not implement P2K-H unless separately authorized. Parallel: **L2A** or doc 40 items.
+- Current sprint: **PVS-1** complete (`docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-1_PRODUCTION_PREDICTION_VERTICAL_SLICE_COMPLETION_REPORT.md`). Prior: Prediction Vertical Slice Readiness Audit.
+- Last completed delivery: **PVS-1 Production Prediction Vertical Slice**; prior Prediction Vertical Slice Readiness Audit; P2K-CAL-2, …
+- Demo: recorded cassette `football:100001` — analyze via `POST /api/analyze { homeTeam: "FC Seoul", awayTeam: "Ulsan Hyundai FC" }` or `POST /api/analyze/match/football:100001`; production path uses Football State → Match Script → Unified Matrix (V2 pin)
+- Next authorized work: **PVS-2** (recommended) — Workspace analyze-by-teams UX + live fixture smoke documentation; **not** P2K-CAL-3 unless explicitly authorized. Do **not** auto-promote calibration candidate1 or Candidate C.
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
@@ -71,6 +71,7 @@ Operational:
 Domain (private demo):
 
 - `POST /api/import/match/:matchId`
+- `POST /api/analyze` (homeTeam + awayTeam + optional date → fixture discovery → analyze)
 - `POST /api/analyze/match/:matchId`
 - `GET /api/evaluation-history/match/:matchId`
 - `GET /api/evaluation-history`

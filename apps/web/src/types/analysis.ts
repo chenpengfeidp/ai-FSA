@@ -656,6 +656,27 @@ export interface ProjectionParameterCatalogDto {
   readonly limitations: readonly string[];
 }
 
+export interface FixtureResolutionDto {
+  readonly requestedHomeTeam: string;
+  readonly requestedAwayTeam: string;
+  readonly requestedDate?: string;
+  readonly normalizedHomeTeam: string;
+  readonly normalizedAwayTeam: string;
+  readonly resolvedHomeTeam: string;
+  readonly resolvedAwayTeam: string;
+  readonly resolvedMatchId: string;
+  readonly kickoff: string;
+  readonly competition: string;
+  readonly scheduleSource: string;
+  readonly providerSource: string;
+  readonly homeAwaySwapped: boolean;
+}
+
+export interface AnalysisProvenanceDto {
+  readonly projectionPolicyPin: "v1" | "v2";
+  readonly fixtureResolution?: FixtureResolutionDto;
+}
+
 export interface AnalysisReportDto {
   readonly reportId: string;
   readonly matchId: string;
@@ -676,6 +697,7 @@ export interface AnalysisReportDto {
   readonly projectionReplay?: ProjectionReplayReportDto;
   readonly projectionDiagnostics?: ProjectionDiagnosticsReportDto;
   readonly projectionParameters?: ProjectionParameterCatalogDto;
+  readonly analysisProvenance?: AnalysisProvenanceDto;
 }
 
 export interface ProjectionReplayMetricSummaryDto {

@@ -44,6 +44,12 @@ export interface CalibrationConfig {
   readonly artifactMode: CalibrationArtifactMode;
 }
 
+export type ProjectionPolicyPin = "v1" | "v2";
+
+export interface ProjectionConfig {
+  readonly policyPin: ProjectionPolicyPin;
+}
+
 export type DatabaseClientMode = "live" | "stub";
 
 export type EvidenceRepositoryMode = "memory" | "postgres";
@@ -85,6 +91,7 @@ export interface ApiConfig {
   readonly oddsProvider: OddsProviderConfig;
   readonly footballDataProvider: FootballDataProviderConfig;
   readonly calibration: CalibrationConfig;
+  readonly projection: ProjectionConfig;
   readonly database: DatabaseConfig;
   readonly evidenceRepository: EvidenceRepositoryConfig;
   readonly platformPersistence: PlatformPersistenceConfig;
@@ -160,6 +167,8 @@ const calibrationArtifactModeSchema = z
   .enum(["identity", "population_demo_v1"])
   .default("population_demo_v1");
 
+const projectionPolicyPinSchema = z.enum(["v1", "v2"]).default("v2");
+
 const databaseUrlSchema = z
   .string()
   .trim()
@@ -191,6 +200,7 @@ const apiEnvironmentSchema = z
     API_FOOTBALL_TIMEOUT_MS: apiFootballTimeoutMsSchema,
     API_FOOTBALL_MAX_RETRIES: apiFootballMaxRetriesSchema,
     CALIBRATION_ARTIFACT: calibrationArtifactModeSchema,
+    PROJECTION_POLICY_PIN: projectionPolicyPinSchema,
     DATABASE_URL: databaseUrlSchema,
     DATABASE_CLIENT_MODE: databaseClientModeSchema,
     EVIDENCE_REPOSITORY_MODE: evidenceRepositoryModeSchema,
@@ -504,6 +514,9 @@ export function loadApiConfig(source?: EnvironmentSource): ApiConfig {
     }),
     calibration: Object.freeze({
       artifactMode: parsed.CALIBRATION_ARTIFACT,
+    }),
+    projection: Object.freeze({
+      policyPin: parsed.PROJECTION_POLICY_PIN,
     }),
     database: Object.freeze({
       url: parsed.DATABASE_URL,

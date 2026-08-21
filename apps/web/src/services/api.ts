@@ -60,6 +60,33 @@ export async function analyzeMatch(matchId: string): Promise<AnalysisReportDto> 
   }
 }
 
+export interface AnalyzeByTeamsInput {
+  readonly homeTeam: string;
+  readonly awayTeam: string;
+  readonly date?: string;
+}
+
+export type AnalyzeByTeamsResponseDto = AnalysisReportDto | BackendErrorResponseDto;
+
+export async function analyzeByTeams(
+  input: AnalyzeByTeamsInput,
+): Promise<AnalysisReportDto> {
+  try {
+    const response = await apiClient.post<AnalyzeByTeamsResponseDto>(
+      "/api/analyze",
+      input,
+    );
+
+    if (isBackendErrorResponse(response.data)) {
+      throw new Error(response.data.error.message);
+    }
+
+    return response.data;
+  } catch (error: unknown) {
+    throw new Error(errorMessage(error, "Unable to analyze the match."));
+  }
+}
+
 export async function getEvidenceByMatch(
   matchId: string,
 ): Promise<readonly EvidenceDto[]> {

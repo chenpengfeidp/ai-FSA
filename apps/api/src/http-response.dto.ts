@@ -568,6 +568,61 @@ export class AnalysisReportDto {
   })
   declare readonly projectionFramework?: Readonly<Record<string, unknown>>;
   declare readonly footballState?: Readonly<Record<string, unknown>>;
+
+  @ApiPropertyOptional({
+    description:
+      "Runtime observability: projection policy pin and optional fixture resolution provenance.",
+    type: "object",
+    additionalProperties: true,
+  })
+  declare readonly analysisProvenance?: Readonly<Record<string, unknown>>;
+}
+
+export class FixtureDiscoveryCandidateDto {
+  @ApiProperty({ example: "football:100001" })
+  declare readonly matchId: string;
+
+  @ApiProperty({ example: "FC Seoul" })
+  declare readonly homeTeam: string;
+
+  @ApiProperty({ example: "Ulsan Hyundai FC" })
+  declare readonly awayTeam: string;
+
+  @ApiProperty({ example: "2026-08-21T11:00:00Z" })
+  declare readonly kickoff: string;
+
+  @ApiProperty({ example: "K League 1" })
+  declare readonly competition: string;
+
+  @ApiProperty({ example: "api-football" })
+  declare readonly providerSource: string;
+
+  @ApiProperty({ example: true })
+  declare readonly analyzable: boolean;
+
+  @ApiProperty({ example: false })
+  declare readonly homeAwaySwapped: boolean;
+}
+
+export class FixtureDiscoveryErrorDto {
+  @ApiProperty({ enum: ["FIXTURE_NOT_FOUND", "FIXTURE_AMBIGUOUS"] })
+  declare readonly code: "FIXTURE_AMBIGUOUS" | "FIXTURE_NOT_FOUND";
+
+  @ApiProperty({
+    example: 'No fixture found for "Rosenborg" vs "Fredrikstad".',
+  })
+  declare readonly message: string;
+
+  @ApiPropertyOptional({ isArray: true, type: () => FixtureDiscoveryCandidateDto })
+  declare readonly candidates?: readonly FixtureDiscoveryCandidateDto[];
+}
+
+export class FixtureDiscoveryErrorResponseDto {
+  @ApiProperty({ enum: [false], example: false })
+  declare readonly ok: false;
+
+  @ApiProperty({ type: () => FixtureDiscoveryErrorDto })
+  declare readonly error: FixtureDiscoveryErrorDto;
 }
 
 export class AnalysisErrorCauseDto {

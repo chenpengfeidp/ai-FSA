@@ -54,14 +54,24 @@ export function HomeHero(): ReactElement {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Button
             onClick={() => {
-              scrollToSection("todays-matches");
+              scrollToSection("analyze-by-teams");
             }}
             size="lg"
             type="button"
             variant="primary"
           >
-            {zh.hero.analyzeToday}
+            {zh.hero.analyzeByTeams}
             <ArrowRight aria-hidden="true" className="size-4" />
+          </Button>
+          <Button
+            onClick={() => {
+              scrollToSection("todays-matches");
+            }}
+            size="lg"
+            type="button"
+            variant="outline"
+          >
+            {zh.hero.analyzeToday}
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link href="/reports">{zh.hero.viewRecentReports}</Link>

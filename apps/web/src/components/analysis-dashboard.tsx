@@ -14,6 +14,7 @@ import {
   windowEndDate,
 } from "../lib/match-center-filter";
 import type { MatchSummary } from "../types/match-center";
+import { AnalyzeByTeamsSection } from "./analyze-by-teams-section";
 import { HomeHero } from "./home-hero";
 import { MatchCard } from "./match-card";
 import { MatchCenterFilters } from "./match-center-filters";
@@ -64,6 +65,8 @@ export function AnalysisDashboard(): ReactElement {
     <PageContainer>
       <div className="space-y-10 sm:space-y-12">
         <HomeHero />
+
+        <AnalyzeByTeamsSection />
 
         <section
           aria-labelledby="todays-matches-heading"

@@ -1,8 +1,12 @@
 import axios from "axios";
 import type {
   AnalysisReportDto,
+  AnalyzeByTeamsFailure,
+  AnalyzeByTeamsResponseDto,
+  AnalyzeByTeamsResult,
   AnalyzeMatchResponseDto,
   BackendErrorResponseDto,
+  FixtureDiscoveryErrorResponseDto,
 } from "../types/analysis";
 import type { EvidenceByMatchResponseDto, EvidenceDto } from "../types/evidence";
 import type {
@@ -66,24 +70,98 @@ export interface AnalyzeByTeamsInput {
   readonly date?: string;
 }
 
-export type AnalyzeByTeamsResponseDto = AnalysisReportDto | BackendErrorResponseDto;
+function isFixtureDiscoveryErrorResponse(
+  value: unknown,
+): value is FixtureDiscoveryErrorResponseDto {
+  if (typeof value !== "object" || value === null || !("ok" in value)) {
+    return false;
+  }
+
+  if (value.ok !== false || !("error" in value)) {
+    return false;
+  }
+
+  const error = (value as FixtureDiscoveryErrorResponseDto).error;
+
+  return error.code === "FIXTURE_NOT_FOUND" || error.code === "FIXTURE_AMBIGUOUS";
+}
+
+function parseAnalyzeByTeamsFailure(
+  data: AnalyzeByTeamsResponseDto,
+): AnalyzeByTeamsFailure {
+  if (isFixtureDiscoveryErrorResponse(data)) {
+    return Object.freeze({
+      kind: "fixture" as const,
+      code: data.error.code,
+      message: data.error.message,
+      ...(data.error.candidates === undefined
+        ? {}
+        : { candidates: data.error.candidates }),
+    });
+  }
+
+  if (isBackendErrorResponse(data)) {
+    const code = data.error.code;
+
+    if (code === "PROJECTION_POLICY_UNAVAILABLE") {
+      return Object.freeze({
+        kind: "policy" as const,
+        code,
+        message: data.error.message,
+      });
+    }
+
+    return Object.freeze({
+      kind: "analysis" as const,
+      code,
+      message: data.error.message,
+    });
+  }
+
+  return Object.freeze({
+    kind: "network" as const,
+    code: "UNEXPECTED_RESPONSE",
+    message: "Unexpected analyze response.",
+  });
+}
 
 export async function analyzeByTeams(
   input: AnalyzeByTeamsInput,
-): Promise<AnalysisReportDto> {
+): Promise<AnalyzeByTeamsResult> {
   try {
     const response = await apiClient.post<AnalyzeByTeamsResponseDto>(
       "/api/analyze",
       input,
     );
+    const data = response.data;
 
-    if (isBackendErrorResponse(response.data)) {
-      throw new Error(response.data.error.message);
+    if ("ok" in data && data.ok === false) {
+      return Object.freeze({
+        ok: false as const,
+        failure: parseAnalyzeByTeamsFailure(data),
+      });
     }
 
-    return response.data;
+    if (isBackendErrorResponse(data)) {
+      return Object.freeze({
+        ok: false as const,
+        failure: parseAnalyzeByTeamsFailure(data),
+      });
+    }
+
+    return Object.freeze({
+      ok: true as const,
+      report: data as AnalysisReportDto,
+    });
   } catch (error: unknown) {
-    throw new Error(errorMessage(error, "Unable to analyze the match."));
+    return Object.freeze({
+      ok: false as const,
+      failure: Object.freeze({
+        kind: "network" as const,
+        code: "NETWORK_ERROR",
+        message: errorMessage(error, "Unable to analyze the match."),
+      }),
+    });
   }
 }
 

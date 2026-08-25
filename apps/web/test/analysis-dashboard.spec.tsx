@@ -159,6 +159,9 @@ describe("AnalysisDashboard", () => {
       }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("heading", { name: zh.analyzeByTeams.heading }),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("heading", { name: zh.matchCenter.upcomingHeading }),
     ).toBeInTheDocument();
 

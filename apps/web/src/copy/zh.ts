@@ -22,6 +22,7 @@ export const zh = {
     title: "AI 足球分析平台",
     description: "基于确定性流水线的可解释足球分析。",
     analyzeToday: "分析今日比赛",
+    analyzeByTeams: "按队名分析",
     viewRecentReports: "查看近期报告",
   },
   matchCenter: {
@@ -63,6 +64,28 @@ export const zh = {
     jumpToEarliest: (date: string): string => `跳到 ${date} 查看`,
     showingRange: (from: string, to: string, shown: number, total: number): string =>
       `${from} → ${to} · 显示 ${String(shown)} / ${String(total)} 场`,
+  },
+  analyzeByTeams: {
+    eyebrow: "队名分析",
+    heading: "输入主队与客队开始分析",
+    description:
+      "系统将在 Match Center 赛程中确定性解析 fixture，然后运行 Production Projection V2 完整管道。不会在前端重复解析逻辑。",
+    homeTeam: "主队",
+    awayTeam: "客队",
+    dateOptional: "比赛日期（可选）",
+    homePlaceholder: "例如 FC Seoul",
+    awayPlaceholder: "例如 Ulsan Hyundai FC",
+    submit: "分析比赛",
+    analyzing: "分析中…",
+    loadingPipeline:
+      "正在解析赛程 → 导入证据 → 特征 → 规则 → 足球状态 → 比赛剧本 → 统一矩阵 → 生成报告…",
+    ambiguousTitle: "找到多场可能的比赛",
+    ambiguousHint: "请选择确切场次。系统不会自动替你选择。",
+    swappedOrdering: "主客与输入顺序相反",
+    policyUnavailable: (detail: string): string =>
+      `Projection V2 生产策略不可用：${detail}`,
+    analysisFailed: (detail: string): string => `分析失败：${detail}`,
+    recordedExample: "录制示例：FC Seoul vs Ulsan Hyundai FC",
   },
   matchCard: {
     home: "主队",

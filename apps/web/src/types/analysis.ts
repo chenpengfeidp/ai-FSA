@@ -883,6 +883,50 @@ export interface ProjectionDiagnosticsReportDto {
   readonly checksum: string;
 }
 
+export interface FixtureDiscoveryCandidateDto {
+  readonly matchId: string;
+  readonly homeTeam: string;
+  readonly awayTeam: string;
+  readonly kickoff: string;
+  readonly competition: string;
+  readonly providerSource: string;
+  readonly analyzable: boolean;
+  readonly homeAwaySwapped: boolean;
+}
+
+export interface FixtureDiscoveryErrorDto {
+  readonly code: "FIXTURE_AMBIGUOUS" | "FIXTURE_NOT_FOUND";
+  readonly message: string;
+  readonly candidates?: readonly FixtureDiscoveryCandidateDto[];
+}
+
+export interface FixtureDiscoveryErrorResponseDto {
+  readonly ok: false;
+  readonly error: FixtureDiscoveryErrorDto;
+}
+
+export type AnalyzeByTeamsResponseDto =
+  | AnalysisReportDto
+  | BackendErrorResponseDto
+  | FixtureDiscoveryErrorResponseDto;
+
+export type AnalyzeByTeamsFailureKind =
+  | "analysis"
+  | "fixture"
+  | "network"
+  | "policy";
+
+export interface AnalyzeByTeamsFailure {
+  readonly kind: AnalyzeByTeamsFailureKind;
+  readonly code: string;
+  readonly message: string;
+  readonly candidates?: readonly FixtureDiscoveryCandidateDto[];
+}
+
+export type AnalyzeByTeamsResult =
+  | Readonly<{ ok: true; report: AnalysisReportDto }>
+  | Readonly<{ ok: false; failure: AnalyzeByTeamsFailure }>;
+
 export interface BackendErrorDto {
   readonly code: string;
   readonly message: string;

@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** PVS-1 完成：生产 API 默认 **Projection V2**（`PROJECTION_POLICY_PIN=v2`）；`POST /api/analyze` 支持队名→赛程解析；报告含 `analysisProvenance`。recorded 示例：`FC Seoul` vs `Ulsan Hyundai FC` → `football:100001`。下一步 **PVS-2**（Workspace 队名分析 + live smoke）；**非** P2K-CAL-3。Candidate C / calibration candidate1 均 NON-DEFAULT。
+一句话：**已进入产品研发阶段。** PVS-2 完成：Match Center **队名分析**表单 → `POST /api/analyze` → Workspace 可解释 V2 报告（含赛程解析 provenance、BTTS/O-U）；歧义赛程需用户选择。PVS-1：生产 API 默认 **Projection V2**；recorded 示例：`FC Seoul` vs `Ulsan Hyundai FC` → `football:100001`。下一步 **PVS-3**（live smoke CI）；**非** P2K-CAL-3。Candidate C / calibration candidate1 均 NON-DEFAULT。
 
 ---
 
@@ -122,6 +122,7 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/PREDICTION_VERTICAL_SLICE_READINESS_AUDIT.md` | 预测垂直切片运行时就绪审计（2026-08-20；**PARTIAL**；API V1 pin 缺口）。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/PREDICTION_VERTICAL_SLICE_READINESS_AUDIT_COMPLETION_REPORT.md` | 上述审计完成报告；推荐 **PVS-1**。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-1_PRODUCTION_PREDICTION_VERTICAL_SLICE_COMPLETION_REPORT.md` | **PVS-1** — 生产 API V2 pin + 队名赛程解析 + `POST /api/analyze`。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-2_MATCH_CENTER_ANALYZE_BY_TEAMS_COMPLETION_REPORT.md` | **PVS-2** — Match Center 队名分析 UX + 歧义赛程选择 + live smoke 文档。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 
@@ -167,7 +168,7 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | 路径 | 职责 | 状态 |
 |------|------|------|
 | `apps/api` | NestJS REST：import / analyze / evidence / matches/upcoming / health / evaluation-history / calibration / validation | 垂直切片可用 |
-| `apps/web` | Next.js：Match Center、Session、Workspace、Library；`copy/zh.ts` | ZH-1/ZH-2 中文 |
+| `apps/web` | Next.js：Match Center（含 **队名分析** `#analyze-by-teams`）、Session、Workspace、Library；`copy/zh.ts` | ZH-1/ZH-2 中文 |
 | `apps/worker` | NestJS worker 组合根 | 启动后退出；无队列 |
 
 ### 5.2 平台包

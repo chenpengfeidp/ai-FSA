@@ -2,15 +2,15 @@
 
 ## Snapshot
 
-- Last updated: 2026-08-21 (PVS-1 Production Prediction Vertical Slice)
+- Last updated: 2026-08-21 (PVS-2 Match Center Analyze-by-Teams UX)
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **PVS-1 COMPLETED** — production API pins **Projection V2** (`PROJECTION_POLICY_PIN` default `"v2"`); `POST /api/analyze` resolves fixtures by team names against Match Center catalog; reports expose `analysisProvenance` (policy pin + fixture resolution). Prior: Prediction Vertical Slice Readiness Audit (PARTIAL); P2K-CAL-2 calibration candidate (NON-DEFAULT).
+- Current task status: **PVS-2 COMPLETED** — Match Center **analyze-by-teams** form calls existing `POST /api/analyze`; ambiguous fixture picker; explainable V2 report + provenance in Workspace; live smoke procedure documented. Prior: **PVS-1** production API V2 pin + fixture discovery.
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **PVS-1** complete (`docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-1_PRODUCTION_PREDICTION_VERTICAL_SLICE_COMPLETION_REPORT.md`). Prior: Prediction Vertical Slice Readiness Audit.
-- Last completed delivery: **PVS-1 Production Prediction Vertical Slice**; prior Prediction Vertical Slice Readiness Audit; P2K-CAL-2, …
-- Demo: recorded cassette `football:100001` — analyze via `POST /api/analyze { homeTeam: "FC Seoul", awayTeam: "Ulsan Hyundai FC" }` or `POST /api/analyze/match/football:100001`; production path uses Football State → Match Script → Unified Matrix (V2 pin)
-- Next authorized work: **PVS-2** (recommended) — Workspace analyze-by-teams UX + live fixture smoke documentation; **not** P2K-CAL-3 unless explicitly authorized. Do **not** auto-promote calibration candidate1 or Candidate C.
+- Current sprint: **PVS-2** complete (`docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-2_MATCH_CENTER_ANALYZE_BY_TEAMS_COMPLETION_REPORT.md`). Prior: PVS-1 Production Prediction Vertical Slice.
+- Last completed delivery: **PVS-2 Match Center Analyze-by-Teams UX**; prior PVS-1 Production Prediction Vertical Slice; Prediction Vertical Slice Readiness Audit; P2K-CAL-2, …
+- Demo: recorded cassette `football:100001` — Match Center form **FC Seoul vs Ulsan Hyundai FC** → `POST /api/analyze` → Workspace V2 report; or `POST /api/analyze/match/football:100001`
+- Next authorized work: **PVS-3** (recommended) — live fixture CI/staging smoke with credentials; **not** P2K-CAL-3 unless explicitly authorized. Do **not** auto-promote calibration candidate1 or Candidate C.
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`

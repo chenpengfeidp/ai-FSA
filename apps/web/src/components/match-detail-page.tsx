@@ -1,9 +1,12 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { type ReactElement, useEffect } from "react";
 import { useMatchDetail } from "../hooks/use-match-detail";
+import { MATCH_DETAIL_QUERY_KEY } from "../hooks/match-detail-query-key";
 import { useUpcomingMatches } from "../hooks/use-upcoming-matches";
+import { matchSummaryFromReport } from "../lib/match-from-report";
 import { recordAnalysisHistoryEntry } from "../lib/analysis-history";
 import { decodeRouteMatchId } from "../lib/route-match-id";
 import { findMatchById } from "../lib/todays-matches";
@@ -51,10 +54,22 @@ function resolveStatus(
 export function MatchDetailPage({
   matchId,
 }: Readonly<{ matchId: string }>): ReactElement {
+  const queryClient = useQueryClient();
   const resolvedMatchId = decodeRouteMatchId(matchId);
   const upcoming = useUpcomingMatches();
-  const match = findMatchById(resolvedMatchId, upcoming.matches);
-  const detail = useMatchDetail(resolvedMatchId, match !== undefined);
+  const boardMatch = findMatchById(resolvedMatchId, upcoming.matches);
+  const hasSeededDetail =
+    queryClient.getQueryData([MATCH_DETAIL_QUERY_KEY, resolvedMatchId]) !==
+    undefined;
+  const detail = useMatchDetail(
+    resolvedMatchId,
+    boardMatch !== undefined || hasSeededDetail,
+  );
+  const match =
+    boardMatch ??
+    (detail.data === undefined
+      ? undefined
+      : matchSummaryFromReport(detail.data.report));
   const status = resolveStatus(
     detail.isError,
     detail.isPending,

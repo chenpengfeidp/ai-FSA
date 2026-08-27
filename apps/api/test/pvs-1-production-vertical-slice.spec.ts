@@ -1,7 +1,9 @@
 import "reflect-metadata";
+import { DiscoverFixtureByTeamsUseCase } from "@fas/application";
 import type { INestApplication } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { AnalysisController } from "../src/analysis.controller.js";
 import { AppModule } from "../src/app.module.js";
 import { configureOpenApi } from "../src/openapi.js";
 
@@ -60,6 +62,13 @@ describe("PVS-1 production prediction vertical slice", () => {
 
   afterEach(async () => {
     await app.close();
+  });
+
+  it("resolves DiscoverFixtureByTeamsUseCase through AnalysisController at runtime", () => {
+    expect(app.get(DiscoverFixtureByTeamsUseCase)).toBeInstanceOf(
+      DiscoverFixtureByTeamsUseCase,
+    );
+    expect(app.get(AnalysisController)).toBeInstanceOf(AnalysisController);
   });
 
   it("uses projection policy pin v2 on matchId analyze and exposes V2 provenance", async () => {

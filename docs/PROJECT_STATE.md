@@ -2,15 +2,15 @@
 
 ## Snapshot
 
-- Last updated: 2026-08-21 (PVS-2 Match Center Analyze-by-Teams UX)
+- Last updated: 2026-08-27 (PVS-3.3 provider capability and data coverage audit — COMPLETE)
 - Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
 - Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **PVS-2 COMPLETED** — Match Center **analyze-by-teams** form calls existing `POST /api/analyze`; ambiguous fixture picker; explainable V2 report + provenance in Workspace; live smoke procedure documented. Prior: **PVS-1** production API V2 pin + fixture discovery.
+- Current task status: **PVS-3.3 COMPLETE — Option C**. Repository and official-provider audit confirms API-Football can supply the current Projection V2 core fact set in product capability, subject to current-season entitlement and actual league/fixture coverage. The Odds API is an optional supporting market source, not a football-facts source. The integrated providers do not document live public-money/volume/sharp fields or guaranteed true opening odds, and the repository lacks a general `football:*` ↔ Odds event crosswalk. No third provider is required merely to run the current algorithm; full Market Intelligence depth needs an additional licensed/self-captured data acquisition layer. PVS-3.2 remains live-smoke BLOCKED on 2026 entitlement.
 - Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **PVS-2** complete (`docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-2_MATCH_CENTER_ANALYZE_BY_TEAMS_COMPLETION_REPORT.md`). Prior: PVS-1 Production Prediction Vertical Slice.
-- Last completed delivery: **PVS-2 Match Center Analyze-by-Teams UX**; prior PVS-1 Production Prediction Vertical Slice; Prediction Vertical Slice Readiness Audit; P2K-CAL-2, …
+- Current sprint: **PVS-3.3 Football Intelligence Provider Capability & Data Coverage Audit COMPLETE** (`docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.3_PROVIDER_CAPABILITY_AND_DATA_COVERAGE_AUDIT.md`).
+- Last completed delivery: **PVS-3.3 provider capability/data coverage audit (Option C)**; prior PVS-3.2 valid-credential/current-season-entitlement blocked smoke report; PVS-3.2 missing-credential validation report; PVS-3.1 production runtime boot fix; PVS-3 blocked live validation report; PVS-2 Match Center Analyze-by-Teams UX; PVS-1 Production Prediction Vertical Slice; Prediction Vertical Slice Readiness Audit; P2K-CAL-2, …
 - Demo: recorded cassette `football:100001` — Match Center form **FC Seoul vs Ulsan Hyundai FC** → `POST /api/analyze` → Workspace V2 report; or `POST /api/analyze/match/football:100001`
-- Next authorized work: **PVS-3** (recommended) — live fixture CI/staging smoke with credentials; **not** P2K-CAL-3 unless explicitly authorized. Do **not** auto-promote calibration candidate1 or Candidate C.
+- Next authorized work: human decision on current-season API-Football entitlement and whether to authorize the recommended bounded **PVS-3.4 Current-Season Provider Coverage Probe & Commercial Decision Gate**. Do not purchase a provider or start PVS-3.4 automatically. PVS-3.2 live acceptance still requires a dynamically selected 2026 fixture. **Not** P2K-CAL-3 unless explicitly authorized. Do **not** auto-promote calibration candidate1 or Candidate C.
 - Release status: Pre-release; private trusted environment only; not production
 - Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
 - Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
@@ -244,16 +244,18 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 Recommended follow-ons (ordered):
 
-1. Human governance on calibration candidate1 promotion (remain NON-DEFAULT) or authorize P2K-CAL-3 tuning;
-2. Do **not** auto-promote candidate1 or Candidate C;
-3. Candidate C promotion decision remains an explicit human gate (no auto-promotion in code);
-4. **L2A** Squad Intelligence Evidence (or other doc 40 items);
-5. Follow **`docs/40_PRODUCT_ROADMAP.md`** for trust-track governance listing of P2*/R1B/M1B;
-6. Keep Odds as optional market layer only;
-7. Compose migrate automation / postgres-mode smoke evidence (platform companion);
-8. Do not start Redis/BullMQ/pgvector, public auth, or network AI without a separate approved milestone.
+1. Human decision on API-Football current-season entitlement; if supplied, rerun live coverage/smoke validation against dynamically selected fixtures;
+2. If explicitly authorized, run the bounded PVS-3.4 coverage probe before buying or integrating any additional provider;
+3. Keep The Odds API optional and supporting-only; do not treat recorded `fas_market_depth` fields as live vendor capability;
+4. Human governance on calibration candidate1 promotion (remain NON-DEFAULT) or separately authorize P2K-CAL-3 tuning;
+5. Do **not** auto-promote candidate1 or Candidate C;
+6. Candidate C promotion decision remains an explicit human gate (no auto-promotion in code);
+7. **L2A** Squad Intelligence Evidence (or other doc 40 items);
+8. Follow **`docs/40_PRODUCT_ROADMAP.md`** for trust-track governance listing of P2*/R1B/M1B/PVS*;
+9. Compose migrate automation / postgres-mode smoke evidence (platform companion);
+10. Do not start Redis/BullMQ/pgvector, public auth, or network AI without a separate approved milestone.
 
-Recently delivered: **P2K-CAL-1 Projection / Match Script Calibration Diagnosis Plan** (`docs/sprints/P2K/P2K_CAL_1_PROJECTION_MATCH_SCRIPT_CALIBRATION_DIAGNOSIS_PLAN.md`); **P2K-G3 Validation Prediction Distribution Audit**; **P2K-G Validation Expansion V2 Population Evaluation**; **P2K-F Validation Expansion V2 Sealed Cohort Offline Replay Run**; **P2K-E Validation Expansion V2 Sealed Replay Cohort**; **P2K-G2-A Validation Dataset Diversity Expansion**; **P2K-G2 Planning/Audit**; **P2K-G Validation Recovery V2 Population Evaluation**; **P2K-F Validation Recovery V2 Offline Replay**; **P2K-E Validation Recovery V2 Sealed Cohort**; **P2K-G-RECOVERY Projection V2 Bootstrap**; **P2K-F Validation Offline Replay FAIL CLOSED**; **P2K-E Validation Sealed Cohort**; **P2K Validation Data Bootstrap**; **P2K-G**; **P2K-F**; **P2K-E**; **P2K-D**; **P2K-C**; **P2K-A/B**; **P2K** planning; **R1B** / **R1A**; **M1B** / **M1A**; **P2J**–**P2A**; **O1**; **V1A**; **A2**; **P1B** / **P1A**; **L1B** / **L1A**; **A1.5** / **A1**; Freeze **v0.3**.
+Recently delivered: **PVS-3.3 Provider Capability & Data Coverage Audit** (**COMPLETE — Option C**; current core can run from API-Football facts, Odds remains optional, full market depth needs another acquisition layer; `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.3_PROVIDER_CAPABILITY_AND_DATA_COVERAGE_AUDIT.md`); **PVS-3.2 Live Fixture Smoke** (**LIVE SMOKE BLOCKED** by API-Football current-season plan entitlement; credential valid, production Nest startup PASS, explicit catalog fallback, fallback analysis failed closed with zero Evidence; `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.2_LIVE_FIXTURE_SMOKE_COMPLETION_REPORT.md`); prior **PVS-3.2 Live Production Prediction Validation** (**LIVE_VALIDATION_BLOCKED_MISSING_CREDENTIAL**; `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.2_LIVE_PRODUCTION_PREDICTION_VALIDATION_COMPLETION_REPORT.md`); **PVS-3.1 Production Runtime Boot Fix** (**COMPLETE**, recorded production HTTP PASS; `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.1_PRODUCTION_RUNTIME_BOOT_FIX_COMPLETION_REPORT.md`); **PVS-3 Production Live Fixture End-to-End Validation** (**BLOCKED**, no live-success claim; `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3_LIVE_FIXTURE_END_TO_END_VALIDATION_COMPLETION_REPORT.md`); **PVS-2**; **PVS-1**; **P2K-CAL-1 Projection / Match Script Calibration Diagnosis Plan** (`docs/sprints/P2K/P2K_CAL_1_PROJECTION_MATCH_SCRIPT_CALIBRATION_DIAGNOSIS_PLAN.md`); **P2K-G3 Validation Prediction Distribution Audit**; **P2K-G Validation Expansion V2 Population Evaluation**; **P2K-F Validation Expansion V2 Sealed Cohort Offline Replay Run**; **P2K-E Validation Expansion V2 Sealed Replay Cohort**; **P2K-G2-A Validation Dataset Diversity Expansion**; **P2K-G2 Planning/Audit**; **P2K-G Validation Recovery V2 Population Evaluation**; **P2K-F Validation Recovery V2 Offline Replay**; **P2K-E Validation Recovery V2 Sealed Cohort**; **P2K-G-RECOVERY Projection V2 Bootstrap**; **P2K-F Validation Offline Replay FAIL CLOSED**; **P2K-E Validation Sealed Cohort**; **P2K Validation Data Bootstrap**; **P2K-G**; **P2K-F**; **P2K-E**; **P2K-D**; **P2K-C**; **P2K-A/B**; **P2K** planning; **R1B** / **R1A**; **M1B** / **M1A**; **P2J**–**P2A**; **O1**; **V1A**; **A2**; **P1B** / **P1A**; **L1B** / **L1A**; **A1.5** / **A1**; Freeze **v0.3**.
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 

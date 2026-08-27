@@ -3,7 +3,8 @@ import {
   type GenerateMatchReportResult,
   GenerateMatchReportUseCase,
 } from "@fas/report";
-import type { DiscoverFixtureByTeamsUseCase } from "@fas/application";
+// biome-ignore lint/style/useImportType: NestJS uses the use case class as constructor metadata.
+import { DiscoverFixtureByTeamsUseCase } from "@fas/application";
 import { loadApiConfig } from "@fas/config";
 import { createMatchId } from "@fas/match";
 import {

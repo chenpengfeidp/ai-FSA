@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** PVS-3.3 Provider Capability & Data Coverage Audit 已完成，结论 **Option C**：API-Football 在产品能力上足以提供当前 Projection V2 核心 facts（但现有 Free entitlement 不支持 2026），The Odds API 仅是可选 supporting market source；live public-money / volume / sharp / guaranteed true opening odds 不由当前两家文档能力覆盖，且仓库尚无通用 `football:*` ↔ Odds event crosswalk。当前算法无需第三 Provider；完整 Market Intelligence depth 需要额外 licensed / self-captured acquisition layer。PVS-3.2 live smoke 仍 BLOCKED；Candidate C / calibration candidate1 均 NON-DEFAULT。
+一句话：**已进入产品研发阶段。** 最新完成 Match Replay / Evaluation Dataset Update：4 场 2026-08-27 已确认结果作为 outcome-only `ActualMatchResult` 样本加入；历史赛前 Prediction 不可用，因此没有回填 Evaluation History、Sidecar、sealed cohort 或 Calibration。Celta–Osasuna 保留红牌驱动的状态转换标注，Omonia–Sint-Truiden 保留 open/high-goal 标注。PVS-3.3 仍为 **Option C**，PVS-3.2 live smoke 仍 BLOCKED；Projection V2、`projection.v3.replay`、Candidate C / calibration candidate1 均未变更或晋升。
 
 ---
 
@@ -128,6 +128,7 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.2_LIVE_PRODUCTION_PREDICTION_VALIDATION_COMPLETION_REPORT.md` | **PVS-3.2** — **LIVE_VALIDATION_BLOCKED_MISSING_CREDENTIAL**；live 未触达 provider，recorded HTTP / Evidence provenance / V2 / Workspace 回归通过。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.2_LIVE_FIXTURE_SMOKE_COMPLETION_REPORT.md` | **PVS-3.2 rerun** — **LIVE SMOKE BLOCKED**；credential valid + Nest live startup PASS，但 account plan 不支持 2026 season；catalog explicit recorded fallback，fallback analyze fail closed / zero Evidence。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.3_PROVIDER_CAPABILITY_AND_DATA_COVERAGE_AUDIT.md` | **PVS-3.3** — Provider / Evidence / Feature / Rule / Football State / Projection V2 capability matrix；结论 **Option C**，当前 core facts 足够，完整 Market depth 需额外 acquisition layer。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/MATCH_REPLAY_EVALUATION_DATASET_UPDATE_COMPLETION_REPORT.md` | 4 场真实 FT outcome-only replay 样本；明确区分 unavailable Prediction / Actual Result / post-match script / exogenous events；不写 History/Sidecar/cohort，不调参。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 
@@ -288,12 +289,13 @@ Match Center (web)
 35. **Football Intelligence v3 Knowledge Model Design**（设计评审，非编码冲刺）— 已完成（`docs/architecture/FOOTBALL_INTELLIGENCE_V3_KNOWLEDGE_MODEL_DESIGN.md`）  
 36. **PVS-1 / PVS-2 / PVS-3.1** — 已完成；**PVS-3.2 live validation** 首次报告为 **LIVE_VALIDATION_BLOCKED_MISSING_CREDENTIAL**，最新重跑为 **LIVE SMOKE BLOCKED**（`docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.2_LIVE_FIXTURE_SMOKE_COMPLETION_REPORT.md`）：key 有效、Nest live startup PASS，但套餐不支持 2026 season；需取得 current-season entitlement 后重跑，不得把 explicit recorded fallback 写成 live 成功
 37. **PVS-3.3 Provider Capability & Data Coverage Audit** — 已完成（`docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.3_PROVIDER_CAPABILITY_AND_DATA_COVERAGE_AUDIT.md`；**Option C**；无购买、无 credential 变更、无 production code）
-38. **PVS-3.4 coverage probe / commercial decision gate** — 仅在人工明确授权后；不得自动购买或开工
-39. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后
-40. **L2A Squad Intelligence Evidence** — 其后候选
-41. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0
+38. **Match Replay / Evaluation Dataset Update** — 已完成（4 场 outcome-only `ActualMatchResult` fixture；无 Prediction 回填、无 History/cohort/calibration mutation；`docs/sprints/PREDICTION_VERTICAL_SLICE/MATCH_REPLAY_EVALUATION_DATASET_UPDATE_COMPLETION_REPORT.md`）
+39. **PVS-3.4 coverage probe / commercial decision gate** — 仅在人工明确授权后；不得自动购买或开工
+40. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后
+41. **L2A Squad Intelligence Evidence** — 其后候选
+42. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0
 
-历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B · P2K-C · P2K-D · P2K-E · P2K-F · P2K-G · Validation Data Bootstrap · P2K-E Validation Seal · P2K-F Validation（fail closed） · P2K-G-RECOVERY V2 Bootstrap · P2K-E Recovery V2 Seal · P2K-F Recovery V2 Replay · P2K-G Recovery V2 Population Evaluation · P2K-G2-A · P2K-E Expansion V2 Seal · P2K-F Expansion V2 Replay · P2K-G Expansion V2 Population Evaluation · PVS-1 · PVS-2 · PVS-3（blocked validation） · PVS-3.1（recorded runtime boot fix） · PVS-3.2（missing-credential blocked validation + current-season-plan blocked rerun） · PVS-3.3（provider coverage audit / Option C）
+历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B · P2K-C · P2K-D · P2K-E · P2K-F · P2K-G · Validation Data Bootstrap · P2K-E Validation Seal · P2K-F Validation（fail closed） · P2K-G-RECOVERY V2 Bootstrap · P2K-E Recovery V2 Seal · P2K-F Recovery V2 Replay · P2K-G Recovery V2 Population Evaluation · P2K-G2-A · P2K-E Expansion V2 Seal · P2K-F Expansion V2 Replay · P2K-G Expansion V2 Population Evaluation · PVS-1 · PVS-2 · PVS-3（blocked validation） · PVS-3.1（recorded runtime boot fix） · PVS-3.2（missing-credential blocked validation + current-season-plan blocked rerun） · PVS-3.3（provider coverage audit / Option C） · Match Replay / Evaluation Dataset Update（4 场 outcome-only）
 
 平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 

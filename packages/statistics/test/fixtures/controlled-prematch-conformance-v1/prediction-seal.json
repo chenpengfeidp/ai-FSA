@@ -1,0 +1,195 @@
+{
+  "schemaVersion": "controlled-prematch-prediction-seal.v1",
+  "sealPayload": {
+    "fixtureId": "controlled-prematch-conformance-v1",
+    "immutableFixtureIdentity": "urn:fas:test-fixture:controlled-prematch-conformance:v1",
+    "classification": {
+      "synthetic": true,
+      "historicalAuthenticity": false,
+      "provenanceClass": "B",
+      "allowedUsage": "conformance_test_only"
+    },
+    "fixtureIdentity": {
+      "matchId": "conformance:prematch:v1:home-fc:away-fc:2030-01-15T19:00:00Z",
+      "homeTeam": "Conformance Home FC",
+      "awayTeam": "Conformance Away FC",
+      "competitionId": "conformance-competition-v1",
+      "competitionName": "FAS Controlled Conformance Competition",
+      "season": "conformance-season-v1",
+      "kickoff": "2030-01-15T19:00:00.000Z"
+    },
+    "temporal": {
+      "mode": "PRE_MATCH",
+      "analysisTime": "2030-01-15T12:00:00.000Z",
+      "analysisCutoff": "2030-01-15T12:00:00.000Z",
+      "generatedAt": "2030-01-15T12:00:01.000Z",
+      "sourceTimezone": "UTC",
+      "timeContractVersion": "fip.analysis-protocol.v1"
+    },
+    "lineage": {
+      "featureModelVersion": "feature.synthetic.conformance.v1",
+      "ruleSetVersion": "rule.synthetic.conformance.v1",
+      "projectionModelVersion": "projection.synthetic.conformance.v1",
+      "policyVersion": "projection-policy.synthetic.conformance.v1",
+      "parameterArtifact": {
+        "artifactId": "projectionParams:synthetic:conformance:v1",
+        "versionLabel": "projection.synthetic.conformance.v1",
+        "checksum": "5cfefe7d1ccdfe34e5df0fe00fbc3251d102a47de618d365bc17c64d0eff5790",
+        "checksumAlgorithm": "sha256",
+        "checksumCanonicalization": "fas-json-canonical.v1",
+        "checksumScope": "/sealPayload/lineage/parameterArtifact/payload",
+        "payload": {
+          "fixtureOnly": true,
+          "notProductionParameters": true
+        }
+      }
+    },
+    "projectionChecksumPayload": {
+      "matchId": "conformance:prematch:v1:home-fc:away-fc:2030-01-15T19:00:00Z",
+      "projectionStatus": "completed_nonempty",
+      "pHome": 0.5,
+      "pDraw": 0.3,
+      "pAway": 0.2,
+      "topScorelines": [
+        {
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "probability": 0.12
+        },
+        {
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "probability": 0.11
+        }
+      ],
+      "goalRange": {
+        "range01": 0.3,
+        "range23": 0.45,
+        "range4Plus": 0.25
+      },
+      "predictionConfidence": 70,
+      "confidenceBand": "high",
+      "scenarios": {
+        "mostLikely": {
+          "slot": "mostLikely",
+          "winner": "home",
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "probability": 0.5
+        },
+        "secondLikely": {
+          "slot": "secondLikely",
+          "winner": "draw",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "probability": 0.3
+        },
+        "upset": {
+          "slot": "upset",
+          "winner": "away",
+          "homeGoals": 0,
+          "awayGoals": 1,
+          "probability": 0.2
+        }
+      },
+      "rules": [
+        {
+          "ruleName": "SYNTHETIC_HOME_EDGE",
+          "status": "PASS",
+          "channel": "home+"
+        }
+      ],
+      "featureNames": ["syntheticHomeStrength", "syntheticAwayStrength"],
+      "projectionModelVersion": "projection.synthetic.conformance.v1",
+      "featureModelVersion": "feature.synthetic.conformance.v1",
+      "ruleSetVersion": "rule.synthetic.conformance.v1"
+    },
+    "projectionIntegrity": {
+      "algorithm": "sha256",
+      "canonicalization": "fas-json-canonical.v1",
+      "scope": "/sealPayload/projectionChecksumPayload",
+      "digest": "8afa8d2475bab45dd1d349b7f7228d0af07bcd97450f8fc1b9dd5e70bff16618"
+    },
+    "prediction": {
+      "matchId": "conformance:prematch:v1:home-fc:away-fc:2030-01-15T19:00:00Z",
+      "projectionChecksum": "8afa8d2475bab45dd1d349b7f7228d0af07bcd97450f8fc1b9dd5e70bff16618",
+      "projectionStatus": "completed_nonempty",
+      "pHome": 0.5,
+      "pDraw": 0.3,
+      "pAway": 0.2,
+      "topScorelines": [
+        {
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "probability": 0.12
+        },
+        {
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "probability": 0.11
+        }
+      ],
+      "goalRange": {
+        "range01": 0.3,
+        "range23": 0.45,
+        "range4Plus": 0.25
+      },
+      "predictionConfidence": 70,
+      "confidenceBand": "high",
+      "scenarios": {
+        "mostLikely": {
+          "slot": "mostLikely",
+          "winner": "home",
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "probability": 0.5
+        },
+        "secondLikely": {
+          "slot": "secondLikely",
+          "winner": "draw",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "probability": 0.3
+        },
+        "upset": {
+          "slot": "upset",
+          "winner": "away",
+          "homeGoals": 0,
+          "awayGoals": 1,
+          "probability": 0.2
+        }
+      },
+      "rules": [
+        {
+          "ruleName": "SYNTHETIC_HOME_EDGE",
+          "status": "PASS",
+          "channel": "home+"
+        }
+      ],
+      "featureNames": ["syntheticHomeStrength", "syntheticAwayStrength"],
+      "projectionModelVersion": "projection.synthetic.conformance.v1",
+      "featureModelVersion": "feature.synthetic.conformance.v1",
+      "ruleSetVersion": "rule.synthetic.conformance.v1"
+    },
+    "provenance": {
+      "creator": "repository-controlled-fixture",
+      "creationMethod": "hand-authored-static-conformance-data",
+      "generatedByCurrentAnalysis": false,
+      "generatedByCurrentFeature": false,
+      "generatedByCurrentRule": false,
+      "generatedByCurrentMatchScript": false,
+      "generatedByCurrentProjection": false,
+      "historicalSource": null,
+      "limitations": [
+        "Synthetic conformance fixture only",
+        "Not evidence of an authentic historical prediction"
+      ]
+    }
+  },
+  "sealIntegrity": {
+    "algorithm": "sha256",
+    "canonicalization": "fas-json-canonical.v1",
+    "scope": "/sealPayload",
+    "digest": "3135c5bef2e727c8604b701bc5253984f78a1c5b2836846391edb64bf3696411"
+  }
+}

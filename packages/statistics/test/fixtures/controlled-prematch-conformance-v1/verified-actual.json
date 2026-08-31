@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "controlled-verified-match-result.v1",
+  "actualPayload": {
+    "fixtureId": "controlled-prematch-conformance-v1",
+    "immutableFixtureIdentity": "urn:fas:test-fixture:controlled-prematch-conformance:v1",
+    "classification": {
+      "synthetic": true,
+      "historicalAuthenticity": false,
+      "provenanceClass": "B",
+      "allowedUsage": "conformance_test_only"
+    },
+    "fixtureIdentity": {
+      "matchId": "conformance:prematch:v1:home-fc:away-fc:2030-01-15T19:00:00Z",
+      "homeTeam": "Conformance Home FC",
+      "awayTeam": "Conformance Away FC",
+      "competitionId": "conformance-competition-v1",
+      "competitionName": "FAS Controlled Conformance Competition",
+      "season": "conformance-season-v1",
+      "kickoff": "2030-01-15T19:00:00.000Z"
+    },
+    "evidence": {
+      "id": "evidence:controlled-prematch-conformance-v1:match-result",
+      "providerId": "internal:controlled-conformance",
+      "source": "controlled-conformance-fixture",
+      "sourceId": "controlled-prematch-conformance-v1:result",
+      "type": "MATCH_RESULT",
+      "matchId": "conformance:prematch:v1:home-fc:away-fc:2030-01-15T19:00:00Z",
+      "collectedAt": "2030-01-15T21:00:00.000Z",
+      "eventTime": "2030-01-15T21:00:00.000Z",
+      "timestamp": "2030-01-15T21:00:00.000Z",
+      "freshness": "fresh",
+      "confidence": "high",
+      "quality": "verified",
+      "provenance": {
+        "collector": "repository-controlled-fixture",
+        "method": "controlled-fixture-contract-verification",
+        "providerId": "internal:controlled-conformance",
+        "category": "internal"
+      },
+      "payload": {
+        "homeTeam": "Conformance Home FC",
+        "awayTeam": "Conformance Away FC",
+        "competitionId": "conformance-competition-v1",
+        "competitionName": "FAS Controlled Conformance Competition",
+        "season": "conformance-season-v1",
+        "kickoff": "2030-01-15T19:00:00.000Z",
+        "homeGoals": 2,
+        "awayGoals": 1,
+        "winner": "home",
+        "totalGoals": 3,
+        "matchStatus": "FINISHED",
+        "observedAt": "2030-01-15T21:00:00.000Z",
+        "synthetic": true,
+        "historicalAuthenticity": false
+      }
+    },
+    "verification": {
+      "verificationClass": "controlled-fixture-only",
+      "verifiedAgainst": "controlled-prematch-conformance-manifest.v1",
+      "realWorldVerification": false
+    }
+  },
+  "actualIntegrity": {
+    "algorithm": "sha256",
+    "canonicalization": "fas-json-canonical.v1",
+    "scope": "/actualPayload",
+    "digest": "03fd2e6505d54dcc4a405b05c83de860fb0955e1ab96ff3e13872cd9e6af9a38"
+  }
+}

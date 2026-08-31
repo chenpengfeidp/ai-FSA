@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "controlled-prematch-conformance-manifest.v1",
+  "manifestPayload": {
+    "fixtureId": "controlled-prematch-conformance-v1",
+    "immutableFixtureIdentity": "urn:fas:test-fixture:controlled-prematch-conformance:v1",
+    "classification": {
+      "synthetic": true,
+      "historicalAuthenticity": false,
+      "provenanceClass": "B",
+      "allowedUsage": "conformance_test_only"
+    },
+    "populationPolicy": {
+      "historicalPopulationEligible": false,
+      "calibrationEligible": false,
+      "validationEligible": false,
+      "databasePersistenceAllowed": false
+    },
+    "fixtureIdentity": {
+      "matchId": "conformance:prematch:v1:home-fc:away-fc:2030-01-15T19:00:00Z",
+      "homeTeam": "Conformance Home FC",
+      "awayTeam": "Conformance Away FC",
+      "competitionId": "conformance-competition-v1",
+      "competitionName": "FAS Controlled Conformance Competition",
+      "season": "conformance-season-v1",
+      "kickoff": "2030-01-15T19:00:00.000Z"
+    },
+    "files": {
+      "predictionSeal": {
+        "path": "prediction-seal.json",
+        "schemaVersion": "controlled-prematch-prediction-seal.v1",
+        "sha256": "3135c5bef2e727c8604b701bc5253984f78a1c5b2836846391edb64bf3696411"
+      },
+      "verifiedActual": {
+        "path": "verified-actual.json",
+        "schemaVersion": "controlled-verified-match-result.v1",
+        "sha256": "03fd2e6505d54dcc4a405b05c83de860fb0955e1ab96ff3e13872cd9e6af9a38"
+      }
+    },
+    "expectedBoundary": {
+      "sealValid": true,
+      "actualValid": true,
+      "ftEvaluationAllowed": true,
+      "sidecarPresent": false,
+      "outcomeEvaluable": true,
+      "replayComplete": false,
+      "replayEligible": false,
+      "replayReason": "MISSING_SIDECAR"
+    }
+  },
+  "manifestIntegrity": {
+    "algorithm": "sha256",
+    "canonicalization": "fas-json-canonical.v1",
+    "scope": "/manifestPayload",
+    "digest": "c05d672bd329675607cb2f0ebfef564ae0a7fa896ed0be3b9a7d1734c5d919c7"
+  }
+}

@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** FIP-1 Football Intelligence Analysis Protocol Planning 已完成 Review / Sign-off，状态为 **PLANNING COMPLETE / REVIEWED**；它明确区分当前已实现能力与尚未落地的 cutoff、freshness/conflict、External Evidence intake、no-silent-fallback 和 cross-Agent conformance。FIP-2 P0 Governance and Canonicalization 仅完成 Planning，等待人工批准；建议 canonical 文件尚未创建。PVS-3.3 仍为 **Option C**，PVS-3.2 live smoke 仍 BLOCKED；Projection V2、`projection.v3.replay`、Candidate C / calibration candidate1 均未变更或晋升。
+一句话：**已进入产品研发阶段。** Historical Match Evaluation / Case capability audit 已完成，结论 **Option B / Planning only**：FT-only Actual Result、Evaluation、History、Calibration、Validation、Replay 已实现，但任意历史分析入库仍缺 genuine PRE_MATCH seal/cutoff integrity gate，Case Engine 仍为 documented only。FIP-1 保持 **PLANNING COMPLETE / REVIEWED**；FIP-2 P0 已完成，唯一 canonical Agent 分析协议为 `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`；FIP-2 P1/P2/P3/P4 均未授权、未启动。PVS-3.3 仍为 **Option C**，PVS-3.2 live smoke 仍 BLOCKED；Projection V2、`projection.v3.replay`、Candidate C / calibration candidate1 均未变更或晋升。
 
 ---
 
@@ -38,11 +38,12 @@
 4. Approved implementation plan / gate / sign-off
 5. `docs/PROJECT_STATE.md`（**当前交付真相**）
 6. `docs/40_PRODUCT_ROADMAP.md`（**产品 Sprint 排序唯一权威**）
-7. Sprint plans / reports（须引用 doc 40；历史证据不覆盖契约）
-8. 现有实现
-9. 评论、示例、agent 假设
+7. `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`（Agent PRE_MATCH 分析执行与治理；不覆盖 owning contracts）
+8. Sprint plans / reports（须引用 doc 40；历史证据不覆盖契约）
+9. 现有实现
+10. 评论、示例、agent 假设
 
-Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md` → 产品工作再读 doc 40。
+Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md` → 产品工作再读 doc 40 → 比赛分析再读 canonical protocol。
 
 ---
 
@@ -56,6 +57,7 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/DEVELOPMENT_WORKFLOW.md` | 工程生命周期与治理流程。 |
 | `AGENTS.md` | AI agent 必读规则；**Project Governance Rule**（产品研发阶段铁规则）。 |
 | `docs/40_PRODUCT_ROADMAP.md` | v0.2 后唯一产品路线图；每个 Sprint 必须引用。 |
+| `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md` | 唯一 canonical、Provider-agnostic、非 Architecture 的 Agent PRE_MATCH 比赛分析协议；拥有 Agent 执行顺序、研究/覆盖/失败呈现、integrity audit 与输出形状，不拥有 API、Evidence schema 或模型数学。 |
 | `docs/41_EVIDENCE_PROVIDER_ARCHITECTURE.md` | Evidence Provider Layer 架构规划冻结（多 Provider；不授权 coding / 新 package）。 |
 | `docs/50_EVIDENCE_CATALOG.md` | Evidence / 产品表面交付状态目录（INJURY / SUSPENSION / AVAILABILITY 等）。 |
 | `docs/PROJECT_STATE.md` | **当前里程碑 / 已交付 / 下一步** 的活快照。 |
@@ -130,7 +132,9 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.3_PROVIDER_CAPABILITY_AND_DATA_COVERAGE_AUDIT.md` | **PVS-3.3** — Provider / Evidence / Feature / Rule / Football State / Projection V2 capability matrix；结论 **Option C**，当前 core facts 足够，完整 Market depth 需额外 acquisition layer。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/MATCH_REPLAY_EVALUATION_DATASET_UPDATE_COMPLETION_REPORT.md` | 4 场真实 FT outcome-only replay 样本；明确区分 unavailable Prediction / Actual Result / post-match script / exogenous events；不写 History/Sidecar/cohort，不调参。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-1_FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL_PLANNING.md` | **FIP-1** — 跨 Agent PRE_MATCH 分析协议 Planning；Review PASS / Planning Complete；不代表 cutoff/freshness/external intake 已实现。 |
-| `docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_PLANNING.md` | **FIP-2 P0 Planning only** — 规划唯一 non-Architecture canonical protocol、ownership/versioning 与 Agent 入口；等待人工批准，P1–P4 未授权。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_PLANNING.md` | **FIP-2 P0 Planning** — 已获人工批准并按限定范围完成；历史 planning 输入，不替代 canonical protocol。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_COMPLETION_REPORT.md` | **FIP-2 P0 Completion / Sign-off** — canonicalization、链接一致性、非 runtime 边界与 acceptance 证据；P1–P4 未授权。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_MATCH_EVALUATION_CASE_CAPABILITY_AUDIT.md` | Historical Match Evaluation / Case 能力审计；**Option B / Planning only**。确认 FT Evaluation/History/Replay 可复用，但安全历史 intake 缺 original PRE_MATCH seal/cutoff gate；Case Engine 仅有文档，无 runtime。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 
@@ -164,6 +168,8 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
     │     └── 34–35 V2 alignment + first slice spec
     ├── PROJECT_STATE (delivery snapshot)
     ├── PROJECT_INDEX (this map)
+    ├── protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md
+    │     (canonical Agent PRE_MATCH protocol; non-Architecture)
     └── sprints/* (historical + vertical-slice specs)
 ```
 
@@ -293,13 +299,14 @@ Match Center (web)
 37. **PVS-3.3 Provider Capability & Data Coverage Audit** — 已完成（`docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-3.3_PROVIDER_CAPABILITY_AND_DATA_COVERAGE_AUDIT.md`；**Option C**；无购买、无 credential 变更、无 production code）
 38. **Match Replay / Evaluation Dataset Update** — 已完成（4 场 outcome-only `ActualMatchResult` fixture；无 Prediction 回填、无 History/cohort/calibration mutation；`docs/sprints/PREDICTION_VERTICAL_SLICE/MATCH_REPLAY_EVALUATION_DATASET_UPDATE_COMPLETION_REPORT.md`）
 39. **FIP-1 Football Intelligence Analysis Protocol Planning** — **PLANNING COMPLETE / REVIEWED**（`docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-1_FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL_PLANNING.md`；不代表 operational protocol 已落地）
-40. **FIP-2 P0 Governance and Canonicalization Planning** — **PLANNING ONLY / AWAITING HUMAN APPROVAL**（`docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_PLANNING.md`；canonical protocol 尚未创建；P1/P2/P3/P4 未授权）
-41. **PVS-3.4 coverage probe / commercial decision gate** — 仅在人工明确授权后；不得自动购买或开工
-42. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后
-43. **L2A Squad Intelligence Evidence** — 其后候选
-44. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0
+40. **FIP-2 P0 Governance and Canonicalization** — **COMPLETE / SIGNED OFF**（canonical `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`；`docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_COMPLETION_REPORT.md`；仅文档治理，P1/P2/P3/P4 未授权、未启动）
+41. **Historical Match Evaluation / Case Capability Audit** — **COMPLETE / Option B / Planning only**（FT Evaluation/History/Replay 已实现；安全历史 intake 缺 genuine PRE_MATCH seal/cutoff gate；Case Engine documented only；未 ingest 样本、未改 runtime/schema）
+42. **PVS-3.4 coverage probe / commercial decision gate** — 仅在人工明确授权后；不得自动购买或开工
+43. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后
+44. **L2A Squad Intelligence Evidence** — 其后候选
+45. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0
 
-历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B · P2K-C · P2K-D · P2K-E · P2K-F · P2K-G · Validation Data Bootstrap · P2K-E Validation Seal · P2K-F Validation（fail closed） · P2K-G-RECOVERY V2 Bootstrap · P2K-E Recovery V2 Seal · P2K-F Recovery V2 Replay · P2K-G Recovery V2 Population Evaluation · P2K-G2-A · P2K-E Expansion V2 Seal · P2K-F Expansion V2 Replay · P2K-G Expansion V2 Population Evaluation · PVS-1 · PVS-2 · PVS-3（blocked validation） · PVS-3.1（recorded runtime boot fix） · PVS-3.2（missing-credential blocked validation + current-season-plan blocked rerun） · PVS-3.3（provider coverage audit / Option C） · Match Replay / Evaluation Dataset Update（4 场 outcome-only） · FIP-1 Planning Review / Sign-off
+历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B · P2K-C · P2K-D · P2K-E · P2K-F · P2K-G · Validation Data Bootstrap · P2K-E Validation Seal · P2K-F Validation（fail closed） · P2K-G-RECOVERY V2 Bootstrap · P2K-E Recovery V2 Seal · P2K-F Recovery V2 Replay · P2K-G Recovery V2 Population Evaluation · P2K-G2-A · P2K-E Expansion V2 Seal · P2K-F Expansion V2 Replay · P2K-G Expansion V2 Population Evaluation · PVS-1 · PVS-2 · PVS-3（blocked validation） · PVS-3.1（recorded runtime boot fix） · PVS-3.2（missing-credential blocked validation + current-season-plan blocked rerun） · PVS-3.3（provider coverage audit / Option C） · Match Replay / Evaluation Dataset Update（4 场 outcome-only） · FIP-1 Planning Review / Sign-off · FIP-2 P0 Governance and Canonicalization · Historical Match Evaluation / Case Capability Audit（Option B / planning only）
 
 平台配套（非产品 Sprint 主体）：Compose postgres 冒烟等仍见 `PROJECT_STATE`。
 
@@ -314,7 +321,7 @@ Match Center (web)
 1. `docs/PROJECT_INDEX.md`（本文）  
 2. `docs/PROJECT_STATE.md`  
 3. `AGENTS.md`（禁区与权威序）  
-4. 做跨 Agent 比赛分析协议工作时读 `docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-1_FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL_PLANNING.md`（已审查 Planning，尚非 operational canonical protocol）
+4. 执行比赛分析时读 `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`（唯一 canonical、Provider-agnostic、非 Architecture；未落地 runtime gate 会明确 fail closed）
 5. 需要契约细节时再下钻 `00` / ADR / `34`–`35` / 对应 `VERTICAL_SLICE_*`
 
 更新本索引的时机：新增编号文档、关闭/开启里程碑、或交付状态相对 `PROJECT_STATE` 发生跳跃时。

@@ -8,6 +8,8 @@ Use it to determine what to read, which documents are authoritative, how work is
 
 For the live delivery snapshot, read `docs/PROJECT_STATE.md`.
 
+For football match analysis, read and follow `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`, subject to the authority order below.
+
 For product sprint sequencing after Architecture Freeze v0.2, read `docs/40_PRODUCT_ROADMAP.md`.
 
 ## Project Governance Rule (Product Development Phase)

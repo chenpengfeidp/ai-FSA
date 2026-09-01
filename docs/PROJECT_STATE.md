@@ -1,24 +1,425 @@
-# FAS Project State
+# Current Project State
+
+```yaml
+project: AI-FSA
+current_track: PREDICTION_VERTICAL_SLICE
+current_stage: CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_COMPLETED
+current_gate: FIXTURE_REVIEW_NEXT
+historical_evaluation_intake: C_BLOCKED
+authentic_prematch_seal: NOT_FOUND
+authentic_seal_plus_verified_real_world_actual: NOT_FOUND
+controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
+controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
+production_historical_intake_authorized: false
+next_action: CONTROLLED_FIXTURE_IMPLEMENTATION_REVIEW
+next_production_capability: HISTORICAL_EVALUATION_INTAKE
+```
+
+## Document role
+
+This file is the **Repository-grounded project state and execution handoff**.
+It is the primary current-state entry point for a future Agent opening a
+repository ZIP.
+
+Use it to:
+
+- understand delivered capabilities without relying on conversation memory;
+- identify the current track, stage, gate, blockers and next action;
+- avoid duplicate implementation;
+- avoid crossing governance gates early;
+- find the evidence that supports each status claim.
+
+This file is not:
+
+- a Product Roadmap;
+- the canonical FIP Protocol;
+- an Architecture specification;
+- a prediction-model specification.
+
+It does not override the Project Bible, accepted ADRs, owning numbered
+contracts or approved gates. `docs/40_PRODUCT_ROADMAP.md` remains authoritative
+for product sequencing. The canonical FIP protocol remains authoritative for
+Agent PRE_MATCH analysis workflow. If this snapshot conflicts with either in
+its owning scope, the owning canonical source wins and this file must be
+corrected.
+
+Update this document after every sprint, implementation gate, review that
+changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-08-31 (Historical Match Evaluation / Case capability audit — COMPLETE; Option B planning only)
-- Current delivery milestone: Deterministic football vertical slice (post–Milestone 3A bootstrap)
-- Canonical roadmap alignment: v0.1 Foundation bootstrap remains incomplete; V2 first vertical slice (docs 34–35) plus B.1/B.2 international market path landed
-- Current task status: **Historical Match Evaluation / Case capability audit COMPLETE — Option B, planning only** (`docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_MATCH_EVALUATION_CASE_CAPABILITY_AUDIT.md`). FT-only Actual Result, deterministic Evaluation, append-only History, Calibration, Validation and Replay are implemented and reusable only when a genuine sealed PRE_MATCH prediction exists. A small bounded historical-intake integrity extension is recommended because cutoff/original-seal verification and complete Football State/Match Script/Unified Matrix preservation are absent; Case Engine remains documented only. No implementation is authorized by the audit. **FIP-1 remains PLANNING COMPLETE / REVIEWED; FIP-2 P0 remains COMPLETE / SIGNED OFF; FIP-2 P1/P2/P3/P4 remain NOT AUTHORIZED / NOT STARTED**.
-- Delivery phase: **Product development** (architecture-design phase closed; see Project Governance Rule in `AGENTS.md` and doc 40)
-- Current sprint: **No implementation sprint active**. Latest audit delivery: Historical Match Evaluation / Case capability audit (Option B; planning only). Latest governance delivery remains FIP-2 P0 canonical protocol and sign-off.
-- Last completed delivery: **Historical Match Evaluation / Case Capability Audit Complete — Option B / no implementation**; FIP-2 P0 remains Complete / Signed Off; FIP-1 remains Planning Complete / Reviewed; prior four-case outcome-only Match Replay / Evaluation dataset update; PVS-3.3 provider capability/data coverage audit (Option C); PVS-3.2 valid-credential/current-season-entitlement blocked smoke report; PVS-3.2 missing-credential validation report; PVS-3.1 production runtime boot fix; PVS-3 blocked live validation report; PVS-2 Match Center Analyze-by-Teams UX; PVS-1 Production Prediction Vertical Slice; P2K-CAL-2, …
-- Demo: recorded cassette `football:100001` — Match Center form **FC Seoul vs Ulsan Hyundai FC** → `POST /api/analyze` → Workspace V2 report; or `POST /api/analyze/match/football:100001`
-- Next authorized work: no Historical Evaluation intake extension, Case Engine activation or later FIP phase is authorized by the audit. **FIP-2 P1/P2/P3/P4 remain NOT AUTHORIZED / NOT STARTED**. Separately, a human may decide current-season API-Football entitlement and whether to authorize bounded **PVS-3.4**. Do not ingest the audited matches, purchase a provider, start PVS-3.4, perform P2K-CAL-3 or promote calibration candidate1/Candidate C automatically.
-- Release status: Pre-release; private trusted environment only; not production
-- Architecture freeze: **v0.3** (v0.2 pipeline/boundaries reaffirmed; Projection dual-input + Market findings-only ratified)
-- Product roadmap (sole post-v0.2 sequencing authority): `docs/40_PRODUCT_ROADMAP.md`
-- Project Governance Rule: no new Architecture docs / Engines without defect or capability gap; Sprint → code+tests+validation first; every Sprint cites doc 40 with I/O + acceptance + completion report
-- Document map for AI/onboarding: `docs/PROJECT_INDEX.md`
-- Approved gate (facts provider): `docs/sprints/VERTICAL_SLICE_F1_FOOTBALL_DATA_PROVIDER_SPEC.md` (API-Football, `@fas/provider-football`, API-Sports direct). **xG is roadmap Sprint F1.3** (doc 40 supersedes informal “F.1.1 = xG” naming).
+- Last updated: 2026-08-31 — Controlled PRE_MATCH Conformance Fixture
+  implementation recorded as complete and validated.
+- Current track: **PREDICTION_VERTICAL_SLICE**.
+- Current stage:
+  **CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_COMPLETED**.
+- Current gate: **FIXTURE_REVIEW_NEXT**.
+- Current next action: **Controlled Fixture Implementation Review**.
+- Current production sprint: **none active**.
+- Latest implementation evidence: commit `08467c5`,
+  `feat(statistics): 添加 controlled PRE_MATCH 夹具`.
+- Fixture classification: **B — controlled synthetic**;
+  `synthetic=true`, `historicalAuthenticity=false`,
+  `allowedUsage=conformance_test_only`.
+- Historical Evaluation Intake remains **C. BLOCKED** and is not authorized.
+- Authentic PRE_MATCH seal remains **NOT FOUND**.
+- Authentic seal plus verified real-world Actual remains **NOT FOUND**.
+- Delivery phase: **Product development**.
+- Release status: pre-release, private trusted environment only; not public
+  production.
+- Architecture Freeze: **v0.3**, unchanged.
+- FIP-1: **Planning Complete / Reviewed**.
+- FIP-2 P0: **Complete / Signed Off**.
+- FIP-2 P1/P2/P3/P4: **NOT AUTHORIZED / NOT STARTED**.
+- Product roadmap: `docs/40_PRODUCT_ROADMAP.md`, unchanged.
+- Canonical PRE_MATCH protocol:
+  `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`, unchanged.
+- Document/code navigation: `docs/PROJECT_INDEX.md`.
 
-Update this document after every sprint, implementation gate, or material governance change.
+There is no discrepancy between the requested machine-readable state and the
+repository evidence inspected for this update.
+
+## Execution map
+
+```mermaid
+flowchart TD
+  FAS["AI-FSA / FAS Repository"]
+  PLATFORM["Platform + Repository Foundation<br/>COMPLETED for current delivered scope"]
+  FI["Football Intelligence domains<br/>COMPLETED / PARTIAL by capability map"]
+  PVS["Prediction Vertical Slice<br/>CURRENT TRACK"]
+
+  FAS --> PLATFORM
+  FAS --> FI
+  FAS --> PVS
+
+  PVS --> PVS1["Production Prediction Vertical Slice<br/>COMPLETED"]
+  PVS1 --> EVAL["A1 Evaluation + A1.5 History + A2 Calibration + V1A Validation<br/>COMPLETED"]
+  EVAL --> AUDIT["Historical Evaluation capability audit<br/>COMPLETED — Option B"]
+  AUDIT --> INTEGRITY["Historical Evaluation Intake Integrity Review<br/>BLOCKED — C"]
+  INTEGRITY --> ADMISSION["Artifact Admission Review<br/>BLOCKED — C"]
+
+  ADMISSION --> SEAL["Authentic PRE_MATCH seal<br/>NOT FOUND"]
+  ADMISSION --> ACTUAL["Verified real-world Actual paired to authentic seal<br/>NOT FOUND"]
+  ADMISSION --> PLAN["Controlled PRE_MATCH Conformance Fixture Plan<br/>A. READY / COMPLETED"]
+  PLAN --> FIXTURE["Class B controlled synthetic fixture<br/>COMPLETED + VALIDATED"]
+  FIXTURE --> CURRENT["Controlled Fixture Implementation Review<br/>NEXT"]
+  CURRENT --> FINALPLAN["Historical Evaluation Intake Planning / Final Gate<br/>NOT STARTED"]
+  FINALPLAN -->|human approval required| PROD["Historical Evaluation Intake Production Implementation<br/>BLOCKED"]
+  PROD --> VERIFY["Historical Intake focused verification<br/>FUTURE"]
+  VERIFY --> REALADMIT["Authentic Historical Artifact Admission<br/>BLOCKED UNTIL REAL ARTIFACT EXISTS"]
+  SEAL -. required .-> REALADMIT
+  ACTUAL -. required .-> REALADMIT
+  REALADMIT --> POP["Historical Evaluation population admission<br/>FUTURE / CONDITIONAL"]
+
+  classDef completed fill:#d9f2df,stroke:#26733a,color:#123;
+  classDef ready fill:#dceeff,stroke:#2166a5,color:#123;
+  classDef blocked fill:#ffe0e0,stroke:#a52a2a,color:#123;
+  classDef missing fill:#fff0cc,stroke:#9b6b00,color:#123;
+  classDef next fill:#e8ddff,stroke:#6542a6,color:#123;
+
+  class PLATFORM,PVS1,EVAL,AUDIT,FIXTURE completed;
+  class PLAN ready;
+  class INTEGRITY,ADMISSION,PROD,REALADMIT blocked;
+  class SEAL,ACTUAL missing;
+  class CURRENT next;
+```
+
+The controlled fixture and authentic historical artifacts are deliberately
+separate nodes. A passing synthetic fixture never proves that an authentic
+historical prediction exists.
+
+## Completed Capability Map
+
+| Capability | Status | Evidence / document | Owner / package |
+|---|---|---|---|
+| F1.1 Provider/fixture foundation, venue, player and availability path | **COMPLETED for documented F1.1 scope** | `docs/sprints/F1.1/F1.1A_IMPLEMENTATION_REPORT.md`; `F1.1B-1_VENUE_IMPLEMENTATION_REPORT.md`; `F1.1C-1_PLAYER_IMPLEMENTATION_REPORT.md`; `F1.1D_AVAILABILITY_IMPLEMENTATION_REPORT.md` | `@fas/provider-football`, `@fas/evidence-normalizer`, Evidence/Web surfaces |
+| Advanced Statistics | **PARTIAL / IMPLEMENTED WHERE EVIDENCE EXISTS** | `STATISTICS.advanced` implementation and P2K expansion evidence; no dedicated F1.2 completion report exists | `@fas/provider-football`, `@fas/evidence-normalizer`, `@fas/feature`, `@fas/rule` |
+| F1.3A Expected Goals Evidence | **COMPLETED** | `docs/sprints/F1.3/F1.3A_EXPECTED_GOALS_EVIDENCE_COMPLETION_REPORT.md` | Provider → Evidence → Workspace/Report |
+| F1.3B Expected Goals Intelligence | **COMPLETED** | `docs/sprints/F1.3/F1.3B_EXPECTED_GOALS_INTELLIGENCE_COMPLETION_REPORT.md` | `@fas/feature`, `@fas/rule`, `@fas/analysis` |
+| I1A/I1B Match Context | **COMPLETED** | `docs/sprints/I1/I1A_CONTEXT_EVIDENCE_COMPLETION_REPORT.md`; `I1B_CONTEXT_INTELLIGENCE_COMPLETION_REPORT.md` | Provider/Evidence; `@fas/feature`, `@fas/rule`, `@fas/analysis` |
+| I2A/I2B Odds & Market Intelligence | **COMPLETED within findings-only contract** | `docs/sprints/I2/I2A_ODDS_MARKET_EVIDENCE_COMPLETION_REPORT.md`; `I2B_MARKET_INTELLIGENCE_COMPLETION_REPORT.md` | `@fas/provider-odds`, Evidence, Feature/Rule/Analysis |
+| A1 Prediction Evaluation | **COMPLETED** | `docs/sprints/A1/A1_PREDICTION_EVALUATION_COMPLETION_REPORT.md` | `@fas/statistics` with Analysis/Report adapters |
+| A1.5 Evaluation Platform Foundation | **COMPLETED** | `docs/sprints/A1/A1.5_EVALUATION_PLATFORM_FOUNDATION_COMPLETION_REPORT.md` | `@fas/statistics`, `@fas/database`, API/Web reads |
+| A2 Prediction Calibration | **COMPLETED, descriptive only** | `docs/sprints/A2/A2_PREDICTION_CALIBRATION_COMPLETION_REPORT.md` | `@fas/statistics`, Report/API/Web overlays |
+| V1A Football Intelligence Validation | **COMPLETED, descriptive only** | `docs/sprints/V1A/V1A_FOOTBALL_INTELLIGENCE_VALIDATION_COMPLETION_REPORT.md` | `@fas/statistics`, Report/API/Web overlays |
+| L1A/L1B Club Intelligence | **COMPLETED** | `docs/sprints/L1/L1A_CLUB_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`; `L1B_CLUB_INTELLIGENCE_COMPLETION_REPORT.md` | Evidence; `@fas/feature`, `@fas/rule`, `@fas/analysis` |
+| P1A/P1B Player Intelligence | **COMPLETED within provider-backed fields** | `docs/sprints/P1/P1A_PLAYER_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`; `P1B_PLAYER_INTELLIGENCE_COMPLETION_REPORT.md` | Evidence; `@fas/feature`, `@fas/rule`, `@fas/analysis` |
+| M1A/M1B Manager Intelligence | **COMPLETED** | `docs/sprints/M1/M1A_MANAGER_INTELLIGENCE_EVIDENCE_COMPLETION_REPORT.md`; `M1B_MANAGER_INTELLIGENCE_COMPLETION_REPORT.md` | Evidence; Feature/Rule/Football State/Analysis |
+| Football State → Match Script → Unified Matrix → Projection V2 | **COMPLETED for current production path** | P2D–P2G completion reports under `docs/sprints/` | `@fas/analysis` |
+| R1B Match Script Calibration | **COMPLETED as structural experiment only** | `docs/sprints/R1B/R1B_MATCH_SCRIPT_CALIBRATION_COMPLETION_REPORT.md` | `@fas/analysis`; Baseline A remains production default; Candidate C not promoted |
+| Projection Replay/Diagnostics/Parameter artifacts | **COMPLETED for governed P2H/P2I/P2J scope** | P2H, P2I and P2J completion reports | `@fas/statistics`, `@fas/analysis`, `@fas/database` |
+| Controlled PRE_MATCH Conformance Fixture | **COMPLETED + VALIDATED** | commit `08467c5`; fixture/test paths listed below | `@fas/statistics` test-only area |
+
+“Completed” is limited to each cited report's acceptance scope. It does not
+mean live-provider coverage, population qualification, candidate promotion or
+historical authenticity unless the cited evidence explicitly proves it.
+
+## Current Workstream — PREDICTION_VERTICAL_SLICE
+
+| Sequence | Work item | Current result |
+|---|---|---|
+| 1 | Historical Evaluation Intake Integrity Review | **COMPLETED REVIEW / Final Gate C. BLOCKED** |
+| 2 | Historical Evaluation Artifact Admission Review | **COMPLETED REVIEW / C. ADMISSION BLOCKED** |
+| 3 | Controlled PRE_MATCH Conformance Fixture Plan | **COMPLETED / A. READY FOR FIXTURE IMPLEMENTATION**; readiness applied only to fixture design |
+| 4 | Controlled PRE_MATCH Conformance Fixture Implementation | **COMPLETED + VALIDATED** |
+| Current | Controlled Fixture Implementation Review | **NEXT** |
+
+### Controlled fixture implementation evidence
+
+Classification and isolation:
+
+- class **B — controlled synthetic**;
+- `synthetic=true`;
+- `historicalAuthenticity=false`;
+- `provenanceClass=B`;
+- `allowedUsage=conformance_test_only`;
+- historical/Calibration/Validation population eligibility false;
+- no runtime export, Prisma seed, database write, History, Sidecar or cohort;
+- no Analysis, Feature, Rule, Match Script or Projection execution;
+- no production source change.
+
+Files:
+
+- `packages/statistics/test/fixtures/controlled-prematch-conformance-v1/manifest.json`;
+- `packages/statistics/test/fixtures/controlled-prematch-conformance-v1/prediction-seal.json`;
+- `packages/statistics/test/fixtures/controlled-prematch-conformance-v1/verified-actual.json`;
+- `packages/statistics/test/controlled-prematch-conformance-fixture.spec.ts`;
+- `packages/statistics/test/helpers/canonical-json.ts`.
+
+Recorded validation:
+
+- focused fixture tests: **31 passed**;
+- complete `@fas/statistics` tests: **135 passed**;
+- `@fas/statistics` typecheck: **passed**;
+- `pnpm quality`: **passed**;
+- lint/format: **passed**;
+- canonical checksum, temporal gate, identity mutations, seal mutations and
+  controlled-Actual mutations: **passed**;
+- replay-boundary declaration: **passed** with no Sidecar; no Evaluation or
+  Replay execution was performed;
+- commit: `08467c5`.
+
+## Current Blockers
+
+### Artifact blockers
+
+1. Authentic PRE_MATCH seal: **NOT FOUND**.
+2. Authentic seal plus verified real-world Actual: **NOT FOUND**.
+3. Historical Evaluation Intake: **C. BLOCKED** and not authorized.
+
+The controlled fixture is not a real-world artifact and does not remove these
+blockers.
+
+### Future implementation prerequisites
+
+These findings define a future gate; they do not authorize coding:
+
+- a versioned `EvaluationHistoryRecord` historical-intake schema/domain
+  extension;
+- a Prisma version-aware `record_json` decoder that preserves the new variant
+  while keeping `evaluation-history.mvp.a15` readable;
+- approved historical idempotency semantics;
+- resolution of `evaluatedAt` sensitivity in evaluation checksum/History
+  identity without silently changing existing Evaluation semantics;
+- a verified Actual Evidence boundary that distinguishes controlled
+  verification from real-world verification;
+- a stricter historical-intake replay parameter-provenance gate;
+- explicit original-seal checksum algorithm, scope and storage authority;
+- human approval of the final implementation boundary.
+
+No Prisma migration is currently indicated for the proposed JSON manifest, but
+that conclusion does not authorize the decoder/domain changes.
+
+# Next Execution Sequence
+
+## STEP 1 — Controlled Fixture Implementation Review
+
+- **Status:** NEXT.
+- **Objective:** review the committed class-B fixture, canonical checksums,
+  mutation coverage, isolation controls and non-authentic labeling.
+- **Entry condition:** fixture implementation and validation evidence exist.
+- **Allowed scope:** repository inspection, test/evidence review and governance
+  sign-off; fixes only if separately authorized.
+- **Exit condition:** explicit PASS/FAIL review with any conditions recorded.
+- **Blocking condition:** checksum, identity, classification, provenance or
+  population-isolation defect.
+
+## STEP 2 — Historical Evaluation Intake Implementation Planning / Final Gate
+
+- **Status:** NOT STARTED.
+- **Objective:** reconcile prior planning with fixture-review evidence and issue
+  one final implementation authorization decision.
+- **Entry condition:** STEP 1 passes and a human authorizes this planning/gate
+  review.
+- **Allowed scope:** planning, exact file boundary, contracts, acceptance tests
+  and human decisions; no production implementation.
+- **Exit condition:** explicit READY/BLOCKED final gate and approved
+  idempotency/Actual/replay/schema decisions.
+- **Blocking condition:** unresolved prerequisites or absent human approval.
+
+## STEP 3 — Historical Evaluation Intake production implementation
+
+- **Status:** BLOCKED UNTIL STEP 2 APPROVAL.
+- **Objective:** implement only the approved bounded intake trust boundary.
+- **Entry condition:** explicit human approval after STEP 2.
+- **Allowed scope:** only files/contracts named by the approved gate.
+- **Exit condition:** focused implementation evidence and no boundary leakage.
+- **Blocking condition:** no approval, architecture conflict, or attempted
+  historical reconstruction.
+
+## STEP 4 — Historical Intake focused verification
+
+- **Status:** FUTURE.
+- **Objective:** verify temporal, identity, seal, Actual, idempotency, legacy
+  History and replay-blocked behavior.
+- **Entry condition:** STEP 3 implementation completes within its approved
+  scope.
+- **Allowed scope:** focused tests and validation evidence; no model tuning.
+- **Exit condition:** all approved fail-closed tests pass.
+- **Blocking condition:** any silent fallback, reconstruction, schema
+  incompatibility or persistence divergence.
+
+## STEP 5 — Authentic historical artifact admission
+
+- **Status:** BLOCKED UNTIL A REAL ARTIFACT EXISTS.
+- **Objective:** admit an authentic original pre-kickoff seal and matching
+  verified real-world Actual.
+- **Entry condition:** a real artifact independently satisfies the seven-part
+  authenticity test and the verified-Actual contract.
+- **Allowed scope:** artifact inspection and admission; no reconstruction.
+- **Exit condition:** explicit artifact-level admission decision.
+- **Blocking condition:** missing seal, missing real-world verification,
+  ambiguous fixture identity or retrospective origin.
+
+## STEP 6 — Historical Evaluation population admission
+
+- **Status:** FUTURE / CONDITIONAL.
+- **Objective:** admit only approved historical records to governed Evaluation
+  populations.
+- **Entry condition:** STEP 4 passes and STEP 5 admits authentic paired
+  artifacts.
+- **Allowed scope:** separately approved population admission.
+- **Exit condition:** traceable, qualified population membership evidence.
+- **Blocking condition:** synthetic fixture contamination, missing provenance
+  or absent population governance.
+
+## Gate Matrix
+
+| Gate | Status | Meaning | Can Proceed? |
+|---|---|---|---|
+| Historical Evaluation Integrity Review | **C. BLOCKED** | Planning is architecturally plausible but authenticity/test prerequisites were missing | No production intake |
+| Artifact Admission Review | **C. ADMISSION BLOCKED** | No authentic seal or verified real-world Actual pair exists | No authentic admission |
+| Controlled Fixture Plan | **A. READY / COMPLETED** | Fixture design can be implemented | Fixture implementation only |
+| Controlled Fixture Implementation | **COMPLETED + VALIDATED** | Static class-B fixture and test-only validation landed | Proceed to fixture review |
+| Fixture Implementation Review | **NEXT** | Review implementation evidence and isolation | Yes, review only |
+| Historical Intake Implementation Planning | **NOT STARTED** | Final gate must resolve prerequisites | Only after STEP 1 + approval |
+| Historical Intake Production Implementation | **BLOCKED** | No implementation authorization exists | No |
+| Authentic PRE_MATCH Admission | **NOT FOUND / BLOCKED** | No real original seal passes admission | No |
+| Verified Real-world Actual Admission | **NOT FOUND / BLOCKED** | Controlled verified fixture is not real-world verification | No |
+| Historical Evaluation Admission | **FUTURE / CONDITIONAL** | Requires verified implementation and authentic paired artifacts | No |
+
+`A. READY FOR FIXTURE IMPLEMENTATION` means only that the synthetic fixture
+design could be implemented. It never meant Historical Evaluation Intake was
+ready.
+
+# Rules for Future Agents
+
+Before any implementation, read in this order:
+
+1. `AGENTS.md`;
+2. `docs/PROJECT_STATE.md`;
+3. the latest Review in the current workstream;
+4. the current Planning document;
+5. `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md` when match
+   analysis is involved;
+6. `docs/40_PRODUCT_ROADMAP.md` read-only for authorized sequencing.
+
+Then explicitly identify:
+
+```text
+CURRENT_STAGE
+CURRENT_GATE
+NEXT_ACTION
+BLOCKERS
+```
+
+Do not infer implementation authority from source-code availability, a
+completion label outside its scope, or passing tests.
+
+# Do Not Cross These Boundaries
+
+Future Agents must not:
+
+- treat the synthetic controlled fixture as a real historical prediction;
+- clear the Historical Intake blocker because the fixture passes;
+- reconstruct an old Prediction;
+- use current Analysis, Feature, Rule, Match Script or Projection code to
+  generate a claimed original historical prediction;
+- derive a Prediction backwards from an Actual;
+- promote outcome-only data into an authentic PRE_MATCH seal;
+- treat controlled `quality="verified"` as verified real-world evidence;
+- create the Historical Evaluation production pipeline before approval;
+- modify the canonical FIP protocol for this workstream;
+- modify the Product Roadmap without explicit authorization;
+- modify Architecture Freeze boundaries;
+- create a new Engine or replay package for this capability;
+- change Projection, Feature or Rule semantics without an approved sprint;
+- create a Prisma seed for fixture testing;
+- inject the fixture into Calibration, Validation or historical populations;
+- create History, Sidecars or replay cohorts as a shortcut around admission;
+- start FIP-2 P1/P2/P3/P4, PVS-3.4, Case Engine work, P2K-CAL-3 or candidate
+  promotion without a separate gate.
+
+# Evidence Index
+
+| Evidence | Path | Purpose | Status | Authority |
+|---|---|---|---|---|
+| Historical Evaluation Intake Integrity Planning | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_INTEGRITY_PLANNING.md` | Proposed bounded trust contract | Planning complete; no implementation authority | Planning evidence below canonical contracts |
+| Historical Evaluation Intake Integrity Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_READINESS_REVIEW.md` | Repository-grounded readiness review | **C. BLOCKED** | Current gate evidence |
+| Historical Evaluation Artifact Admission Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW.md` | Authentic seal/Actual search and admission | **C. ADMISSION BLOCKED** | Artifact admission evidence |
+| Controlled PRE_MATCH Fixture Plan | `docs/sprints/PREDICTION_VERTICAL_SLICE/CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_PLAN.md` | Class-B synthetic fixture design | **A. READY FOR FIXTURE IMPLEMENTATION / completed plan** | Fixture-only planning evidence |
+| Controlled fixture manifest | `packages/statistics/test/fixtures/controlled-prematch-conformance-v1/manifest.json` | Classification, identity, population isolation and file binding | Implemented | Test-only implementation evidence |
+| Controlled prediction seal | `packages/statistics/test/fixtures/controlled-prematch-conformance-v1/prediction-seal.json` | Static synthetic PRE_MATCH seal payload | Implemented; not historical | Test-only implementation evidence |
+| Controlled verified Actual | `packages/statistics/test/fixtures/controlled-prematch-conformance-v1/verified-actual.json` | Controlled MATCH_RESULT Evidence | Implemented; not real-world verification | Test-only implementation evidence |
+| Fixture verification test | `packages/statistics/test/controlled-prematch-conformance-fixture.spec.ts` | Canonical checksum, temporal, identity, seal, Actual, replay declaration and isolation tests | 31 focused tests passed | Executable acceptance evidence |
+| Fixture implementation commit | `08467c5` | Versioned repository identity for fixture delivery | Complete | Git delivery evidence; not historical timestamp proof |
+
+The latest repository Review and implementation evidence define the current
+workstream status. Sprint reports remain evidence records and do not override
+canonical owning contracts.
+
+# New Agent Bootstrap
+
+1. Read `AGENTS.md`.
+2. Read `docs/PROJECT_STATE.md`.
+3. Read the current workstream Reviews and Planning.
+4. Do not implement immediately.
+5. Identify `CURRENT_STAGE`, `CURRENT_GATE`, `NEXT_ACTION` and `BLOCKERS`.
+6. Execute only `NEXT_ACTION`.
+7. If `NEXT_ACTION` is blocked, perform review/planning only.
+8. Never infer authorization from test PASS alone.
+
+## Current Gate Summary
+
+```text
+Authentic PRE_MATCH seal
+= NOT FOUND
+
+Authentic seal + verified real-world Actual
+= NOT FOUND
+
+Controlled PRE_MATCH Conformance Fixture
+= IMPLEMENTED AND VALIDATED
+
+Historical Evaluation Intake
+= C. BLOCKED
+
+Current Next Step
+= CONTROLLED FIXTURE IMPLEMENTATION REVIEW
+
+Historical Evaluation Intake Production Implementation
+= NOT AUTHORIZED YET
+```
 
 ## Current Repository Status
 
@@ -147,23 +548,23 @@ Historical Sprint 1–10 reports remain the evidence record for Milestone 3A boo
 
 Not a numbered Sprint 11 authorization; delivered as bounded implementation against docs 34–35 and follow-on A→B→C:
 
-| Slice | Delivery | Evidence |
-|---|---|---|
-| 1.0 | Deterministic Feature → Rule → Projection → Report → Workspace | commit `ab0446b` and successors |
-| 1.1 | Optional `HEAD_TO_HEAD` | commit `007d595` |
-| 1.2 | Optional `ODDS` + market conflict → `cautious` | commit `e370299` |
-| 1.3 | `@fas/statistics` identity calibration artifact consumption | commit `690c988` |
-| 1.4 | `@fas/prompt` + local `@fas/ai-provider` inference narrative | commit `39b55b2` |
-| B.1 | Real-shaped pre-match 1X2 ODDS ingest (`@fas/provider-odds`, recorded default) | `docs/sprints/VERTICAL_SLICE_B1_ODDS_INGEST_SPEC.md` |
-| B.2 | International 1X2 + Asian handicap on ODDS; AH features/rules; AH conflict limitation | `docs/sprints/VERTICAL_SLICE_B2_AH_MARKET_SPEC.md` |
-| C.1 | Match Center upcoming fixtures from Odds-shaped feed + fixture demos | `docs/sprints/VERTICAL_SLICE_C1_MATCH_CENTER_FIXTURES_SPEC.md` |
-| C.2 | Scores-backed TEAM_FORM + goals-proxy STATISTICS; `odds:*` analyzable when both sides have results | `docs/sprints/VERTICAL_SLICE_C2_SCORES_FORM_STATS_SPEC.md` |
-| A.1 | Population frequency-ratio 1X2 calibration artifact (`calibration:population-demo:v1`) | `docs/sprints/VERTICAL_SLICE_A1_CALIBRATION_POPULATION_SPEC.md` |
-| P.1 | Database-aware `/health/ready` via `@fas/database` ping (no domain models) | `docs/sprints/VERTICAL_SLICE_P1_DATABASE_READY_SPEC.md` |
-| P.2 | First Prisma Evidence/Match models + `EVIDENCE_REPOSITORY_MODE` adapter | `docs/sprints/VERTICAL_SLICE_P2_EVIDENCE_PERSISTENCE_SPEC.md` |
-| ZH-1 | Chinese UI chrome for Match Center + Analysis Session | `apps/web/src/copy/zh.ts` |
-| C.2+ | Multi-league live scores fan-out (same sport keys as Match Center odds) | `@fas/provider-odds` `LiveTheOddsApiScoresSource` |
-| ZH-2 | Chinese UI for Workspace / explainable report / Library | `apps/web/src/copy/zh.ts` |
+| Slice | Delivery                                                                                           | Evidence                                                        |
+| ----- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 1.0   | Deterministic Feature → Rule → Projection → Report → Workspace                                     | commit `ab0446b` and successors                                 |
+| 1.1   | Optional `HEAD_TO_HEAD`                                                                            | commit `007d595`                                                |
+| 1.2   | Optional `ODDS` + market conflict → `cautious`                                                     | commit `e370299`                                                |
+| 1.3   | `@fas/statistics` identity calibration artifact consumption                                        | commit `690c988`                                                |
+| 1.4   | `@fas/prompt` + local `@fas/ai-provider` inference narrative                                       | commit `39b55b2`                                                |
+| B.1   | Real-shaped pre-match 1X2 ODDS ingest (`@fas/provider-odds`, recorded default)                     | `docs/sprints/VERTICAL_SLICE_B1_ODDS_INGEST_SPEC.md`            |
+| B.2   | International 1X2 + Asian handicap on ODDS; AH features/rules; AH conflict limitation              | `docs/sprints/VERTICAL_SLICE_B2_AH_MARKET_SPEC.md`              |
+| C.1   | Match Center upcoming fixtures from Odds-shaped feed + fixture demos                               | `docs/sprints/VERTICAL_SLICE_C1_MATCH_CENTER_FIXTURES_SPEC.md`  |
+| C.2   | Scores-backed TEAM_FORM + goals-proxy STATISTICS; `odds:*` analyzable when both sides have results | `docs/sprints/VERTICAL_SLICE_C2_SCORES_FORM_STATS_SPEC.md`      |
+| A.1   | Population frequency-ratio 1X2 calibration artifact (`calibration:population-demo:v1`)             | `docs/sprints/VERTICAL_SLICE_A1_CALIBRATION_POPULATION_SPEC.md` |
+| P.1   | Database-aware `/health/ready` via `@fas/database` ping (no domain models)                         | `docs/sprints/VERTICAL_SLICE_P1_DATABASE_READY_SPEC.md`         |
+| P.2   | First Prisma Evidence/Match models + `EVIDENCE_REPOSITORY_MODE` adapter                            | `docs/sprints/VERTICAL_SLICE_P2_EVIDENCE_PERSISTENCE_SPEC.md`   |
+| ZH-1  | Chinese UI chrome for Match Center + Analysis Session                                              | `apps/web/src/copy/zh.ts`                                       |
+| C.2+  | Multi-league live scores fan-out (same sport keys as Match Center odds)                            | `@fas/provider-odds` `LiveTheOddsApiScoresSource`               |
+| ZH-2  | Chinese UI for Workspace / explainable report / Library                                            | `apps/web/src/copy/zh.ts`                                       |
 
 Summary evidence: `docs/sprints/VERTICAL_SLICE_1_COMPLETION_REPORT.md` and B.1/B.2/C.1/C.2/A.1/P.1/P.2 specs above.
 
@@ -228,6 +629,7 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Demo evidence is fixture-backed and may be `unverified`.
 - Confirmed Match Replay dataset `confirmed-match-replay-results.v1` contains four outcome-only `ActualMatchResult` samples. They have no historical `predictionSnapshot` and therefore are not Evaluation History, calibration or sealed-cohort rows. HT/events/actual-script/exogenous annotations remain completion-report-only because the canonical result schema is FT-only.
 - Historical Match Evaluation / Case audit verdict is **Option B**: implemented FT Evaluation/History/Replay is reusable, but arbitrary historical intake is not safe until an explicitly authorized bounded path verifies a genuine original PRE_MATCH seal and cutoff. Case Engine remains documented only; no audited sample was ingested.
+- The controlled PRE_MATCH conformance fixture is class B synthetic test data. It is not an authentic historical seal, is not verified real-world Evidence, is not runtime-exported and is ineligible for Historical Evaluation, Calibration and Validation populations.
 - Prisma includes Evidence/Match catalog (P.2), Evaluation History (A1.5), and Projection Replay Sidecar (P2K-B). Default API mode remains in-memory unless `EVIDENCE_REPOSITORY_MODE=postgres` (`platformPersistence`) after migrate; that mode makes Evidence + Evaluation History + Sidecar durable together.
 - Durable jobs, Redis, BullMQ, pgvector, analysis snapshots, and object storage are not implemented.
 - Web ZH-1/ZH-2 Chinese copy covers Match Center/Session/Workspace/Library/report chrome; team and competition names stay English.
@@ -241,11 +643,16 @@ Sprint reports are evidence records, not replacements for canonical architecture
 - Doc 35 header status text may still read as pre-implementation; treat implemented slice 1.0–1.4 behavior in code and `VERTICAL_SLICE_1_COMPLETION_REPORT.md` as delivery evidence.
 - Canonical v0.1 roadmap package naming (`@fas/*-engine`) vs interim packages (`@fas/rule`, `@fas/prompt`, `@fas/statistics`) remains an intentional migration gap documented in `docs/14_MONOREPO.md`.
 
-## Next Work
+## Historical Delivery Context (Not Current Execution Order)
+
+The only current `NEXT_ACTION` is the **Controlled Fixture Implementation
+Review** defined in the `Next Execution Sequence` above. The material below
+preserves older delivery context and deferred options; it does not authorize a
+different next task.
 
 **P2K-CAL-2 Projection λ & Goal Distribution Calibration** **COMPLETED**: governed NON-DEFAULT candidate `projection.v3.calibration.candidate1` (`checksum=9b3b4022`, `productionPromoted=false`); percent-scale normalization fix; feature-group λ governance; optional Dixon–Coles ρ=−0.10; offline Expansion V2 replay (range4Plus 27→0 predicted; Draw winner 0→10; mean λ 5.7→1.9); production default unchanged; **NOT PROMOTED** (`docs/sprints/P2K/P2K_CAL_2_PROJECTION_LAMBDA_CALIBRATION_COMPLETION_REPORT.md`). **P2K-CAL-1 Projection / Match Script Calibration Diagnosis Plan** **COMPLETED**: planning-only audit of λ / Goal Range / Draw / Match Script math chain (`docs/sprints/P2K/P2K_CAL_1_PROJECTION_MATCH_SCRIPT_CALIBRATION_DIAGNOSIS_PLAN.md`); root cause = attack-group `unitCentered` saturation + high base EG; three calibration directions (analysis only); validation strategy for future round; no production code or durable artifact changes; no promotion. **P2K-G3 Validation Prediction Distribution Audit** **COMPLETED**: diagnosis-only audit of Expansion V2 30 members (`docs/sprints/P2K/P2K_G3_VALIDATION_PREDICTION_DISTRIBUTION_AUDIT.md`); Candidate C reaches Match Script→Projection (scripts/λ/probs differ 30/30) but discrete winner/goal-range never flip (0/30); explains P2K-G discrete A/C identity; `range4Plus=27/30` / `Draw=0/30` are Projection/λ/argmax properties; no durable artifact mutation; no calibration; no promotion. **P2K-G Validation Expansion V2 Population Evaluation** **COMPLETED**: `eval.p2k.g.validation.expansion.v2.analyzematch.v1` on SEALED cohort `p2k.e.validation.expansion.v2.analyzematch.v1` using durable A/C runs `run.p2k.f.validation.expansion.v2.analyzematch.v1.a` / `.c`; paired sample 30; checksum `b65010c9eaf25b1946be7ddb8cd5b8489b5b0fc35c76f3ab7d1e81efebedd2f5`; descriptive only; A2 sample meets minimum qualified threshold but that is **not** Candidate C superiority; PostgreSQL round-trip PASS. **P2K-F Validation Expansion V2 Sealed Cohort Offline Replay Run** **COMPLETED**: Baseline A (30/0) and Candidate C (30/0); pairedSuccessfulCount 30, sameHistoricalContext 30/30, identity 30/30. **P2K-E Validation Expansion V2 Sealed Replay Cohort** **COMPLETED**: SEALED cohort `p2k.e.validation.expansion.v2.analyzematch.v1` (30 members; digest `03b52d71078dee7746796fd1de722e22e2a66382ea7202556299990a5714e997`). **P2K-G2-A Validation Dataset Diversity Expansion** **COMPLETED**: 30 new Projection-v2 History+Sidecar rows (`match-p2kg-expansion-v2-*`). Prior recovery-v2 / bootstrap-v1 cohorts and evaluations remain SEALED/untouched. Candidate C remains NON-DEFAULT and is **not** auto-promoted. Production Match Script unchanged. P2K-H not authorized.
 
-Recommended follow-ons (ordered):
+Deferred follow-ons (not the current `NEXT_ACTION`; each requires its own gate):
 
 1. Human decision on API-Football current-season entitlement; if supplied, rerun live coverage/smoke validation against dynamically selected fixtures;
 2. If explicitly authorized, run the bounded PVS-3.4 coverage probe before buying or integrating any additional provider;
@@ -262,7 +669,7 @@ Recently delivered: **FIP-2 P0 Governance and Canonicalization** (**COMPLETE / S
 
 Do not start Redis/BullMQ/pgvector, public auth, or network AI provider SDKs without a separate approved milestone.
 
-## Future Roadmap
+## Long-term context (non-authorizing)
 
 - Complete remaining Milestone 3A / v0.1 Foundation gates (persistence, jobs, CI/ops).
 - Grow calibration from identity baseline to reviewed population artifacts.
@@ -281,3 +688,25 @@ After each sprint or material delivery:
 - record architecture or implementation-gate changes;
 - link new evidence reports;
 - keep release claims narrower than demonstrated evidence.
+
+## Final Current State
+
+```text
+Authentic PRE_MATCH seal
+= NOT FOUND
+
+Authentic seal + verified real-world Actual
+= NOT FOUND
+
+Controlled PRE_MATCH Conformance Fixture
+= IMPLEMENTED AND VALIDATED
+
+Historical Evaluation Intake
+= C. BLOCKED
+
+Current Next Step
+= CONTROLLED FIXTURE IMPLEMENTATION REVIEW
+
+Historical Evaluation Intake Production Implementation
+= NOT AUTHORIZED YET
+```

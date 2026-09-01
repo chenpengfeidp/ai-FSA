@@ -3,15 +3,15 @@
 ```yaml
 project: AI-FSA
 current_track: PREDICTION_VERTICAL_SLICE
-current_stage: CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_COMPLETED
-current_gate: FIXTURE_REVIEW_NEXT
+current_stage: CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_REVIEW_COMPLETED
+current_gate: HISTORICAL_INTAKE_PLANNING_FINAL_GATE
 historical_evaluation_intake: C_BLOCKED
 authentic_prematch_seal: NOT_FOUND
 authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: CONTROLLED_FIXTURE_IMPLEMENTATION_REVIEW
+next_action: HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE
 next_production_capability: HISTORICAL_EVALUATION_INTAKE
 ```
 
@@ -49,12 +49,13 @@ changes the active gate, or material governance change.
 ## Snapshot
 
 - Last updated: 2026-08-31 — Controlled PRE_MATCH Conformance Fixture
-  implementation recorded as complete and validated.
+  implementation review completed with **PASS**.
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
-  **CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_COMPLETED**.
-- Current gate: **FIXTURE_REVIEW_NEXT**.
-- Current next action: **Controlled Fixture Implementation Review**.
+  **CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_REVIEW_COMPLETED**.
+- Current gate: **HISTORICAL_INTAKE_PLANNING_FINAL_GATE**.
+- Current next action:
+  **Historical Evaluation Intake Implementation Planning / Final Gate**.
 - Current production sprint: **none active**.
 - Latest implementation evidence: commit `08467c5`,
   `feat(statistics): 添加 controlled PRE_MATCH 夹具`.
@@ -102,8 +103,8 @@ flowchart TD
   ADMISSION --> ACTUAL["Verified real-world Actual paired to authentic seal<br/>NOT FOUND"]
   ADMISSION --> PLAN["Controlled PRE_MATCH Conformance Fixture Plan<br/>A. READY / COMPLETED"]
   PLAN --> FIXTURE["Class B controlled synthetic fixture<br/>COMPLETED + VALIDATED"]
-  FIXTURE --> CURRENT["Controlled Fixture Implementation Review<br/>NEXT"]
-  CURRENT --> FINALPLAN["Historical Evaluation Intake Planning / Final Gate<br/>NOT STARTED"]
+  FIXTURE --> CURRENT["Controlled Fixture Implementation Review<br/>PASS / COMPLETED"]
+  CURRENT --> FINALPLAN["Historical Evaluation Intake Planning / Final Gate<br/>NEXT"]
   FINALPLAN -->|human approval required| PROD["Historical Evaluation Intake Production Implementation<br/>BLOCKED"]
   PROD --> VERIFY["Historical Intake focused verification<br/>FUTURE"]
   VERIFY --> REALADMIT["Authentic Historical Artifact Admission<br/>BLOCKED UNTIL REAL ARTIFACT EXISTS"]
@@ -117,11 +118,11 @@ flowchart TD
   classDef missing fill:#fff0cc,stroke:#9b6b00,color:#123;
   classDef next fill:#e8ddff,stroke:#6542a6,color:#123;
 
-  class PLATFORM,PVS1,EVAL,AUDIT,FIXTURE completed;
+  class PLATFORM,PVS1,EVAL,AUDIT,FIXTURE,CURRENT completed;
   class PLAN ready;
   class INTEGRITY,ADMISSION,PROD,REALADMIT blocked;
   class SEAL,ACTUAL missing;
-  class CURRENT next;
+  class FINALPLAN next;
 ```
 
 The controlled fixture and authentic historical artifacts are deliberately
@@ -162,7 +163,8 @@ historical authenticity unless the cited evidence explicitly proves it.
 | 2 | Historical Evaluation Artifact Admission Review | **COMPLETED REVIEW / C. ADMISSION BLOCKED** |
 | 3 | Controlled PRE_MATCH Conformance Fixture Plan | **COMPLETED / A. READY FOR FIXTURE IMPLEMENTATION**; readiness applied only to fixture design |
 | 4 | Controlled PRE_MATCH Conformance Fixture Implementation | **COMPLETED + VALIDATED** |
-| Current | Controlled Fixture Implementation Review | **NEXT** |
+| 5 | Controlled Fixture Implementation Review | **PASS / COMPLETED** |
+| Current | Historical Evaluation Intake Implementation Planning / Final Gate | **NEXT; planning only, not production authorization** |
 
 ### Controlled fixture implementation evidence
 
@@ -234,19 +236,20 @@ that conclusion does not authorize the decoder/domain changes.
 
 ## STEP 1 — Controlled Fixture Implementation Review
 
-- **Status:** NEXT.
+- **Status:** PASS / COMPLETED.
 - **Objective:** review the committed class-B fixture, canonical checksums,
   mutation coverage, isolation controls and non-authentic labeling.
 - **Entry condition:** fixture implementation and validation evidence exist.
 - **Allowed scope:** repository inspection, test/evidence review and governance
   sign-off; fixes only if separately authorized.
-- **Exit condition:** explicit PASS/FAIL review with any conditions recorded.
-- **Blocking condition:** checksum, identity, classification, provenance or
-  population-isolation defect.
+- **Exit condition:** satisfied by
+  `CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_REVIEW.md`.
+- **Blocking condition:** none for the bounded class-B fixture; recorded
+  limitations carry forward and do not establish historical authenticity.
 
 ## STEP 2 — Historical Evaluation Intake Implementation Planning / Final Gate
 
-- **Status:** NOT STARTED.
+- **Status:** NEXT / NOT STARTED.
 - **Objective:** reconcile prior planning with fixture-review evidence and issue
   one final implementation authorization decision.
 - **Entry condition:** STEP 1 passes and a human authorizes this planning/gate
@@ -311,8 +314,8 @@ that conclusion does not authorize the decoder/domain changes.
 | Artifact Admission Review | **C. ADMISSION BLOCKED** | No authentic seal or verified real-world Actual pair exists | No authentic admission |
 | Controlled Fixture Plan | **A. READY / COMPLETED** | Fixture design can be implemented | Fixture implementation only |
 | Controlled Fixture Implementation | **COMPLETED + VALIDATED** | Static class-B fixture and test-only validation landed | Proceed to fixture review |
-| Fixture Implementation Review | **NEXT** | Review implementation evidence and isolation | Yes, review only |
-| Historical Intake Implementation Planning | **NOT STARTED** | Final gate must resolve prerequisites | Only after STEP 1 + approval |
+| Fixture Implementation Review | **PASS / COMPLETED** | Class-B implementation satisfies bounded conformance/isolation review | Proceed only to planning/final gate |
+| Historical Intake Implementation Planning | **NEXT / NOT STARTED** | Final gate must resolve prerequisites | Planning only; human authorization still required |
 | Historical Intake Production Implementation | **BLOCKED** | No implementation authorization exists | No |
 | Authentic PRE_MATCH Admission | **NOT FOUND / BLOCKED** | No real original seal passes admission | No |
 | Verified Real-world Actual Admission | **NOT FOUND / BLOCKED** | Controlled verified fixture is not real-world verification | No |
@@ -383,6 +386,7 @@ Future Agents must not:
 | Controlled verified Actual | `packages/statistics/test/fixtures/controlled-prematch-conformance-v1/verified-actual.json` | Controlled MATCH_RESULT Evidence | Implemented; not real-world verification | Test-only implementation evidence |
 | Fixture verification test | `packages/statistics/test/controlled-prematch-conformance-fixture.spec.ts` | Canonical checksum, temporal, identity, seal, Actual, replay declaration and isolation tests | 31 focused tests passed | Executable acceptance evidence |
 | Fixture implementation commit | `08467c5` | Versioned repository identity for fixture delivery | Complete | Git delivery evidence; not historical timestamp proof |
+| Controlled Fixture Implementation Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_REVIEW.md` | Repository-grounded class-B implementation/isolation review | **PASS** | Authorizes progression to planning/final gate only |
 
 The latest repository Review and implementation evidence define the current
 workstream status. Sprint reports remain evidence records and do not override
@@ -415,7 +419,7 @@ Historical Evaluation Intake
 = C. BLOCKED
 
 Current Next Step
-= CONTROLLED FIXTURE IMPLEMENTATION REVIEW
+= HISTORICAL EVALUATION INTAKE IMPLEMENTATION PLANNING / FINAL GATE
 
 Historical Evaluation Intake Production Implementation
 = NOT AUTHORIZED YET
@@ -705,7 +709,7 @@ Historical Evaluation Intake
 = C. BLOCKED
 
 Current Next Step
-= CONTROLLED FIXTURE IMPLEMENTATION REVIEW
+= HISTORICAL EVALUATION INTAKE IMPLEMENTATION PLANNING / FINAL GATE
 
 Historical Evaluation Intake Production Implementation
 = NOT AUTHORIZED YET

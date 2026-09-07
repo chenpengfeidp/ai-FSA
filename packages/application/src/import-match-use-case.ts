@@ -68,7 +68,10 @@ export class ImportMatchUseCase {
     this.#collectedAt = collectedAt;
   }
 
-  async execute(matchId: string): Promise<ImportMatchResult> {
+  async execute(
+    matchId: string,
+    options?: { readonly collectedAt?: string },
+  ): Promise<ImportMatchResult> {
     let providerInput: unknown;
 
     try {
@@ -90,7 +93,11 @@ export class ImportMatchUseCase {
       hasEvidenceSetFields(providerInput) &&
       isRecordImporter(this.#evidenceImporter)
     ) {
-      return this.#importEvidenceSet(providerInput, this.#evidenceImporter);
+      return this.#importEvidenceSet(
+        providerInput,
+        this.#evidenceImporter,
+        options?.collectedAt ?? this.#collectedAt,
+      );
     }
 
     try {
@@ -106,12 +113,13 @@ export class ImportMatchUseCase {
   async #importEvidenceSet(
     providerInput: unknown,
     importer: EvidenceRecordImporter,
+    collectedAt: string,
   ): Promise<ImportMatchResult> {
     let matchInfo: Evidence | undefined;
 
     try {
       const normalized = normalizeFixtureEvidenceSet(providerInput, {
-        collectedAt: this.#collectedAt,
+        collectedAt,
       });
 
       if (!normalized.ok) {

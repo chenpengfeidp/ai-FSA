@@ -11,6 +11,7 @@ export type {
   RuleStatus,
 } from "./domain/rule-result.js";
 export {
+  RULE_SET_VERSION,
   RuleEvaluationError,
   RuleEvaluator,
 } from "./evaluation/rule-evaluator.js";

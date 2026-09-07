@@ -1,4 +1,5 @@
 import type { AnalysisResult } from "../domain/analysis-result.js";
+import { RULE_SET_VERSION } from "@fas/rule";
 import type { SealedPredictionInput } from "@fas/statistics";
 
 /**
@@ -59,6 +60,6 @@ export function buildSealedPredictionInput(
     featureNames: Object.freeze(features.map((feature) => feature.name)),
     projectionModelVersion: projection.projectionModelVersion,
     featureModelVersion: analysis.featureBundle.featureModelVersion,
-    ruleSetVersion: "rule.mvp.m1b.manager",
+    ruleSetVersion: RULE_SET_VERSION,
   });
 }

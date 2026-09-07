@@ -168,6 +168,26 @@ model EvaluationHistoryItem {
   @@map("evaluation_history_items")
 }
 
+/// Authentic PRE_MATCH prediction seal (append-only; independent of Evaluation History).
+model PrematchPredictionSealItem {
+  id              String   @id @db.Uuid
+  originalSealId  String   @unique @map("original_seal_id")
+  matchId         String   @map("match_id")
+  homeTeam        String   @map("home_team")
+  awayTeam        String   @map("away_team")
+  competitionId   String   @map("competition_id")
+  season          String
+  kickoffAt       DateTime @map("kickoff_at") @db.Timestamptz(3)
+  schemaVersion   String   @map("schema_version")
+  sealedAt        DateTime @map("sealed_at") @db.Timestamptz(3)
+  contentSha256   String   @map("content_sha256") @db.Char(64)
+  recordJson      Json     @map("record_json")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([matchId, sealedAt(sort: Desc)])
+  @@map("prematch_prediction_seal_items")
+}
+
 /// P2K-B durable Projection Replay Sidecar (compact SealedProjectionReplayContext).
 /// Linked by domain historyId; optional for legacy History rows (V1-only).
 model ProjectionReplaySidecarItem {

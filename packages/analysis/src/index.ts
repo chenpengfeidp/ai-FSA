@@ -18,6 +18,7 @@ export type {
   AnalysisError,
   AnalysisErrorCause,
   AnalysisErrorCode,
+  AnalyzeMatchOptions,
   AnalyzeMatchResult,
   EvidenceByMatchQuery,
   FeatureExtractionOperation,

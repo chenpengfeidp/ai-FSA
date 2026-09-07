@@ -387,3 +387,42 @@ export { computeProjectionDiagnosticsReport } from "./diagnostics/compute-projec
 export type { ComputeProjectionDiagnosticsReportInput } from "./diagnostics/compute-projection-diagnostics-report.js";
 export { runProjectionDiagnosticsReport } from "./diagnostics/run-projection-diagnostics-report.js";
 export type { RunProjectionDiagnosticsReportInput } from "./diagnostics/run-projection-diagnostics-report.js";
+
+export {
+  PREMATCH_PREDICTION_SEAL_SCHEMA_VERSION,
+  PREMATCH_SEAL_ALLOWED_USAGE_HISTORICAL_INTAKE,
+  PREMATCH_SEAL_CANONICALIZATION,
+  PREMATCH_SEAL_CHECKSUM_ALGORITHM,
+  PREMATCH_SEAL_SOURCE_AUTHORITY,
+  PrematchPredictionSealError,
+} from "./domain/prematch-prediction-seal.js";
+export type {
+  Clock,
+  PrematchFixtureIdentity,
+  PrematchPredictionSeal,
+  PrematchSealErrorCode,
+  PrematchSealIdentity,
+  SealEvidenceAuditRecord,
+} from "./domain/prematch-prediction-seal.js";
+
+export {
+  canonicalizeJson,
+  parseJsonRejectingDuplicateKeys,
+  sha256CanonicalJson,
+} from "./seal/canonical-json.js";
+export {
+  authenticatePrematchPredictionSeal,
+  buildSealIdentity,
+  computeContentSha256,
+  computeOriginalSealId,
+  computeSealIdentityHash,
+  createPrematchPredictionSeal,
+  identitiesCanonicallyEqual,
+} from "./seal/create-prematch-prediction-seal.js";
+export type { CreatePrematchPredictionSealInput } from "./seal/create-prematch-prediction-seal.js";
+export { capturePrematchPredictionSeal } from "./seal/capture-prematch-prediction-seal.js";
+export type { CapturePrematchPredictionSealInput } from "./seal/capture-prematch-prediction-seal.js";
+
+export { SealIdentityConflictError } from "./repository/prematch-prediction-seal-repository.js";
+export type { PrematchPredictionSealRepository } from "./repository/prematch-prediction-seal-repository.js";
+export { InMemoryPrematchPredictionSealRepository } from "./repository/in-memory-prematch-prediction-seal-repository.js";

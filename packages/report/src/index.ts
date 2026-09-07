@@ -12,6 +12,7 @@ export { GenerateMatchReportUseCase } from "./use-case/generate-match-report-use
 export type {
   AnalysisReportBuilder,
   AnalyzeMatchOperation,
+  GenerateMatchReportOptions,
   GenerateMatchReportResult,
   ReportGenerationError,
   ReportGenerationErrorCode,

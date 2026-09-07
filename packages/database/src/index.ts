@@ -7,6 +7,7 @@ export {
 } from "./client.js";
 export { PrismaEvidenceRepository } from "./prisma-evidence-repository.js";
 export { PrismaEvaluationHistoryRepository } from "./prisma-evaluation-history-repository.js";
+export { PrismaPrematchPredictionSealRepository } from "./prisma-prematch-prediction-seal-repository.js";
 export { PrismaProjectionReplaySidecarRepository } from "./prisma-projection-replay-sidecar-repository.js";
 export { PrismaReplayCohortRepository } from "./prisma-replay-cohort-repository.js";
 export { PrismaReplayRunRepository } from "./prisma-replay-run-repository.js";

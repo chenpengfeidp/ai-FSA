@@ -6,7 +6,7 @@ import {
 import { EvidenceQueryService } from "@fas/evidence-query";
 import { FeatureExtractor } from "@fas/feature";
 import { createMatchId, type MatchId } from "@fas/match";
-import { RuleEvaluator } from "@fas/rule";
+import { RuleEvaluator, RULE_SET_VERSION } from "@fas/rule";
 import { describe, expect, it } from "vitest";
 import {
   AnalyzeMatchUseCase,
@@ -236,7 +236,7 @@ describe("M1B Manager Intelligence end-to-end pipeline", () => {
     ).toBeCloseTo(1, 9);
 
     const sealed = buildSealedPredictionInputFromAnalysis(managerAnalysis);
-    expect(sealed.ruleSetVersion).toBe("rule.mvp.m1b.manager");
+    expect(sealed.ruleSetVersion).toBe(RULE_SET_VERSION);
     expect(sealed.featureNames.some((name) => name.startsWith("manager"))).toBe(
       true,
     );

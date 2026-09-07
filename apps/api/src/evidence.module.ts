@@ -36,9 +36,11 @@ import { ProjectionReplaySidecarRepositoryBridge } from "./projection-replay-sid
 import {
   evaluationHistoryRepositoryToken,
   matchProviderToken,
+  prematchPredictionSealRepositoryToken,
   projectionReplaySidecarRepositoryToken,
 } from "./evidence.tokens.js";
 import { ImportController } from "./import.controller.js";
+import { IsoClock } from "./iso-clock.js";
 import { MatchesController } from "./matches.controller.js";
 import { ProvidersController } from "./providers.controller.js";
 import { FootballMatchPrimerBridge } from "./football-match-primer.bridge.js";
@@ -47,6 +49,7 @@ import { OddsSnapshotPrimerBridge } from "./odds-snapshot-primer.bridge.js";
 import {
   createApiEvaluationHistoryRepository,
   createApiEvidenceRepository,
+  createApiPrematchPredictionSealRepository,
   createApiProjectionReplaySidecarRepository,
 } from "./runtime-database.js";
 import { ScoresSnapshotPrimerBridge } from "./scores-snapshot-primer.bridge.js";
@@ -112,6 +115,12 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
       provide: projectionReplaySidecarRepositoryToken,
       useFactory: (): import("@fas/statistics").ProjectionReplaySidecarRepository =>
         createApiProjectionReplaySidecarRepository(),
+    },
+    {
+      provide: prematchPredictionSealRepositoryToken,
+      useFactory: ():
+        | import("@fas/statistics").PrematchPredictionSealRepository
+        | undefined => createApiPrematchPredictionSealRepository(),
     },
     {
       provide: ProjectionReplaySidecarRepositoryBridge,
@@ -228,12 +237,16 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
         ReportBuilder,
         evaluationHistoryRepositoryToken,
         projectionReplaySidecarRepositoryToken,
+        prematchPredictionSealRepositoryToken,
       ],
       useFactory: (
         analyzeMatch: AnalyzeMatchUseCase,
         reportBuilder: ReportBuilder,
         evaluationHistoryRepository: EvaluationHistoryRepository,
         projectionReplaySidecarRepository: import("@fas/statistics").ProjectionReplaySidecarRepository,
+        prematchSealRepository:
+          | import("@fas/statistics").PrematchPredictionSealRepository
+          | undefined,
       ): GenerateMatchReportUseCase =>
         new GenerateMatchReportUseCase(
           analyzeMatch,
@@ -241,6 +254,8 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
           evaluationHistoryRepository,
           projectionReplaySidecarRepository,
           productionProjectionPolicyPin,
+          new IsoClock(),
+          prematchSealRepository,
         ),
     },
     EvidenceExampleInitializer,

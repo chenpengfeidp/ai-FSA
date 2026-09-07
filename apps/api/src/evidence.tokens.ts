@@ -5,3 +5,6 @@ export const evaluationHistoryRepositoryToken = Symbol(
 export const projectionReplaySidecarRepositoryToken = Symbol(
   "ProjectionReplaySidecarRepository",
 );
+export const prematchPredictionSealRepositoryToken = Symbol(
+  "PrematchPredictionSealRepository",
+);

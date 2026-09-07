@@ -101,6 +101,32 @@ describe("ImportMatchUseCase", () => {
     expect(all.some((item) => item.type === "ODDS")).toBe(true);
   });
 
+  it("stamps per-request collectedAt for the governed cutoff path", async () => {
+    const repository = new InMemoryEvidenceRepository();
+    const pipeline = new EvidenceImportPipeline(
+      new FixtureEvidenceNormalizer({ collectedAt: "2026-07-17T10:00:00Z" }),
+      repository,
+    );
+    const useCase = new ImportMatchUseCase(
+      new FixtureProvider(),
+      pipeline,
+      "2026-07-17T10:00:00Z",
+    );
+
+    await useCase.execute("match-example", {
+      collectedAt: "2026-09-30T12:00:00Z",
+    });
+
+    const all = await repository.findAll();
+    expect(all.length).toBeGreaterThan(0);
+    expect(all.every((item) => item.collectedAt <= "2026-09-30T12:00:00Z")).toBe(
+      true,
+    );
+    expect(all.every((item) => item.collectedAt === "2026-09-30T12:00:00Z")).toBe(
+      true,
+    );
+  });
+
   it("imports ODDS with non-fixture provenance from a recorded odds overlay", async () => {
     const repository = new InMemoryEvidenceRepository();
     const pipeline = new EvidenceImportPipeline(

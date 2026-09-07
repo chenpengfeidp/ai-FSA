@@ -25,7 +25,10 @@ export type Result<Value, Failure> =
   | Readonly<{ error: Failure; ok: false }>;
 
 export interface MatchImportOperation {
-  execute(matchId: MatchId): Promise<ImportMatchResult>;
+  execute(
+    matchId: MatchId,
+    options?: { readonly collectedAt?: string },
+  ): Promise<ImportMatchResult>;
 }
 
 export interface EvidenceByMatchQuery {
@@ -42,12 +45,16 @@ export interface RuleEvaluationOperation {
 
 export type AnalysisErrorCode =
   | "ANALYSIS_RESULT_FAILED"
+  | "EVIDENCE_AFTER_CUTOFF"
   | "EVIDENCE_NOT_FOUND"
   | "EVIDENCE_QUERY_FAILED"
   | "FEATURE_EXTRACTION_FAILED"
   | "IMPORT_FAILED"
+  | "INVALID_ANALYSIS_CUTOFF"
+  | "POST_MATCH_EVIDENCE"
   | "PROJECTION_FAILED"
-  | "RULE_EVALUATION_FAILED";
+  | "RULE_EVALUATION_FAILED"
+  | "SEAL_NOT_PRE_MATCH";
 
 export interface AnalysisErrorCause {
   readonly code: string;
@@ -61,6 +68,11 @@ export interface AnalysisError {
 }
 
 export type AnalyzeMatchResult = Result<AnalysisResult, AnalysisError>;
+
+export interface AnalyzeMatchOptions {
+  readonly analysisTime: string;
+  readonly analysisCutoff: string;
+}
 
 function success(value: AnalysisResult): Readonly<{
   ok: true;
@@ -126,6 +138,22 @@ function countRequiredEvidence(evidences: readonly Evidence[]): number {
   ).length;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function kickoffFromEvidence(evidences: readonly Evidence[]): string | undefined {
+  const matchInfo = evidences.find((evidence) => evidence.type === "MATCH_INFO");
+
+  if (matchInfo === undefined || !isRecord(matchInfo.payload)) {
+    return undefined;
+  }
+
+  return typeof matchInfo.payload.kickoff === "string"
+    ? matchInfo.payload.kickoff
+    : undefined;
+}
+
 export class AnalyzeMatchUseCase {
   readonly #importMatch: MatchImportOperation;
   readonly #evidenceQuery: EvidenceByMatchQuery;
@@ -150,11 +178,24 @@ export class AnalyzeMatchUseCase {
     this.#projectionPolicyPin = projectionPolicyPin;
   }
 
-  async execute(matchId: MatchId): Promise<AnalyzeMatchResult> {
+  async execute(
+    matchId: MatchId,
+    options?: AnalyzeMatchOptions,
+  ): Promise<AnalyzeMatchResult> {
+    if (options !== undefined && options.analysisCutoff !== options.analysisTime) {
+      return failure(
+        "INVALID_ANALYSIS_CUTOFF",
+        "analysisCutoff must equal analysisTime.",
+      );
+    }
+
     let imported: ImportMatchResult;
 
     try {
-      imported = await this.#importMatch.execute(matchId);
+      imported = await this.#importMatch.execute(
+        matchId,
+        options === undefined ? undefined : { collectedAt: options.analysisTime },
+      );
     } catch {
       return failure("IMPORT_FAILED", "Match import failed unexpectedly.");
     }
@@ -187,6 +228,39 @@ export class AnalyzeMatchUseCase {
         "EVIDENCE_NOT_FOUND",
         `MATCH_INFO Evidence for "${matchId}" was not found.`,
       );
+    }
+
+    if (options !== undefined) {
+      const afterCutoff = evidenceSet.find(
+        (evidence) =>
+          Date.parse(evidence.collectedAt) > Date.parse(options.analysisCutoff),
+      );
+
+      if (afterCutoff !== undefined) {
+        return failure(
+          "EVIDENCE_AFTER_CUTOFF",
+          "Evidence collectedAt must be at or before analysisCutoff.",
+        );
+      }
+
+      if (evidenceSet.some((evidence) => evidence.type === "MATCH_RESULT")) {
+        return failure(
+          "POST_MATCH_EVIDENCE",
+          "MATCH_RESULT evidence cannot contribute to a governed PRE_MATCH analysis.",
+        );
+      }
+
+      const kickoff = kickoffFromEvidence(evidenceSet);
+
+      if (
+        kickoff !== undefined &&
+        Date.parse(options.analysisTime) >= Date.parse(kickoff)
+      ) {
+        return failure(
+          "SEAL_NOT_PRE_MATCH",
+          "analysisTime must be strictly before kickoff.",
+        );
+      }
     }
 
     let featureBundle: FeatureBundle;

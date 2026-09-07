@@ -15,6 +15,7 @@ import {
   createActualMatchResult,
   evaluatePrediction,
   InMemoryEvaluationHistoryRepository,
+  InMemoryPrematchPredictionSealRepository,
 } from "@fas/statistics";
 import { describe, expect, it } from "vitest";
 import { GenerateMatchReportUseCase, ReportBuilder } from "../src/index.js";
@@ -568,5 +569,152 @@ describe("GenerateMatchReportUseCase — O1 Football Intelligence Contribution o
     expect(result.contribution?.domains.every((row) => row.sampleSize === 0)).toBe(
       true,
     );
+  });
+});
+
+describe("GenerateMatchReportUseCase — authentic PRE_MATCH seal auto-capture", () => {
+  it("captures the seal after AnalysisResult and before ReportBuilder.build", async () => {
+    const analysis = makeCompletedAnalysis();
+    const sealableEvidence = analysis.evidenceSet.map((evidence) => {
+      if (evidence.type !== "MATCH_INFO") {
+        return evidence;
+      }
+
+      return createEvidence({
+        id: evidence.id,
+        source: evidence.source,
+        sourceId: evidence.sourceId,
+        type: evidence.type,
+        matchId: evidence.matchId,
+        collectedAt: "2026-07-17T10:00:00Z",
+        eventTime: "2026-08-01T19:30:00Z",
+        freshness: evidence.freshness,
+        quality: evidence.quality,
+        provenance: evidence.provenance,
+        payload: {
+          home: "Liverpool",
+          away: "Chelsea",
+          kickoff: "2026-08-01T19:30:00Z",
+          competitionId: "39",
+          competitionName: "Premier League",
+          season: "2026",
+        },
+      });
+    });
+    const sealableAnalysis = createAnalysisResult({
+      matchId: analysis.matchId,
+      evidence: sealableEvidence[0] ?? analysis.evidence,
+      evidenceSet: sealableEvidence,
+      features: analysis.features,
+      featureBundle: analysis.featureBundle,
+      ruleResults: analysis.ruleResults,
+      projection: analysis.projection,
+      scenarios: analysis.scenarios,
+      intelligenceConfidence: analysis.intelligenceConfidence,
+      generatedAt: analysis.generatedAt,
+    });
+    const order: string[] = [];
+    const repository = new InMemoryPrematchPredictionSealRepository();
+    const clock = {
+      now(): string {
+        return order.length === 0 ? "2026-07-17T10:00:00Z" : "2026-07-17T10:00:01Z";
+      },
+    };
+    const useCase = new GenerateMatchReportUseCase(
+      {
+        execute: async (_matchId, options) => {
+          order.push(`analyze:${options?.analysisTime ?? "none"}`);
+          expect(options).toEqual({
+            analysisTime: "2026-07-17T10:00:00Z",
+            analysisCutoff: "2026-07-17T10:00:00Z",
+          });
+          return { ok: true, value: sealableAnalysis };
+        },
+      },
+      {
+        build: (input) => {
+          order.push("report");
+          return createReportBuilder().build(input);
+        },
+      },
+      undefined,
+      undefined,
+      "v2",
+      clock,
+      repository,
+    );
+
+    const result = await useCase.execute(matchId);
+    const stored = await repository.findByMatch(matchId);
+
+    expect("ok" in result).toBe(false);
+    expect(order).toEqual(["analyze:2026-07-17T10:00:00Z", "report"]);
+    expect(stored).toHaveLength(1);
+    expect(stored[0]?.sealedAt).toBe("2026-07-17T10:00:01Z");
+    expect(stored[0]?.sealIdentity.analysisTime).toBe("2026-07-17T10:00:00Z");
+  });
+
+  it("fails closed when durable seal write fails", async () => {
+    const analysis = makeCompletedAnalysis();
+    const matchInfo = createEvidence({
+      id: "evidence-1",
+      source: "fixture",
+      sourceId: "fixture-match-1",
+      type: "MATCH_INFO",
+      matchId,
+      collectedAt: "2026-07-17T10:00:00Z",
+      eventTime: "2026-08-01T19:30:00Z",
+      freshness: "fresh",
+      quality: "unverified",
+      provenance: {
+        collector: "@fas/evidence-normalizer",
+        method: "fixture",
+      },
+      payload: {
+        away: "Chelsea",
+        home: "Liverpool",
+        kickoff: "2026-08-01T19:30:00Z",
+        competitionId: "39",
+        competitionName: "Premier League",
+        season: "2026",
+      },
+    });
+    const sealableAnalysis = createAnalysisResult({
+      matchId: analysis.matchId,
+      evidence: matchInfo,
+      evidenceSet: [
+        matchInfo,
+        ...analysis.evidenceSet.filter((item) => item.type !== "MATCH_INFO"),
+      ],
+      features: analysis.features,
+      featureBundle: analysis.featureBundle,
+      ruleResults: analysis.ruleResults,
+      projection: analysis.projection,
+      scenarios: analysis.scenarios,
+      intelligenceConfidence: analysis.intelligenceConfidence,
+      generatedAt: analysis.generatedAt,
+    });
+    const useCase = new GenerateMatchReportUseCase(
+      { execute: async () => ({ ok: true, value: sealableAnalysis }) },
+      createReportBuilder(),
+      undefined,
+      undefined,
+      "v2",
+      { now: () => "2026-07-17T10:00:00Z" },
+      {
+        save: async () => {
+          throw new Error("postgres unavailable");
+        },
+        findByOriginalSealId: async () => undefined,
+        findByMatch: async () => Object.freeze([]),
+      },
+    );
+
+    const result = await useCase.execute(matchId);
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "PREMATCH_SEAL_FAILED" },
+    });
   });
 });

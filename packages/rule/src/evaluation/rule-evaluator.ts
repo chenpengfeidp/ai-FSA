@@ -67,7 +67,8 @@ const TAU_MANAGER_CHANGE_RISK = 55;
 const TAU_PLAYER_AVAILABILITY = 10;
 const TAU_PLAYER_ATTACK = 15;
 const TAU_GOALKEEPER_EDGE = 15;
-const RULE_POLICY = "rule.mvp.m1b.manager";
+export const RULE_SET_VERSION = "rule.mvp.m1b.manager";
+const RULE_POLICY = RULE_SET_VERSION;
 
 interface PresenceRuleDefinition {
   readonly kind: "presence";

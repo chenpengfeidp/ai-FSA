@@ -10,6 +10,7 @@ import { type EvidenceRepository, InMemoryEvidenceRepository } from "@fas/eviden
 import {
   type EvaluationHistoryRepository,
   InMemoryEvaluationHistoryRepository,
+  type PrematchPredictionSealRepository,
   type ProjectionReplaySidecarRepository,
   InMemoryProjectionReplaySidecarRepository,
 } from "@fas/statistics";
@@ -98,6 +99,16 @@ export function createApiProjectionReplaySidecarRepository(): ProjectionReplaySi
   }
 
   return cachedMemoryProjectionReplaySidecar;
+}
+
+export function createApiPrematchPredictionSealRepository():
+  | PrematchPredictionSealRepository
+  | undefined {
+  if (isPostgresPlatformPersistence()) {
+    return getPostgresDatabase().prematchPredictionSealRepository;
+  }
+
+  return undefined;
 }
 
 /** Observable platform persistence mode for operators and diagnostics (P2K-A). */

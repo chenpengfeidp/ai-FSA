@@ -7,6 +7,7 @@ import {
   createAnalysisProvenanceMetadata,
   type AnalysisProvenanceMetadata,
   type AnalysisResult,
+  type AnalyzeMatchOptions,
   type AnalyzeMatchResult,
   type FixtureResolutionMetadata,
   type ProjectionParameterCatalog,
@@ -15,15 +16,20 @@ import {
 import type { MatchId } from "@fas/match";
 import {
   buildEvaluationHistoryRecord,
+  capturePrematchPredictionSeal,
   computeContributionReport,
   computePredictionCalibrationReport,
   computeProjectionDiagnosticsReport,
   computeValidationReport,
   ConflictProjectionReplaySidecarError,
+  PrematchPredictionSealError,
   runProjectionReplayReport,
+  type Clock,
   type ContributionReport,
   type EvaluationHistoryRecord,
   type EvaluationHistoryRepository,
+  type PrematchFixtureIdentity,
+  type PrematchPredictionSealRepository,
   type PredictionCalibrationReport,
   type ProjectionDiagnosticsReport,
   type ProjectionReplayReport,
@@ -36,7 +42,10 @@ import { createAnalysisReport } from "../domain/analysis-report.js";
 type AnalysisFailure = Extract<AnalyzeMatchResult, { ok: false }>;
 
 export interface AnalyzeMatchOperation {
-  execute(matchId: MatchId): Promise<AnalyzeMatchResult>;
+  execute(
+    matchId: MatchId,
+    options?: AnalyzeMatchOptions,
+  ): Promise<AnalyzeMatchResult>;
 }
 
 export interface AnalysisReportBuilder {
@@ -48,6 +57,7 @@ export type ReportGenerationErrorCode =
   | "CALIBRATION_REPORT_FAILED"
   | "CONTRIBUTION_REPORT_FAILED"
   | "EVALUATION_HISTORY_FAILED"
+  | "PREMATCH_SEAL_FAILED"
   | "PROJECTION_REPLAY_SIDECAR_FAILED"
   | "PROJECTION_REPLAY_REPORT_FAILED"
   | "PROJECTION_DIAGNOSTICS_REPORT_FAILED"
@@ -226,6 +236,78 @@ async function persistAndLoadHistory(
   return repository.findByMatch(analysis.matchId);
 }
 
+function isPrematchSealError(error: unknown): error is PrematchPredictionSealError {
+  return (
+    error instanceof PrematchPredictionSealError ||
+    (error instanceof Error &&
+      error.name === "PrematchPredictionSealError" &&
+      "code" in error &&
+      typeof (error as { code: unknown }).code === "string")
+  );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function extractPrematchFixtureIdentity(
+  analysis: AnalysisResult,
+): PrematchFixtureIdentity | undefined {
+  const matchInfo = analysis.evidenceSet.find(
+    (evidence) => evidence.type === "MATCH_INFO",
+  );
+
+  if (matchInfo === undefined || !isRecord(matchInfo.payload)) {
+    return undefined;
+  }
+
+  const home =
+    typeof matchInfo.payload.home === "string" ? matchInfo.payload.home.trim() : "";
+  const away =
+    typeof matchInfo.payload.away === "string" ? matchInfo.payload.away.trim() : "";
+  const kickoff =
+    typeof matchInfo.payload.kickoff === "string"
+      ? matchInfo.payload.kickoff.trim()
+      : "";
+  const competitionId =
+    typeof matchInfo.payload.competitionId === "string"
+      ? matchInfo.payload.competitionId.trim()
+      : "";
+  const competitionName =
+    typeof matchInfo.payload.competitionName === "string"
+      ? matchInfo.payload.competitionName.trim()
+      : typeof matchInfo.payload.competition === "string"
+        ? matchInfo.payload.competition.trim()
+        : "";
+  const season =
+    typeof matchInfo.payload.season === "string"
+      ? matchInfo.payload.season.trim()
+      : typeof matchInfo.payload.season === "number"
+        ? String(matchInfo.payload.season)
+        : "";
+
+  if (
+    home.length === 0 ||
+    away.length === 0 ||
+    kickoff.length === 0 ||
+    competitionId.length === 0 ||
+    competitionName.length === 0 ||
+    season.length === 0
+  ) {
+    return undefined;
+  }
+
+  return Object.freeze({
+    matchId: analysis.matchId,
+    homeTeam: home,
+    awayTeam: away,
+    competitionId,
+    competitionName,
+    season,
+    kickoff,
+  });
+}
+
 export class GenerateMatchReportUseCase {
   readonly #analyzeMatch: AnalyzeMatchOperation;
   readonly #reportBuilder: AnalysisReportBuilder;
@@ -235,6 +317,8 @@ export class GenerateMatchReportUseCase {
     | undefined;
   readonly #projectionReplayPort = new AnalysisProjectionReplayPort();
   readonly #projectionPolicyPin: ProjectionPolicyPin;
+  readonly #clock: Clock | undefined;
+  readonly #prematchSealRepository: PrematchPredictionSealRepository | undefined;
 
   constructor(
     analyzeMatch: AnalyzeMatchOperation,
@@ -242,12 +326,16 @@ export class GenerateMatchReportUseCase {
     evaluationHistoryRepository?: EvaluationHistoryRepository,
     projectionReplaySidecarRepository?: ProjectionReplaySidecarRepository,
     projectionPolicyPin: ProjectionPolicyPin = "v2",
+    clock?: Clock,
+    prematchSealRepository?: PrematchPredictionSealRepository,
   ) {
     this.#analyzeMatch = analyzeMatch;
     this.#reportBuilder = reportBuilder;
     this.#evaluationHistoryRepository = evaluationHistoryRepository;
     this.#projectionReplaySidecarRepository = projectionReplaySidecarRepository;
     this.#projectionPolicyPin = projectionPolicyPin;
+    this.#clock = clock;
+    this.#prematchSealRepository = prematchSealRepository;
   }
 
   async execute(
@@ -255,15 +343,86 @@ export class GenerateMatchReportUseCase {
     options?: GenerateMatchReportOptions,
   ): Promise<GenerateMatchReportResult> {
     let analysis: AnalyzeMatchResult;
+    const clock = this.#clock;
+    const sealRepository = this.#prematchSealRepository;
+    const captureEnabled = clock !== undefined && sealRepository !== undefined;
+    const analysisTime = captureEnabled ? clock.now() : undefined;
+    const cutoffOptions: AnalyzeMatchOptions | undefined =
+      analysisTime === undefined
+        ? undefined
+        : { analysisTime, analysisCutoff: analysisTime };
 
     try {
-      analysis = await this.#analyzeMatch.execute(matchId);
+      analysis = await this.#analyzeMatch.execute(matchId, cutoffOptions);
     } catch {
       return failure("ANALYSIS_FAILED", "Match analysis failed unexpectedly.");
     }
 
+    if (
+      !analysis.ok &&
+      analysis.error.code === "SEAL_NOT_PRE_MATCH" &&
+      cutoffOptions !== undefined
+    ) {
+      try {
+        analysis = await this.#analyzeMatch.execute(matchId);
+      } catch {
+        return failure("ANALYSIS_FAILED", "Match analysis failed unexpectedly.");
+      }
+    }
+
     if (!analysis.ok) {
       return analysis;
+    }
+
+    if (captureEnabled && analysisTime !== undefined) {
+      const fixture = extractPrematchFixtureIdentity(analysis.value);
+
+      if (
+        fixture !== undefined &&
+        Date.parse(analysisTime) < Date.parse(fixture.kickoff)
+      ) {
+        const sealedAt = clock.now();
+        const snapshot = buildSealedPredictionInput(analysis.value);
+        const framework = analysis.value.projectionFramework;
+
+        try {
+          await capturePrematchPredictionSeal(
+            {
+              fixture,
+              evidenceSet: analysis.value.evidenceSet,
+              predictionSnapshot: snapshot,
+              featureModelVersion: analysis.value.featureBundle.featureModelVersion,
+              ruleSetVersion: snapshot.ruleSetVersion ?? "",
+              projectionModelVersion: snapshot.projectionModelVersion,
+              projectionPolicyPin: this.#projectionPolicyPin,
+              ...(framework === undefined
+                ? {}
+                : {
+                    parameterArtifactId: framework.parameterArtifactId,
+                    parameterVersionLabel: framework.parameterVersionLabel,
+                    parameterArtifactChecksum: framework.parameterArtifactChecksum,
+                  }),
+              analysisTime,
+              analysisCutoff: analysisTime,
+              sealedAt,
+            },
+            sealRepository,
+          );
+        } catch (error) {
+          if (isPrematchSealError(error)) {
+            if (error.code === "SEAL_NOT_PRE_MATCH") {
+              // Past-kickoff runs produce a report without Class A.
+            } else {
+              return failure("PREMATCH_SEAL_FAILED", error.message);
+            }
+          } else {
+            return failure(
+              "PREMATCH_SEAL_FAILED",
+              "Authentic PRE_MATCH seal persistence failed unexpectedly.",
+            );
+          }
+        }
+      }
     }
 
     let report: AnalysisReport;

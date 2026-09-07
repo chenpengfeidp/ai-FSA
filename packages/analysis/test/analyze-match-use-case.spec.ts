@@ -257,4 +257,89 @@ describe("AnalyzeMatchUseCase", () => {
       error: { code: "RULE_EVALUATION_FAILED" },
     });
   });
+
+  it("fails closed when Evidence is after analysisCutoff", async () => {
+    const evidence = makeEvidence();
+    const useCase = createUseCase(
+      {
+        execute: async () => Object.freeze({ ok: true, value: evidence }),
+      },
+      {
+        findByMatch: async () =>
+          Object.freeze({
+            ok: true,
+            value: Object.freeze([
+              {
+                ...evidence,
+                collectedAt: "2026-07-20T12:00:00Z",
+              },
+            ]),
+          }),
+      },
+    );
+
+    const result = await useCase.execute(createMatchId("match-1"), {
+      analysisTime: "2026-07-19T12:00:00Z",
+      analysisCutoff: "2026-07-19T12:00:00Z",
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "EVIDENCE_AFTER_CUTOFF" },
+    });
+  });
+
+  it("fails closed when MATCH_RESULT is present on a governed PRE_MATCH run", async () => {
+    const evidence = makeEvidence();
+    const resultEvidence = {
+      ...evidence,
+      id: "evidence-result",
+      type: "MATCH_RESULT" as const,
+    };
+    const useCase = createUseCase(
+      {
+        execute: async () => Object.freeze({ ok: true, value: evidence }),
+      },
+      {
+        findByMatch: async () =>
+          Object.freeze({
+            ok: true,
+            value: Object.freeze([evidence, resultEvidence]),
+          }),
+      },
+    );
+
+    const result = await useCase.execute(createMatchId("match-1"), {
+      analysisTime: "2026-07-17T10:00:00Z",
+      analysisCutoff: "2026-07-17T10:00:00Z",
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "POST_MATCH_EVIDENCE" },
+    });
+  });
+
+  it("rejects cutoff that is not equal to analysisTime", async () => {
+    const evidence = makeEvidence();
+    const useCase = createUseCase(
+      {
+        execute: async () => Object.freeze({ ok: true, value: evidence }),
+      },
+      {
+        findByMatch: async () =>
+          Object.freeze({ ok: true, value: Object.freeze([evidence]) }),
+      },
+    );
+
+    const result = await useCase.execute(createMatchId("match-1"), {
+      analysisTime: "2026-07-17T10:00:00Z",
+      analysisCutoff: "2026-07-16T10:00:00Z",
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_ANALYSIS_CUTOFF" },
+    });
+  });
 });

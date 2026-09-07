@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** Historical Match Evaluation / Case capability audit 已完成，结论 **Option B / Planning only**：FT-only Actual Result、Evaluation、History、Calibration、Validation、Replay 已实现，但任意历史分析入库仍缺 genuine PRE_MATCH seal/cutoff integrity gate，Case Engine 仍为 documented only。FIP-1 保持 **PLANNING COMPLETE / REVIEWED**；FIP-2 P0 已完成，唯一 canonical Agent 分析协议为 `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`；FIP-2 P1/P2/P3/P4 均未授权、未启动。PVS-3.3 仍为 **Option C**，PVS-3.2 live smoke 仍 BLOCKED；Projection V2、`projection.v3.replay`、Candidate C / calibration candidate1 均未变更或晋升。
+一句话：**已进入产品研发阶段。** Historical Evaluation Intake Implementation Planning / Final Gate 已完成，结论 **B. BLOCKED**（无 Class A 封印、无已验证真实 Actual、生产 intake 未授权）。Authentic PRE_MATCH Seal Capture Planning / Gate 已完成，结论 **A. READY**（仅限另一次人工授权的封印捕获冲刺；**不是** Historical Intake）。当前 `NEXT_ACTION` 为人工审阅封印捕获门禁。FIP-1 保持 **PLANNING COMPLETE / REVIEWED**；FIP-2 P0 已完成；FIP-2 P1–P4 未授权。PVS-3.3 仍为 **Option C**；Class B 夹具不得晋升为历史真实性。
 
 ---
 
@@ -135,6 +135,13 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_PLANNING.md` | **FIP-2 P0 Planning** — 已获人工批准并按限定范围完成；历史 planning 输入，不替代 canonical protocol。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_COMPLETION_REPORT.md` | **FIP-2 P0 Completion / Sign-off** — canonicalization、链接一致性、非 runtime 边界与 acceptance 证据；P1–P4 未授权。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_MATCH_EVALUATION_CASE_CAPABILITY_AUDIT.md` | Historical Match Evaluation / Case 能力审计；**Option B / Planning only**。确认 FT Evaluation/History/Replay 可复用，但安全历史 intake 缺 original PRE_MATCH seal/cutoff gate；Case Engine 仅有文档，无 runtime。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_INTEGRITY_PLANNING.md` | Historical Intake 完整性规划；无实现授权。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_READINESS_REVIEW.md` | Intake 就绪审查；**C. BLOCKED**。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW.md` | 工件准入；**C. ADMISSION BLOCKED**。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_PLAN.md` | Class B 受控夹具规划。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_REVIEW.md` | Class B 夹具实现审查；**PASS**（不等于 Intake READY）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Intake 实现规划终局门禁；**B. BLOCKED**。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | 原版 PRE_MATCH 封印捕获与存储权威规划门禁；**A. READY**（仅封印捕获冲刺；非 Intake）。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 
@@ -300,11 +307,13 @@ Match Center (web)
 38. **Match Replay / Evaluation Dataset Update** — 已完成（4 场 outcome-only `ActualMatchResult` fixture；无 Prediction 回填、无 History/cohort/calibration mutation；`docs/sprints/PREDICTION_VERTICAL_SLICE/MATCH_REPLAY_EVALUATION_DATASET_UPDATE_COMPLETION_REPORT.md`）
 39. **FIP-1 Football Intelligence Analysis Protocol Planning** — **PLANNING COMPLETE / REVIEWED**（`docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-1_FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL_PLANNING.md`；不代表 operational protocol 已落地）
 40. **FIP-2 P0 Governance and Canonicalization** — **COMPLETE / SIGNED OFF**（canonical `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`；`docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_COMPLETION_REPORT.md`；仅文档治理，P1/P2/P3/P4 未授权、未启动）
-41. **Historical Match Evaluation / Case Capability Audit** — **COMPLETE / Option B / Planning only**（FT Evaluation/History/Replay 已实现；安全历史 intake 缺 genuine PRE_MATCH seal/cutoff gate；Case Engine documented only；未 ingest 样本、未改 runtime/schema）
-42. **PVS-3.4 coverage probe / commercial decision gate** — 仅在人工明确授权后；不得自动购买或开工
-43. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后
-44. **L2A Squad Intelligence Evidence** — 其后候选
-45. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0
+41. **Historical Match Evaluation / Case Capability Audit** — **COMPLETE / Option B / Planning only**
+42. **Historical Evaluation Intake Implementation Planning / Final Gate** — **COMPLETE / B. BLOCKED**（`HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md`；生产 intake 未授权）
+43. **Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate** — **COMPLETE / A. READY** for a separately authorized capture sprint only（`AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md`；非 Intake、无 Class A 工件）
+44. **PVS-3.4 coverage probe / commercial decision gate** — 仅在人工明确授权后；不得自动购买或开工
+45. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后
+46. **L2A Squad Intelligence Evidence** — 其后候选
+47. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0
 
 历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B · P2K-C · P2K-D · P2K-E · P2K-F · P2K-G · Validation Data Bootstrap · P2K-E Validation Seal · P2K-F Validation（fail closed） · P2K-G-RECOVERY V2 Bootstrap · P2K-E Recovery V2 Seal · P2K-F Recovery V2 Replay · P2K-G Recovery V2 Population Evaluation · P2K-G2-A · P2K-E Expansion V2 Seal · P2K-F Expansion V2 Replay · P2K-G Expansion V2 Population Evaluation · PVS-1 · PVS-2 · PVS-3（blocked validation） · PVS-3.1（recorded runtime boot fix） · PVS-3.2（missing-credential blocked validation + current-season-plan blocked rerun） · PVS-3.3（provider coverage audit / Option C） · Match Replay / Evaluation Dataset Update（4 场 outcome-only） · FIP-1 Planning Review / Sign-off · FIP-2 P0 Governance and Canonicalization · Historical Match Evaluation / Case Capability Audit（Option B / planning only）
 

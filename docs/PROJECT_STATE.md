@@ -3,16 +3,16 @@
 ```yaml
 project: AI-FSA
 current_track: PREDICTION_VERTICAL_SLICE
-current_stage: CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_REVIEW_COMPLETED
-current_gate: HISTORICAL_INTAKE_PLANNING_FINAL_GATE
+current_stage: AUTHENTIC_PREMATCH_SEAL_CAPTURE_PLANNING_GATE_COMPLETED
+current_gate: AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_AUTHORIZATION
 historical_evaluation_intake: C_BLOCKED
 authentic_prematch_seal: NOT_FOUND
 authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE
-next_production_capability: HISTORICAL_EVALUATION_INTAKE
+next_action: HUMAN_REVIEW_OF_AUTHENTIC_PREMATCH_SEAL_CAPTURE_GATE
+next_production_capability: AUTHENTIC_PREMATCH_SEAL_CAPTURE
 ```
 
 ## Document role
@@ -48,17 +48,21 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-08-31 — Controlled PRE_MATCH Conformance Fixture
-  implementation review completed with **PASS**.
+- Last updated: 2026-09-06 — Historical Evaluation Intake Implementation
+  Planning / Final Gate completed (**B. BLOCKED**); Authentic PRE_MATCH Seal
+  Capture & Storage Authority Planning / Gate completed (**A. READY** for a
+  separately authorized capture sprint only).
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
-  **CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_REVIEW_COMPLETED**.
-- Current gate: **HISTORICAL_INTAKE_PLANNING_FINAL_GATE**.
+  **AUTHENTIC_PREMATCH_SEAL_CAPTURE_PLANNING_GATE_COMPLETED**.
+- Current gate:
+  **AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_AUTHORIZATION**.
 - Current next action:
-  **Historical Evaluation Intake Implementation Planning / Final Gate**.
+  **Human review of Authentic PRE_MATCH Seal Capture gate**.
 - Current production sprint: **none active**.
 - Latest implementation evidence: commit `08467c5`,
-  `feat(statistics): 添加 controlled PRE_MATCH 夹具`.
+  `feat(statistics): 添加 controlled PRE_MATCH 夹具` (unchanged; this update
+  is governance only).
 - Fixture classification: **B — controlled synthetic**;
   `synthetic=true`, `historicalAuthenticity=false`,
   `allowedUsage=conformance_test_only`.
@@ -104,8 +108,10 @@ flowchart TD
   ADMISSION --> PLAN["Controlled PRE_MATCH Conformance Fixture Plan<br/>A. READY / COMPLETED"]
   PLAN --> FIXTURE["Class B controlled synthetic fixture<br/>COMPLETED + VALIDATED"]
   FIXTURE --> CURRENT["Controlled Fixture Implementation Review<br/>PASS / COMPLETED"]
-  CURRENT --> FINALPLAN["Historical Evaluation Intake Planning / Final Gate<br/>NEXT"]
-  FINALPLAN -->|human approval required| PROD["Historical Evaluation Intake Production Implementation<br/>BLOCKED"]
+  CURRENT --> FINALPLAN["Historical Evaluation Intake Planning / Final Gate<br/>COMPLETED / B. BLOCKED"]
+  FINALPLAN --> SEALPLAN["Authentic PRE_MATCH Seal Capture Planning / Gate<br/>COMPLETED / A. READY for capture sprint only"]
+  SEALPLAN -->|human authorization required| SEALIMPL["Authentic PRE_MATCH Seal Capture Implementation<br/>NOT AUTHORIZED"]
+  FINALPLAN --> PROD["Historical Evaluation Intake Production Implementation<br/>BLOCKED"]
   PROD --> VERIFY["Historical Intake focused verification<br/>FUTURE"]
   VERIFY --> REALADMIT["Authentic Historical Artifact Admission<br/>BLOCKED UNTIL REAL ARTIFACT EXISTS"]
   SEAL -. required .-> REALADMIT
@@ -118,11 +124,10 @@ flowchart TD
   classDef missing fill:#fff0cc,stroke:#9b6b00,color:#123;
   classDef next fill:#e8ddff,stroke:#6542a6,color:#123;
 
-  class PLATFORM,PVS1,EVAL,AUDIT,FIXTURE,CURRENT completed;
-  class PLAN ready;
-  class INTEGRITY,ADMISSION,PROD,REALADMIT blocked;
+  class PLATFORM,PVS1,EVAL,AUDIT,FIXTURE,CURRENT,FINALPLAN completed;
+  class PLAN,SEALPLAN ready;
+  class INTEGRITY,ADMISSION,PROD,REALADMIT,SEALIMPL blocked;
   class SEAL,ACTUAL missing;
-  class FINALPLAN next;
 ```
 
 The controlled fixture and authentic historical artifacts are deliberately
@@ -164,7 +169,8 @@ historical authenticity unless the cited evidence explicitly proves it.
 | 3 | Controlled PRE_MATCH Conformance Fixture Plan | **COMPLETED / A. READY FOR FIXTURE IMPLEMENTATION**; readiness applied only to fixture design |
 | 4 | Controlled PRE_MATCH Conformance Fixture Implementation | **COMPLETED + VALIDATED** |
 | 5 | Controlled Fixture Implementation Review | **PASS / COMPLETED** |
-| Current | Historical Evaluation Intake Implementation Planning / Final Gate | **NEXT; planning only, not production authorization** |
+| 6 | Historical Evaluation Intake Implementation Planning / Final Gate | **COMPLETED / B. BLOCKED**; contracts frozen; production intake **not** authorized |
+| Current | Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate | **COMPLETED / A. READY** for a separately authorized capture sprint only; not Intake |
 
 ### Controlled fixture implementation evidence
 
@@ -249,16 +255,41 @@ that conclusion does not authorize the decoder/domain changes.
 
 ## STEP 2 — Historical Evaluation Intake Implementation Planning / Final Gate
 
-- **Status:** NEXT / NOT STARTED.
+- **Status:** COMPLETED / **B. BLOCKED**.
 - **Objective:** reconcile prior planning with fixture-review evidence and issue
   one final implementation authorization decision.
 - **Entry condition:** STEP 1 passes and a human authorizes this planning/gate
   review.
 - **Allowed scope:** planning, exact file boundary, contracts, acceptance tests
   and human decisions; no production implementation.
-- **Exit condition:** explicit READY/BLOCKED final gate and approved
-  idempotency/Actual/replay/schema decisions.
-- **Blocking condition:** unresolved prerequisites or absent human approval.
+- **Exit condition:** satisfied by
+  `HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md`.
+- **Blocking condition:** authentic Class A seal **NOT FOUND**; verified
+  real-world Actual **NOT FOUND**; production intake remains unauthorized.
+
+## STEP 2b — Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate
+
+- **Status:** COMPLETED / **A. READY** for a separately authorized capture
+  implementation sprint only.
+- **Objective:** freeze how a real original PRE_MATCH seal is created and
+  stored before kickoff.
+- **Entry condition:** Historical Intake Final Gate remains BLOCKED on missing
+  Class A evidence.
+- **Allowed scope:** planning / gate; no production code, no Prisma migration,
+  no fake Class A artifact.
+- **Exit condition:** satisfied by
+  `AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md`.
+- **Blocking condition for coding:** absent human authorization of the capture
+  sprint, Prisma table, and auto-wire vs library-only decision.
+
+## STEP 2c — Authentic PRE_MATCH Seal Capture implementation
+
+- **Status:** NOT AUTHORIZED. Next action is human review of STEP 2b.
+- **Objective:** persist original PRE_MATCH seals before kickoff.
+- **Entry condition:** explicit human approval of STEP 2b human-decision list.
+- **Allowed scope:** only files named by the capture gate.
+- **Does not authorize:** Historical Evaluation Intake, reconstruction, Class B
+  promotion, Calibration/Validation membership.
 
 ## STEP 3 — Historical Evaluation Intake production implementation
 
@@ -315,7 +346,8 @@ that conclusion does not authorize the decoder/domain changes.
 | Controlled Fixture Plan | **A. READY / COMPLETED** | Fixture design can be implemented | Fixture implementation only |
 | Controlled Fixture Implementation | **COMPLETED + VALIDATED** | Static class-B fixture and test-only validation landed | Proceed to fixture review |
 | Fixture Implementation Review | **PASS / COMPLETED** | Class-B implementation satisfies bounded conformance/isolation review | Proceed only to planning/final gate |
-| Historical Intake Implementation Planning | **NEXT / NOT STARTED** | Final gate must resolve prerequisites | Planning only; human authorization still required |
+| Historical Intake Implementation Planning | **COMPLETED / B. BLOCKED** | Intake contracts frozen; authentic artifacts still missing | No production intake |
+| Authentic PRE_MATCH Seal Capture Planning | **COMPLETED / A. READY (capture only)** | Storage = new append-only Prisma table; capture ≠ Intake | Capture sprint only after human approval |
 | Historical Intake Production Implementation | **BLOCKED** | No implementation authorization exists | No |
 | Authentic PRE_MATCH Admission | **NOT FOUND / BLOCKED** | No real original seal passes admission | No |
 | Verified Real-world Actual Admission | **NOT FOUND / BLOCKED** | Controlled verified fixture is not real-world verification | No |
@@ -370,6 +402,10 @@ Future Agents must not:
 - create a Prisma seed for fixture testing;
 - inject the fixture into Calibration, Validation or historical populations;
 - create History, Sidecars or replay cohorts as a shortcut around admission;
+- implement Authentic PRE_MATCH Seal Capture without explicit human approval of
+  that gate's human-decision list;
+- create a fake Class A seal, backfill old matches, or promote the Class B
+  fixture;
 - start FIP-2 P1/P2/P3/P4, PVS-3.4, Case Engine work, P2K-CAL-3 or candidate
   promotion without a separate gate.
 
@@ -387,6 +423,8 @@ Future Agents must not:
 | Fixture verification test | `packages/statistics/test/controlled-prematch-conformance-fixture.spec.ts` | Canonical checksum, temporal, identity, seal, Actual, replay declaration and isolation tests | 31 focused tests passed | Executable acceptance evidence |
 | Fixture implementation commit | `08467c5` | Versioned repository identity for fixture delivery | Complete | Git delivery evidence; not historical timestamp proof |
 | Controlled Fixture Implementation Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_REVIEW.md` | Repository-grounded class-B implementation/isolation review | **PASS** | Authorizes progression to planning/final gate only |
+| Historical Evaluation Intake Implementation Planning / Final Gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Minimum intake production boundary; schema/idempotency/Actual/replay freeze | **B. BLOCKED** | Does not authorize intake implementation |
+| Authentic PRE_MATCH Seal Capture Planning / Gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | How to create/store original PRE_MATCH seals before kickoff | **A. READY** for a separate capture sprint after human approval | Does not authorize Intake or Class A admission |
 
 The latest repository Review and implementation evidence define the current
 workstream status. Sprint reports remain evidence records and do not override
@@ -419,9 +457,12 @@ Historical Evaluation Intake
 = C. BLOCKED
 
 Current Next Step
-= HISTORICAL EVALUATION INTAKE IMPLEMENTATION PLANNING / FINAL GATE
+= HUMAN REVIEW OF AUTHENTIC PRE_MATCH SEAL CAPTURE GATE
 
 Historical Evaluation Intake Production Implementation
+= NOT AUTHORIZED
+
+Authentic PRE_MATCH Seal Capture Implementation
 = NOT AUTHORIZED YET
 ```
 
@@ -649,10 +690,10 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Historical Delivery Context (Not Current Execution Order)
 
-The only current `NEXT_ACTION` is the **Controlled Fixture Implementation
-Review** defined in the `Next Execution Sequence` above. The material below
-preserves older delivery context and deferred options; it does not authorize a
-different next task.
+The only current `NEXT_ACTION` is **human review of the Authentic PRE_MATCH
+Seal Capture Planning / Gate**. Historical Evaluation Intake remains
+**C. BLOCKED**. The material below preserves older delivery context and
+deferred options; it does not authorize a different next task.
 
 **P2K-CAL-2 Projection λ & Goal Distribution Calibration** **COMPLETED**: governed NON-DEFAULT candidate `projection.v3.calibration.candidate1` (`checksum=9b3b4022`, `productionPromoted=false`); percent-scale normalization fix; feature-group λ governance; optional Dixon–Coles ρ=−0.10; offline Expansion V2 replay (range4Plus 27→0 predicted; Draw winner 0→10; mean λ 5.7→1.9); production default unchanged; **NOT PROMOTED** (`docs/sprints/P2K/P2K_CAL_2_PROJECTION_LAMBDA_CALIBRATION_COMPLETION_REPORT.md`). **P2K-CAL-1 Projection / Match Script Calibration Diagnosis Plan** **COMPLETED**: planning-only audit of λ / Goal Range / Draw / Match Script math chain (`docs/sprints/P2K/P2K_CAL_1_PROJECTION_MATCH_SCRIPT_CALIBRATION_DIAGNOSIS_PLAN.md`); root cause = attack-group `unitCentered` saturation + high base EG; three calibration directions (analysis only); validation strategy for future round; no production code or durable artifact changes; no promotion. **P2K-G3 Validation Prediction Distribution Audit** **COMPLETED**: diagnosis-only audit of Expansion V2 30 members (`docs/sprints/P2K/P2K_G3_VALIDATION_PREDICTION_DISTRIBUTION_AUDIT.md`); Candidate C reaches Match Script→Projection (scripts/λ/probs differ 30/30) but discrete winner/goal-range never flip (0/30); explains P2K-G discrete A/C identity; `range4Plus=27/30` / `Draw=0/30` are Projection/λ/argmax properties; no durable artifact mutation; no calibration; no promotion. **P2K-G Validation Expansion V2 Population Evaluation** **COMPLETED**: `eval.p2k.g.validation.expansion.v2.analyzematch.v1` on SEALED cohort `p2k.e.validation.expansion.v2.analyzematch.v1` using durable A/C runs `run.p2k.f.validation.expansion.v2.analyzematch.v1.a` / `.c`; paired sample 30; checksum `b65010c9eaf25b1946be7ddb8cd5b8489b5b0fc35c76f3ab7d1e81efebedd2f5`; descriptive only; A2 sample meets minimum qualified threshold but that is **not** Candidate C superiority; PostgreSQL round-trip PASS. **P2K-F Validation Expansion V2 Sealed Cohort Offline Replay Run** **COMPLETED**: Baseline A (30/0) and Candidate C (30/0); pairedSuccessfulCount 30, sameHistoricalContext 30/30, identity 30/30. **P2K-E Validation Expansion V2 Sealed Replay Cohort** **COMPLETED**: SEALED cohort `p2k.e.validation.expansion.v2.analyzematch.v1` (30 members; digest `03b52d71078dee7746796fd1de722e22e2a66382ea7202556299990a5714e997`). **P2K-G2-A Validation Dataset Diversity Expansion** **COMPLETED**: 30 new Projection-v2 History+Sidecar rows (`match-p2kg-expansion-v2-*`). Prior recovery-v2 / bootstrap-v1 cohorts and evaluations remain SEALED/untouched. Candidate C remains NON-DEFAULT and is **not** auto-promoted. Production Match Script unchanged. P2K-H not authorized.
 
@@ -709,8 +750,11 @@ Historical Evaluation Intake
 = C. BLOCKED
 
 Current Next Step
-= HISTORICAL EVALUATION INTAKE IMPLEMENTATION PLANNING / FINAL GATE
+= HUMAN REVIEW OF AUTHENTIC PRE_MATCH SEAL CAPTURE GATE
 
 Historical Evaluation Intake Production Implementation
+= NOT AUTHORIZED
+
+Authentic PRE_MATCH Seal Capture Implementation
 = NOT AUTHORIZED YET
 ```

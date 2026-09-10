@@ -12,7 +12,7 @@ authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: BOUNDED_REAL_PREMATCH_CAPTURE_VERIFICATION
+next_action: RESTORE_DURABLE_POSTGRES_AND_RETRY_REAL_PREMATCH_CAPTURE_VERIFICATION
 next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
@@ -49,21 +49,21 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-07 — Authentic PRE_MATCH Seal Capture implementation
-  completed (**A. PASS** capability); real Class A artifact still
-  **NOT FOUND**; Historical Evaluation Intake remains **C. BLOCKED**.
+- Last updated: 2026-09-07 — Bounded real PRE_MATCH capture verification
+  **B. BLOCKED** (durable Postgres unavailable; no candidate Class A row).
+  Capture **capability** remains implemented (commit `1effc56`);
+  `authentic_prematch_seal` remains **NOT_FOUND**; Historical Evaluation
+  Intake remains **C. BLOCKED**.
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_COMPLETED**.
 - Current gate:
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION**.
 - Current next action:
-  **Bounded real PRE_MATCH capture verification**.
-- Current production sprint: **Authentic PRE_MATCH Seal Capture** (code
-  complete; awaiting a real pre-kickoff durable write).
-- Latest implementation evidence: commit `08467c5`,
-  `feat(statistics): 添加 controlled PRE_MATCH 夹具` (unchanged; this update
-  is governance only).
+  **Restore durable Postgres and retry real PRE_MATCH capture verification**.
+- Current production sprint: none active (verification blocked on runtime).
+- Latest implementation evidence: commit `1effc56`,
+  `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
 - Fixture classification: **B — controlled synthetic**;
   `synthetic=true`, `historicalAuthenticity=false`,
   `allowedUsage=conformance_test_only`.
@@ -112,7 +112,7 @@ flowchart TD
   CURRENT --> FINALPLAN["Historical Evaluation Intake Planning / Final Gate<br/>COMPLETED / B. BLOCKED"]
   FINALPLAN --> SEALPLAN["Authentic PRE_MATCH Seal Capture Planning / Gate<br/>COMPLETED / A. READY"]
   SEALPLAN --> SEALIMPL["Authentic PRE_MATCH Seal Capture Implementation<br/>COMPLETED / capability PASS"]
-  SEALIMPL --> SEALVERIFY["Bounded real PRE_MATCH capture verification<br/>NEXT"]
+  SEALIMPL --> SEALVERIFY["Bounded real PRE_MATCH capture verification<br/>BLOCKED — Postgres unavailable"]
   FINALPLAN --> PROD["Historical Evaluation Intake Production Implementation<br/>BLOCKED"]
   PROD --> VERIFY["Historical Intake focused verification<br/>FUTURE"]
   VERIFY --> REALADMIT["Authentic Historical Artifact Admission<br/>BLOCKED UNTIL REAL ARTIFACT EXISTS"]
@@ -127,8 +127,8 @@ flowchart TD
   classDef next fill:#e8ddff,stroke:#6542a6,color:#123;
 
   class PLATFORM,PVS1,EVAL,AUDIT,FIXTURE,CURRENT,FINALPLAN,SEALPLAN,SEALIMPL completed;
-  class PLAN,SEALVERIFY ready;
-  class INTEGRITY,ADMISSION,PROD,REALADMIT blocked;
+  class PLAN ready;
+  class INTEGRITY,ADMISSION,PROD,REALADMIT,SEALVERIFY blocked;
   class SEAL,ACTUAL missing;
 ```
 
@@ -175,7 +175,8 @@ historical authenticity unless the cited evidence explicitly proves it.
 | 5 | Controlled Fixture Implementation Review | **PASS / COMPLETED** |
 | 6 | Historical Evaluation Intake Implementation Planning / Final Gate | **COMPLETED / B. BLOCKED**; contracts frozen; production intake **not** authorized |
 | 7 | Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate | **COMPLETED / A. READY**; capture sprint was authorized and implemented |
-| Current | Authentic PRE_MATCH Seal Capture Implementation | **A. PASS / capability IMPLEMENTED**; real Class A artifact **NOT FOUND**; next is bounded real capture verification |
+| 8 | Authentic PRE_MATCH Seal Capture Implementation | **A. PASS / capability IMPLEMENTED** (`1effc56`); real Class A artifact **NOT FOUND** |
+| Current | Bounded real PRE_MATCH capture verification | **B. BLOCKED** — durable Postgres unavailable; no candidate Class A artifact; see `REAL_PREMATCH_CAPTURE_VERIFICATION.md` |
 
 ### Controlled fixture implementation evidence
 
@@ -302,12 +303,13 @@ that conclusion does not authorize the decoder/domain changes.
 
 ## STEP 2d — Bounded real PRE_MATCH capture verification
 
-- **Status:** NEXT / NOT STARTED.
+- **Status:** COMPLETED REVIEW / **B. BLOCKED**.
 - **Objective:** prove a real production PRE_MATCH run writes a durable Class A
   row before kickoff. Only then may `authentic_prematch_seal` become FOUND.
-- **Entry condition:** STEP 2c implementation review PASS.
-- **Allowed scope:** live/pre-kickoff analyze against postgres; artifact
-  admission of that row; no Historical Intake implementation.
+- **Exit condition:** `REAL_PREMATCH_CAPTURE_VERIFICATION.md`.
+- **Blocking condition:** Postgres not reachable; `DATABASE_URL` unset;
+  `EVIDENCE_REPOSITORY_MODE` defaults to memory; Football Data defaults to
+  recorded; API not running. No fixture was fabricated.
 - **Does not authorize:** backfill, replay-as-original, Class B promotion, or
   `production_historical_intake_authorized = true`.
 
@@ -447,6 +449,7 @@ Future Agents must not:
 | Historical Evaluation Intake Implementation Planning / Final Gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Minimum intake production boundary; schema/idempotency/Actual/replay freeze | **B. BLOCKED** | Does not authorize intake implementation |
 | Authentic PRE_MATCH Seal Capture Planning / Gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | How to create/store original PRE_MATCH seals before kickoff | **A. READY** (planning); capture sprint authorized | Does not authorize Intake or Class A admission |
 | Authentic PRE_MATCH Seal Capture Implementation Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md` | Capture capability, hashes, cutoff, postgres authority | **A. PASS** (capability); real artifact **NOT FOUND** | Does not set `authentic_prematch_seal=FOUND` |
+| Real PRE_MATCH Capture Verification | `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | First real Class A candidate attempt | **B. BLOCKED** — Postgres unavailable | Does not authorize Intake or admission |
 
 The latest repository Review and implementation evidence define the current
 workstream status. Sprint reports remain evidence records and do not override
@@ -479,7 +482,7 @@ Historical Evaluation Intake
 = C. BLOCKED
 
 Current Next Step
-= BOUNDED REAL PRE_MATCH CAPTURE VERIFICATION
+= RESTORE DURABLE POSTGRES AND RETRY REAL PRE_MATCH CAPTURE VERIFICATION
 
 Historical Evaluation Intake Production Implementation
 = NOT AUTHORIZED
@@ -715,8 +718,8 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Historical Delivery Context (Not Current Execution Order)
 
-The only current `NEXT_ACTION` is **bounded real PRE_MATCH capture
-verification**. Historical Evaluation Intake remains
+The only current `NEXT_ACTION` is **restore durable Postgres and retry real
+PRE_MATCH capture verification**. Historical Evaluation Intake remains
 **C. BLOCKED**. The material below preserves older delivery context and
 deferred options; it does not authorize a different next task.
 
@@ -775,7 +778,7 @@ Historical Evaluation Intake
 = C. BLOCKED
 
 Current Next Step
-= BOUNDED REAL PRE_MATCH CAPTURE VERIFICATION
+= RESTORE DURABLE POSTGRES AND RETRY REAL PRE_MATCH CAPTURE VERIFICATION
 
 Historical Evaluation Intake Production Implementation
 = NOT AUTHORIZED

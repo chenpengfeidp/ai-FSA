@@ -26,7 +26,7 @@
 | Football Intelligence MVP | **已落地**（F1.2–F1.3–I1–I2；Market findings-only） |
 | Redis / BullMQ / 公网认证 / 网络 AI SDK | **未做 / 禁止擅自开工** |
 
-一句话：**已进入产品研发阶段。** Historical Evaluation Intake Implementation Planning / Final Gate 已完成，结论 **B. BLOCKED**（无 Class A 封印、无已验证真实 Actual、生产 intake 未授权）。Authentic PRE_MATCH Seal Capture **capability** 已实现（Implementation Review **A. PASS**）；真实 Class A 工件仍 **NOT FOUND**。当前 `NEXT_ACTION` 为 **bounded real PRE_MATCH capture verification**（不是 Historical Intake）。FIP-1 保持 **PLANNING COMPLETE / REVIEWED**；FIP-2 P0 已完成；FIP-2 P1–P4 未授权。PVS-3.3 仍为 **Option C**；Class B 夹具不得晋升为历史真实性。
+一句话：**已进入产品研发阶段。** Historical Evaluation Intake 仍为 **C. BLOCKED**（无 Class A 封印、无已验证真实 Actual、生产 intake 未授权）。Authentic PRE_MATCH Seal Capture **capability** 已实现（`1effc56`，Implementation Review **A. PASS**）；真实 Class A 工件仍 **NOT FOUND**。Bounded real PRE_MATCH capture verification 结论 **B. BLOCKED**（durable Postgres 不可用）。当前 `NEXT_ACTION` 为恢复 Postgres 后重试该验证（不是 Historical Intake）。FIP-1 保持 **PLANNING COMPLETE / REVIEWED**；FIP-2 P0 已完成；FIP-2 P1–P4 未授权。PVS-3.3 仍为 **Option C**；Class B 夹具不得晋升为历史真实性。
 
 ---
 
@@ -143,6 +143,7 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Intake 实现规划终局门禁；**B. BLOCKED**。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | 原版 PRE_MATCH 封印捕获与存储权威规划门禁；**A. READY**（仅封印捕获冲刺；非 Intake）。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md` | 封印捕获实现审查；**A. PASS**（capability；真实 Class A 工件仍 NOT FOUND）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | 真实 PRE_MATCH 封印捕获验证；**B. BLOCKED**（Postgres 不可用；无候选 Class A）。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 
@@ -312,11 +313,12 @@ Match Center (web)
 42. **Historical Evaluation Intake Implementation Planning / Final Gate** — **COMPLETE / B. BLOCKED**（`HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md`；生产 intake 未授权）
 43. **Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate** — **COMPLETE / A. READY**（规划；`AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md`）
 44. **Authentic PRE_MATCH Seal Capture Implementation** — **COMPLETE / A. PASS**（capability；`AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md`；真实 Class A 工件 **NOT FOUND**）
-45. **Bounded real PRE_MATCH capture verification** — **NEXT**；不得把测试/迁移当成 Class A；不得开工 Historical Intake
-46. **PVS-3.4 coverage probe / commercial decision gate** — 仅在人工明确授权后；不得自动购买或开工
-47. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后
-48. **L2A Squad Intelligence Evidence** — 其后候选
-49. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0
+45. **Bounded real PRE_MATCH capture verification** — **B. BLOCKED**（`REAL_PREMATCH_CAPTURE_VERIFICATION.md`；Postgres 不可用；不得把测试/迁移当成 Class A；不得开工 Historical Intake）
+46. **Restore durable Postgres + retry real PRE_MATCH capture verification** — **NEXT**
+47. **PVS-3.4 coverage probe / commercial decision gate** — 仅在人工明确授权后；不得自动购买或开工
+48. **Candidate C promotion gate / P2K-H+** — 仅在人工治理授权后
+49. **L2A Squad Intelligence Evidence** — 其后候选
+50. 其后按 DA Waves 2–6 / 可选 Provider Gate → v1.0
 
 历史已交付（勿重复开工）：F1.1* · F1.2* · F1.3* · I1* · I2* · Freeze Review v0.3 · P0 · DA · L1A · L1B · P1A · P1B · A2 · V1A · O1 · M1A · M1B · R1A · R1B · V3-KM（设计） · P2A–P2J · P2K-A/B · P2K-C · P2K-D · P2K-E · P2K-F · P2K-G · Validation Data Bootstrap · P2K-E Validation Seal · P2K-F Validation（fail closed） · P2K-G-RECOVERY V2 Bootstrap · P2K-E Recovery V2 Seal · P2K-F Recovery V2 Replay · P2K-G Recovery V2 Population Evaluation · P2K-G2-A · P2K-E Expansion V2 Seal · P2K-F Expansion V2 Replay · P2K-G Expansion V2 Population Evaluation · PVS-1 · PVS-2 · PVS-3（blocked validation） · PVS-3.1（recorded runtime boot fix） · PVS-3.2（missing-credential blocked validation + current-season-plan blocked rerun） · PVS-3.3（provider coverage audit / Option C） · Match Replay / Evaluation Dataset Update（4 场 outcome-only） · FIP-1 Planning Review / Sign-off · FIP-2 P0 Governance and Canonicalization · Historical Match Evaluation / Case Capability Audit（Option B / planning only）
 

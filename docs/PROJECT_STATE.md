@@ -3,8 +3,8 @@
 ```yaml
 project: AI-FSA
 current_track: PREDICTION_VERTICAL_SLICE
-current_stage: AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_COMPLETED
-current_gate: AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION
+current_stage: CHINA_LOTTERY_MULTI_SOURCE_PREMATCH_PLANNING_GATE_COMPLETED
+current_gate: CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_AUTHORIZATION
 historical_evaluation_intake: C_BLOCKED
 authentic_prematch_seal: NOT_FOUND
 authentic_prematch_seal_capture_capability: IMPLEMENTED
@@ -12,8 +12,9 @@ authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: OBTAIN_API_FOOTBALL_CURRENT_SEASON_ENTITLEMENT_AND_RETRY_REAL_PREMATCH_CAPTURE_VERIFICATION
-next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
+next_action: HUMAN_REVIEW_OF_CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_GATE
+next_production_capability: PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE
+pending_verification_gate: AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION
 ```
 
 ## Document role
@@ -49,21 +50,24 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-13 — Bounded real PRE_MATCH capture verification
-  **retry B. BLOCKED** (Postgres restored + migrations applied; **no genuine
-  live upcoming fixture** — `usedRecordedFallback: true`, zero future
-  kickoffs; no candidate Class A row). Capture **capability** remains
-  implemented (commit `1effc56`); `authentic_prematch_seal` remains
-  **NOT_FOUND**; Historical Evaluation Intake remains **C. BLOCKED**.
+- Last updated: 2026-09-13 — **China Sports Lottery + multi-source PRE_MATCH
+  Evidence implementation gate** completed (**A. READY** for bounded PVS-4);
+  owner product direction reconciled (API-Football **not** mandatory fixture
+  authority). Prior PRE_MATCH verification retry remains **B. BLOCKED** on
+  obsolete API-Football catalog recipe; **pending** product-aligned Class A
+  retry after PVS-4. Seal capture capability remains implemented (`1effc56`);
+  `authentic_prematch_seal` **NOT_FOUND**; Intake **C. BLOCKED**.
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
-  **AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_COMPLETED**.
+  **CHINA_LOTTERY_MULTI_SOURCE_PREMATCH_PLANNING_GATE_COMPLETED**.
 - Current gate:
-  **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION**.
+  **CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_AUTHORIZATION**.
+- Pending verification gate (after PVS-4):
+  **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** (product-aligned
+  recipe; see implementation gate §11).
 - Current next action:
-  **Obtain API-Football current-season entitlement and retry real PRE_MATCH
-  capture verification** (durable Postgres path demonstrated locally on
-  2026-09-13; see `REAL_PREMATCH_CAPTURE_VERIFICATION.md`).
+  **Human review of China Sports Lottery fixture authority implementation
+  gate** (`CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md`).
 - Current production sprint: none active (verification blocked on runtime).
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
@@ -179,7 +183,9 @@ historical authenticity unless the cited evidence explicitly proves it.
 | 6 | Historical Evaluation Intake Implementation Planning / Final Gate | **COMPLETED / B. BLOCKED**; contracts frozen; production intake **not** authorized |
 | 7 | Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate | **COMPLETED / A. READY**; capture sprint was authorized and implemented |
 | 8 | Authentic PRE_MATCH Seal Capture Implementation | **A. PASS / capability IMPLEMENTED** (`1effc56`); real Class A artifact **NOT FOUND** |
-| Current | Bounded real PRE_MATCH capture verification | **B. BLOCKED** — genuine live upcoming fixture unavailable (Postgres/migration OK on 2026-09-13 retry); see `REAL_PREMATCH_CAPTURE_VERIFICATION.md` |
+| 9 | China Sports Lottery architecture compatibility review | **A. PASS** — existing architecture can support; see `CHINA_SPORTS_LOTTERY_WEB_MARKET_INTELLIGENCE_SOURCE_STRATEGY_ARCHITECTURE_COMPATIBILITY_REVIEW.md` |
+| 10 | China Sports Lottery fixture authority + multi-source Evidence implementation gate | **A. READY** — PVS-4 bounded sprint authorized pending human gate review; see `CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md` |
+| Pending | Bounded real PRE_MATCH capture verification (product-aligned) | **Not rerun** — prior attempt **B. BLOCKED** on API-Football catalog; superseded fixture authority; retry after **PVS-4** |
 
 ### Controlled fixture implementation evidence
 
@@ -310,10 +316,9 @@ that conclusion does not authorize the decoder/domain changes.
 - **Objective:** prove a real production PRE_MATCH run writes a durable Class A
   row before kickoff. Only then may `authentic_prematch_seal` become FOUND.
 - **Exit condition:** `REAL_PREMATCH_CAPTURE_VERIFICATION.md`.
-- **Blocking condition (latest retry):** live Football Data catalog cannot
-  supply a genuine upcoming current-season fixture (`usedRecordedFallback:
-  true`; entitlement gap per PVS-3.2). Postgres + migration path demonstrated
-  locally 2026-09-13. No fixture was fabricated.
+- **Blocking condition (latest retry):** verification recipe assumed API-Football
+  upcoming catalog (obsolete for product). Postgres path demonstrated 2026-09-13.
+  **Product-aligned retry** requires PVS-4 lottery fixture path (gate §11).
 - **Does not authorize:** backfill, replay-as-original, Class B promotion, or
   `production_historical_intake_authorized = true`.
 
@@ -453,7 +458,9 @@ Future Agents must not:
 | Historical Evaluation Intake Implementation Planning / Final Gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Minimum intake production boundary; schema/idempotency/Actual/replay freeze | **B. BLOCKED** | Does not authorize intake implementation |
 | Authentic PRE_MATCH Seal Capture Planning / Gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | How to create/store original PRE_MATCH seals before kickoff | **A. READY** (planning); capture sprint authorized | Does not authorize Intake or Class A admission |
 | Authentic PRE_MATCH Seal Capture Implementation Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md` | Capture capability, hashes, cutoff, postgres authority | **A. PASS** (capability); real artifact **NOT FOUND** | Does not set `authentic_prematch_seal=FOUND` |
-| Real PRE_MATCH Capture Verification | `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | First real Class A candidate attempt | **B. BLOCKED** — Postgres unavailable | Does not authorize Intake or admission |
+| Real PRE_MATCH Capture Verification | `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | Real Class A candidate attempt | **B. BLOCKED** — obsolete API-Football catalog recipe; retry after PVS-4 | Does not authorize Intake or admission |
+| China Sports Lottery architecture compatibility | `docs/sprints/PREDICTION_VERTICAL_SLICE/CHINA_SPORTS_LOTTERY_WEB_MARKET_INTELLIGENCE_SOURCE_STRATEGY_ARCHITECTURE_COMPATIBILITY_REVIEW.md` | Product-aligned input strategy | **A. PASS** (planning) | Does not authorize implementation |
+| China Sports Lottery fixture authority gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md` | PVS-4 bounded implementation authorization | **A. READY** (pending human review) | Does not authorize Intake or Class A admission |
 
 The latest repository Review and implementation evidence define the current
 workstream status. Sprint reports remain evidence records and do not override
@@ -722,16 +729,18 @@ Sprint reports are evidence records, not replacements for canonical architecture
 
 ## Historical Delivery Context (Not Current Execution Order)
 
-The only current `NEXT_ACTION` is **restore durable Postgres and retry real
-PRE_MATCH capture verification**. Historical Evaluation Intake remains
-**C. BLOCKED**. The material below preserves older delivery context and
-deferred options; it does not authorize a different next task.
+The current `NEXT_ACTION` is **human review of the China Sports Lottery
+fixture authority implementation gate**, then bounded **PVS-4** implementation
+when approved. Class A PRE_MATCH verification retries use the **lottery-first**
+recipe after PVS-4. Historical Evaluation Intake remains **C. BLOCKED**. The
+material below preserves older delivery context; API-Football entitlement is
+**not** the primary next product action.
 
 **P2K-CAL-2 Projection λ & Goal Distribution Calibration** **COMPLETED**: governed NON-DEFAULT candidate `projection.v3.calibration.candidate1` (`checksum=9b3b4022`, `productionPromoted=false`); percent-scale normalization fix; feature-group λ governance; optional Dixon–Coles ρ=−0.10; offline Expansion V2 replay (range4Plus 27→0 predicted; Draw winner 0→10; mean λ 5.7→1.9); production default unchanged; **NOT PROMOTED** (`docs/sprints/P2K/P2K_CAL_2_PROJECTION_LAMBDA_CALIBRATION_COMPLETION_REPORT.md`). **P2K-CAL-1 Projection / Match Script Calibration Diagnosis Plan** **COMPLETED**: planning-only audit of λ / Goal Range / Draw / Match Script math chain (`docs/sprints/P2K/P2K_CAL_1_PROJECTION_MATCH_SCRIPT_CALIBRATION_DIAGNOSIS_PLAN.md`); root cause = attack-group `unitCentered` saturation + high base EG; three calibration directions (analysis only); validation strategy for future round; no production code or durable artifact changes; no promotion. **P2K-G3 Validation Prediction Distribution Audit** **COMPLETED**: diagnosis-only audit of Expansion V2 30 members (`docs/sprints/P2K/P2K_G3_VALIDATION_PREDICTION_DISTRIBUTION_AUDIT.md`); Candidate C reaches Match Script→Projection (scripts/λ/probs differ 30/30) but discrete winner/goal-range never flip (0/30); explains P2K-G discrete A/C identity; `range4Plus=27/30` / `Draw=0/30` are Projection/λ/argmax properties; no durable artifact mutation; no calibration; no promotion. **P2K-G Validation Expansion V2 Population Evaluation** **COMPLETED**: `eval.p2k.g.validation.expansion.v2.analyzematch.v1` on SEALED cohort `p2k.e.validation.expansion.v2.analyzematch.v1` using durable A/C runs `run.p2k.f.validation.expansion.v2.analyzematch.v1.a` / `.c`; paired sample 30; checksum `b65010c9eaf25b1946be7ddb8cd5b8489b5b0fc35c76f3ab7d1e81efebedd2f5`; descriptive only; A2 sample meets minimum qualified threshold but that is **not** Candidate C superiority; PostgreSQL round-trip PASS. **P2K-F Validation Expansion V2 Sealed Cohort Offline Replay Run** **COMPLETED**: Baseline A (30/0) and Candidate C (30/0); pairedSuccessfulCount 30, sameHistoricalContext 30/30, identity 30/30. **P2K-E Validation Expansion V2 Sealed Replay Cohort** **COMPLETED**: SEALED cohort `p2k.e.validation.expansion.v2.analyzematch.v1` (30 members; digest `03b52d71078dee7746796fd1de722e22e2a66382ea7202556299990a5714e997`). **P2K-G2-A Validation Dataset Diversity Expansion** **COMPLETED**: 30 new Projection-v2 History+Sidecar rows (`match-p2kg-expansion-v2-*`). Prior recovery-v2 / bootstrap-v1 cohorts and evaluations remain SEALED/untouched. Candidate C remains NON-DEFAULT and is **not** auto-promoted. Production Match Script unchanged. P2K-H not authorized.
 
 Deferred follow-ons (not the current `NEXT_ACTION`; each requires its own gate):
 
-1. Human decision on API-Football current-season entitlement; if supplied, rerun live coverage/smoke validation against dynamically selected fixtures;
+1. ~~API-Football current-season entitlement as gate to Class A~~ — **superseded** by lottery-first product direction; API-Football remains optional supplemental football-data adapter;
 2. If explicitly authorized, run the bounded PVS-3.4 coverage probe before buying or integrating any additional provider;
 3. Keep The Odds API optional and supporting-only; do not treat recorded `fas_market_depth` fields as live vendor capability;
 4. Human governance on calibration candidate1 promotion (remain NON-DEFAULT) or separately authorize P2K-CAL-3 tuning;

@@ -12,7 +12,7 @@ authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: RESTORE_DURABLE_POSTGRES_AND_RETRY_REAL_PREMATCH_CAPTURE_VERIFICATION
+next_action: OBTAIN_API_FOOTBALL_CURRENT_SEASON_ENTITLEMENT_AND_RETRY_REAL_PREMATCH_CAPTURE_VERIFICATION
 next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
@@ -49,18 +49,21 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-07 — Bounded real PRE_MATCH capture verification
-  **B. BLOCKED** (durable Postgres unavailable; no candidate Class A row).
-  Capture **capability** remains implemented (commit `1effc56`);
-  `authentic_prematch_seal` remains **NOT_FOUND**; Historical Evaluation
-  Intake remains **C. BLOCKED**.
+- Last updated: 2026-09-13 — Bounded real PRE_MATCH capture verification
+  **retry B. BLOCKED** (Postgres restored + migrations applied; **no genuine
+  live upcoming fixture** — `usedRecordedFallback: true`, zero future
+  kickoffs; no candidate Class A row). Capture **capability** remains
+  implemented (commit `1effc56`); `authentic_prematch_seal` remains
+  **NOT_FOUND**; Historical Evaluation Intake remains **C. BLOCKED**.
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_COMPLETED**.
 - Current gate:
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION**.
 - Current next action:
-  **Restore durable Postgres and retry real PRE_MATCH capture verification**.
+  **Obtain API-Football current-season entitlement and retry real PRE_MATCH
+  capture verification** (durable Postgres path demonstrated locally on
+  2026-09-13; see `REAL_PREMATCH_CAPTURE_VERIFICATION.md`).
 - Current production sprint: none active (verification blocked on runtime).
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
@@ -176,7 +179,7 @@ historical authenticity unless the cited evidence explicitly proves it.
 | 6 | Historical Evaluation Intake Implementation Planning / Final Gate | **COMPLETED / B. BLOCKED**; contracts frozen; production intake **not** authorized |
 | 7 | Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate | **COMPLETED / A. READY**; capture sprint was authorized and implemented |
 | 8 | Authentic PRE_MATCH Seal Capture Implementation | **A. PASS / capability IMPLEMENTED** (`1effc56`); real Class A artifact **NOT FOUND** |
-| Current | Bounded real PRE_MATCH capture verification | **B. BLOCKED** — durable Postgres unavailable; no candidate Class A artifact; see `REAL_PREMATCH_CAPTURE_VERIFICATION.md` |
+| Current | Bounded real PRE_MATCH capture verification | **B. BLOCKED** — genuine live upcoming fixture unavailable (Postgres/migration OK on 2026-09-13 retry); see `REAL_PREMATCH_CAPTURE_VERIFICATION.md` |
 
 ### Controlled fixture implementation evidence
 
@@ -307,9 +310,10 @@ that conclusion does not authorize the decoder/domain changes.
 - **Objective:** prove a real production PRE_MATCH run writes a durable Class A
   row before kickoff. Only then may `authentic_prematch_seal` become FOUND.
 - **Exit condition:** `REAL_PREMATCH_CAPTURE_VERIFICATION.md`.
-- **Blocking condition:** Postgres not reachable; `DATABASE_URL` unset;
-  `EVIDENCE_REPOSITORY_MODE` defaults to memory; Football Data defaults to
-  recorded; API not running. No fixture was fabricated.
+- **Blocking condition (latest retry):** live Football Data catalog cannot
+  supply a genuine upcoming current-season fixture (`usedRecordedFallback:
+  true`; entitlement gap per PVS-3.2). Postgres + migration path demonstrated
+  locally 2026-09-13. No fixture was fabricated.
 - **Does not authorize:** backfill, replay-as-original, Class B promotion, or
   `production_historical_intake_authorized = true`.
 

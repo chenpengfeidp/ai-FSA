@@ -143,7 +143,8 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Intake 实现规划终局门禁；**B. BLOCKED**。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | 原版 PRE_MATCH 封印捕获与存储权威规划门禁；**A. READY**（仅封印捕获冲刺；非 Intake）。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md` | 封印捕获实现审查；**A. PASS**（capability；真实 Class A 工件仍 NOT FOUND）。 |
-| `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | 真实 PRE_MATCH 封印捕获验证；**B. BLOCKED**（Postgres 不可用；无候选 Class A）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | 真实 PRE_MATCH 封印捕获验证；**B. BLOCKED**（2026-09-13 重试：Postgres OK，live 赛程不可用；无候选 Class A）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/CHINA_SPORTS_LOTTERY_WEB_MARKET_INTELLIGENCE_SOURCE_STRATEGY_ARCHITECTURE_COMPATIBILITY_REVIEW.md` | 竞彩赛程 + 多源网页/市场情报 — 架构兼容性规划评审；**A. 现有架构可支撑**（仅规划，无实现）。 |
 
 ### 3.5 Milestone 3A / Sprint 历史（Historical evidence）
 

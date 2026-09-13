@@ -1,27 +1,33 @@
 # Real PRE_MATCH Capture Verification
 
-## 0. Recommendation
+## 0. Recommendation (latest)
 
 | Field | Result |
 |---|---|
-| Review type | Bounded real PRE_MATCH capture verification |
-| Date | 2026-09-07 |
-| Clock at verification | `2026-09-07T10:05:18Z` (UTC; host `date -u`) |
-| Implementation commit | `1effc562a7ae1cde34dd8764d3ca4ea77159dd97` (`1effc56`) |
-| Worktree | Clean; `main` at `1effc56`, tracking `origin/main` |
+| Review type | Bounded real PRE_MATCH capture verification (retry) |
+| Date | 2026-09-13 |
+| Clock at verification | `2026-09-13T09:38:04Z` (API start); catalog probe `2026-09-13T09:39:31Z` |
+| Repository HEAD | `4641b347c2d4cf4845607c51da31ce056f9a3f04` (`4641b34`) |
+| Implementation commit (capability) | `1effc562a7ae1cde34dd8764d3ca4ea77159dd97` (`1effc56`) |
+| Worktree | Clean; `main` @ `4641b34`, tracking `origin/main` |
 | Production code changed in this task | **No** |
 | Candidate authentic Class A seal | **Does not exist** |
 | Historical Evaluation Intake | **C. BLOCKED** / `production_historical_intake_authorized = false` |
 | Primary recommendation | **B. BLOCKED — REAL PRE_MATCH CAPTURE NOT ESTABLISHED** |
 
-Primary blocker: **durable Postgres authority is unavailable** in the current
-environment. Secondary blockers prevent a genuine live upcoming fixture from
-being selected even if Postgres were later started without additional
-configuration.
+**First hard blocker (this retry):**
+**B. BLOCKED — GENUINE LIVE PRE_MATCH FIXTURE UNAVAILABLE**
 
-This verification did **not** invent a match, start Compose to force a pass,
-apply a migration against a missing database, call in-memory seal helpers, or
-treat recorded/cassette/Class B data as Class A.
+Postgres durable authority was restored and migrations applied in this retry.
+No genuine upcoming live Football Data fixture could be selected; the Match
+Center board returned explicit recorded fallback with zero future kickoffs.
+
+Prior attempt (2026-09-07) failed earlier on Postgres unavailable; see
+[Appendix A](#appendix-a--2026-09-07-attempt-postgres-unavailable).
+
+This verification did **not** invent a match, analyze a fallback row as Class A,
+call seal capture directly, use memory storage as evidence, or authorize
+Historical Evaluation Intake.
 
 ---
 
@@ -30,21 +36,20 @@ treat recorded/cassette/Class B data as Class A.
 ```text
 1effc562a7ae1cde34dd8764d3ca4ea77159dd97
 feat(statistics): 添加 PRE_MATCH 封印捕获与持久化
-AuthorDate: Mon Sep 7 18:02:41 2026 +0800
 ```
 
-Inspected on `main` (not the review document alone). The commit contains:
+Inspected on `main` (ancestor of `4641b34`). Baseline unchanged:
 
 - production `fas-json-canonical.v1` + dual hashes;
 - Prisma model/table `prematch_prediction_seal_items`;
+- migration `20260907120000_prematch_prediction_seal`;
 - cutoff-governed `AnalyzeMatchUseCase`;
-- auto-capture in `GenerateMatchReportUseCase` **before** `ReportBuilder.build`;
-- API wiring: `IsoClock` always; Prisma seal repository **only when**
+- auto-capture in `GenerateMatchReportUseCase` before `ReportBuilder.build`;
+- API: `IsoClock`; `PrismaPrematchPredictionSealRepository` when
   `EVIDENCE_REPOSITORY_MODE=postgres`.
 
-Memory API mode returns `undefined` from
-`createApiPrematchPredictionSealRepository()` — committed behavior; Class A
-cannot be claimed from that path.
+No drift found that invalidates
+`AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md`.
 
 ---
 
@@ -53,22 +58,17 @@ cannot be claimed from that path.
 | Item | Observed (no secrets) |
 |---|---|
 | Host | local Darwin; repo `/Users/mico/Desktop/football-analysis-system` |
-| Git | `main` @ `1effc56` = `origin/main`; clean worktree |
-| `.env` | present (uncommitted; values not copied here) |
-| `DATABASE_URL` | **absent** |
-| `EVIDENCE_REPOSITORY_MODE` | **unset** → code default **`memory`** |
-| `DATABASE_CLIENT_MODE` | **unset** |
-| `FOOTBALL_DATA_PROVIDER_MODE` | **unset** → code default **`recorded`** |
-| `ODDS_PROVIDER_MODE` | `live` (Odds is optional overlay, not Match Center facts when Football Data is recorded) |
-| `API_FOOTBALL_KEY` | present (length recorded only; not printed) |
-| `THE_ODDS_API_KEY` | present (length recorded only; not printed) |
-| `pnpm dev:api` / port 3001 | **closed** |
-| web port 3000 | **closed** |
-| Docker CLI | `/usr/local/bin/docker` present |
-| Docker daemon | **unavailable** (`docker info` failed) |
-| Compose postgres | **not running** |
-
-No API process was started for this verification.
+| Git | `main` @ `4641b34` = `origin/main`; clean worktree |
+| `.env` | present (uncommitted); `API_FOOTBALL_KEY` set (length 32); `DATABASE_URL` **unset in file** |
+| Runtime `DATABASE_URL` (verification) | set for session only: `postgresql://fas_local@127.0.0.1:5432/fas_local` (password not recorded) |
+| `EVIDENCE_REPOSITORY_MODE` | `postgres` (verification override) |
+| `DATABASE_CLIENT_MODE` | `live` (verification override) |
+| `FOOTBALL_DATA_PROVIDER_MODE` | `live` (verification override) |
+| `ODDS_PROVIDER_MODE` | `recorded` (from `.env` / default) |
+| Docker | Desktop started for verification; daemon available after start |
+| Postgres | `postgres:17-alpine` container `fas-postgres-verify`, `127.0.0.1:5432` → healthy |
+| API | `pnpm dev:api` on `http://127.0.0.1:3001`; `/health/ready` → `ready` |
+| `GET /api/providers/connected` | `football:api-sports` **connected: true** |
 
 ---
 
@@ -76,16 +76,15 @@ No API process was started for this verification.
 
 | Check | Result |
 |---|---|
-| TCP `127.0.0.1:5432` | **closed** (`nc`) |
-| `pg_isready` | client not installed; port still closed |
-| `DATABASE_URL` | **not set** — no target DSN to connect |
-| Prisma client connect | **not attempted** (no URL, no listener) |
-| Production repository insert/read | **not possible** |
-| Process reload/read-back | **not possible** |
+| TCP `127.0.0.1:5432` | **open** |
+| `pg_isready` (in container) | **accepting connections** |
+| Prisma `migrate deploy` | **success** (7 migrations including `20260907120000_prematch_prediction_seal`) |
+| Table `prematch_prediction_seal_items` | **exists** |
+| Row count before capture | **0** |
+| `PrismaPrematchPredictionSealRepository` | **wired** via `EVIDENCE_REPOSITORY_MODE=postgres` (no capture run) |
 
-In-memory repository was **not** used as substitute evidence.
-
-**Blocker label:** `B. BLOCKED — DURABLE POSTGRES AUTHORITY UNAVAILABLE`
+**This retry:** durable Postgres authority **available** for the verification
+session. Not used as Class A evidence without a governed PRE_MATCH capture run.
 
 ---
 
@@ -93,195 +92,191 @@ In-memory repository was **not** used as substitute evidence.
 
 | Check | Result |
 |---|---|
-| Migration file in commit `1effc56` | **exists**: `packages/database/prisma/migrations/20260907120000_prematch_prediction_seal/migration.sql` |
-| Table definition | `prematch_prediction_seal_items` with unique `original_seal_id` |
-| Applied to a live database | **unknown / not applied in this environment** — cannot query `_prisma_migrations` without a connection |
-| Table exists in live Postgres | **not verified** (no Postgres) |
-
-A committed SQL file is not a live applied migration.
+| Migration `20260907120000_prematch_prediction_seal` | **applied** (`pnpm prisma:migrate` / `migrate deploy`) |
+| `_prisma_migrations` | 7 migrations applied in fresh local volume |
+| Live table | **verified** via `psql` `\dt` |
 
 ---
 
-## 5. Exact selected fixture
+## 5. Live provider / current-season status
+
+| Check | Result |
+|---|---|
+| Football Data mode at runtime | `live` (`meta.footballDataProviderMode`) |
+| Credential | key present; provider **connected** in `/api/providers/connected` |
+| Match Center catalog | `GET /api/matches/upcoming` → `ok: true` |
+| `meta.usedRecordedFallback` | **`true`** |
+| `meta.scheduleSource` | `football-data` |
+| Eligible live upcoming rows | **0** (`futureCount` with wall clock `2026-09-13T09:39:31Z`) |
+| Row provenance on board | API-Football-shaped rows: `providerMethod: recorded-snapshot`; additional `providerSource: fixture` seeds |
+| Max kickoff on board | **before** verification clock (all past) |
+
+**Entitlement blocker (consistent with PVS-3.2):** live API-Football catalog
+does not supply a genuine current-season upcoming fixture; production falls
+back to recorded snapshots explicitly. Prior sprint evidence documented plan
+denial for **2026** season (`Free plans do not have access to this season,
+try from 2022 to 2024.`). This retry did not re-print provider payloads or
+account identity.
+
+**Blocker label:** `B. BLOCKED — GENUINE LIVE PRE_MATCH FIXTURE UNAVAILABLE`
+
+---
+
+## 6. Exact selected fixture
 
 **None.**
 
-No genuine upcoming fixture was selected. Prerequisites A–J failed before
-fixture selection. Inventing `matchId` / kickoff, using recorded cassettes,
-Class B fixtures, demo population, or yesterday’s completed match is forbidden.
+Fixture selection stopped at prerequisite 7. No `POST /api/analyze` was executed.
 
 ---
 
-## 6. Exact kickoff
+## 7. Exact kickoff
 
-**Not applicable.** No fixture selected.
-
-Clock at verification: `2026-09-07T10:05:18Z`. Cannot compare to a real
-kickoff without a real fixture.
+**Not applicable.**
 
 ---
 
-## 7. Exact execution command / API request
+## 8. Exact execution command / API request
 
-**Not executed.**
+Postgres restore (local, credentials aligned with `.env.example` placeholders):
 
-The production path that would have been used, had prerequisites existed:
-
-```text
-EVIDENCE_REPOSITORY_MODE=postgres
-DATABASE_CLIENT_MODE=live
-FOOTBALL_DATA_PROVIDER_MODE=live
-→ GET /api/matches/upcoming   (live catalog, kickoff in the future)
-→ POST /api/analyze/match/:matchId
-   or POST /api/analyze { homeTeam, awayTeam, optional date }
+```bash
+docker run -d --name fas-postgres-verify \
+  -p 127.0.0.1:5432:5432 \
+  -e POSTGRES_DB=fas_local \
+  -e POSTGRES_USER=fas_local \
+  -e POSTGRES_PASSWORD=<local-only> \
+  postgres:17-alpine
 ```
 
-Owner: `GenerateMatchReportUseCase` (auto-capture before `ReportBuilder.build`).
+```bash
+DATABASE_URL="postgresql://fas_local:<local-only>@127.0.0.1:5432/fas_local" \
+  pnpm prisma:migrate
+```
 
-This verification did not POST analyze, did not call
-`capturePrematchPredictionSeal` from a script, and did not write rows by hand.
+Production API (verification overrides; `.env` sourced for keys only):
 
----
+```bash
+DATABASE_URL="postgresql://fas_local:<local-only>@127.0.0.1:5432/fas_local" \
+DATABASE_CLIENT_MODE=live \
+EVIDENCE_REPOSITORY_MODE=postgres \
+FOOTBALL_DATA_PROVIDER_MODE=live \
+ODDS_PROVIDER_MODE=recorded \
+PORT=3001 \
+pnpm dev:api
+```
 
-## 8–10. analysisTime / analysisCutoff / sealedAt
+Catalog probe (executed):
 
-**Not captured.** No production run.
+```http
+GET http://127.0.0.1:3001/api/matches/upcoming
+```
 
----
-
-## 11. Evidence count
-
-**Not captured.**
-
----
-
-## 12. max Evidence.collectedAt
-
-**Not captured.**
-
----
-
-## 13. MATCH_RESULT count
-
-**Not captured.** No governed PRE_MATCH evidenceSet was loaded.
+Analyze / seal capture path **not executed** (no qualifying fixture).
 
 ---
 
-## 14–16. originalSealId / sealIdentityHash / contentSha256
+## 9–16. Temporal, Evidence, hashes, classification
 
-**None.** No persisted artifact.
+**Not captured.** No governed PRE_MATCH production run.
 
-Independent hash recomputation was not performed because there is no stored
-`sealIdentity` / `contentSha256` to authenticate.
-
----
-
-## 17. Persisted classification
-
-**None.** Required Class A fields were not read from Postgres because no row
-exists in this environment.
-
----
-
-## 18. sourceAuthority
-
-**Not observed on a persisted row.**
-
-Committed production code would set
-`prisma.prematch_prediction_seal_items` only after a successful Prisma insert.
-That path was not reachable (`EVIDENCE_REPOSITORY_MODE` default memory + no
-Postgres).
+| Field | Value |
+|---|---|
+| analysisTime | — |
+| analysisCutoff | — |
+| sealedAt | — |
+| Evidence count | — |
+| max `Evidence.collectedAt` | — |
+| MATCH_RESULT count | — |
+| originalSealId | — |
+| sealIdentityHash | — |
+| contentSha256 | — |
+| Persisted classification | — |
+| Postgres row evidence | **0 rows** |
 
 ---
 
-## 19. Postgres row evidence
+## 17. Reload / read-back evidence
 
-**Zero rows inspected.** No connection, no table probe, no `SELECT`.
-
----
-
-## 20. Reload / read-back evidence
-
-**Not performed.** Requires a durable write first.
+**Not performed.** No durable seal write.
 
 ---
 
-## 21. Retry / idempotency evidence
+## 18. Retry / idempotency evidence
 
-**Skipped.** No first write; retry would not be a PRE_MATCH production retry.
-
----
-
-## 22. Deviations
-
-None from the verification contract:
-
-- did not fabricate a match;
-- did not start Docker/Compose to manufacture Postgres for a forced PASS;
-- did not switch env to recorded/cassette and call it real-world;
-- did not use memory seal repository;
-- did not modify production code;
-- did not backfill or backdate.
-
-Runtime config deviations **relative to Class A capture requirements** (current
-`.env` / defaults, not code defects):
-
-1. Postgres not running; `DATABASE_URL` unset.
-2. Persistence mode defaults to **memory** → seal repository **not wired**.
-3. Football Data mode defaults to **recorded** → cassette/demo schedule, not a
-   live upcoming catalog.
-4. API HTTP surface not running (ports 3001/3000 closed).
-5. Docker daemon unavailable, so Compose postgres cannot be assumed present.
-
-These are environment/runtime gaps, not newly discovered production-code
-defects in commit `1effc56`. No bounded fix sprint is indicated for seal
-capture logic from this run.
+**Skipped.** No first capture.
 
 ---
 
-## 23. Blockers
+## 19. Deviations
 
-Required checklist:
+- Started Docker Desktop when daemon was initially stopped (runtime restoration).
+- Used a one-off `postgres:17-alpine` container with host port `5432` and
+  `.env.example` database/user/db names so host `pnpm prisma:migrate` and
+  `pnpm dev:api` could reach Postgres (Compose postgres service publishes no
+  host port per README).
+- Did **not** commit `.env` changes; session-only env overrides for verification.
+- Did **not** analyze fallback or fixture-seed rows.
 
-| ID | Prerequisite | Result |
+No production-code defects discovered in this retry.
+
+---
+
+## 20. Blockers (checklist)
+
+| ID | Prerequisite | Result (2026-09-13 retry) |
 |---|---|---|
-| A | Real upcoming football fixture | **MISSING** — not selected; live catalog not queried |
-| B | kickoff strictly in the future | **MISSING** |
+| A | Real upcoming football fixture | **FAIL** — none on live catalog |
+| B | kickoff strictly in the future | **FAIL** — 0 future rows |
 | C | exact real matchId | **MISSING** |
 | D | exact home/away orientation | **MISSING** |
 | E | real competition / season / kickoff identity | **MISSING** |
-| F | real PRE_MATCH Evidence via production pipeline | **MISSING** |
-| G | production Postgres connectivity | **FAIL** — port closed, no DSN |
-| H | PrematchPredictionSealItem migration applied | **UNVERIFIED / unavailable** |
-| I | production Prisma seal repository wired | **FAIL** — memory default, no postgres mode |
-| J | injected real clock | **NOT EXERCISED** (API not running; `IsoClock` exists in code only) |
-| K | no MATCH_RESULT / Actual on governed path | **NOT EXERCISED** |
-| L | source not Class B / demo / fixture / replay / backfill | **FAIL to establish** — current Football Data default is `recorded` |
-
-PASS requires all of A–L plus durable write, checksum, and reload. Anything
-less is BLOCKED.
+| F | real PRE_MATCH Evidence via production pipeline | **NOT RUN** |
+| G | production Postgres connectivity | **PASS** (this retry) |
+| H | migration applied | **PASS** |
+| I | Prisma seal repository wired | **PASS** (`postgres` mode) |
+| J | injected real clock | **NOT EXERCISED** (no analyze) |
+| K | no MATCH_RESULT / Actual | **NOT EXERCISED** |
+| L | source not Class B / demo / fixture / replay | **FAIL** — board is explicit recorded fallback + fixture seeds |
 
 ---
 
-## 24. Final recommendation
+## 21. Final recommendation
 
 **B. BLOCKED — REAL PRE_MATCH CAPTURE NOT ESTABLISHED**
 
-Narrower label for the first hard stop:
+Narrower label for the **first hard stop on the capture path** (after Postgres
+restored):
 
-**B. BLOCKED — DURABLE POSTGRES AUTHORITY UNAVAILABLE**
+**B. BLOCKED — GENUINE LIVE PRE_MATCH FIXTURE UNAVAILABLE**
 
 `authentic_prematch_seal` remains **NOT_FOUND**.
 
-This is **not** Artifact Admission. Historical Evaluation Intake remains
-**C. BLOCKED**. `production_historical_intake_authorized` remains **false**.
+Historical Evaluation Intake remains **C. BLOCKED**.
+`production_historical_intake_authorized` remains **false**.
 
 ### Exact next Governance action
 
-Restore a **live durable Postgres** (`DATABASE_URL` + applied
-`20260907120000_prematch_prediction_seal` migration +
-`EVIDENCE_REPOSITORY_MODE=postgres`), run the **production API** with
-**live** Football Data against a **genuine upcoming** fixture (kickoff in the
-future), then **retry this same verification**. Do **not** implement Historical
-Evaluation Intake. Do **not** treat recorded cassettes or Class B fixtures as
-Class A.
+1. Obtain API-Football **current-season** entitlement that returns genuine
+   upcoming fixtures (not recorded fallback).
+2. Retry bounded real PRE_MATCH capture verification with the same production
+   path (`EVIDENCE_REPOSITORY_MODE=postgres`, live Football Data, one future
+   fixture, `POST /api/analyze/match/:matchId` or governed team analyze).
+3. **Do not** implement Historical Evaluation Intake until a candidate Class A
+   seal exists and completes **Artifact Admission Review** (separate gate).
+
+---
+
+## Appendix A — 2026-09-07 attempt (Postgres unavailable)
+
+| Field | Result |
+|---|---|
+| Date | 2026-09-07 |
+| HEAD | `1effc56` |
+| Primary blocker | **B. BLOCKED — DURABLE POSTGRES AUTHORITY UNAVAILABLE** |
+| Postgres | port closed; `DATABASE_URL` unset; Docker daemon unavailable |
+| Fixture | not selected |
+| Analyze | not executed |
+
+That attempt is superseded for Postgres/migration status by the 2026-09-13
+retry above; capture remains blocked on live fixture entitlement.

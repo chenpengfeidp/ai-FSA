@@ -296,12 +296,24 @@ importers:
         specifier: workspace:*
         version: link:../match
     devDependencies:
+      '@fas/analysis':
+        specifier: workspace:*
+        version: link:../analysis
+      '@fas/evidence-query':
+        specifier: workspace:*
+        version: link:../evidence-query
+      '@fas/feature':
+        specifier: workspace:*
+        version: link:../feature
       '@fas/provider-fixture':
         specifier: workspace:*
         version: link:../provider-fixture
       '@fas/provider-odds':
         specifier: workspace:*
         version: link:../provider-odds
+      '@fas/rule':
+        specifier: workspace:*
+        version: link:../rule
       '@fas/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig

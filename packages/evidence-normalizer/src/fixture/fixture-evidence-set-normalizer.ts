@@ -1815,6 +1815,31 @@ export function normalizeFixtureEvidenceSet(
     evidences.push(normalized.value);
   }
 
+  if (input.additionalOdds !== undefined) {
+    if (!Array.isArray(input.additionalOdds)) {
+      return failure(
+        "INVALID_FIELD",
+        "additionalOdds must be an array when present.",
+        "additionalOdds",
+      );
+    }
+
+    for (let index = 0; index < input.additionalOdds.length; index += 1) {
+      const normalized = parseOdds(
+        input.additionalOdds[index],
+        matchId,
+        context.collectedAt,
+        matchInfo.value.eventTime,
+      );
+
+      if (!normalized.ok) {
+        return normalized;
+      }
+
+      evidences.push(normalized.value);
+    }
+  }
+
   if (input.matchResult !== undefined) {
     const normalized = parseMatchResult(
       input.matchResult,

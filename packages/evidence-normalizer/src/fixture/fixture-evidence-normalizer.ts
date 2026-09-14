@@ -209,6 +209,33 @@ export function normalizeFixtureEvidence(
       overlay?.sourceId ?? context.sourceId ?? `fixture-${raw.matchId}`;
     const method = overlay?.method ?? "fixture";
     const refereePayload = parseOptionalRefereePayload(input);
+    const record = isRecord(input) ? input : {};
+    const competitionId =
+      typeof record.competitionId === "string" &&
+      record.competitionId.trim().length > 0
+        ? record.competitionId.trim()
+        : undefined;
+    const competitionName =
+      typeof record.competitionName === "string" &&
+      record.competitionName.trim().length > 0
+        ? record.competitionName.trim()
+        : undefined;
+    const season =
+      typeof record.season === "string" && record.season.trim().length > 0
+        ? record.season.trim()
+        : typeof record.season === "number" && Number.isFinite(record.season)
+          ? String(record.season)
+          : undefined;
+    const scheduleSource =
+      typeof record.scheduleSource === "string" &&
+      record.scheduleSource.trim().length > 0
+        ? record.scheduleSource.trim()
+        : undefined;
+    const fixtureAuthority =
+      typeof record.fixtureAuthority === "string" &&
+      record.fixtureAuthority.trim().length > 0
+        ? record.fixtureAuthority.trim()
+        : undefined;
     const evidence = createEvidence({
       id: context.evidenceId ?? `evidence-${source}-${raw.matchId}`,
       source,
@@ -229,6 +256,11 @@ export function normalizeFixtureEvidence(
         home: raw.home,
         away: raw.away,
         kickoff: raw.kickoff,
+        ...(competitionId === undefined ? {} : { competitionId }),
+        ...(competitionName === undefined ? {} : { competitionName }),
+        ...(season === undefined ? {} : { season }),
+        ...(scheduleSource === undefined ? {} : { scheduleSource }),
+        ...(fixtureAuthority === undefined ? {} : { fixtureAuthority }),
         ...(refereePayload === undefined ? {} : { referee: refereePayload }),
       },
     });

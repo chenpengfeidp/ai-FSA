@@ -3,7 +3,12 @@ import {
   resolvePinnedCalibrationArtifact,
   type ProjectionPolicyPin,
 } from "@fas/analysis";
-import { DiscoverFixtureByTeamsUseCase, ImportMatchUseCase } from "@fas/application";
+import {
+  CompositeLotteryFirstMatchProvider,
+  DiscoverFixtureByTeamsUseCase,
+  ImportMatchUseCase,
+  LotteryMatchProvider,
+} from "@fas/application";
 import { loadApiConfig } from "@fas/config";
 
 import { type EvidenceRepository, EvidenceService } from "@fas/evidence";
@@ -41,6 +46,8 @@ import {
 } from "./evidence.tokens.js";
 import { ImportController } from "./import.controller.js";
 import { IsoClock } from "./iso-clock.js";
+import { LotteryController } from "./lottery.controller.js";
+import { lotteryFixtureRegistry } from "./lottery-fixture-registry.singleton.js";
 import { MatchesController } from "./matches.controller.js";
 import { ProvidersController } from "./providers.controller.js";
 import { FootballMatchPrimerBridge } from "./football-match-primer.bridge.js";
@@ -65,6 +72,10 @@ const productionProjectionPolicyPin: ProjectionPolicyPin =
 const matchProviderWiring = createMatchProviderWiring(
   apiConfig.oddsProvider,
   apiConfig.footballDataProvider,
+);
+const lotteryAwareMatchProvider = new CompositeLotteryFirstMatchProvider(
+  new LotteryMatchProvider(lotteryFixtureRegistry),
+  matchProviderWiring.matchProvider,
 );
 const upcomingMatchesBoard = createUpcomingMatchesBoard(
   apiConfig.footballDataProvider,
@@ -92,6 +103,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     ProvidersController,
     ImportController,
     MatchesController,
+    LotteryController,
   ],
   providers: [
     {
@@ -151,7 +163,7 @@ const upcomingMatchesBoard = createUpcomingMatchesBoard(
     },
     {
       provide: matchProviderToken,
-      useValue: matchProviderWiring.matchProvider,
+      useValue: lotteryAwareMatchProvider,
     },
     {
       provide: OddsSnapshotPrimerBridge,

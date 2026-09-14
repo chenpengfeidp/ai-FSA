@@ -3,8 +3,8 @@
 ```yaml
 project: AI-FSA
 current_track: PREDICTION_VERTICAL_SLICE
-current_stage: CHINA_LOTTERY_MULTI_SOURCE_PREMATCH_PLANNING_GATE_COMPLETED
-current_gate: CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_AUTHORIZATION
+current_stage: PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_COMPLETED
+current_gate: AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION
 historical_evaluation_intake: C_BLOCKED
 authentic_prematch_seal: NOT_FOUND
 authentic_prematch_seal_capture_capability: IMPLEMENTED
@@ -12,9 +12,8 @@ authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: HUMAN_REVIEW_OF_CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_GATE
-next_production_capability: PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE
-pending_verification_gate: AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION
+next_action: RETRY_PRODUCT_ALIGNED_REAL_PREMATCH_CAPTURE_VERIFICATION
+next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
 ## Document role
@@ -50,24 +49,24 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-13 — **China Sports Lottery + multi-source PRE_MATCH
-  Evidence implementation gate** completed (**A. READY** for bounded PVS-4);
-  owner product direction reconciled (API-Football **not** mandatory fixture
-  authority). Prior PRE_MATCH verification retry remains **B. BLOCKED** on
-  obsolete API-Football catalog recipe; **pending** product-aligned Class A
-  retry after PVS-4. Seal capture capability remains implemented (`1effc56`);
-  `authentic_prematch_seal` **NOT_FOUND**; Intake **C. BLOCKED**.
+- Last updated: 2026-09-13 — **PVS-4** China Sports Lottery fixture authority +
+  multi-source PRE_MATCH Evidence **implementation PASS** (manifest intake,
+  `lottery:csl:` ids, CORE + 1X2/AH/O/U; see
+  `PVS-4_CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_REVIEW.md`). Real Class A
+  verification **NOT ATTEMPTED**; gate
+  **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** open with
+  product-aligned recipe. `authentic_prematch_seal` **NOT_FOUND**; Intake
+  **C. BLOCKED**.
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
-  **CHINA_LOTTERY_MULTI_SOURCE_PREMATCH_PLANNING_GATE_COMPLETED**.
+  **PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_COMPLETED**.
 - Current gate:
-  **CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_AUTHORIZATION**.
-- Pending verification gate (after PVS-4):
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** (product-aligned
-  recipe; see implementation gate §11).
+  lottery-first recipe).
 - Current next action:
-  **Human review of China Sports Lottery fixture authority implementation
-  gate** (`CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md`).
+  **Retry product-aligned real PRE_MATCH capture verification** (live operator
+  lottery fixture + Postgres + governed analyze; no API-Football schedule
+  authority).
 - Current production sprint: none active (verification blocked on runtime).
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
@@ -184,8 +183,9 @@ historical authenticity unless the cited evidence explicitly proves it.
 | 7 | Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate | **COMPLETED / A. READY**; capture sprint was authorized and implemented |
 | 8 | Authentic PRE_MATCH Seal Capture Implementation | **A. PASS / capability IMPLEMENTED** (`1effc56`); real Class A artifact **NOT FOUND** |
 | 9 | China Sports Lottery architecture compatibility review | **A. PASS** — existing architecture can support; see `CHINA_SPORTS_LOTTERY_WEB_MARKET_INTELLIGENCE_SOURCE_STRATEGY_ARCHITECTURE_COMPATIBILITY_REVIEW.md` |
-| 10 | China Sports Lottery fixture authority + multi-source Evidence implementation gate | **A. READY** — PVS-4 bounded sprint authorized pending human gate review; see `CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md` |
-| Pending | Bounded real PRE_MATCH capture verification (product-aligned) | **Not rerun** — prior attempt **B. BLOCKED** on API-Football catalog; superseded fixture authority; retry after **PVS-4** |
+| 10 | China Sports Lottery fixture authority + multi-source Evidence implementation gate | **A. READY** — see `CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md` |
+| 11 | PVS-4 implementation | **A. PASS** — see `PVS-4_CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_REVIEW.md` |
+| Current | Bounded real PRE_MATCH capture verification (product-aligned) | **Not rerun** — prior **B. BLOCKED** on obsolete API-Football catalog; retry with lottery path |
 
 ### Controlled fixture implementation evidence
 
@@ -460,7 +460,8 @@ Future Agents must not:
 | Authentic PRE_MATCH Seal Capture Implementation Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md` | Capture capability, hashes, cutoff, postgres authority | **A. PASS** (capability); real artifact **NOT FOUND** | Does not set `authentic_prematch_seal=FOUND` |
 | Real PRE_MATCH Capture Verification | `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | Real Class A candidate attempt | **B. BLOCKED** — obsolete API-Football catalog recipe; retry after PVS-4 | Does not authorize Intake or admission |
 | China Sports Lottery architecture compatibility | `docs/sprints/PREDICTION_VERTICAL_SLICE/CHINA_SPORTS_LOTTERY_WEB_MARKET_INTELLIGENCE_SOURCE_STRATEGY_ARCHITECTURE_COMPATIBILITY_REVIEW.md` | Product-aligned input strategy | **A. PASS** (planning) | Does not authorize implementation |
-| China Sports Lottery fixture authority gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md` | PVS-4 bounded implementation authorization | **A. READY** (pending human review) | Does not authorize Intake or Class A admission |
+| China Sports Lottery fixture authority gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md` | PVS-4 bounded implementation authorization | **A. READY** | Does not authorize Intake or Class A admission |
+| PVS-4 implementation review | `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-4_CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_REVIEW.md` | Manifest intake + CORE/market Evidence path | **A. PASS** | Does not set `authentic_prematch_seal=FOUND` |
 
 The latest repository Review and implementation evidence define the current
 workstream status. Sprint reports remain evidence records and do not override

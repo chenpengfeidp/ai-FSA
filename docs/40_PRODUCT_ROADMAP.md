@@ -71,6 +71,42 @@ Freeze architecture and prove a private, reviewable deterministic vertical slice
 
 ---
 
+## Sprint PVS-4 — China Sports Lottery fixture authority + multi-source PRE_MATCH Evidence
+
+### Goal
+
+Enable production analyze from **China Sports Lottery** daily fixture selection
+and **governed multi-source** PRE_MATCH Evidence (football facts + core markets)
+without API-Football as mandatory schedule authority.
+
+### Scope (bounded)
+
+- Operator/manifest lottery fixture intake → canonical `MATCH_INFO`
+- Governed Evidence import for CORE + 1X2 / AH / O/U (V1)
+- Existing AnalyzeMatchUseCase + authentic PRE_MATCH seal path unchanged
+- Recorded CI cassettes; no Historical Intake; no generic web scraping framework
+
+### Out of scope
+
+- Historical Evaluation Intake; Projection/Rule/Calibration changes; new Engine;
+  public sentiment; multi-book consensus engine; API-Football subscription as gate
+
+### Acceptance criteria
+
+1. Analyze succeeds on recorded PVS-4 cassette without API-Football fixture authority.
+2. Seal capture path exercisable when `EVIDENCE_REPOSITORY_MODE=postgres`.
+3. Sprint Plan/Report cite roadmap id **PVS-4** and the implementation gate document.
+
+### Dependencies
+
+- Baseline v0.2 vertical slice; authentic PRE_MATCH seal capability (`1effc56`).
+
+### Estimated complexity
+
+**M** — manifest intake + evidence bundle mapping + API wiring; no pipeline math changes.
+
+---
+
 ## Sprint F1.1 — Player Analysis, Lineup, Injury, Referee, Recent Form
 
 ### Goal

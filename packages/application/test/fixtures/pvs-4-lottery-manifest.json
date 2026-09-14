@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "lottery-fixture-manifest.v1",
+  "salesIssueId": "20260913",
+  "manifestCollectedAt": "2026-09-13T08:00:00+08:00",
+  "sourceReference": "operator-attested-daily-list",
+  "marketPrimaryBook": "lottery-official",
+  "matches": [
+    {
+      "lotteryMatchCode": "001",
+      "homeTeam": "山东泰山",
+      "awayTeam": "上海申花",
+      "competitionId": "csl:1",
+      "competitionName": "Chinese Super League",
+      "season": "2026",
+      "kickoff": "2026-10-15T19:35:00+08:00",
+      "timezone": "Asia/Shanghai",
+      "scheduleSource": "china-sports-lottery",
+      "fixtureAuthority": "lottery-official-list",
+      "collectedAt": "2026-09-13T08:00:00+08:00",
+      "teamForm": [
+        {
+          "teamSide": "home",
+          "window": 3,
+          "results": ["W", "D", "W"],
+          "goalsFor": [2, 1, 3],
+          "goalsAgainst": [0, 1, 1]
+        },
+        {
+          "teamSide": "away",
+          "window": 3,
+          "results": ["L", "W", "D"],
+          "goalsFor": [0, 2, 1],
+          "goalsAgainst": [2, 1, 1]
+        }
+      ],
+      "statistics": [
+        {
+          "teamSide": "home",
+          "windowMatches": 5,
+          "shotsForPerMatch": 12.4,
+          "shotsAgainstPerMatch": 9.1,
+          "xgForPerMatch": 1.55,
+          "xgAgainstPerMatch": 1.05
+        },
+        {
+          "teamSide": "away",
+          "windowMatches": 5,
+          "shotsForPerMatch": 11.2,
+          "shotsAgainstPerMatch": 10.3,
+          "xgForPerMatch": 1.35,
+          "xgAgainstPerMatch": 1.2
+        }
+      ],
+      "odds": {
+        "homeOdds": 2.15,
+        "drawOdds": 3.25,
+        "awayOdds": 3.1,
+        "observedAt": "2026-09-13T08:00:00+08:00",
+        "marketSource": "lottery-official",
+        "asianHandicapLine": -0.25,
+        "asianHandicapHomeOdds": 1.92,
+        "asianHandicapAwayOdds": 1.88,
+        "overUnderLine": 2.5,
+        "overOdds": 1.85,
+        "underOdds": 1.95
+      },
+      "additionalOdds": [
+        {
+          "homeOdds": 2.2,
+          "drawOdds": 3.2,
+          "awayOdds": 3.05,
+          "observedAt": "2026-09-13T08:00:00+08:00",
+          "marketSource": "reference-book-b",
+          "asianHandicapLine": -0.25,
+          "asianHandicapHomeOdds": 1.9,
+          "asianHandicapAwayOdds": 1.9,
+          "overUnderLine": 2.5,
+          "overOdds": 1.88,
+          "underOdds": 1.92
+        }
+      ]
+    }
+  ]
+}

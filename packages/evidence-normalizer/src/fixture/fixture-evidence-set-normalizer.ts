@@ -1357,6 +1357,14 @@ function parseOddsProvenanceOverlay(
   return parseProviderProvenanceOverlay(value);
 }
 
+function buildOddsEvidenceId(
+  source: string,
+  matchId: string,
+  sourceId: string,
+): string {
+  return `evidence-${source}-${matchId}-odds-${sourceId}`;
+}
+
 function parseOdds(
   value: unknown,
   matchId: string,
@@ -1421,7 +1429,7 @@ function parseOdds(
   const evidenceId =
     provenanceOverlay.value === undefined
       ? `evidence-fixture-${matchId}-odds`
-      : `evidence-${source}-${matchId}-odds`;
+      : buildOddsEvidenceId(source, matchId, sourceId);
 
   try {
     return success(

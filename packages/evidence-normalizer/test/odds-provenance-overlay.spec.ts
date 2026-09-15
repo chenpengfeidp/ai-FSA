@@ -106,7 +106,9 @@ describe("ODDS provenance overlay", () => {
 
     expect(odds?.source).toBe("the-odds-api");
     expect(odds?.sourceId).toBe("evt:pinnacle:h2h");
-    expect(odds?.id).toBe("evidence-the-odds-api-match-example-odds");
+    expect(odds?.id).toBe(
+      "evidence-the-odds-api-match-example-odds-evt:pinnacle:h2h",
+    );
     expect(odds?.provenance.method).toBe("recorded-snapshot");
     expect(odds?.payload).toEqual({
       homeOdds: 1.55,

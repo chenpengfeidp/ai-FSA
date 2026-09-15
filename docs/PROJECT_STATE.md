@@ -13,7 +13,7 @@ authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: REMEDIATE_LOTTERY_MULTI_ODDS_EVIDENCE_PERSISTENCE_AND_RETRY_ARTIFACT_ADMISSION
+next_action: RETRY_POST_REMEDIATION_PREMATCH_RECAPTURE_AND_ARTIFACT_ADMISSION
 next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
@@ -62,9 +62,9 @@ changes the active gate, or material governance change.
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** (product-aligned
   lottery-first recipe).
 - Current next action:
-  **Remediate lottery multi-ODDS Evidence persistence and retry artifact admission**
-  (engineering + re-verify; see admission review §13).
-- Current production sprint: none active (admission blocked on Evidence gap).
+  **Retry post-remediation PRE_MATCH recapture and artifact admission** (governed
+  analyze on fixed build; see remediation review).
+- Current production sprint: none active (remediation merged; recapture pending).
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
 - Fixture classification: **B — controlled synthetic**;

@@ -18,7 +18,10 @@ import {
   type Evidence,
 } from "@fas/evidence";
 import { EvidenceImportPipeline } from "@fas/evidence-import";
-import { FixtureEvidenceNormalizer } from "@fas/evidence-normalizer";
+import {
+  FixtureEvidenceNormalizer,
+  normalizeFixtureEvidenceSet,
+} from "@fas/evidence-normalizer";
 import { EvidenceQueryService } from "@fas/evidence-query";
 import { FeatureExtractor } from "@fas/feature";
 import { createMatchId } from "@fas/match";
@@ -394,5 +397,89 @@ describe("PVS-4 China Sports Lottery manifest (T01–T25)", () => {
 
   it("T25 Historical Intake remains blocked by governance (no intake API added)", () => {
     expect(true).toBe(true);
+  });
+
+  it("T26 lottery 1X2 + handicap-result both persist (remediation)", async () => {
+    const manifestPath = join(
+      fixtureDir,
+      "../../../docs/sprints/PREDICTION_VERTICAL_SLICE/verification-artifacts/2026-09-15-liv-tot-lottery-manifest.v1.json",
+    );
+    const livManifest = JSON.parse(readFileSync(manifestPath, "utf8")) as unknown;
+    const registry = new LotteryFixtureRegistry();
+    new ImportLotteryManifestUseCase(registry).execute(livManifest);
+    const matchId = buildLotteryMatchId("20260915", "周二011");
+    const providerInput = new LotteryMatchProvider(registry).getMatch(matchId);
+    const normalized = normalizeFixtureEvidenceSet(providerInput, {
+      collectedAt: "2026-09-15T14:08:00+08:00",
+    });
+
+    expect(normalized.ok).toBe(true);
+
+    if (!normalized.ok) {
+      return;
+    }
+
+    expect(normalized.value.filter((item) => item.type === "ODDS")).toHaveLength(3);
+
+    const oddsIds = normalized.value
+      .filter((item) => item.type === "ODDS")
+      .map((item) => item.id);
+
+    if (new Set(oddsIds).size !== 3) {
+      throw new Error(`duplicate ODDS ids:\n${oddsIds.join("\n")}`);
+    }
+
+    const { repository, importMatch } = setupLotteryPipeline(registry);
+    const imported = await importMatch.execute(matchId);
+
+    expect(imported.ok).toBe(true);
+
+    const odds = (await repository.findAll()).filter((item) => item.type === "ODDS");
+    const lotteryOdds = odds.filter(
+      (item) => item.source === "china-sports-lottery",
+    );
+
+    expect(odds).toHaveLength(3);
+    expect(lotteryOdds).toHaveLength(2);
+  });
+
+  it("T27 exact manifest retry does not duplicate Evidence (remediation)", async () => {
+    const manifestPath = join(
+      fixtureDir,
+      "../../../docs/sprints/PREDICTION_VERTICAL_SLICE/verification-artifacts/2026-09-15-liv-tot-lottery-manifest.v1.json",
+    );
+    const livManifest = JSON.parse(readFileSync(manifestPath, "utf8")) as unknown;
+    const registry = new LotteryFixtureRegistry();
+    new ImportLotteryManifestUseCase(registry).execute(livManifest);
+    const { repository, importMatch } = setupLotteryPipeline(registry);
+    const matchId = buildLotteryMatchId("20260915", "周二011");
+    await importMatch.execute(matchId);
+    const first = (await repository.findAll()).length;
+    await importMatch.execute(matchId);
+    const second = (await repository.findAll()).length;
+
+    expect(second).toBe(first);
+  });
+
+  it("T28 independent AH and O/U remain available (remediation)", async () => {
+    const manifestPath = join(
+      fixtureDir,
+      "../../../docs/sprints/PREDICTION_VERTICAL_SLICE/verification-artifacts/2026-09-15-liv-tot-lottery-manifest.v1.json",
+    );
+    const livManifest = JSON.parse(readFileSync(manifestPath, "utf8")) as unknown;
+    const registry = new LotteryFixtureRegistry();
+    new ImportLotteryManifestUseCase(registry).execute(livManifest);
+    const { repository, importMatch } = setupLotteryPipeline(registry);
+    await importMatch.execute(buildLotteryMatchId("20260915", "周二011"));
+    const publicRow = (await repository.findAll()).find(
+      (item) =>
+        item.type === "ODDS" &&
+        item.sourceId === "public:liverpool-tottenham-efl-cup-2026-09-15:1x2-ah-ou",
+    );
+
+    expect(publicRow?.payload).toMatchObject({
+      asianHandicapLine: -1,
+      overUnderLine: 3.5,
+    });
   });
 });

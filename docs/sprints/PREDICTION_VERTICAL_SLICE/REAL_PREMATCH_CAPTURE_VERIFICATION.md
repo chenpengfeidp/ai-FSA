@@ -4,30 +4,42 @@
 
 | Field | Result |
 |---|---|
-| Review type | Bounded real PRE_MATCH capture verification (retry) |
-| Date | 2026-09-13 |
-| Clock at verification | `2026-09-13T09:38:04Z` (API start); catalog probe `2026-09-13T09:39:31Z` |
-| Repository HEAD | `4641b347c2d4cf4845607c51da31ce056f9a3f04` (`4641b34`) |
-| Implementation commit (capability) | `1effc562a7ae1cde34dd8764d3ca4ea77159dd97` (`1effc56`) |
-| Worktree | Clean; `main` @ `4641b34`, tracking `origin/main` |
+| Review type | Product-aligned real PRE_MATCH Class A capture verification (PVS-4 lottery path) |
+| Date | 2026-09-14 |
+| Clock at verification | `2026-09-14T02:34:22Z` (repository clock); local probe `2026-09-14T02:35Z` |
+| Repository HEAD | `22eddf6fd06fd8c2c65a412240a1b6eed47bb68a` (`22eddf6`) |
+| PVS-4 implementation | **A. PASS** (manifest intake, `lottery:csl:` ids, multi-source CORE/market Evidence) |
+| Implementation commit (seal capability) | `1effc562a7ae1cde34dd8764d3ca4ea77159dd97` (`1effc56`) |
+| Worktree | Clean; `main` @ `22eddf6`, tracking `origin/main` |
 | Production code changed in this task | **No** |
 | Candidate authentic Class A seal | **Does not exist** |
 | Historical Evaluation Intake | **C. BLOCKED** / `production_historical_intake_authorized = false` |
 | Primary recommendation | **B. BLOCKED — REAL PRE_MATCH CAPTURE NOT ESTABLISHED** |
 
 **First hard blocker (this retry):**
-**B. BLOCKED — GENUINE LIVE PRE_MATCH FIXTURE UNAVAILABLE**
+**B. BLOCKED — GENUINE OPERATOR-SUPPLIED CHINA SPORTS LOTTERY FIXTURE AND PRE_MATCH EVIDENCE UNAVAILABLE**
 
-Postgres durable authority was restored and migrations applied in this retry.
-No genuine upcoming live Football Data fixture could be selected; the Match
-Center board returned explicit recorded fallback with zero future kickoffs.
+PVS-4 requires a real **operator-attested** `lottery-fixture-manifest.v1` (genuine
+竞彩 identity, future kickoff, bounded CORE + 1X2/AH/O/U). No such manifest was
+available in the verification environment. The only repository manifest sample is
+the CI cassette `packages/application/test/fixtures/pvs-4-lottery-manifest.json`,
+which this verification **must not** use (test fixture / not Class A authority).
+A read-only probe of the public Sporttery JC gateway from the verification host
+returned access denied (`禁止访问`); this task did not add generic scraping to the
+product.
 
-Prior attempt (2026-09-07) failed earlier on Postgres unavailable; see
-[Appendix A](#appendix-a--2026-09-07-attempt-postgres-unavailable).
+Postgres durable authority, seal table, and API lottery endpoints were verified.
+`POST /api/analyze/match/:lotteryMatchId` and seal capture were **not executed**
+(no qualifying fixture).
 
-This verification did **not** invent a match, analyze a fallback row as Class A,
-call seal capture directly, use memory storage as evidence, or authorize
-Historical Evaluation Intake.
+Prior attempts: 2026-09-13 API-Football catalog path
+[Appendix B](#appendix-b--2026-09-13-attempt-api-football-catalog);
+2026-09-07 Postgres unavailable [Appendix A](#appendix-a--2026-09-07-attempt-postgres-unavailable).
+
+This verification did **not** invent a match, promote the PVS-4 test cassette,
+analyze a fallback row as Class A, call seal capture directly without a governed
+run, use memory storage as Class A evidence, or authorize Historical Evaluation
+Intake.
 
 ---
 
@@ -264,6 +276,52 @@ Historical Evaluation Intake remains **C. BLOCKED**.
    fixture, `POST /api/analyze/match/:matchId` or governed team analyze).
 3. **Do not** implement Historical Evaluation Intake until a candidate Class A
    seal exists and completes **Artifact Admission Review** (separate gate).
+
+---
+
+## Appendix B — 2026-09-14 product-aligned attempt (PVS-4 lottery path)
+
+| # | Field | Value |
+|---|---|---|
+| 1 | Repository HEAD | `22eddf6fd06fd8c2c65a412240a1b6eed47bb68a` |
+| 2 | Fixture identity | **None selected** |
+| 3 | Lottery manifest | **Not submitted** (no genuine operator manifest) |
+| 4 | Canonical `matchId` | — |
+| 5 | Evidence sources | — |
+| 6 | Evidence count | — |
+| 7 | `analysisTime` | — |
+| 8 | `analysisCutoff` | — |
+| 9 | max `collectedAt` | — |
+| 10 | MATCH_RESULT count | — |
+| 11 | Actual count | — |
+| 12 | `sealedAt` | — |
+| 13 | `originalSealId` | — |
+| 14 | `sealIdentityHash` | — |
+| 15 | `contentSha256` | — |
+| 16 | Persisted row | **0 rows** in `prematch_prediction_seal_items` |
+| 17 | Reload/read-back | **Not performed** |
+| 18 | Retry/idempotency | **Skipped** (no first capture) |
+| 19 | Runtime configuration | Postgres container `fas-postgres-verify` healthy; `GET /version` → `platformPersistenceMode: postgres`; `GET /health/ready` → `ready`; `GET /api/lottery/fixtures` → `fixtures: []`; invalid manifest probe → `LOTTERY_MANIFEST_SCHEMA_UNSUPPORTED` (endpoint live) |
+| 20 | Deviations | Did not use PVS-4 CI manifest; did not implement Sporttery scraping in repo |
+| 21 | Blockers | **A.** No operator genuine manifest **B.** No verifiable live 竞彩 list in session **C.** Analyze/seal path not run |
+| 22 | Final recommendation | **B. BLOCKED** — first hard stop: **genuine operator-supplied lottery fixture + PRE_MATCH Evidence unavailable** |
+
+**Exact next Governance action:** Obtain one genuine upcoming 竞彩足球 fixture +
+bounded CORE/market fields as `lottery-fixture-manifest.v1`, register via
+`POST /api/lottery/manifest`, run governed `POST /api/analyze/match/lottery:csl:…`
+before kickoff with `EVIDENCE_REPOSITORY_MODE=postgres`, then re-run this
+verification. On success, next step is **AUTHENTIC PRE_MATCH SEAL ARTIFACT
+ADMISSION REVIEW** (not Historical Intake authorization).
+
+---
+
+## Appendix C — 2026-09-13 attempt (API-Football catalog)
+
+Supersedes the former “latest” narrative in §0 before 2026-09-14. Postgres was
+restored; blocker was **B. BLOCKED — GENUINE LIVE PRE_MATCH FIXTURE UNAVAILABLE**
+(`GET /api/matches/upcoming`, `usedRecordedFallback: true`, zero future kickoffs).
+Repository HEAD `4641b347c2d4cf4845607c51da31ce056f9a3f04`. Full tables remain in
+sections 1–21 below (environment, Postgres, catalog probe).
 
 ---
 

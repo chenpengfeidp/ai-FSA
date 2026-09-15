@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "lottery-fixture-manifest.v1",
+  "salesIssueId": "20260915",
+  "manifestCollectedAt": "2026-09-15T14:08:00+08:00",
+  "sourceReference": "operator-screenshot-sporttery-jczq-2026-09-15;independent-fixture-liverpoolfc-carabao-cup-2026-09-15;public-market-oddssafari-betdiary-footballcalculator-2026-09-15",
+  "marketPrimaryBook": "lottery-official",
+  "matches": [
+    {
+      "lotteryMatchCode": "周二011",
+      "homeTeam": "利物浦",
+      "awayTeam": "热刺",
+      "competitionId": "eng:efl-cup",
+      "competitionName": "EFL Cup / 英联赛杯",
+      "season": "2025/26",
+      "kickoff": "2026-09-16T03:00:00+08:00",
+      "timezone": "Asia/Shanghai",
+      "scheduleSource": "china-sports-lottery",
+      "fixtureAuthority": "lottery-official-list",
+      "collectedAt": "2026-09-15T14:08:00+08:00",
+      "teamForm": [
+        {
+          "teamSide": "home",
+          "window": 4,
+          "results": ["W", "D", "D", "D"],
+          "goalsFor": [2, 2, 1, 1],
+          "goalsAgainst": [1, 1, 1, 1]
+        },
+        {
+          "teamSide": "away",
+          "window": 4,
+          "results": ["L", "D", "L", "D"],
+          "goalsFor": [0, 0, 0, 0],
+          "goalsAgainst": [2, 1, 1, 1]
+        }
+      ],
+      "statistics": [
+        {
+          "teamSide": "home",
+          "windowMatches": 4,
+          "shotsForPerMatch": 14.2,
+          "shotsAgainstPerMatch": 10.5,
+          "xgForPerMatch": 1.62,
+          "xgAgainstPerMatch": 1.08
+        },
+        {
+          "teamSide": "away",
+          "windowMatches": 4,
+          "shotsForPerMatch": 10.8,
+          "shotsAgainstPerMatch": 14.0,
+          "xgForPerMatch": 0.72,
+          "xgAgainstPerMatch": 1.48
+        }
+      ],
+      "odds": {
+        "homeOdds": 1.62,
+        "drawOdds": 3.82,
+        "awayOdds": 4.0,
+        "observedAt": "2026-09-15T14:08:00+08:00",
+        "marketSource": "lottery-official",
+        "providerSource": "china-sports-lottery",
+        "providerSourceId": "lottery:20260915:周二011:1x2"
+      },
+      "additionalOdds": [
+        {
+          "homeOdds": 2.78,
+          "drawOdds": 3.65,
+          "awayOdds": 2.02,
+          "observedAt": "2026-09-15T14:08:00+08:00",
+          "marketSource": "lottery-official-handicap-result-minus-one",
+          "providerSource": "china-sports-lottery",
+          "providerSourceId": "lottery:20260915:周二011:handicap-result-1"
+        },
+        {
+          "homeOdds": 1.8,
+          "drawOdds": 3.75,
+          "awayOdds": 4.1,
+          "observedAt": "2026-09-15T14:08:00+08:00",
+          "marketSource": "public-reference-consensus",
+          "providerSource": "oddssafari-efl-cup-2026-09-15",
+          "providerSourceId": "public:liverpool-tottenham-efl-cup-2026-09-15:1x2-ah-ou",
+          "asianHandicapLine": -1,
+          "asianHandicapHomeOdds": 2.25,
+          "asianHandicapAwayOdds": 1.63,
+          "overUnderLine": 3.5,
+          "overOdds": 2.25,
+          "underOdds": 1.67
+        }
+      ]
+    }
+  ]
+}

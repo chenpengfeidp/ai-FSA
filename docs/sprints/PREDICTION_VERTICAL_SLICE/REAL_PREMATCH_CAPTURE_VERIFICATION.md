@@ -5,41 +5,46 @@
 | Field | Result |
 |---|---|
 | Review type | Product-aligned real PRE_MATCH Class A capture verification (PVS-4 lottery path) |
-| Date | 2026-09-14 |
-| Clock at verification | `2026-09-14T02:34:22Z` (repository clock); local probe `2026-09-14T02:35Z` |
-| Repository HEAD | `22eddf6fd06fd8c2c65a412240a1b6eed47bb68a` (`22eddf6`) |
+| Date | 2026-09-15 |
+| Clock at verification | First governed analyze `2026-09-15T08:43:58.720Z`; wall ~`2026-09-15T16:43+08:00` |
+| Repository HEAD | `bb2d925f3d066b44e1cafe2f83a3b6668b755f3f` (`bb2d925`) |
 | PVS-4 implementation | **A. PASS** (manifest intake, `lottery:csl:` ids, multi-source CORE/market Evidence) |
 | Implementation commit (seal capability) | `1effc562a7ae1cde34dd8764d3ca4ea77159dd97` (`1effc56`) |
-| Worktree | Clean; `main` @ `22eddf6`, tracking `origin/main` |
+| Saved manifest artifact | `docs/sprints/PREDICTION_VERTICAL_SLICE/verification-artifacts/2026-09-15-liv-tot-lottery-manifest.v1.json` |
 | Production code changed in this task | **No** |
-| Candidate authentic Class A seal | **Does not exist** |
+| Candidate authentic Class A seal | **Captured (first row)** — awaiting artifact admission review |
 | Historical Evaluation Intake | **C. BLOCKED** / `production_historical_intake_authorized = false` |
-| Primary recommendation | **B. BLOCKED — REAL PRE_MATCH CAPTURE NOT ESTABLISHED** |
+| Primary recommendation | **A. PASS — CANDIDATE AUTHENTIC CLASS A PRE_MATCH SEAL CAPTURED** |
 
-**First hard blocker (this retry):**
-**B. BLOCKED — GENUINE OPERATOR-SUPPLIED CHINA SPORTS LOTTERY FIXTURE AND PRE_MATCH EVIDENCE UNAVAILABLE**
+**Fixture:** 竞彩足球 list date **2026-09-15**, code **周二011**, **利物浦 vs 热刺**,
+EFL Cup, kickoff **`2026-09-16T03:00:00+08:00`**, canonical
+`lottery:csl:20260915:周二011`.
 
-PVS-4 requires a real **operator-attested** `lottery-fixture-manifest.v1` (genuine
-竞彩 identity, future kickoff, bounded CORE + 1X2/AH/O/U). No such manifest was
-available in the verification environment. The only repository manifest sample is
-the CI cassette `packages/application/test/fixtures/pvs-4-lottery-manifest.json`,
-which this verification **must not** use (test fixture / not Class A authority).
-A read-only probe of the public Sporttery JC gateway from the verification host
-returned access denied (`禁止访问`); this task did not add generic scraping to the
-product.
+**salesIssueId resolution:** PVS-4 gate defines `salesIssueId` as the official
+sales-period id with example `20260913` (YYYYMMDD). Operator screenshot exposes
+list date **2026-09-15** but not a separate opaque issue id. Contract-valid
+representation: **`20260915`** (aligned with gate example and list date).
 
-Postgres durable authority, seal table, and API lottery endpoints were verified.
-`POST /api/analyze/match/:lotteryMatchId` and seal capture were **not executed**
-(no qualifying fixture).
+**Governed capture (first run):** `EVIDENCE_REPOSITORY_MODE=postgres`,
+`platformPersistenceMode=postgres`, `POST /api/lottery/manifest` →
+`POST /api/analyze/match/lottery:csl:20260915:周二011` before kickoff.
+`analysisTime === analysisCutoff === 2026-09-15T08:43:58.720Z`;
+`sealedAt === 2026-09-15T08:43:58.894Z`; temporal gate satisfied.
+`authenticatePrematchPredictionSeal` **PASS** on first row. Durable read-back
+after API process restart **unchanged** on first row.
 
-Prior attempts: 2026-09-13 API-Football catalog path
+**Deviations (do not void first candidate):** lottery fixture registry is
+**in-memory** (manifest must be re-posted after API restart). A later
+post-restart re-analyze with a **new** `analysisTime` inserted a **second** seal
+row — that is **not** governed idempotency; same-session immediate retry was not
+completed. See [Appendix D](#appendix-d--2026-09-15-liverpool-v-tottenham-product-aligned-capture).
+
+**Does not authorize:** Historical Evaluation Intake, `authentic_prematch_seal=FOUND`,
+or calibration population membership.
+
+Prior blocked attempts: [Appendix C](#appendix-c--2026-09-14-no-operator-manifest);
 [Appendix B](#appendix-b--2026-09-13-attempt-api-football-catalog);
-2026-09-07 Postgres unavailable [Appendix A](#appendix-a--2026-09-07-attempt-postgres-unavailable).
-
-This verification did **not** invent a match, promote the PVS-4 test cassette,
-analyze a fallback row as Class A, call seal capture directly without a governed
-run, use memory storage as Class A evidence, or authorize Historical Evaluation
-Intake.
+[Appendix A](#appendix-a--2026-09-07-attempt-postgres-unavailable).
 
 ---
 
@@ -279,7 +284,38 @@ Historical Evaluation Intake remains **C. BLOCKED**.
 
 ---
 
-## Appendix B — 2026-09-14 product-aligned attempt (PVS-4 lottery path)
+## Appendix D — 2026-09-15 Liverpool v Tottenham product-aligned capture
+
+| # | Field | Value |
+|---|---|---|
+| 1 | Repository HEAD | `bb2d925f3d066b44e1cafe2f83a3b6668b755f3f` |
+| 2 | Fixture identity | `salesIssueId=20260915`, `lotteryMatchCode=周二011`, 利物浦 vs 热刺, `eng:efl-cup`, `2025/26` |
+| 3 | Saved manifest | `docs/sprints/PREDICTION_VERTICAL_SLICE/verification-artifacts/2026-09-15-liv-tot-lottery-manifest.v1.json` |
+| 4 | Canonical `matchId` | `lottery:csl:20260915:周二011` |
+| 5 | CORE Evidence | `MATCH_INFO`×1, `TEAM_FORM`×2, `STATISTICS`×2 — sources `china-sports-lottery` (manifest) |
+| 6 | Evidence total (first analyze) | **7** rows (`GET /api/evidence/match/...`) |
+| 7 | `analysisTime` | `2026-09-15T08:43:58.720Z` |
+| 8 | `analysisCutoff` | `2026-09-15T08:43:58.720Z` |
+| 9 | max `Evidence.collectedAt` | `2026-09-15T08:43:58.720Z` (≤ cutoff) |
+| 10 | MATCH_RESULT count | **0** |
+| 11 | Actual count | **0** |
+| 12 | `sealedAt` (first row) | `2026-09-15T08:43:58.894Z` |
+| 13 | `originalSealId` (first) | `prematch-seal:lottery:csl:20260915:周二011:d63058fdd561cbe09375cf068b4e3eca5c46bf00147ebfefbf9b0941d061ec42` |
+| 14 | `sealIdentityHash` (first) | `d63058fdd561cbe09375cf068b4e3eca5c46bf00147ebfefbf9b0941d061ec42` — **verified** |
+| 15 | `contentSha256` (first) | `4c52a8b9d68c5ab825cbf7116451fcbbb12c3b3f27297e6627e3e0ee9e667a01` — **verified** |
+| 16 | Persisted classification (first row `recordJson`) | `schemaVersion=prematch-prediction-seal.v1`, `synthetic=false`, `historicalAuthenticity=true`, `provenanceClass=A`, `sourceAuthority=prisma.prematch_prediction_seal_items`, `allowedUsage` includes `historical_evaluation_intake` |
+| 17 | Reload after API restart | First row `originalSealId`, `sealedAt`, `contentSha256` **unchanged** |
+| 18 | Idempotency | **Not demonstrated** on immediate same-session retry; post-restart re-analyze with new `analysisTime` created a **second** row (excluded from candidate) |
+| 19 | Runtime | Postgres `fas-postgres-verify`; migrations applied; API `platformPersistenceMode=postgres`; `FOOTBALL_DATA_PROVIDER_MODE=recorded`, `ODDS_PROVIDER_MODE=recorded` |
+| 20 | Market Evidence | **1X2:** `lottery-official` (1.62 / 3.82 / 4.00) + `lottery-official-handicap-result-minus-one` three-way (2.78 / 3.65 / 2.02) — **not** labeled Asian Handicap; **AH:** independent `public-reference-consensus` line −1 @ 2.25 / 1.63; **O/U:** same row line 3.5 @ 2.25 / 1.67 (rechecked vs public consensus 2026-09-15) |
+| 21 | ODDS row count | **2** persisted ODDS Evidence rows (lottery + public reference bundle per normalizer) |
+| 22 | Final recommendation | **A. PASS — CANDIDATE AUTHENTIC CLASS A PRE_MATCH SEAL CAPTURED** |
+
+**Exact next Governance action:** **AUTHENTIC PRE_MATCH SEAL ARTIFACT ADMISSION REVIEW** (first row only).
+
+---
+
+## Appendix C — 2026-09-14 product-aligned attempt (no operator manifest)
 
 | # | Field | Value |
 |---|---|---|
@@ -315,7 +351,7 @@ ADMISSION REVIEW** (not Historical Intake authorization).
 
 ---
 
-## Appendix C — 2026-09-13 attempt (API-Football catalog)
+## Appendix B — 2026-09-13 attempt (API-Football catalog)
 
 Supersedes the former “latest” narrative in §0 before 2026-09-14. Postgres was
 restored; blocker was **B. BLOCKED — GENUINE LIVE PRE_MATCH FIXTURE UNAVAILABLE**

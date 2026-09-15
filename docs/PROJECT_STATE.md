@@ -7,12 +7,13 @@ current_stage: PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE_IM
 current_gate: AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION
 historical_evaluation_intake: C_BLOCKED
 authentic_prematch_seal: NOT_FOUND
+candidate_authentic_class_a_prematch_seal: CAPTURED_ADMISSION_BLOCKED
 authentic_prematch_seal_capture_capability: IMPLEMENTED
 authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: OBTAIN_OPERATOR_GENUINE_CHINA_SPORTS_LOTTERY_MANIFEST_AND_RETRY_REAL_PREMATCH_CAPTURE_VERIFICATION
+next_action: REMEDIATE_LOTTERY_MULTI_ODDS_EVIDENCE_PERSISTENCE_AND_RETRY_ARTIFACT_ADMISSION
 next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
@@ -49,12 +50,11 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-14 — **PVS-4** implementation **PASS**; product-aligned
-  real Class A capture verification **attempted** and **B. BLOCKED** (no genuine
-  operator-supplied 竞彩 manifest + PRE_MATCH Evidence in session; see
-  `REAL_PREMATCH_CAPTURE_VERIFICATION.md` Appendix B). Gate
-  **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** remains open.
-  `authentic_prematch_seal` **NOT_FOUND**; Intake **C. BLOCKED**.
+- Last updated: 2026-09-15 — **Artifact admission review BLOCKED** (first candidate
+  `d63058f…`; lottery handicap-result ODDS not in governed Evidence set; see
+  `AUTHENTIC_PREMATCH_SEAL_ARTIFACT_ADMISSION_REVIEW.md`). Capture remains documented
+  in `REAL_PREMATCH_CAPTURE_VERIFICATION.md` Appendix D. `authentic_prematch_seal`
+  **NOT_FOUND**; Intake **C. BLOCKED**.
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
   **PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_COMPLETED**.
@@ -62,10 +62,9 @@ changes the active gate, or material governance change.
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** (product-aligned
   lottery-first recipe).
 - Current next action:
-  **Obtain operator genuine China Sports Lottery manifest + PRE_MATCH Evidence,
-  then retry real PRE_MATCH capture verification** (Postgres + governed analyze;
-  no test cassette; no Historical Intake).
-- Current production sprint: none active (verification blocked on operator input).
+  **Remediate lottery multi-ODDS Evidence persistence and retry artifact admission**
+  (engineering + re-verify; see admission review §13).
+- Current production sprint: none active (admission blocked on Evidence gap).
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
 - Fixture classification: **B — controlled synthetic**;
@@ -183,7 +182,7 @@ historical authenticity unless the cited evidence explicitly proves it.
 | 9 | China Sports Lottery architecture compatibility review | **A. PASS** — existing architecture can support; see `CHINA_SPORTS_LOTTERY_WEB_MARKET_INTELLIGENCE_SOURCE_STRATEGY_ARCHITECTURE_COMPATIBILITY_REVIEW.md` |
 | 10 | China Sports Lottery fixture authority + multi-source Evidence implementation gate | **A. READY** — see `CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md` |
 | 11 | PVS-4 implementation | **A. PASS** — see `PVS-4_CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_REVIEW.md` |
-| Current | Bounded real PRE_MATCH capture verification (product-aligned) | **B. BLOCKED** (2026-09-14) — no operator genuine 竞彩 manifest; Postgres + lottery API path verified |
+| Current | Bounded real PRE_MATCH capture verification (product-aligned) | **A. PASS — candidate captured** (2026-09-15 Liverpool v Tottenham; Appendix D) |
 
 ### Controlled fixture implementation evidence
 
@@ -314,10 +313,10 @@ that conclusion does not authorize the decoder/domain changes.
 - **Objective:** prove a real production PRE_MATCH run writes a durable Class A
   row before kickoff. Only then may `authentic_prematch_seal` become FOUND.
 - **Exit condition:** `REAL_PREMATCH_CAPTURE_VERIFICATION.md`.
-- **Blocking condition (latest retry):** **no genuine operator-supplied China
-  Sports Lottery manifest and PRE_MATCH Evidence** (2026-09-14; PVS-4 path).
-  Postgres + `prematch_prediction_seal_items` + `platformPersistenceMode=postgres`
-  demonstrated. Prior 2026-09-13 blocker was obsolete API-Football catalog.
+- **Blocking condition (superseded):** 2026-09-14 no operator manifest; resolved
+  2026-09-15 with operator screenshot manifest (Appendix D). Candidate row
+  captured; admission review open. `authentic_prematch_seal` remains NOT_FOUND
+  until admission.
 - **Does not authorize:** backfill, replay-as-original, Class B promotion, or
   `production_historical_intake_authorized = true`.
 
@@ -457,7 +456,7 @@ Future Agents must not:
 | Historical Evaluation Intake Implementation Planning / Final Gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Minimum intake production boundary; schema/idempotency/Actual/replay freeze | **B. BLOCKED** | Does not authorize intake implementation |
 | Authentic PRE_MATCH Seal Capture Planning / Gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | How to create/store original PRE_MATCH seals before kickoff | **A. READY** (planning); capture sprint authorized | Does not authorize Intake or Class A admission |
 | Authentic PRE_MATCH Seal Capture Implementation Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md` | Capture capability, hashes, cutoff, postgres authority | **A. PASS** (capability); real artifact **NOT FOUND** | Does not set `authentic_prematch_seal=FOUND` |
-| Real PRE_MATCH Capture Verification | `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | Real Class A candidate attempt | **B. BLOCKED** — 2026-09-14: no operator genuine 竞彩 manifest (Appendix B) | Does not authorize Intake or admission |
+| Real PRE_MATCH Capture Verification | `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | Real Class A candidate attempt | **A. PASS — candidate captured** (2026-09-15; Appendix D) | Does not authorize Intake; admission review required |
 | China Sports Lottery architecture compatibility | `docs/sprints/PREDICTION_VERTICAL_SLICE/CHINA_SPORTS_LOTTERY_WEB_MARKET_INTELLIGENCE_SOURCE_STRATEGY_ARCHITECTURE_COMPATIBILITY_REVIEW.md` | Product-aligned input strategy | **A. PASS** (planning) | Does not authorize implementation |
 | China Sports Lottery fixture authority gate | `docs/sprints/PREDICTION_VERTICAL_SLICE/CHINA_LOTTERY_FIXTURE_AUTHORITY_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_GATE.md` | PVS-4 bounded implementation authorization | **A. READY** | Does not authorize Intake or Class A admission |
 | PVS-4 implementation review | `docs/sprints/PREDICTION_VERTICAL_SLICE/PVS-4_CHINA_LOTTERY_FIXTURE_AUTHORITY_IMPLEMENTATION_REVIEW.md` | Manifest intake + CORE/market Evidence path | **A. PASS** | Does not set `authentic_prematch_seal=FOUND` |

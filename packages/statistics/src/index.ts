@@ -96,16 +96,75 @@ export type {
 
 export {
   createEvaluationHistoryRecord,
+  createHistoricalIntakeEvaluationHistoryRecord,
   EVALUATION_HISTORY_SCHEMA_VERSION,
+  EVALUATION_HISTORY_HISTORICAL_INTAKE_SCHEMA_VERSION,
+  SUPPORTED_EVALUATION_HISTORY_SCHEMA_VERSIONS,
+  INTAKE_INTEGRITY_CONTRACT_VERSION,
   EvaluationHistoryValidationError,
+  isHistoricalIntakeEvaluationHistoryRecord,
+  isCalibrationPopulationEligible,
+  isValidationPopulationEligible,
+  isContributionPopulationEligible,
+  isReplayCohortPopulationEligible,
 } from "./domain/evaluation-history.js";
 export type {
   CreateEvaluationHistoryRecordInput,
+  CreateHistoricalIntakeEvaluationHistoryRecordInput,
   EvaluationHistoryRecord,
+  A15EvaluationHistoryRecord,
+  HistoricalIntakeEvaluationHistoryRecord,
+  HistoricalIntakeIntegrity,
+  SupportedEvaluationHistorySchemaVersion,
 } from "./domain/evaluation-history.js";
 
 export { buildEvaluationHistoryRecord } from "./evaluation/build-evaluation-history-record.js";
 export type { BuildEvaluationHistoryRecordInput } from "./evaluation/build-evaluation-history-record.js";
+
+export {
+  HISTORICAL_PREDICTION_SEAL_KIND,
+  UNIT_TEST_CONSTRUCTED_SOURCE_AUTHORITY,
+  historicalPredictionSealFromPrematch,
+} from "./domain/historical-prediction-seal.js";
+export type {
+  HistoricalPredictionSeal,
+  HistoricalPredictionSealObservation,
+} from "./domain/historical-prediction-seal.js";
+
+export {
+  HISTORICAL_EVALUATION_INTAKE_FAILURE_CODES,
+  HistoricalEvaluationIntakeError,
+} from "./domain/historical-evaluation-intake.js";
+export type {
+  HistoricalEvaluationIntakeCommand,
+  HistoricalEvaluationIntakeFailureCode,
+  HistoricalEvaluationIntakeResult,
+  HistoricalIntakeMatchResultEvidence,
+  HistoricalIntakeReplaySidecarInput,
+  VerifiedRealWorldActual,
+} from "./domain/historical-evaluation-intake.js";
+
+export {
+  canonicalizeJson as canonicalizeEvaluationJson,
+  parseJsonRejectingDuplicateKeys as parseEvaluationJsonRejectingDuplicateKeys,
+  sha256CanonicalJson as sha256CanonicalEvaluationJson,
+} from "./evaluation/canonical-json.js";
+
+export { validateHistoricalPredictionSeal } from "./evaluation/validate-historical-prediction-seal.js";
+export { validateVerifiedRealWorldActual } from "./evaluation/validate-verified-real-world-actual.js";
+export { assertHistoricalIntakeTemporalIntegrity } from "./evaluation/assert-historical-intake-temporal-integrity.js";
+export {
+  buildHistoricalIntakeHistoryRecord,
+  historicalIntakeHistoryId,
+  HISTORICAL_INTAKE_HISTORY_ID_PREFIX,
+} from "./evaluation/build-historical-intake-history-record.js";
+export type { BuildHistoricalIntakeHistoryRecordInput } from "./evaluation/build-historical-intake-history-record.js";
+export { ingestHistoricalEvaluation } from "./evaluation/ingest-historical-evaluation.js";
+export type { IngestHistoricalEvaluationInput } from "./evaluation/ingest-historical-evaluation.js";
+export {
+  decodeEvaluationHistoryRecord,
+  UnsupportedHistorySchemaVersionError,
+} from "./evaluation/decode-evaluation-history-record.js";
 
 export { DuplicateEvaluationHistoryError } from "./repository/evaluation-history-repository.js";
 export type {

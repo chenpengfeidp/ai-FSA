@@ -1,4 +1,7 @@
-import type { EvaluationHistoryRecord } from "../domain/evaluation-history.js";
+import {
+  isValidationPopulationEligible,
+  type EvaluationHistoryRecord,
+} from "../domain/evaluation-history.js";
 import {
   FEATURE_PROFILE_IDS,
   FEATURE_PROFILE_LABELS,
@@ -235,7 +238,7 @@ export function computeValidationReport(
   input: ComputeValidationReportInput,
 ): ValidationReport {
   const computedAt = requireTimestamp(input.computedAt);
-  const records = input.records;
+  const records = input.records.filter(isValidationPopulationEligible);
   const groups = groupByProfile(records);
 
   const profiles = FEATURE_PROFILE_IDS.map((profile) =>

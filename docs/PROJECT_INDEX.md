@@ -140,7 +140,12 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW.md` | 工件准入；**C. ADMISSION BLOCKED**。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_PLAN.md` | Class B 受控夹具规划。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_IMPLEMENTATION_REVIEW.md` | Class B 夹具实现审查；**PASS**（不等于 Intake READY）。 |
-| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Intake 实现规划终局门禁；**B. BLOCKED**。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md` | Intake 实现规划终局门禁；技术合同冻结。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_READINESS_REVIEW_2026-09-17.md` | 2026-09-17 就绪审查；**A. PASS**（仅就绪）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION_REVIEW_2026-09-17.md` | 实现授权审查；人工 §8 前 **B. BLOCKED**。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HUMAN_REVIEW_OF_HISTORICAL_INTAKE_FINAL_GATE_2026-09-17.md` | Final Gate §8 人工决策呈现。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION.md` | 人工 §8 批准；仅限定实现。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_BOUNDED_IMPLEMENTATION_COMPLETION_REPORT.md` | 限定 A1 库实现完成；生产 intake 仍 **C_BLOCKED**。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | 原版 PRE_MATCH 封印捕获与存储权威规划门禁；**A. READY**（仅封印捕获冲刺；非 Intake）。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md` | 封印捕获实现审查；**A. PASS**（capability；真实 Class A 工件仍 NOT FOUND）。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | 真实 PRE_MATCH 封印捕获验证；**B. BLOCKED**（2026-09-13 重试：Postgres OK，live 赛程不可用；无候选 Class A）。 |
@@ -313,7 +318,8 @@ Match Center (web)
 39. **FIP-1 Football Intelligence Analysis Protocol Planning** — **PLANNING COMPLETE / REVIEWED**（`docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-1_FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL_PLANNING.md`；不代表 operational protocol 已落地）
 40. **FIP-2 P0 Governance and Canonicalization** — **COMPLETE / SIGNED OFF**（canonical `docs/protocols/FOOTBALL_INTELLIGENCE_ANALYSIS_PROTOCOL.md`；`docs/sprints/PREDICTION_VERTICAL_SLICE/FIP-2_P0_GOVERNANCE_CANONICALIZATION_COMPLETION_REPORT.md`；仅文档治理，P1/P2/P3/P4 未授权、未启动）
 41. **Historical Match Evaluation / Case Capability Audit** — **COMPLETE / Option B / Planning only**
-42. **Historical Evaluation Intake Implementation Planning / Final Gate** — **COMPLETE / B. BLOCKED**（`HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_PLANNING_FINAL_GATE.md`；生产 intake 未授权）
+42. **Historical Evaluation Intake Implementation Planning / Final Gate** — **COMPLETE / B. BLOCKED**（生产 intake 未授权）
+42a. **Historical Evaluation Intake bounded A1 library implementation** — **COMPLETE**（`HISTORICAL_EVALUATION_INTAKE_BOUNDED_IMPLEMENTATION_COMPLETION_REPORT.md`；生产 intake 仍 **C_BLOCKED**；未摄入真实比赛）
 43. **Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate** — **COMPLETE / A. READY**（规划；`AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md`）
 44. **Authentic PRE_MATCH Seal Capture Implementation** — **COMPLETE / A. PASS**（capability；`AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md`；真实 Class A 工件 **NOT FOUND**）
 45. **Bounded real PRE_MATCH capture verification** — **B. BLOCKED**（`REAL_PREMATCH_CAPTURE_VERIFICATION.md`；Postgres 不可用；不得把测试/迁移当成 Class A；不得开工 Historical Intake）

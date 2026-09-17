@@ -2,27 +2,29 @@
 
 | Field | Value |
 |---|---|
-| Date | 2026-09-16 |
+| Date (initial) | 2026-09-16 |
+| Recovery completed | 2026-09-17 |
 | `matchId` | `lottery:csl:20260915:周二012` |
-| Admitted seal | `prematch-seal:lottery:csl:20260915:周二012:23fdf75e…` |
-| Pair verification (agent session) | **BLOCKED — persistence not executed** |
+| Pair result | **A. PASS — AUTHENTIC CLASS A SEAL + VERIFIED REAL-WORLD ACTUAL PAIR ESTABLISHED** |
 | Historical Evaluation Intake | **C_BLOCKED** (unchanged) |
 
 ---
 
-## 1. Repository state before run
+## 1. Season semantics (pre-persistence gate)
 
-```yaml
-authentic_prematch_seal: FOUND_ADMITTED
-authentic_seal_plus_verified_real_world_actual: NOT_FOUND
-historical_evaluation_intake: C_BLOCKED
-production_historical_intake_authorized: false
-next_action: WAIT_FOR_MATCH_COMPLETION_AND_CAPTURE_VERIFIED_REAL_WORLD_ACTUAL
-```
+**Verdict: A — `2025/26` is correct for governed FAS fixture identity.**
+
+| Source | Rule |
+|---|---|
+| PVS-4 manifest | Operator-attested `season` on `lottery-fixture-manifest.v1` (`2026-09-15-ips-ars-lottery-manifest.v1.json` → `2025/26`) |
+| Architecture compatibility review | *Explicit sports season string (may differ from calendar year); required on seal.* |
+| Intake gate (future) | Exact `season` binding between seal and Actual — **no** kickoff-derived season normalization in code |
+
+The admitted seal and `MATCH_INFO` carry `2025/26`. Verified Actual **copies seal `season`** for binding; the seal is **not** mutated. External UK calendar labeling for a September 2026 kickoff may differ; that is a **metadata caveat** for future Historical Intake review, not a reason to rewrite season on Actual without a new governed fixture revision.
 
 ---
 
-## 2. Admitted seal (read-only; do not mutate)
+## 2. Admitted seal (Postgres, unchanged)
 
 | Field | Value |
 |---|---|
@@ -30,100 +32,81 @@ next_action: WAIT_FOR_MATCH_COMPLETION_AND_CAPTURE_VERIFIED_REAL_WORLD_ACTUAL
 | `contentSha256` | `ecd427e51da3ac40cc1d57672321c1311471954ba7341afa6cd325f825fc410e` |
 | `analysisTime` / `analysisCutoff` | `2026-09-15T14:22:18.766Z` |
 | `sealedAt` | `2026-09-15T14:22:18.878Z` |
-| `kickoff` | `2026-09-16T03:00:00+08:00` (`2026-09-15T19:00:00Z`) |
-| `homeTeam` / `awayTeam` | 伊普斯维奇 / 阿森纳 |
-| `competitionId` / `season` | `eng:efl-cup` / `2025/26` |
-| `predictionSnapshot` | On seal (`pHome`≈0.26, `pDraw`≈0.16, `pAway`≈0.58) — **source of truth** |
+| `kickoff` | `2026-09-16T03:00:00+08:00` |
+| Teams | 伊普斯维奇 / 阿森纳 |
+| `competitionId` | `eng:efl-cup` |
+| `season` | `2025/26` |
 
-Artifact: `verification-artifacts/2026-09-15-ips-ars-seal-recordJson.json`
+Post-Actual reload: **unchanged** (`sealUnchanged: true`).
 
 ---
 
-## 3. Verified final score (external authority)
+## 3. Real-world result
 
 | Field | Value |
 |---|---|
-| Primary | Ipswich Town official club reporting ecosystem — **Ipswich Town 2–4 Arsenal** (Carabao / EFL Cup, Portman Road) |
-| Corroboration | [Arsenal FC match report](https://www.arsenal.com/news/report-ipswich-town-2-4-arsenal-ajWTj8V8S3qK); [TWTD match report](https://www.twtd.co.uk/ipswich-town-news/52800/ipswich-town-2-4-arsenal--match-report) |
-| **HOME** | **2** |
-| **AWAY** | **4** |
+| Score | Ipswich Town **2** – **4** Arsenal (home/away) |
 | `matchStatus` | `FINISHED` |
 | `winner` | `away` |
+| Authority | [Arsenal FC official match report](https://www.arsenal.com/news/report-ipswich-town-2-4-arsenal-ajWTj8V8S3qK); Ipswich ecosystem reporting (e.g. TWTD) corroborates |
 
 ---
 
-## 4. Governed MATCH_RESULT Evidence (planned)
+## 4. Persisted MATCH_RESULT
 
-Persist **only** via `EvidenceRepository.save` / idempotent import — **no** new schema.
-
-| Field | Planned value |
+| Field | Value |
 |---|---|
 | `Evidence.id` | `evidence-itfc.co.uk-lottery:csl:20260915:周二012-match-result` |
 | `type` | `MATCH_RESULT` |
-| `providerSource` | `itfc.co.uk` |
-| `providerSourceId` | `carabao-cup-2026-09-15:ipswich-arsenal:ft:2-4` |
-| `providerMethod` | `official-club-match-report` |
 | `quality` | `verified` |
-| `realWorldVerification` | `true` (payload + verification bundle) |
-| `observedAt` | `2026-09-16T15:35:00+08:00` (post-kickoff capture instant; **not** backdated to FT) |
+| `realWorldVerification` | `true` |
+| `observedAt` (actual capture) | `2026-09-17T03:01:13.950Z` |
+| `providerSource` / `providerSourceId` / `method` | `itfc.co.uk` / `carabao-cup-2026-09-15:ipswich-arsenal:ft:2-4` / `official-club-match-report` |
+| Persistence path | `PrismaEvidenceRepository.save` via `persist-verified-actual-ips-ars.mjs` |
+| Idempotency | Second run returned same row (no duplicate) |
 
-Payload binds seal fixture identity: `homeTeam`, `awayTeam`, `competitionId`, `competitionName`, `season`, `kickoff` copied from admitted `sealIdentity`.
+Run artifact: `verification-artifacts/2026-09-17-ips-ars-verified-actual-persist-run.json`
 
 ---
 
-## 5. Temporal integrity (expected)
+## 5. `ActualMatchResult` mapping
 
-| Rule | Expected |
+`mapActualMatchResultFromEvidence` → `FINISHED`, home 2, away 4, winner `away`, `observedAt` as persisted.
+
+---
+
+## 6. Fixture binding
+
+Exact match: `matchId`, Chinese home/away on seal, `competitionId` / `competitionName`, `season`, `kickoff` on payload aligned with `sealIdentity`.
+
+---
+
+## 7. Temporal integrity
+
+| Check | Result |
 |---|---|
+| `analysisCutoff === analysisTime` | PASS |
 | `analysisTime` < kickoff | PASS |
 | `sealedAt` < kickoff | PASS |
-| `observedAt` > kickoff | PASS (`2026-09-16T15:35:00+08:00` > `2026-09-16T03:00:00+08:00`) |
+| `observedAt` > kickoff | PASS |
+| PRE_MATCH analyze had `MATCH_RESULT` | **0** at seal time (unchanged) |
 
 ---
 
-## 6. Operator execution (required to establish pair)
+## 8. Durable reload
 
-```bash
-cd football-analysis-system
-export DATABASE_URL="postgresql://fas_local:<password>@127.0.0.1:5432/fas_local"
-pnpm --filter @fas/database test -- verified-actual-ips-ars-pair
-# or:
-node docs/sprints/PREDICTION_VERTICAL_SLICE/verification-artifacts/persist-verified-actual-ips-ars.mjs
-```
-
-Then verify:
-
-- `GET /api/evidence/match/lottery:csl:20260915:周二012` includes one `MATCH_RESULT`
-- Admitted seal row unchanged (`content_sha256`, `sealed_at`, `record_json`)
+Script disconnects and reconnects Prisma; evidence and seal values unchanged on reload.
 
 ---
 
-## 7. Pair completeness
+## 9. Historical Intake
 
-| Check | Agent session |
-|---|---|
-| Admitted seal exists | **Yes** (documented) |
-| Verified MATCH_RESULT in Postgres | **Not executed** (blocked runtime) |
-| Seal immutability after Actual | **Not demonstrated** |
-| **Pair established** | **No** |
+**Not started.** `historical_evaluation_intake: C_BLOCKED`, `production_historical_intake_authorized: false`.
 
 ---
 
-## 8. Historical Intake
+## 10. Recommendation
 
-Remains **C_BLOCKED**. No Evaluation History, Calibration, Validation, or Contribution writes.
+**A. PASS — AUTHENTIC CLASS A SEAL + VERIFIED REAL-WORLD ACTUAL PAIR ESTABLISHED**
 
----
-
-## 9. Recommendation
-
-**B. BLOCKED — VERIFIED REAL-WORLD ACTUAL PAIR NOT ESTABLISHED** until operator runs §6 and confirms durable read-back.
-
-After successful §6, update `PROJECT_STATE`:
-
-```yaml
-authentic_seal_plus_verified_real_world_actual: FOUND_VERIFIED
-next_action: AUTHENTIC_SEAL_ACTUAL_PAIR_ARTIFACT_REVIEW_OR_HISTORICAL_INTAKE_GATE
-```
-
-(Do not set `FOUND_VERIFIED` without Postgres evidence.)
+`next_action`: **AUTHENTIC_SEAL_ACTUAL_PAIR_ARTIFACT_REVIEW**

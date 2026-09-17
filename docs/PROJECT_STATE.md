@@ -11,11 +11,11 @@ authentic_prematch_seal_match_id: lottery:csl:20260915:周二012
 authentic_prematch_seal_original_seal_id: prematch-seal:lottery:csl:20260915:周二012:23fdf75ec3d3ba8f1b105b5098c7207382b80ac0cb6a3a866f36ec024a08e3e9
 candidate_authentic_class_a_prematch_seal_liverpool_blocked: CAPTURED_ADMISSION_BLOCKED
 authentic_prematch_seal_capture_capability: IMPLEMENTED
-authentic_seal_plus_verified_real_world_actual: NOT_FOUND
+authentic_seal_plus_verified_real_world_actual: FOUND_VERIFIED
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: WAIT_FOR_MATCH_COMPLETION_AND_CAPTURE_VERIFIED_REAL_WORLD_ACTUAL
+next_action: HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_REVIEW
 next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
@@ -52,12 +52,19 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-15 — **Post-remediation Class A seal ADMITTED** for
+- Last updated: 2026-09-17 — **Bounded Historical Evaluation Intake library implemented**
+  (`HISTORICAL_EVALUATION_INTAKE_BOUNDED_IMPLEMENTATION_COMPLETION_REPORT.md`; human §8
+  `HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION.md`). **No production intake;
+  no real-match ingest.** **Readiness PASS**
+  (`HISTORICAL_EVALUATION_INTAKE_READINESS_REVIEW_2026-09-17.md`). **Pair artifact review PASS** (`AUTHENTIC_SEAL_ACTUAL_PAIR_ARTIFACT_REVIEW_IPSWICH_ARSENAL_2026-09-17.md`). **Verified real-world Actual paired** to admitted
+  `周二012` seal; see
+  `VERIFIED_REAL_WORLD_ACTUAL_AND_SEAL_PAIR_VERIFICATION_IPSWICH_ARSENAL_2026-09-16.md`.
+  **2026-09-15 — Post-remediation Class A seal ADMITTED** for
   `lottery:csl:20260915:周二012` (Ipswich vs Arsenal); see
   `AUTHENTIC_PREMATCH_SEAL_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-15.md`
   and `REAL_PREMATCH_CAPTURE_VERIFICATION_IPSWICH_ARSENAL_2026-09-15.md`. Liverpool
   first candidate `d63058f…` remains **CAPTURED_ADMISSION_BLOCKED** (unchanged rows).
-  `authentic_prematch_seal` **FOUND_ADMITTED**; Intake **C_BLOCKED**; Actual **NOT_FOUND**.
+  `authentic_prematch_seal` **FOUND_ADMITTED**; Actual **FOUND_VERIFIED**; Intake **C_BLOCKED**.
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
   **PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_COMPLETED**.
@@ -65,9 +72,10 @@ changes the active gate, or material governance change.
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** (product-aligned
   lottery-first recipe).
 - Current next action:
-  **Wait for match completion and capture verified real-world Actual** (周二012
-  kickoff `2026-09-15T19:00:00Z`; no Historical Intake).
-- Current production sprint: none active (Class A seal admitted; Actual pending).
+  **Historical Evaluation Intake implementation review** (bounded A1 library implemented
+  2026-09-17; **no** production intake; **no** real-match ingest).
+- Current production sprint: none active pending implementation review. Intake remains
+  **C_BLOCKED**.
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
 - Fixture classification: **B — controlled synthetic**;
@@ -75,7 +83,7 @@ changes the active gate, or material governance change.
   `allowedUsage=conformance_test_only`.
 - Historical Evaluation Intake remains **C. BLOCKED** and is not authorized.
 - Authentic PRE_MATCH seal **FOUND / ADMITTED** (`周二012`, `23fdf75e…`).
-- Authentic seal plus verified real-world Actual remains **NOT FOUND**.
+- Authentic seal plus verified real-world Actual **FOUND_VERIFIED** (`周二012`).
 - Delivery phase: **Product development**.
 - Release status: pre-release, private trusted environment only; not public
   production.
@@ -447,7 +455,12 @@ Future Agents must not:
 | Evidence | Path | Purpose | Status | Authority |
 |---|---|---|---|---|
 | Historical Evaluation Intake Integrity Planning | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_INTEGRITY_PLANNING.md` | Proposed bounded trust contract | Planning complete; no implementation authority | Planning evidence below canonical contracts |
-| Historical Evaluation Intake Integrity Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_READINESS_REVIEW.md` | Repository-grounded readiness review | **C. BLOCKED** | Current gate evidence |
+| Historical Evaluation Intake Bounded Implementation (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_BOUNDED_IMPLEMENTATION_COMPLETION_REPORT.md` | A1 library intake path + firewall | **COMPLETE** (impl); production intake still **C_BLOCKED** | Human §8 bounded authorization |
+| Historical Evaluation Intake Implementation Authorization (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION.md` | Human §8.1–§8.10 approval with clarifications | **AUTHORIZED FOR BOUNDED IMPLEMENTATION ONLY** | Does not authorize production intake or real ingest |
+| Human Review of Historical Intake Final Gate (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HUMAN_REVIEW_OF_HISTORICAL_INTAKE_FINAL_GATE_2026-09-17.md` | §8 decision presentation | Human **APPROVE** recorded | Presentation; not production intake |
+| Historical Evaluation Intake Implementation Authorization Review (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION_REVIEW_2026-09-17.md` | Pre-human review: impl not authorized | **B. BLOCKED** then superseded by human §8 | Review complete; see authorization record |
+| Historical Evaluation Intake Readiness Review (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_READINESS_REVIEW_2026-09-17.md` | Authentic `周二012` pair; intake not authorized | **A. PASS** (readiness only) | Supersedes 2026-08-31 blocker on missing artifacts |
+| Historical Evaluation Intake Integrity Review (2026-08-31) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_READINESS_REVIEW.md` | Pre-pair planning readiness | **C. BLOCKED** (historical) | See 2026-09-17 review |
 | Historical Evaluation Artifact Admission Review | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW.md` | Authentic seal/Actual search and admission | **C. ADMISSION BLOCKED** | Artifact admission evidence |
 | Controlled PRE_MATCH Fixture Plan | `docs/sprints/PREDICTION_VERTICAL_SLICE/CONTROLLED_PREMATCH_CONFORMANCE_FIXTURE_PLAN.md` | Class-B synthetic fixture design | **A. READY FOR FIXTURE IMPLEMENTATION / completed plan** | Fixture-only planning evidence |
 | Controlled fixture manifest | `packages/statistics/test/fixtures/controlled-prematch-conformance-v1/manifest.json` | Classification, identity, population isolation and file binding | Implemented | Test-only implementation evidence |

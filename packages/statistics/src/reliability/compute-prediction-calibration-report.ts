@@ -1,4 +1,7 @@
-import type { EvaluationHistoryRecord } from "../domain/evaluation-history.js";
+import {
+  isCalibrationPopulationEligible,
+  type EvaluationHistoryRecord,
+} from "../domain/evaluation-history.js";
 import type { GoalRangeBucket } from "../domain/prediction-evaluation.js";
 import {
   CONFIDENCE_BANDS,
@@ -437,7 +440,7 @@ export function computePredictionCalibrationReport(
   input: ComputePredictionCalibrationReportInput,
 ): PredictionCalibrationReport {
   const computedAt = requireTimestamp(input.computedAt);
-  const records = input.records;
+  const records = input.records.filter(isCalibrationPopulationEligible);
   const sampleSize = records.length;
   const qualified = sampleSize >= MINIMUM_QUALIFIED_REPORT_SAMPLE_SIZE;
 

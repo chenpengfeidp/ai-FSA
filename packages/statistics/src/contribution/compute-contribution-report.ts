@@ -10,7 +10,10 @@ import {
   type DomainContributionRow,
   type IntelligenceDomainId,
 } from "../domain/contribution-report.js";
-import type { EvaluationHistoryRecord } from "../domain/evaluation-history.js";
+import {
+  isContributionPopulationEligible,
+  type EvaluationHistoryRecord,
+} from "../domain/evaluation-history.js";
 import type { ValidationMetricSummary } from "../domain/validation-report.js";
 import { computePredictionCalibrationReport } from "../reliability/compute-prediction-calibration-report.js";
 import { hasDomainFeatures } from "./domain-feature-families.js";
@@ -268,7 +271,7 @@ export function computeContributionReport(
   input: ComputeContributionReportInput,
 ): ContributionReport {
   const computedAt = requireTimestamp(input.computedAt);
-  const records = input.records;
+  const records = input.records.filter(isContributionPopulationEligible);
   const totalSampleSize = records.length;
   const groups = groupByDomain(records);
 

@@ -1,4 +1,7 @@
-import type { EvaluationHistoryRecord } from "../domain/evaluation-history.js";
+import {
+  isReplayCohortPopulationEligible,
+  type EvaluationHistoryRecord,
+} from "../domain/evaluation-history.js";
 import type {
   ReplayCohortMember,
   ReplayCohortSpecification,
@@ -97,6 +100,11 @@ export function selectReplayCohortMembers(input: {
 
   for (const history of input.histories) {
     consideredHistoryIds.push(history.historyId);
+
+    if (!isReplayCohortPopulationEligible(history)) {
+      rejectedHistoryIds.push(history.historyId);
+      continue;
+    }
 
     if (
       specification.recordedAtFromInclusive !== undefined &&

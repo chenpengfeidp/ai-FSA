@@ -1,8 +1,7 @@
 import { createHash } from "node:crypto";
 
 import {
-  createEvaluationHistoryRecord,
-  type CreateEvaluationHistoryRecordInput,
+  decodeEvaluationHistoryRecord,
   DuplicateEvaluationHistoryError,
   type EvaluationHistoryQuery,
   type EvaluationHistoryRecord,
@@ -20,24 +19,8 @@ function historyIdToUuid(historyId: string): string {
   return uuidV5(historyId, FAS_EVIDENCE_NAMESPACE);
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function reviveHistoryRecord(value: unknown): EvaluationHistoryRecord | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-
-  const { schemaVersion: _schemaVersion, ...rest } = value;
-
-  try {
-    return createEvaluationHistoryRecord(
-      rest as unknown as CreateEvaluationHistoryRecordInput,
-    );
-  } catch {
-    return undefined;
-  }
+  return decodeEvaluationHistoryRecord(value);
 }
 
 export class PrismaEvaluationHistoryRepository

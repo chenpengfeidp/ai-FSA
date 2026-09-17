@@ -1,0 +1,441 @@
+{
+  "sealedAt": "2026-09-15T14:22:18.878Z",
+  "sealIdentity": {
+    "season": "2025/26",
+    "kickoff": "2026-09-16T03:00:00+08:00",
+    "matchId": "lottery:csl:20260915:周二012",
+    "awayTeam": "阿森纳",
+    "homeTeam": "伊普斯维奇",
+    "synthetic": false,
+    "allowedUsage": ["historical_evaluation_intake"],
+    "analysisTime": "2026-09-15T14:22:18.766Z",
+    "competitionId": "eng:efl-cup",
+    "schemaVersion": "prematch-prediction-seal.v1",
+    "analysisCutoff": "2026-09-15T14:22:18.766Z",
+    "ruleSetVersion": "rule.mvp.m1b.manager",
+    "competitionName": "EFL Cup / 英联赛杯",
+    "provenanceClass": "A",
+    "sourceAuthority": "prisma.prematch_prediction_seal_items",
+    "predictionSnapshot": {
+      "pAway": 0.576276503482,
+      "pDraw": 0.163995407588,
+      "pHome": 0.25972808893,
+      "rules": [
+        { "status": "PASS", "channel": "none", "ruleName": "HOME_TEAM_PRESENT" },
+        { "status": "PASS", "channel": "none", "ruleName": "AWAY_TEAM_PRESENT" },
+        { "status": "PASS", "channel": "none", "ruleName": "KICKOFF_PRESENT" },
+        { "status": "FAIL", "channel": "home+", "ruleName": "HOME_ATTACK_EDGE" },
+        { "status": "PASS", "channel": "away+", "ruleName": "AWAY_ATTACK_EDGE" },
+        { "status": "FAIL", "channel": "home+", "ruleName": "FORM_HOME_SUPERIOR" },
+        { "status": "PASS", "channel": "away+", "ruleName": "FORM_AWAY_SUPERIOR" },
+        { "status": "FAIL", "channel": "none", "ruleName": "FORM_NEAR_PARITY" },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "HOME_VENUE_FORM_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "AWAY_VENUE_FORM_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "GOALS_SCORED_HOME_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "GOALS_SCORED_AWAY_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "ATTACK_EFFICIENCY_HOME_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "ATTACK_EFFICIENCY_AWAY_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "POSSESSION_HOME_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "POSSESSION_AWAY_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "CHANCE_CREATION_HOME_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "CHANCE_CREATION_AWAY_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "XG_ATTACK_HOME_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "XG_ATTACK_AWAY_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "XG_DEFENSIVE_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "XG_DEFENSIVE_AWAY_EDGE"
+        },
+        { "status": "INAPPLICABLE", "channel": "home+", "ruleName": "XG_DOMINANCE" },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "XG_DOMINANCE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "REST_ADVANTAGE_HOME"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "REST_ADVANTAGE_AWAY"
+        },
+        { "status": "INAPPLICABLE", "channel": "away+", "ruleName": "FATIGUE_HOME" },
+        { "status": "INAPPLICABLE", "channel": "home+", "ruleName": "FATIGUE_AWAY" },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "HOME_STABILITY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "ROTATION_PRESSURE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "none",
+          "ruleName": "KNOCKOUT_CONTEXT"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "DISCIPLINE_AWAY_RISK"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "DISCIPLINE_HOME_RISK"
+        },
+        { "status": "PASS", "channel": "home+", "ruleName": "DEFENSE_HOME_STABLE" },
+        { "status": "PASS", "channel": "away+", "ruleName": "DEFENSE_AWAY_STABLE" },
+        { "status": "FAIL", "channel": "away+", "ruleName": "DEFENSE_HOME_FRAGILE" },
+        { "status": "FAIL", "channel": "home+", "ruleName": "DEFENSE_AWAY_FRAGILE" },
+        { "status": "FAIL", "channel": "home+", "ruleName": "MOMENTUM_HOME" },
+        { "status": "PASS", "channel": "away+", "ruleName": "MOMENTUM_AWAY" },
+        {
+          "status": "PASS",
+          "channel": "home+",
+          "ruleName": "HOME_ADVANTAGE_MATERIAL"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "VENUE_SUPPORTS_HOME"
+        },
+        { "status": "PASS", "channel": "none", "ruleName": "VENUE_UNAVAILABLE" },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "AVAILABILITY_HOME_HIT"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "AVAILABILITY_AWAY_HIT"
+        },
+        {
+          "status": "PASS",
+          "channel": "none",
+          "ruleName": "AVAILABILITY_HOME_UNKNOWN"
+        },
+        {
+          "status": "PASS",
+          "channel": "none",
+          "ruleName": "AVAILABILITY_AWAY_UNKNOWN"
+        },
+        { "status": "FAIL", "channel": "home+", "ruleName": "SIGNALS_ALIGNED_HOME" },
+        { "status": "PASS", "channel": "away+", "ruleName": "SIGNALS_ALIGNED_AWAY" },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "H2H_SUPPORTS_HOME"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "H2H_SUPPORTS_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "CLUB_STRENGTH_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "CLUB_STRENGTH_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "LEAGUE_STRENGTH_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "LEAGUE_STRENGTH_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "FORM_STRENGTH_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "FORM_STRENGTH_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "ATTACK_STRENGTH_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "ATTACK_STRENGTH_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "DEFENSE_STRENGTH_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "DEFENSE_STRENGTH_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "MANAGER_STABILITY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "MANAGER_STABILITY_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "PLAYER_AVAILABILITY_EDGE_HOME"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "PLAYER_AVAILABILITY_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "KEY_PLAYER_MISSING_HOME"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "KEY_PLAYER_MISSING_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "PLAYER_ATTACK_EDGE_HOME"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "PLAYER_ATTACK_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "GOALKEEPER_EDGE_HOME"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "GOALKEEPER_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "MANAGER_STABILITY_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "MANAGER_STABILITY_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "MANAGER_EXPERIENCE_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "MANAGER_EXPERIENCE_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "MANAGER_CONTINUITY_EDGE"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "MANAGER_CONTINUITY_EDGE_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "away+",
+          "ruleName": "MANAGER_CHANGE_RISK_HOME"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "home+",
+          "ruleName": "MANAGER_CHANGE_RISK_AWAY"
+        },
+        { "status": "FAIL", "channel": "none", "ruleName": "MARKET_LEAN_HOME" },
+        { "status": "PASS", "channel": "none", "ruleName": "MARKET_LEAN_AWAY" },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "none",
+          "ruleName": "MARKET_AH_LEAN_HOME"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "none",
+          "ruleName": "MARKET_AH_LEAN_AWAY"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "none",
+          "ruleName": "MARKET_CONSENSUS"
+        },
+        { "status": "INAPPLICABLE", "channel": "none", "ruleName": "STEAM_MOVE" },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "none",
+          "ruleName": "REVERSE_LINE_MOVEMENT"
+        },
+        {
+          "status": "INAPPLICABLE",
+          "channel": "none",
+          "ruleName": "MARKET_VOLATILITY"
+        },
+        { "status": "INAPPLICABLE", "channel": "none", "ruleName": "SHARP_SUPPORT" }
+      ],
+      "matchId": "lottery:csl:20260915:周二012",
+      "goalRange": {
+        "range01": 0.00701446542,
+        "range23": 0.074605176958,
+        "range4Plus": 0.918380357622
+      },
+      "scenarios": {
+        "upset": {
+          "slot": "upset",
+          "winner": "away",
+          "awayGoals": 4,
+          "homeGoals": 3,
+          "probability": 0.050364844636
+        },
+        "mostLikely": {
+          "slot": "mostLikely",
+          "winner": "draw",
+          "awayGoals": 3,
+          "homeGoals": 3,
+          "probability": 0.051071820963
+        },
+        "secondLikely": {
+          "slot": "secondLikely",
+          "winner": "away",
+          "awayGoals": 4,
+          "homeGoals": 3,
+          "probability": 0.050364844636
+        }
+      },
+      "featureNames": [
+        "homeTeam",
+        "awayTeam",
+        "kickoff",
+        "attackRatingHome",
+        "defenseRatingHome",
+        "momentumHome",
+        "recentFormHome",
+        "attackRatingAway",
+        "defenseRatingAway",
+        "momentumAway",
+        "recentFormAway",
+        "momentum",
+        "homeAdvantage",
+        "marketImpliedHome",
+        "marketImpliedDraw",
+        "marketImpliedAway",
+        "marketLean"
+      ],
+      "topScorelines": [
+        { "awayGoals": 3, "homeGoals": 3, "probability": 0.051071820963 },
+        { "awayGoals": 4, "homeGoals": 3, "probability": 0.050364844636 },
+        { "awayGoals": 4, "homeGoals": 2, "probability": 0.046397370446 },
+        { "awayGoals": 3, "homeGoals": 2, "probability": 0.04598830729 },
+        { "awayGoals": 4, "homeGoals": 4, "probability": 0.042052309973 },
+        { "awayGoals": 5, "homeGoals": 3, "probability": 0.040965346518 },
+        { "awayGoals": 3, "homeGoals": 4, "probability": 0.040859311234 },
+        { "awayGoals": 5, "homeGoals": 2, "probability": 0.037699638534 }
+      ],
+      "confidenceBand": "low",
+      "ruleSetVersion": "rule.mvp.m1b.manager",
+      "projectionStatus": "completed_nonempty",
+      "projectionChecksum": "b016ab9c",
+      "featureModelVersion": "feature.v2.m1b.manager",
+      "predictionConfidence": 24.1,
+      "projectionModelVersion": "projection.v2.m1b.manager"
+    },
+    "featureModelVersion": "feature.v2.m1b.manager",
+    "parameterArtifactId": "projectionParams:v3.1:matchScript",
+    "projectionPolicyPin": "v2",
+    "parameterVersionLabel": "projection.v3.replay",
+    "historicalAuthenticity": true,
+    "projectionModelVersion": "projection.v2.m1b.manager",
+    "parameterArtifactChecksum": "d7b2f4fd"
+  },
+  "contentSha256": "ecd427e51da3ac40cc1d57672321c1311471954ba7341afa6cd325f825fc410e",
+  "schemaVersion": "prematch-prediction-seal.v1",
+  "originalSealId": "prematch-seal:lottery:csl:20260915:周二012:23fdf75ec3d3ba8f1b105b5098c7207382b80ac0cb6a3a866f36ec024a08e3e9"
+}

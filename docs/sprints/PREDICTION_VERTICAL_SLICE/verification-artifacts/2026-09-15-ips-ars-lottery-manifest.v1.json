@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "lottery-fixture-manifest.v1",
+  "salesIssueId": "20260915",
+  "manifestCollectedAt": "2026-09-15T22:05:00+08:00",
+  "sourceReference": "operator-screenshot-sporttery-jczq-2026-09-15-周二012;oddssafari.com/matches/soccer/england/efl-cup/ipswich-vs-arsenal/2314006;jihai8.com/zq/asia_3072969.html;footymetrics.com/fixtures/32547290-carabao-cup-ipswich-town-arsenal",
+  "marketPrimaryBook": "lottery-official",
+  "matches": [
+    {
+      "lotteryMatchCode": "周二012",
+      "homeTeam": "伊普斯维奇",
+      "awayTeam": "阿森纳",
+      "competitionId": "eng:efl-cup",
+      "competitionName": "EFL Cup / 英联赛杯",
+      "season": "2025/26",
+      "kickoff": "2026-09-16T03:00:00+08:00",
+      "timezone": "Asia/Shanghai",
+      "scheduleSource": "china-sports-lottery",
+      "fixtureAuthority": "lottery-official-list",
+      "collectedAt": "2026-09-15T22:05:00+08:00",
+      "teamForm": [
+        {
+          "teamSide": "home",
+          "window": 4,
+          "results": ["D", "L", "W", "D"],
+          "goalsFor": [2, 0, 5, 2],
+          "goalsAgainst": [2, 2, 2, 3]
+        },
+        {
+          "teamSide": "away",
+          "window": 4,
+          "results": ["W", "W", "W", "W"],
+          "goalsFor": [2, 3, 2, 3],
+          "goalsAgainst": [1, 0, 1, 0]
+        }
+      ],
+      "statistics": [
+        {
+          "teamSide": "home",
+          "windowMatches": 4,
+          "shotsForPerMatch": 11.5,
+          "shotsAgainstPerMatch": 13.2,
+          "xgForPerMatch": 1.28,
+          "xgAgainstPerMatch": 1.42
+        },
+        {
+          "teamSide": "away",
+          "windowMatches": 4,
+          "shotsForPerMatch": 15.8,
+          "shotsAgainstPerMatch": 8.4,
+          "xgForPerMatch": 2.05,
+          "xgAgainstPerMatch": 0.72
+        }
+      ],
+      "odds": {
+        "homeOdds": 7.1,
+        "drawOdds": 4.55,
+        "awayOdds": 1.3,
+        "observedAt": "2026-09-15T22:05:00+08:00",
+        "marketSource": "lottery-official",
+        "providerSource": "china-sports-lottery",
+        "providerSourceId": "lottery:20260915:周二012:1x2",
+        "providerMethod": "lottery-manifest"
+      },
+      "additionalOdds": [
+        {
+          "homeOdds": 2.9,
+          "drawOdds": 3.65,
+          "awayOdds": 1.96,
+          "observedAt": "2026-09-15T22:05:00+08:00",
+          "marketSource": "lottery-official-handicap-result-plus-one",
+          "providerSource": "china-sports-lottery",
+          "providerSourceId": "lottery:20260915:周二012:handicap-result+1",
+          "providerMethod": "lottery-manifest"
+        },
+        {
+          "homeOdds": 8.0,
+          "drawOdds": 4.33,
+          "awayOdds": 1.4,
+          "observedAt": "2026-09-15T22:03:00+08:00",
+          "marketSource": "bet365-efl-cup-asian-handicap",
+          "providerSource": "bet365.com",
+          "providerSourceId": "bet365:carabao-cup-2026-09-15:ipswich-arsenal:asian-handicap:+1.5",
+          "providerMethod": "jihai8-instant-asian-handicap-index",
+          "asianHandicapLine": 1.5,
+          "asianHandicapHomeOdds": 1.9,
+          "asianHandicapAwayOdds": 1.95
+        },
+        {
+          "homeOdds": 8.0,
+          "drawOdds": 4.33,
+          "awayOdds": 1.4,
+          "observedAt": "2026-09-15T22:03:00+08:00",
+          "marketSource": "bet365-efl-cup-over-under",
+          "providerSource": "bet365.com",
+          "providerSourceId": "bet365:carabao-cup-2026-09-15:ipswich-arsenal:total:2.5",
+          "providerMethod": "footymetrics-public-bet365-card",
+          "overUnderLine": 2.5,
+          "overOdds": 1.62,
+          "underOdds": 2.25
+        }
+      ]
+    }
+  ]
+}

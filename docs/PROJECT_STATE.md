@@ -6,14 +6,16 @@ current_track: PREDICTION_VERTICAL_SLICE
 current_stage: PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_COMPLETED
 current_gate: AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION
 historical_evaluation_intake: C_BLOCKED
-authentic_prematch_seal: NOT_FOUND
-candidate_authentic_class_a_prematch_seal: CAPTURED_ADMISSION_BLOCKED
+authentic_prematch_seal: FOUND_ADMITTED
+authentic_prematch_seal_match_id: lottery:csl:20260915:周二012
+authentic_prematch_seal_original_seal_id: prematch-seal:lottery:csl:20260915:周二012:23fdf75ec3d3ba8f1b105b5098c7207382b80ac0cb6a3a866f36ec024a08e3e9
+candidate_authentic_class_a_prematch_seal_liverpool_blocked: CAPTURED_ADMISSION_BLOCKED
 authentic_prematch_seal_capture_capability: IMPLEMENTED
 authentic_seal_plus_verified_real_world_actual: NOT_FOUND
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: RETRY_POST_REMEDIATION_PREMATCH_RECAPTURE_AND_ARTIFACT_ADMISSION
+next_action: WAIT_FOR_MATCH_COMPLETION_AND_CAPTURE_VERIFIED_REAL_WORLD_ACTUAL
 next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
@@ -50,11 +52,12 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-15 — **Artifact admission review BLOCKED** (first candidate
-  `d63058f…`; lottery handicap-result ODDS not in governed Evidence set; see
-  `AUTHENTIC_PREMATCH_SEAL_ARTIFACT_ADMISSION_REVIEW.md`). Capture remains documented
-  in `REAL_PREMATCH_CAPTURE_VERIFICATION.md` Appendix D. `authentic_prematch_seal`
-  **NOT_FOUND**; Intake **C. BLOCKED**.
+- Last updated: 2026-09-15 — **Post-remediation Class A seal ADMITTED** for
+  `lottery:csl:20260915:周二012` (Ipswich vs Arsenal); see
+  `AUTHENTIC_PREMATCH_SEAL_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-15.md`
+  and `REAL_PREMATCH_CAPTURE_VERIFICATION_IPSWICH_ARSENAL_2026-09-15.md`. Liverpool
+  first candidate `d63058f…` remains **CAPTURED_ADMISSION_BLOCKED** (unchanged rows).
+  `authentic_prematch_seal` **FOUND_ADMITTED**; Intake **C_BLOCKED**; Actual **NOT_FOUND**.
 - Current track: **PREDICTION_VERTICAL_SLICE**.
 - Current stage:
   **PVS_4_CHINA_LOTTERY_FIXTURE_AND_MULTI_SOURCE_PREMATCH_EVIDENCE_IMPLEMENTATION_COMPLETED**.
@@ -62,16 +65,16 @@ changes the active gate, or material governance change.
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** (product-aligned
   lottery-first recipe).
 - Current next action:
-  **Retry post-remediation PRE_MATCH recapture and artifact admission** (governed
-  analyze on fixed build; see remediation review).
-- Current production sprint: none active (remediation merged; recapture pending).
+  **Wait for match completion and capture verified real-world Actual** (周二012
+  kickoff `2026-09-15T19:00:00Z`; no Historical Intake).
+- Current production sprint: none active (Class A seal admitted; Actual pending).
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
 - Fixture classification: **B — controlled synthetic**;
   `synthetic=true`, `historicalAuthenticity=false`,
   `allowedUsage=conformance_test_only`.
 - Historical Evaluation Intake remains **C. BLOCKED** and is not authorized.
-- Authentic PRE_MATCH seal remains **NOT FOUND**.
+- Authentic PRE_MATCH seal **FOUND / ADMITTED** (`周二012`, `23fdf75e…`).
 - Authentic seal plus verified real-world Actual remains **NOT FOUND**.
 - Delivery phase: **Product development**.
 - Release status: pre-release, private trusted environment only; not public

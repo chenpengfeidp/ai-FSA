@@ -317,6 +317,18 @@ module.exports = {
         path: "^packages/provider-",
       },
     },
+    {
+      name: "no-apps-to-statistics-test-helpers",
+      comment:
+        "Production apps must not import statistics test-only Historical Intake helpers.",
+      severity: "error",
+      from: {
+        path: "^apps/",
+      },
+      to: {
+        path: "^packages/statistics/test/",
+      },
+    },
   ],
   options: {
     doNotFollow: {

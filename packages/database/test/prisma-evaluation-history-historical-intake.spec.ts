@@ -5,7 +5,6 @@ import {
   EVALUATION_HISTORY_HISTORICAL_INTAKE_SCHEMA_VERSION,
   EVALUATION_HISTORY_SCHEMA_VERSION,
   evaluatePrediction,
-  ingestHistoricalEvaluation,
   PREMATCH_SEAL_ALLOWED_USAGE_HISTORICAL_INTAKE,
   sha256CanonicalEvaluationJson,
   UNIT_TEST_CONSTRUCTED_SOURCE_AUTHORITY,
@@ -14,6 +13,10 @@ import {
   type HistoricalPredictionSeal,
   type SealedPredictionInput,
 } from "@fas/statistics";
+import {
+  constructedHistoricalIntakeAuthorizationPolicy,
+  ingestHistoricalEvaluationForTest,
+} from "../../statistics/test/helpers/ingest-historical-evaluation-for-test.js";
 
 import { createFasDatabase, type FasDatabaseHandle } from "../src/index.js";
 
@@ -203,32 +206,36 @@ describe.skipIf(connected === undefined)(
         providerMethod: "unit-test-constructed",
         observedAt: "2030-06-01T17:00:00.000Z",
       });
-      const result = await ingestHistoricalEvaluation({
+      const verifiedActual = {
+        actual,
+        evidence: {
+          id: `evidence-unit-test-${seal.matchId}-match-result`,
+          type: "MATCH_RESULT",
+          quality: "verified",
+          providerId: "unit-test:constructed",
+          sourceId: `${seal.matchId}:result`,
+          method: "unit-test-constructed",
+          matchId: seal.matchId,
+        },
+        realWorldVerification: true as const,
+        verificationClass: "real-world",
+        homeTeam: seal.homeTeam,
+        awayTeam: seal.awayTeam,
+        competitionId: seal.competitionId,
+        competitionName: seal.competitionName,
+        season: seal.season,
+        kickoff: seal.kickoff,
+      };
+      const result = await ingestHistoricalEvaluationForTest({
         command: {
           seal,
-          actual: {
-            actual,
-            evidence: {
-              id: `evidence-unit-test-${seal.matchId}-match-result`,
-              type: "MATCH_RESULT",
-              quality: "verified",
-              providerId: "unit-test:constructed",
-              sourceId: `${seal.matchId}:result`,
-              method: "unit-test-constructed",
-              matchId: seal.matchId,
-            },
-            realWorldVerification: true,
-            verificationClass: "real-world",
-            homeTeam: seal.homeTeam,
-            awayTeam: seal.awayTeam,
-            competitionId: seal.competitionId,
-            competitionName: seal.competitionName,
-            season: seal.season,
-            kickoff: seal.kickoff,
-          },
+          actual: verifiedActual,
           intakeRecordedAt: "2030-06-02T00:00:00.000Z",
         },
         historyRepository: requireConnected().evaluationHistoryRepository,
+        authorizationPolicy: constructedHistoricalIntakeAuthorizationPolicy([
+          { seal, actual: verifiedActual },
+        ]),
       });
 
       expect(result.status).toBe("accepted");

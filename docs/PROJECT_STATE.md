@@ -15,7 +15,7 @@ authentic_seal_plus_verified_real_world_actual: FOUND_VERIFIED
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: CLOSE_ARTIFACT_SCOPED_PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_GAP
+next_action: HISTORICAL_INTAKE_ARTIFACT_SCOPED_AUTHORIZATION_GAP_IMPLEMENTATION_REVIEW
 next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
@@ -52,12 +52,13 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-18 — **Production Historical Evaluation Intake authorization review BLOCKED**
-  (`PRODUCTION_HISTORICAL_EVALUATION_INTAKE_AUTHORIZATION_REVIEW_2026-09-18.md`).
-  `production_historical_intake_authorized` remains **false** (YAML-only global flag; **unread**
-  by TypeScript). Runtime **cannot** prove named Artifact Admission Review. Do **not** set the
-  flag true until artifact-scoped enforcement exists. Ipswich–Arsenal remains
-  **ADMITTED_FOR_FUTURE_HISTORICAL_EVALUATION_INTAKE** only; **no** ingest; History count **0**.
+- Last updated: 2026-09-22 — **Artifact-scoped production Historical Intake authorization gap
+  IMPLEMENTED** (`ARTIFACT_SCOPED_PRODUCTION_HISTORICAL_INTAKE_GAP_IMPLEMENTATION_REPORT.md`).
+  Runtime v1 registry: **global false**, **authorizedPairs []**. Public `ingestHistoricalEvaluation`
+  fail-closes with `PRODUCTION_INTAKE_NOT_AUTHORIZED`. YAML
+  `production_historical_intake_authorized` remains **false** (not runtime-read). **No** real
+  ingest; Ipswich **not** listed; lottery historical-intake History count **0**. Next: implementation
+  review of this gap (not Ipswich production authorization).
   Artifact admission remains **PASS**
   (`HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-18.md`; eligibility
   only). Implementation review remains **PASS**
@@ -80,8 +81,9 @@ changes the active gate, or material governance change.
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** (product-aligned
   lottery-first recipe).
 - Current next action:
-  **Close artifact-scoped production Historical Evaluation Intake authorization gap**
-  (do **not** set `production_historical_intake_authorized`; do **not** ingest).
+  **Implementation review of the artifact-scoped Historical Intake authorization gap**
+  (runtime closed; do **not** list Ipswich; do **not** ingest; do **not** set
+  `production_historical_intake_authorized`).
 - Current production sprint: none active. Intake remains **C_BLOCKED**.
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
@@ -464,6 +466,8 @@ Future Agents must not:
 | Evidence | Path | Purpose | Status | Authority |
 |---|---|---|---|---|
 | Historical Evaluation Intake Integrity Planning | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_INTEGRITY_PLANNING.md` | Proposed bounded trust contract | Planning complete; no implementation authority | Planning evidence below canonical contracts |
+| Artifact-scoped production Historical Intake gap implementation (2026-09-22) | `docs/sprints/PREDICTION_VERTICAL_SLICE/ARTIFACT_SCOPED_PRODUCTION_HISTORICAL_INTAKE_GAP_IMPLEMENTATION_REPORT.md` | Fail-closed public ingest + empty v1 registry | **IMPLEMENTED** (no real ingest; YAML still false) | Does not authorize Ipswich listing or production ingest |
+| Artifact-scoped production Historical Intake authorization gap review (2026-09-22) | `docs/sprints/PREDICTION_VERTICAL_SLICE/ARTIFACT_SCOPED_PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_GAP_REVIEW.md` | Narrowest enforceable design for global+pair fail-closed ingest | **A. READY** (design); implementation authorized then landed | See implementation report |
 | Production Historical Evaluation Intake Authorization Review (2026-09-18) | `docs/sprints/PREDICTION_VERTICAL_SLICE/PRODUCTION_HISTORICAL_EVALUATION_INTAKE_AUTHORIZATION_REVIEW_2026-09-18.md` | Whether human may set `production_historical_intake_authorized` | **B. BLOCKED** (flag global + unread; admission not runtime-enforced) | Do not flip flag; do not ingest |
 | Historical Evaluation Artifact Admission — Ipswich–Arsenal (2026-09-18) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-18.md` | Real Class A pair eligible for *future* intake | **A. PASS** (eligibility only) | Does not authorize production ingest |
 | Historical Evaluation Intake Implementation Review (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_REVIEW_2026-09-17.md` | Verify bounded A1 library vs Final Gate | **A. PASS** (impl review); production intake still **C_BLOCKED** | Does not authorize real ingest |
@@ -520,7 +524,7 @@ Historical Evaluation Intake
 = C. BLOCKED
 
 Current Next Step
-= CLOSE_ARTIFACT_SCOPED_PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_GAP
+= HISTORICAL_INTAKE_ARTIFACT_SCOPED_AUTHORIZATION_GAP_IMPLEMENTATION_REVIEW
 
 Historical Evaluation Intake Production Implementation
 = NOT AUTHORIZED

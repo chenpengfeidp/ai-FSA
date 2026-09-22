@@ -14,12 +14,14 @@ import {
   decodeEvaluationHistoryRecord,
   EVALUATION_HISTORY_HISTORICAL_INTAKE_SCHEMA_VERSION,
   EvaluationHistoryValidationError,
-  ingestHistoricalEvaluation,
   PREMATCH_SEAL_ALLOWED_USAGE_HISTORICAL_INTAKE,
   sha256CanonicalEvaluationJson,
   UNIT_TEST_CONSTRUCTED_SOURCE_AUTHORITY,
   UnsupportedHistorySchemaVersionError,
 } from "../../../../packages/statistics/dist/index.js";
+import { HISTORICAL_INTAKE_PRODUCTION_AUTHORIZATION_SCHEMA_VERSION } from "../../../../packages/statistics/dist/domain/historical-intake-production-authorization.js";
+import { createHistoricalIntakeAuthorization } from "../../../../packages/statistics/dist/evaluation/create-historical-intake-authorization.js";
+import { ingestHistoricalEvaluationWithAuthorization } from "../../../../packages/statistics/dist/evaluation/ingest-historical-evaluation.js";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const envPath = join(REPO_ROOT, ".env");
@@ -167,6 +169,21 @@ function makeActual(s) {
   });
 }
 
+function constructedAuth(command) {
+  return createHistoricalIntakeAuthorization({
+    schemaVersion: HISTORICAL_INTAKE_PRODUCTION_AUTHORIZATION_SCHEMA_VERSION,
+    globalProductionHistoricalIntakeEnabled: true,
+    authorizedPairs: [
+      {
+        originalSealId: command.seal.originalSealId,
+        originalSealChecksum: command.seal.originalSealChecksum,
+        resultEvidenceId: command.actual.evidence.id,
+        admissionReviewId: "unit_test_constructed_admission",
+      },
+    ],
+  });
+}
+
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString }),
 });
@@ -195,9 +212,10 @@ try {
     actual: makeActual(s),
     intakeRecordedAt: "2030-06-02T00:00:00.000Z",
   };
-  const first = await ingestHistoricalEvaluation({
+  const first = await ingestHistoricalEvaluationWithAuthorization({
     command,
     historyRepository: repo,
+    authorization: constructedAuth(command),
   });
   if (first.status !== "accepted") {
     throw new Error(`ingest ${first.status} ${first.code ?? ""}`);
@@ -231,9 +249,10 @@ try {
   const queried = await repo2.query({ matchId });
   results.queryCount = queried.length;
 
-  const retry = await ingestHistoricalEvaluation({
+  const retry = await ingestHistoricalEvaluationWithAuthorization({
     command,
     historyRepository: repo2,
+    authorization: constructedAuth(command),
   });
   results.retryStatus = retry.status;
   results.retrySameId =
@@ -241,7 +260,7 @@ try {
     retry.history.historyId === first.history.historyId;
   results.retryRowCount = (await repo2.query({ matchId })).length;
 
-  const conflict = await ingestHistoricalEvaluation({
+  const conflict = await ingestHistoricalEvaluationWithAuthorization({
     command: {
       ...command,
       actual: {
@@ -256,6 +275,7 @@ try {
       },
     },
     historyRepository: repo2,
+    authorization: constructedAuth(command),
   });
   results.conflictStatus = conflict.status;
   results.conflictCode = conflict.status === "rejected" ? conflict.code : null;

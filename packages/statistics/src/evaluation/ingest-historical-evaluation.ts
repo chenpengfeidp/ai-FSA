@@ -4,16 +4,25 @@ import {
   type HistoricalEvaluationIntakeResult,
   type HistoricalIntakeReplaySidecarInput,
 } from "../domain/historical-evaluation-intake.js";
+import type { HistoricalIntakeAuthorization } from "../domain/historical-intake-production-authorization.js";
 import type { EvaluationHistoryRepository } from "../repository/evaluation-history-repository.js";
 import { DuplicateEvaluationHistoryError } from "../repository/evaluation-history-repository.js";
 import type { ProjectionReplaySidecarRepository } from "../repository/projection-replay-sidecar-repository.js";
 import { assessProjectionReplayEligibility } from "../replay/assess-projection-replay-eligibility.js";
 import { computeProjectionReplaySidecarContentSha256 } from "../replay/sidecar-content-sha256.js";
+import type { ActualMatchResult } from "../domain/actual-match-result.js";
+import type {
+  PredictionEvaluationRecord,
+  SealedPredictionInput,
+} from "../domain/prediction-evaluation.js";
 import { evaluatePrediction } from "./evaluate-prediction.js";
 import { validateHistoricalPredictionSeal } from "./validate-historical-prediction-seal.js";
 import { validateVerifiedRealWorldActual } from "./validate-verified-real-world-actual.js";
 import { assertHistoricalIntakeTemporalIntegrity } from "./assert-historical-intake-temporal-integrity.js";
+import { assertHistoricalIntakeProductionAuthorization } from "./assert-historical-intake-production-authorization.js";
 import { buildHistoricalIntakeHistoryRecord } from "./build-historical-intake-history-record.js";
+import { createHistoricalIntakeAuthorization } from "./create-historical-intake-authorization.js";
+import { PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY } from "./historical-intake-production-authorization.v1.js";
 import { isHistoricalIntakeEvaluationHistoryRecord } from "../domain/evaluation-history.js";
 
 export interface IngestHistoricalEvaluationInput {
@@ -21,6 +30,25 @@ export interface IngestHistoricalEvaluationInput {
   readonly historyRepository: EvaluationHistoryRepository;
   readonly sidecarRepository?: ProjectionReplaySidecarRepository;
 }
+
+export type EvaluatePredictionFn = (input: {
+  readonly prediction: SealedPredictionInput;
+  readonly actual: ActualMatchResult;
+  readonly evaluatedAt: string;
+}) => PredictionEvaluationRecord;
+
+/**
+ * Internal intake entry used by tests. Not part of the `@fas/statistics` public export.
+ */
+export interface IngestHistoricalEvaluationWithAuthorizationInput
+  extends IngestHistoricalEvaluationInput {
+  readonly authorization: HistoricalIntakeAuthorization;
+  readonly evaluatePredictionFn?: EvaluatePredictionFn;
+}
+
+const productionHistoricalIntakeAuthorization = createHistoricalIntakeAuthorization(
+  PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY,
+);
 
 function validateReplaySidecar(
   sidecar: HistoricalIntakeReplaySidecarInput,
@@ -66,21 +94,28 @@ function validateReplaySidecar(
 }
 
 /**
- * Library-only Historical Evaluation Intake command.
- * Evaluates an immutable authenticated PRE_MATCH seal against a verified Actual.
- * Does not mutate the seal, Actual, Projection, Features, or Rules.
+ * Internal Historical Evaluation Intake with an injected authorization policy.
+ * Production code must call `ingestHistoricalEvaluation`, which always binds
+ * the empty-by-default v1 production registry.
  */
-export async function ingestHistoricalEvaluation(
-  input: IngestHistoricalEvaluationInput,
+export async function ingestHistoricalEvaluationWithAuthorization(
+  input: IngestHistoricalEvaluationWithAuthorizationInput,
 ): Promise<HistoricalEvaluationIntakeResult> {
-  const { command, historyRepository, sidecarRepository } = input;
+  const {
+    command,
+    historyRepository,
+    sidecarRepository,
+    authorization,
+    evaluatePredictionFn = evaluatePrediction,
+  } = input;
 
   try {
     const seal = validateHistoricalPredictionSeal(command.seal);
     const actual = validateVerifiedRealWorldActual(command.actual, seal);
     assertHistoricalIntakeTemporalIntegrity({ seal, actual });
+    assertHistoricalIntakeProductionAuthorization(authorization, seal, actual);
 
-    const evaluation = evaluatePrediction({
+    const evaluation = evaluatePredictionFn({
       prediction: seal.predictionSnapshot,
       actual: actual.actual,
       evaluatedAt: seal.generatedAt,
@@ -208,4 +243,19 @@ export async function ingestHistoricalEvaluation(
 
     throw error;
   }
+}
+
+/**
+ * Library-only Historical Evaluation Intake command.
+ * Always enforces the production v1 authorization registry (global false, no pairs).
+ * Evaluates an immutable authenticated PRE_MATCH seal against a verified Actual.
+ * Does not mutate the seal, Actual, Projection, Features, or Rules.
+ */
+export async function ingestHistoricalEvaluation(
+  input: IngestHistoricalEvaluationInput,
+): Promise<HistoricalEvaluationIntakeResult> {
+  return ingestHistoricalEvaluationWithAuthorization({
+    ...input,
+    authorization: productionHistoricalIntakeAuthorization,
+  });
 }

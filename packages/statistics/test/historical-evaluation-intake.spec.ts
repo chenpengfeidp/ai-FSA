@@ -20,10 +20,15 @@ import {
   UnsupportedHistorySchemaVersionError,
   type HistoricalEvaluationIntakeCommand,
   type HistoricalPredictionSeal,
+  type IngestHistoricalEvaluationInput,
   type SealedPredictionInput,
   type SealedProjectionReplayContext,
   type VerifiedRealWorldActual,
 } from "../src/index.js";
+import {
+  constructedHistoricalIntakeAuthorizationPolicy,
+  ingestHistoricalEvaluationForTest,
+} from "./helpers/ingest-historical-evaluation-for-test.js";
 
 const FIXTURE_DIRECTORY = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -230,6 +235,17 @@ function commandFrom(
   });
 }
 
+function ingestAuthorized(
+  input: IngestHistoricalEvaluationInput,
+): ReturnType<typeof ingestHistoricalEvaluationForTest> {
+  return ingestHistoricalEvaluationForTest({
+    ...input,
+    authorizationPolicy: constructedHistoricalIntakeAuthorizationPolicy([
+      { seal: input.command.seal, actual: input.command.actual },
+    ]),
+  });
+}
+
 function sampleSidecar(matchId: string): SealedProjectionReplayContext {
   return Object.freeze({
     matchId,
@@ -289,7 +305,7 @@ function a15History() {
 describe("Historical Evaluation Intake (bounded A1 library)", () => {
   it("T01 accepts a constructed Class A double and writes historical-intake History", async () => {
     const historyRepository = new InMemoryEvaluationHistoryRepository();
-    const result = await ingestHistoricalEvaluation({
+    const result = await ingestAuthorized({
       command: commandFrom(),
       historyRepository,
     });
@@ -649,11 +665,11 @@ describe("Historical Evaluation Intake (bounded A1 library)", () => {
 
   it("T17 is idempotent for an exact retry", async () => {
     const historyRepository = new InMemoryEvaluationHistoryRepository();
-    const first = await ingestHistoricalEvaluation({
+    const first = await ingestAuthorized({
       command: commandFrom(),
       historyRepository,
     });
-    const second = await ingestHistoricalEvaluation({
+    const second = await ingestAuthorized({
       command: commandFrom(),
       historyRepository,
     });
@@ -673,13 +689,19 @@ describe("Historical Evaluation Intake (bounded A1 library)", () => {
     const historyRepository = new InMemoryEvaluationHistoryRepository();
     const firstSeal = constructedSeal({ originalSealId: "unit-test-seal:a" });
     const secondSeal = constructedSeal({ originalSealId: "unit-test-seal:b" });
-    const first = await ingestHistoricalEvaluation({
+    const authorizationPolicy = constructedHistoricalIntakeAuthorizationPolicy([
+      { seal: firstSeal, actual: constructedActual(firstSeal) },
+      { seal: secondSeal, actual: constructedActual(secondSeal) },
+    ]);
+    const first = await ingestHistoricalEvaluationForTest({
       command: commandFrom(firstSeal),
       historyRepository,
+      authorizationPolicy,
     });
-    const second = await ingestHistoricalEvaluation({
+    const second = await ingestHistoricalEvaluationForTest({
       command: commandFrom(secondSeal),
       historyRepository,
+      authorizationPolicy,
     });
 
     expect(first.status).toBe("accepted");
@@ -690,14 +712,14 @@ describe("Historical Evaluation Intake (bounded A1 library)", () => {
   it("T19 rejects a conflicting Actual for the same seal", async () => {
     const historyRepository = new InMemoryEvaluationHistoryRepository();
     const seal = constructedSeal();
-    const first = await ingestHistoricalEvaluation({
+    const first = await ingestAuthorized({
       command: commandFrom(
         seal,
         constructedActual(seal, { homeGoals: 2, awayGoals: 4 }),
       ),
       historyRepository,
     });
-    const second = await ingestHistoricalEvaluation({
+    const second = await ingestAuthorized({
       command: commandFrom(
         seal,
         constructedActual(seal, { homeGoals: 0, awayGoals: 1 }),
@@ -728,7 +750,7 @@ describe("Historical Evaluation Intake (bounded A1 library)", () => {
   });
 
   it("T21 restores historical-intake.v1 including intakeIntegrity", async () => {
-    const result = await ingestHistoricalEvaluation({
+    const result = await ingestAuthorized({
       command: commandFrom(),
       historyRepository: new InMemoryEvaluationHistoryRepository(),
     });
@@ -756,7 +778,7 @@ describe("Historical Evaluation Intake (bounded A1 library)", () => {
   });
 
   it("T24 allows outcome History without fabricating a sidecar", async () => {
-    const result = await ingestHistoricalEvaluation({
+    const result = await ingestAuthorized({
       command: commandFrom(),
       historyRepository: new InMemoryEvaluationHistoryRepository(),
     });
@@ -775,7 +797,7 @@ describe("Historical Evaluation Intake (bounded A1 library)", () => {
     const historyRepository = new InMemoryEvaluationHistoryRepository();
     const sidecarRepository = new InMemoryProjectionReplaySidecarRepository();
     const seal = constructedSeal();
-    const result = await ingestHistoricalEvaluation({
+    const result = await ingestAuthorized({
       command: {
         ...commandFrom(seal),
         replaySidecar: {
@@ -807,7 +829,7 @@ describe("Historical Evaluation Intake (bounded A1 library)", () => {
   });
 
   it("does not redefine scoreHit as top-K coverage", async () => {
-    const result = await ingestHistoricalEvaluation({
+    const result = await ingestAuthorized({
       command: commandFrom(),
       historyRepository: new InMemoryEvaluationHistoryRepository(),
     });

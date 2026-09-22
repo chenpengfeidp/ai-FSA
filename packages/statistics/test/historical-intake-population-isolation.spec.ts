@@ -10,7 +10,6 @@ import {
   EVALUATION_HISTORY_HISTORICAL_INTAKE_SCHEMA_VERSION,
   EVALUATION_HISTORY_SCHEMA_VERSION,
   evaluatePrediction,
-  ingestHistoricalEvaluation,
   InMemoryEvaluationHistoryRepository,
   PREMATCH_SEAL_ALLOWED_USAGE_HISTORICAL_INTAKE,
   selectReplayCohortMembers,
@@ -19,6 +18,10 @@ import {
   type HistoricalPredictionSeal,
   type SealedPredictionInput,
 } from "../src/index.js";
+import {
+  constructedHistoricalIntakeAuthorizationPolicy,
+  ingestHistoricalEvaluationForTest,
+} from "./helpers/ingest-historical-evaluation-for-test.js";
 
 const KICKOFF = "2030-06-01T15:00:00.000Z";
 const ANALYSIS_TIME = "2030-06-01T12:00:00.000Z";
@@ -172,32 +175,36 @@ describe("Historical intake population isolation (T26)", () => {
       providerMethod: "unit-test-constructed",
       observedAt: OBSERVED_AT,
     });
-    const intakeResult = await ingestHistoricalEvaluation({
+    const verifiedActual = {
+      actual: actualResult,
+      evidence: {
+        id: `evidence-unit-test-${seal.matchId}-match-result`,
+        type: "MATCH_RESULT",
+        quality: "verified",
+        providerId: "unit-test:constructed",
+        sourceId: `${seal.matchId}:result`,
+        method: "unit-test-constructed",
+        matchId: seal.matchId,
+      },
+      realWorldVerification: true as const,
+      verificationClass: "real-world",
+      homeTeam: seal.homeTeam,
+      awayTeam: seal.awayTeam,
+      competitionId: seal.competitionId,
+      competitionName: seal.competitionName,
+      season: seal.season,
+      kickoff: seal.kickoff,
+    };
+    const intakeResult = await ingestHistoricalEvaluationForTest({
       command: {
         seal,
-        actual: {
-          actual: actualResult,
-          evidence: {
-            id: `evidence-unit-test-${seal.matchId}-match-result`,
-            type: "MATCH_RESULT",
-            quality: "verified",
-            providerId: "unit-test:constructed",
-            sourceId: `${seal.matchId}:result`,
-            method: "unit-test-constructed",
-            matchId: seal.matchId,
-          },
-          realWorldVerification: true,
-          verificationClass: "real-world",
-          homeTeam: seal.homeTeam,
-          awayTeam: seal.awayTeam,
-          competitionId: seal.competitionId,
-          competitionName: seal.competitionName,
-          season: seal.season,
-          kickoff: seal.kickoff,
-        },
+        actual: verifiedActual,
         intakeRecordedAt: "2030-06-02T00:00:00.000Z",
       },
       historyRepository: new InMemoryEvaluationHistoryRepository(),
+      authorizationPolicy: constructedHistoricalIntakeAuthorizationPolicy([
+        { seal, actual: verifiedActual },
+      ]),
     });
 
     expect(intakeResult.status).toBe("accepted");

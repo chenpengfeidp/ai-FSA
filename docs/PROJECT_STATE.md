@@ -15,7 +15,7 @@ authentic_seal_plus_verified_real_world_actual: FOUND_VERIFIED
 controlled_prematch_fixture: IMPLEMENTED_AND_VALIDATED
 controlled_fixture_classification: B_CONTROLLED_SYNTHETIC
 production_historical_intake_authorized: false
-next_action: HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_REVIEW
+next_action: CLOSE_ARTIFACT_SCOPED_PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_GAP
 next_production_capability: REAL_PREMATCH_CLASS_A_SEAL_CAPTURE_VERIFICATION
 ```
 
@@ -52,10 +52,18 @@ changes the active gate, or material governance change.
 
 ## Snapshot
 
-- Last updated: 2026-09-17 — **Bounded Historical Evaluation Intake library implemented**
-  (`HISTORICAL_EVALUATION_INTAKE_BOUNDED_IMPLEMENTATION_COMPLETION_REPORT.md`; human §8
-  `HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION.md`). **No production intake;
-  no real-match ingest.** **Readiness PASS**
+- Last updated: 2026-09-18 — **Production Historical Evaluation Intake authorization review BLOCKED**
+  (`PRODUCTION_HISTORICAL_EVALUATION_INTAKE_AUTHORIZATION_REVIEW_2026-09-18.md`).
+  `production_historical_intake_authorized` remains **false** (YAML-only global flag; **unread**
+  by TypeScript). Runtime **cannot** prove named Artifact Admission Review. Do **not** set the
+  flag true until artifact-scoped enforcement exists. Ipswich–Arsenal remains
+  **ADMITTED_FOR_FUTURE_HISTORICAL_EVALUATION_INTAKE** only; **no** ingest; History count **0**.
+  Artifact admission remains **PASS**
+  (`HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-18.md`; eligibility
+  only). Implementation review remains **PASS**
+  (`HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_REVIEW_2026-09-17.md`). Bounded A1 library
+  remains complete. Human §8
+  (`HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION.md`). **Readiness PASS**
   (`HISTORICAL_EVALUATION_INTAKE_READINESS_REVIEW_2026-09-17.md`). **Pair artifact review PASS** (`AUTHENTIC_SEAL_ACTUAL_PAIR_ARTIFACT_REVIEW_IPSWICH_ARSENAL_2026-09-17.md`). **Verified real-world Actual paired** to admitted
   `周二012` seal; see
   `VERIFIED_REAL_WORLD_ACTUAL_AND_SEAL_PAIR_VERIFICATION_IPSWICH_ARSENAL_2026-09-16.md`.
@@ -72,10 +80,9 @@ changes the active gate, or material governance change.
   **AUTHENTIC_PREMATCH_SEAL_CAPTURE_REAL_ARTIFACT_VERIFICATION** (product-aligned
   lottery-first recipe).
 - Current next action:
-  **Historical Evaluation Intake implementation review** (bounded A1 library implemented
-  2026-09-17; **no** production intake; **no** real-match ingest).
-- Current production sprint: none active pending implementation review. Intake remains
-  **C_BLOCKED**.
+  **Close artifact-scoped production Historical Evaluation Intake authorization gap**
+  (do **not** set `production_historical_intake_authorized`; do **not** ingest).
+- Current production sprint: none active. Intake remains **C_BLOCKED**.
 - Latest implementation evidence: commit `1effc56`,
   `feat(statistics): 添加 PRE_MATCH 封印捕获与持久化`.
 - Fixture classification: **B — controlled synthetic**;
@@ -442,6 +449,8 @@ Future Agents must not:
 - create a Prisma seed for fixture testing;
 - inject the fixture into Calibration, Validation or historical populations;
 - create History, Sidecars or replay cohorts as a shortcut around admission;
+- set `production_historical_intake_authorized = true` while ingest cannot
+  enforce named Artifact Admission Review (global YAML flag is unread by runtime);
 - implement Authentic PRE_MATCH Seal Capture without explicit human approval of
   that gate's human-decision list (capability now implemented under that
   authorization; real artifact verification is a separate next step);
@@ -455,6 +464,9 @@ Future Agents must not:
 | Evidence | Path | Purpose | Status | Authority |
 |---|---|---|---|---|
 | Historical Evaluation Intake Integrity Planning | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_INTEGRITY_PLANNING.md` | Proposed bounded trust contract | Planning complete; no implementation authority | Planning evidence below canonical contracts |
+| Production Historical Evaluation Intake Authorization Review (2026-09-18) | `docs/sprints/PREDICTION_VERTICAL_SLICE/PRODUCTION_HISTORICAL_EVALUATION_INTAKE_AUTHORIZATION_REVIEW_2026-09-18.md` | Whether human may set `production_historical_intake_authorized` | **B. BLOCKED** (flag global + unread; admission not runtime-enforced) | Do not flip flag; do not ingest |
+| Historical Evaluation Artifact Admission — Ipswich–Arsenal (2026-09-18) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-18.md` | Real Class A pair eligible for *future* intake | **A. PASS** (eligibility only) | Does not authorize production ingest |
+| Historical Evaluation Intake Implementation Review (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_REVIEW_2026-09-17.md` | Verify bounded A1 library vs Final Gate | **A. PASS** (impl review); production intake still **C_BLOCKED** | Does not authorize real ingest |
 | Historical Evaluation Intake Bounded Implementation (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_BOUNDED_IMPLEMENTATION_COMPLETION_REPORT.md` | A1 library intake path + firewall | **COMPLETE** (impl); production intake still **C_BLOCKED** | Human §8 bounded authorization |
 | Historical Evaluation Intake Implementation Authorization (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION.md` | Human §8.1–§8.10 approval with clarifications | **AUTHORIZED FOR BOUNDED IMPLEMENTATION ONLY** | Does not authorize production intake or real ingest |
 | Human Review of Historical Intake Final Gate (2026-09-17) | `docs/sprints/PREDICTION_VERTICAL_SLICE/HUMAN_REVIEW_OF_HISTORICAL_INTAKE_FINAL_GATE_2026-09-17.md` | §8 decision presentation | Human **APPROVE** recorded | Presentation; not production intake |
@@ -496,10 +508,10 @@ canonical owning contracts.
 
 ```text
 Authentic PRE_MATCH seal
-= NOT FOUND
+= FOUND_ADMITTED
 
 Authentic seal + verified real-world Actual
-= NOT FOUND
+= FOUND_VERIFIED
 
 Controlled PRE_MATCH Conformance Fixture
 = IMPLEMENTED AND VALIDATED
@@ -508,7 +520,7 @@ Historical Evaluation Intake
 = C. BLOCKED
 
 Current Next Step
-= RESTORE DURABLE POSTGRES AND RETRY REAL PRE_MATCH CAPTURE VERIFICATION
+= CLOSE_ARTIFACT_SCOPED_PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_GAP
 
 Historical Evaluation Intake Production Implementation
 = NOT AUTHORIZED

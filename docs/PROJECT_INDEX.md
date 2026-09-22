@@ -146,6 +146,9 @@ Agent 规则：`AGENTS.md`（含 Project Governance Rule）→ `PROJECT_STATE.md
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/HUMAN_REVIEW_OF_HISTORICAL_INTAKE_FINAL_GATE_2026-09-17.md` | Final Gate §8 人工决策呈现。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_AUTHORIZATION.md` | 人工 §8 批准；仅限定实现。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_BOUNDED_IMPLEMENTATION_COMPLETION_REPORT.md` | 限定 A1 库实现完成；生产 intake 仍 **C_BLOCKED**。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_REVIEW_2026-09-17.md` | 限定实现审查；**A. PASS**（非生产 intake；未摄入真实比赛）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-18.md` | 真实 Class A 工件准入（伊普斯维奇–阿森纳）；**A. PASS**（仅未来 intake 资格；未摄入）。 |
+| `docs/sprints/PREDICTION_VERTICAL_SLICE/PRODUCTION_HISTORICAL_EVALUATION_INTAKE_AUTHORIZATION_REVIEW_2026-09-18.md` | 生产 Historical Evaluation Intake 授权审查；**B. BLOCKED**（全局 YAML 旗标无运行时强制；未摄入）。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md` | 原版 PRE_MATCH 封印捕获与存储权威规划门禁；**A. READY**（仅封印捕获冲刺；非 Intake）。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md` | 封印捕获实现审查；**A. PASS**（capability；真实 Class A 工件仍 NOT FOUND）。 |
 | `docs/sprints/PREDICTION_VERTICAL_SLICE/REAL_PREMATCH_CAPTURE_VERIFICATION.md` | 真实 PRE_MATCH 封印捕获验证；**B. BLOCKED**（2026-09-13 重试：Postgres OK，live 赛程不可用；无候选 Class A）。 |
@@ -320,6 +323,9 @@ Match Center (web)
 41. **Historical Match Evaluation / Case Capability Audit** — **COMPLETE / Option B / Planning only**
 42. **Historical Evaluation Intake Implementation Planning / Final Gate** — **COMPLETE / B. BLOCKED**（生产 intake 未授权）
 42a. **Historical Evaluation Intake bounded A1 library implementation** — **COMPLETE**（`HISTORICAL_EVALUATION_INTAKE_BOUNDED_IMPLEMENTATION_COMPLETION_REPORT.md`；生产 intake 仍 **C_BLOCKED**；未摄入真实比赛）
+42b. **Historical Evaluation Intake implementation review** — **A. PASS**（`HISTORICAL_EVALUATION_INTAKE_IMPLEMENTATION_REVIEW_2026-09-17.md`；生产 intake 仍 **C_BLOCKED**）
+42c. **Historical Evaluation Artifact Admission (Ipswich–Arsenal)** — **A. PASS**（`HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-18.md`；仅未来 intake 资格；非生产授权、非自动摄入）
+42d. **Production Historical Evaluation Intake Authorization Review** — **B. BLOCKED**（`PRODUCTION_HISTORICAL_EVALUATION_INTAKE_AUTHORIZATION_REVIEW_2026-09-18.md`；旗标为全局且未被 TypeScript 读取；工件准入无运行时强制；不得置 `production_historical_intake_authorized=true`；下一步为关闭工件范围授权缺口，非摄入）
 43. **Authentic PRE_MATCH Seal Capture & Storage Authority Planning / Gate** — **COMPLETE / A. READY**（规划；`AUTHENTIC_PREMATCH_SEAL_CAPTURE_STORAGE_AUTHORITY_PLANNING_GATE.md`）
 44. **Authentic PRE_MATCH Seal Capture Implementation** — **COMPLETE / A. PASS**（capability；`AUTHENTIC_PREMATCH_SEAL_CAPTURE_IMPLEMENTATION_REVIEW.md`；真实 Class A 工件 **NOT FOUND**）
 45. **Bounded real PRE_MATCH capture verification** — **B. BLOCKED**（`REAL_PREMATCH_CAPTURE_VERIFICATION.md`；Postgres 不可用；不得把测试/迁移当成 Class A；不得开工 Historical Intake）

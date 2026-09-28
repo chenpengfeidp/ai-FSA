@@ -7,6 +7,7 @@ import {
   HISTORICAL_INTAKE_PRODUCTION_AUTHORIZATION_SCHEMA_VERSION,
   HistoricalIntakeAuthorizationPolicyError,
 } from "../src/domain/historical-intake-production-authorization.js";
+import { assertHistoricalIntakeProductionAuthorization } from "../src/evaluation/assert-historical-intake-production-authorization.js";
 import { createHistoricalIntakeAuthorization } from "../src/evaluation/create-historical-intake-authorization.js";
 import { PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY } from "../src/evaluation/historical-intake-production-authorization.v1.js";
 import {
@@ -200,19 +201,197 @@ function spyRepository(): InMemoryEvaluationHistoryRepository & {
 }
 
 describe("Artifact-scoped production Historical Intake authorization", () => {
-  it("ships the production registry as global false and empty pairs", () => {
+  it("ships the production registry as global true and exactly one authorized pair (Ipswich-Arsenal)", () => {
     expect(
       PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY.globalProductionHistoricalIntakeEnabled,
-    ).toBe(false);
+    ).toBe(true);
     expect(
       PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY.authorizedPairs,
-    ).toEqual([]);
+    ).toHaveLength(1);
+    expect(
+      PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY.authorizedPairs[0],
+    ).toEqual({
+      originalSealId:
+        "prematch-seal:lottery:csl:20260915:周二012:23fdf75ec3d3ba8f1b105b5098c7207382b80ac0cb6a3a866f36ec024a08e3e9",
+      originalSealChecksum:
+        "ecd427e51da3ac40cc1d57672321c1311471954ba7341afa6cd325f825fc410e",
+      resultEvidenceId:
+        "evidence-itfc.co.uk-lottery:csl:20260915:周二012-match-result",
+      admissionReviewId:
+        "HISTORICAL_EVALUATION_ARTIFACT_ADMISSION_REVIEW_IPSWICH_ARSENAL_2026-09-18",
+    });
     expect(PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY.schemaVersion).toBe(
       HISTORICAL_INTAKE_PRODUCTION_AUTHORIZATION_SCHEMA_VERSION,
     );
   });
 
-  it("rejects public ingest when production global is false", async () => {
+  it("passes authorization assertion for the exact Ipswich triple against production policy", () => {
+    const productionAuth = createHistoricalIntakeAuthorization(
+      PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY,
+    );
+    const ipswichSeal = constructedSeal({
+      originalSealId:
+        "prematch-seal:lottery:csl:20260915:周二012:23fdf75ec3d3ba8f1b105b5098c7207382b80ac0cb6a3a866f36ec024a08e3e9",
+      originalSealChecksum:
+        "ecd427e51da3ac40cc1d57672321c1311471954ba7341afa6cd325f825fc410e",
+      matchId: "lottery:csl:20260915:周二012",
+    });
+    const ipswichActual = constructedActual(
+      ipswichSeal,
+      "evidence-itfc.co.uk-lottery:csl:20260915:周二012-match-result",
+    );
+
+    expect(() =>
+      assertHistoricalIntakeProductionAuthorization(
+        productionAuth,
+        ipswichSeal,
+        ipswichActual,
+      ),
+    ).not.toThrow();
+  });
+
+  it("rejects an unlisted second valid Class A pair against production policy", () => {
+    const productionAuth = createHistoricalIntakeAuthorization(
+      PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY,
+    );
+    const unlistedSeal = constructedSeal({
+      originalSealId:
+        "prematch-seal:lottery:csl:20260915:周二010:d63058f4a13d7e8b9c201e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b",
+      originalSealChecksum: "a".repeat(64),
+      matchId: "lottery:csl:20260915:周二010",
+    });
+    const unlistedActual = constructedActual(
+      unlistedSeal,
+      "evidence-liverpool-match-result",
+    );
+
+    expect(() =>
+      assertHistoricalIntakeProductionAuthorization(
+        productionAuth,
+        unlistedSeal,
+        unlistedActual,
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "ARTIFACT_NOT_PRODUCTION_AUTHORIZED",
+      }),
+    );
+  });
+
+  it("rejects when resultEvidenceId differs from the authorized triple", () => {
+    const productionAuth = createHistoricalIntakeAuthorization(
+      PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY,
+    );
+    const ipswichSeal = constructedSeal({
+      originalSealId:
+        "prematch-seal:lottery:csl:20260915:周二012:23fdf75ec3d3ba8f1b105b5098c7207382b80ac0cb6a3a866f36ec024a08e3e9",
+      originalSealChecksum:
+        "ecd427e51da3ac40cc1d57672321c1311471954ba7341afa6cd325f825fc410e",
+      matchId: "lottery:csl:20260915:周二012",
+    });
+    const wrongActual = constructedActual(
+      ipswichSeal,
+      "evidence-wrong-match-result",
+    );
+
+    expect(() =>
+      assertHistoricalIntakeProductionAuthorization(
+        productionAuth,
+        ipswichSeal,
+        wrongActual,
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "ARTIFACT_NOT_PRODUCTION_AUTHORIZED",
+      }),
+    );
+  });
+
+  it("rejects when originalSealChecksum differs from the authorized triple", () => {
+    const productionAuth = createHistoricalIntakeAuthorization(
+      PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY,
+    );
+    const wrongChecksumSeal = constructedSeal({
+      originalSealId:
+        "prematch-seal:lottery:csl:20260915:周二012:23fdf75ec3d3ba8f1b105b5098c7207382b80ac0cb6a3a866f36ec024a08e3e9",
+      originalSealChecksum: "f".repeat(64),
+      matchId: "lottery:csl:20260915:周二012",
+    });
+    const ipswichActual = constructedActual(
+      wrongChecksumSeal,
+      "evidence-itfc.co.uk-lottery:csl:20260915:周二012-match-result",
+    );
+
+    expect(() =>
+      assertHistoricalIntakeProductionAuthorization(
+        productionAuth,
+        wrongChecksumSeal,
+        ipswichActual,
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "ARTIFACT_NOT_PRODUCTION_AUTHORIZED",
+      }),
+    );
+  });
+
+  it("rejects when originalSealId differs from the authorized triple", () => {
+    const productionAuth = createHistoricalIntakeAuthorization(
+      PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY,
+    );
+    const wrongIdSeal = constructedSeal({
+      originalSealId: "prematch-seal:lottery:csl:20260915:周二012:different-id",
+      originalSealChecksum:
+        "ecd427e51da3ac40cc1d57672321c1311471954ba7341afa6cd325f825fc410e",
+      matchId: "lottery:csl:20260915:周二012",
+    });
+    const ipswichActual = constructedActual(
+      wrongIdSeal,
+      "evidence-itfc.co.uk-lottery:csl:20260915:周二012-match-result",
+    );
+
+    expect(() =>
+      assertHistoricalIntakeProductionAuthorization(
+        productionAuth,
+        wrongIdSeal,
+        ipswichActual,
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "ARTIFACT_NOT_PRODUCTION_AUTHORIZED",
+      }),
+    );
+  });
+
+  it("rejects partial or prefix matching against the authorized triple", () => {
+    const productionAuth = createHistoricalIntakeAuthorization(
+      PRODUCTION_HISTORICAL_INTAKE_AUTHORIZATION_POLICY,
+    );
+    const prefixSeal = constructedSeal({
+      originalSealId: "prematch-seal:lottery:csl:20260915:周二012",
+      originalSealChecksum:
+        "ecd427e51da3ac40cc1d57672321c1311471954ba7341afa6cd325f825fc410e",
+      matchId: "lottery:csl:20260915:周二012",
+    });
+    const ipswichActual = constructedActual(
+      prefixSeal,
+      "evidence-itfc.co.uk-lottery:csl:20260915:周二012-match-result",
+    );
+
+    expect(() =>
+      assertHistoricalIntakeProductionAuthorization(
+        productionAuth,
+        prefixSeal,
+        ipswichActual,
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "ARTIFACT_NOT_PRODUCTION_AUTHORIZED",
+      }),
+    );
+  });
+
+  it("rejects public ingest of an unlisted Class A pair with ARTIFACT_NOT_PRODUCTION_AUTHORIZED", async () => {
     const historyRepository = spyRepository();
     const seal = constructedSeal();
     const actual = constructedActual(seal);
@@ -223,7 +402,7 @@ describe("Artifact-scoped production Historical Intake authorization", () => {
 
     expect(result).toMatchObject({
       status: "rejected",
-      code: "PRODUCTION_INTAKE_NOT_AUTHORIZED",
+      code: "ARTIFACT_NOT_PRODUCTION_AUTHORIZED",
     });
     expect(historyRepository.saveCalls).toBe(0);
     expect(await historyRepository.query({})).toEqual([]);
